@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Clinic</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/font/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/doctor.css' %}">
+</head>
+
+<body class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: #f8f9fa;">
+
+    <!-- Login Container - Square Card -->
+    <div style="width: 100%; max-width: 420px; aspect-ratio: 1 / 1.15; padding: 1rem;">
+        {% for message in messages %}
+            <div class="alert alert-danger">
+                {{ message }}
+            </div>
+            {% endfor %}
+        <!-- Login Card -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden h-100 d-flex flex-column">
+            
+            <!-- Header with Gradient -->
+            <div class="p-4 text-center text-white flex-shrink-0"
+                style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+                <div class="mb-2">
+                    <i class="bi bi-hospital" style="font-size: 2.5rem;"></i>
+                </div>
+                <h2 class="mb-1 fw-bold" style="font-size: 1.5rem;">Welcome Back</h2>
+                <p class="mb-0 small" style="opacity: 0.9;">Login to your clinic account</p>
+            </div>
+
+            <!-- Form Section - Scrollable -->
+            <div class="p-4 flex-grow-1 overflow-y-auto">
+                <!-- Error Message -->
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-3 small" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Error!</strong> {{ error }}
+                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+
+                <form method="POST" action="{% url 'doctor:login' %}" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-semibold d-block mb-1 small">
+                            <i class="bi bi-person-circle me-2"></i>Username
+                        </label>
+                        <input type="text" class="form-control form-control-sm" id="username" name="username"
+                            placeholder="Enter username" required
+                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="mb-2">
+                        <label for="password" class="form-label fw-semibold d-block mb-1 small">
+                            <i class="bi bi-lock-fill me-2"></i>Password
+                        </label>
+                        <input type="password" class="form-control form-control-sm" id="password" name="password"
+                            placeholder="Enter password" required
+                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                    </div>
+
+                    <!-- Forgot Password Link -->
+                    <div class="text-end mb-3">
+                        <a href="#" class="text-primary text-decoration-none"
+                            style="font-size: 0.85rem; font-weight: 600;">Forgot Password?</a>
+                    </div>
+
+                    <!-- Login Button -->
+                    <button type="submit" class="btn w-100 fw-bold rounded-2 text-white"
+                        style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); border: none; font-size: 0.95rem; padding: 0.6rem;">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-light p-3 text-center border-top flex-shrink-0" style="font-size: 0.85rem;">
+                <p class="text-muted mb-0">
+                    Not registered? <a href="#" class="text-primary text-decoration-none fw-semibold">Contact Admin</a>
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+
+    <!-- Input Focus Effects -->
+    <script>
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function () {
+                this.style.borderColor = '#0d6efd';
+                this.style.boxShadow = '0 0 0 3px rgba(13, 110, 253, 0.1)';
+            });
+            input.addEventListener('blur', function () {
+                this.style.borderColor = '#d6deea';
+                this.style.boxShadow = 'none';
+            });
+        });
+    </script>
+
+</body>
+
+</html>

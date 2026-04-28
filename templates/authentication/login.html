@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - Clinic</title>
+    <link rel="stylesheet" href="{% static 'assets/css/auth.css' %}">
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="auth-box">
+            <h2>Welcome Back </h2>
+            <p>Login to your account</p>
+
+            {% if error %}
+            <div class="error-msg" style="color: red;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'login' %}">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="email" required>
+                </div>
+
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="password" required>
+                </div>
+
+                <div style='margin-left:170px;padding:10px;'>
+                    <a href="{% url 'resetpass' %}" style='text-decoration:none;'>Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn">Login</button>
+            </form>
+
+            <div class="switch">
+                Don't have an account?
+                <a href="{% url 'signup' %}">Sign Up</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

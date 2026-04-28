@@ -1,0 +1,83 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, #f5f7ff, #e6e9ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-box {
+    background: #fff;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: center;
+    overflow: visible !important; /* Dropdown ke liye zaroori */
+}
+
+.auth-box h2 { color: #2c2c54; margin-bottom: 10px; }
+.auth-box p { color: #777; margin-bottom: 30px; }
+
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+.iti { width: 100%; display: block; }
+
+/* Fixing Phone Input Padding */
+#phone_input {
+    padding-left: 95px !important; /* Cursor overlap fix */
+}
+
+.input-group input {
+    width: 100% !important;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.input-group input:not(#phone_input) {
+    padding-left: 12px !important;
+}
+
+.input-group input:focus { border-color: #0765f3; }
+
+/* Button & Switch */
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: #3d92ee;
+    border: none;
+    color: #fff;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn:hover { background: #0059ff; }
+
+.switch { margin-top: 20px; font-size: 14px; }
+.switch a { color: #0065f3; text-decoration: none; font-weight: bold; }
+
+/* Country list UI fix */
+.iti__country-list {
+    z-index: 1000 !important;
+    text-align: left;
+}

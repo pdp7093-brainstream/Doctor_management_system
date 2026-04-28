@@ -1,0 +1,46 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Clinic</title>
+    <link rel="stylesheet" href="{% static 'assets/css/auth.css' %}" />
+</head>
+<body>
+    <div class="container">
+        <div class="auth-box">
+            <h2>Create Account</h2>
+            <p>Join our healthcare platform</p>
+
+            <form method="POST" action="{% url 'signup' %}" id="signupForm">
+                {% csrf_token %} 
+                
+                {% if form.non_field_errors %}
+                    <div class="error-msg" style="color: red; font-size: 14px; margin-bottom: 10px;">
+                        {{ form.non_field_errors.0 }}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="input-group">
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="error-text" style="color: red; font-size: 12px; display: block; margin-top: 5px;">
+                                {{ field.errors.0 }}
+                            </span>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="btn">Sign Up</button>
+            </form>
+
+            <div class="switch">
+                Already have an account? <a href="{% url 'login' %}">Login</a>
+            </div>
+        </div>
+    </div>
+  
+</body>
+</html>

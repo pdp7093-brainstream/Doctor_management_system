@@ -1,0 +1,246 @@
+{% extends "doctor/main.html" %}
+{% block title %}Add Appointment - Doctor Dashboard{% endblock %}
+{% block content %}
+<main class="main-content" id="mainContent">
+    <div class="container-fluid px-4 py-5">
+        <!-- Page Header -->
+        <div class="page-header mb-5">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h1 class="h3 fw-bold text-dark mb-2">Add New Appointment</h1>
+                    <p class="text-muted small mb-0">Schedule a new appointment with your patient</p>
+                </div>
+                <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left-circle"></i> Back to Appointments
+                </a>
+            </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-9">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                    <!-- Card Header with Icon -->
+                    <div class="card-header bg-gradient p-4 border-0"
+                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-white rounded-3 p-3" style="width: fit-content;">
+                                <i class="bi bi-calendar-check text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-dark mb-0 fw-bold">Appointment Details</h5>
+                                <small class="text-dark-50">Fill in all required fields</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-5">
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <!-- Patient -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Patient</label>
+                                {{ form.patient }}
+                                {{ form.patient.errors }} ← Errors automatic!
+                            </div>
+
+                            <!-- Date -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Date</label>
+                                {{ form.appointment_date }}
+                                {{ form.appointment_date.errors }}
+                            </div>
+
+                            <!-- Time Slot -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Time Slot</label>
+                                {{ form.time_slot }}
+                                {{ form.time_slot.errors }}
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Notes</label>
+                                {{ form.notes }}
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                Schedule Appointment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced JavaScript -->
+    <script>
+        // Store all time slots
+        let allTimeSlots = [];
+
+        // Generate time slots
+        function generateTimeSlots() {
+            const select = document.getElementById("id_time_slot");
+            select.innerHTML = '<option value="">-- Select Time --</option>';
+
+            const start = 9 * 60;   // 09:00 AM
+            const end = 22 * 60;    // 06:00 PM
+
+            for (let i = start; i < end; i += 30) {
+                const hours = Math.floor(i / 60);
+                const minutes = i % 60;
+
+                // 24-hour format (Django will accept this)
+                const time24 = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+                // 12-hour format for Display
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const displayHours = hours % 12 || 12;
+                const timeDisplay = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+                const option = document.createElement("option");
+                option.value = time24;
+                option.textContent = timeDisplay;
+                option.dataset.time24 = time24;
+                select.appendChild(option);
+
+                // Store slot info
+                allTimeSlots.push({
+                    value: time24,
+                    display: timeDisplay,
+                    hours: hours,
+                    minutes: minutes
+                });
+            }
+        }
+
+        // Filter available time slots based on date
+        function filterTimeSlots() {
+            const dateInput = document.getElementById('id_appointment_date');
+            const select = document.getElementById("id_time_slot");
+            const warningContainer = document.getElementById('slot-warning-container');
+
+            // Remove previous warning if exists
+            const existingWarning = document.getElementById('slot-warning');
+            if (existingWarning) existingWarning.remove();
+
+            if (!dateInput.value) {
+                select.disabled = true;
+                select.classList.add('text-muted');
+                return;
+            }
+
+            select.disabled = false;
+            select.classList.remove('text-muted');
+
+            const selectedDate = dateInput.value;
+            const today = new Date().toISOString().split('T')[0];
+            const isToday = selectedDate === today;
+
+            // Reset select to show all slots first
+            select.innerHTML = '<option value="">-- Select Time --</option>';
+            let availableCount = 0;
+
+            if (isToday) {
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes() + 30;
+
+                allTimeSlots.forEach(slot => {
+                    const slotMinutes = slot.hours * 60 + slot.minutes;
+
+                    if (slotMinutes > currentMinutes) {
+                        const option = document.createElement("option");
+                        option.value = slot.value;
+                        option.textContent = slot.display;
+                        select.appendChild(option);
+                        availableCount++;
+                    }
+                });
+
+                // Show warning if no slots available
+                if (availableCount === 0) {
+                    const warning = document.createElement('div');
+                    warning.id = 'slot-warning';
+                    warning.className = 'alert alert-warning mt-3';
+                    warning.innerHTML = '<i class="bi bi-clock-history me-2"></i>No time slots available for today. Please select another date.';
+                    warningContainer.appendChild(warning);
+                    select.disabled = true;
+                }
+            } else {
+                // Show all slots for future dates
+                allTimeSlots.forEach(slot => {
+                    const option = document.createElement("option");
+                    option.value = slot.value;
+                    option.textContent = slot.display;
+                    select.appendChild(option);
+                    availableCount++;
+                });
+            }
+
+            // Reset selected value
+            select.value = '';
+        }
+
+        // Date validation - prevent past dates
+        function setMinDate() {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0');
+            const dd = String(today.getDate()).padStart(2, '0');
+
+            const dateInput = document.getElementById('id_appointment_date');
+            dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
+        }
+
+        // Form validation with Bootstrap
+        function setupFormValidation() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    if (!form.checkValidity()) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                });
+
+                // Add visual feedback to form controls
+                const inputs = form.querySelectorAll('.form-control, .form-select');
+                inputs.forEach(input => {
+                    input.addEventListener('focus', function () {
+                        this.classList.add('border-primary');
+                    });
+                    input.addEventListener('blur', function () {
+                        if (!this.value) {
+                            this.classList.remove('border-primary');
+                        }
+                    });
+                });
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            generateTimeSlots();
+            setMinDate();
+            setupFormValidation();
+
+            // Create warning container
+            const timeSlotSelect = document.getElementById('id_time_slot');
+            const warningContainer = document.createElement('div');
+            warningContainer.id = 'slot-warning-container';
+            timeSlotSelect.parentElement.appendChild(warningContainer);
+
+            // Add date change listener
+            const dateInput = document.getElementById('id_appointment_date');
+            dateInput.addEventListener('change', filterTimeSlots);
+
+            // Disable time slot select initially
+            timeSlotSelect.disabled = true;
+            timeSlotSelect.classList.add('text-muted');
+        });
+    </script>
+</main>
+{% endblock %}

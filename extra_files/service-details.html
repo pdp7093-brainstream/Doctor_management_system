@@ -1,0 +1,285 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Service Details - Clinic Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Clinic
+  * Template URL: https://bootstrapmade.com/clinic-bootstrap-template/
+  * Updated: Jul 23 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="service-details-page">
+
+  {% include 'header.html' %}
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title">
+      <div class="heading">
+        <div class="container">
+          <div class="row d-flex justify-content-center text-center">
+            <div class="col-lg-8">
+              <h1 class="heading-title">Service Details</h1>
+              <p class="mb-0">
+                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
+                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
+                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
+                ipsum dolorem.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <nav class="breadcrumbs">
+        <div class="container">
+          <ol>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li class="current">Service Details</li>
+          </ol>
+        </div>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <!-- Service Details 2 Section -->
+    <section id="service-details-2" class="service-details-2 section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+
+          <div class="col-lg-8 mx-auto text-center mb-5" data-aos="fade-up" data-aos-delay="150">
+            <div class="service-header">
+              <div class="service-category">
+                <span>Advanced Neurology</span>
+              </div>
+              <h2>Comprehensive Neurological Care Services</h2>
+              <p class="lead">Expert diagnosis and treatment for complex neurological conditions using state-of-the-art
+                technology</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row gy-4 align-items-center">
+
+          <div class="col-lg-5" data-aos="fade-right" data-aos-delay="200">
+            <div class="service-details">
+
+              <div class="detail-item">
+                <div class="icon-wrapper">
+                  <i class="bi bi-activity"></i>
+                </div>
+                <div class="content">
+                  <h4>Neurological Assessment</h4>
+                  <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium
+                    totam rem aperiam.</p>
+                </div>
+              </div>
+
+              <div class="detail-item">
+                <div class="icon-wrapper">
+                  <i class="bi bi-diagram-2"></i>
+                </div>
+                <div class="content">
+                  <h4>Brain Imaging &amp; Diagnosis</h4>
+                  <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum
+                    deleniti.</p>
+                </div>
+              </div>
+
+              <div class="detail-item">
+                <div class="icon-wrapper">
+                  <i class="bi bi-prescription2"></i>
+                </div>
+                <div class="content">
+                  <h4>Treatment Planning</h4>
+                  <p>Excepteur sint occaecat cupidatat non proident sunt in culpa qui officia deserunt mollit anim
+                    laborum.</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="col-lg-7" data-aos="fade-left" data-aos-delay="300">
+            <div class="service-visual">
+              <img src="{% static 'assets/img/health/neurology-2.webp' %}" alt="Neurology Services" class="img-fluid">
+              <div class="visual-overlay">
+                <div class="stats-card">
+                  <div class="stat">
+                    <span class="number">95%</span>
+                    <span class="label">Success Rate</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">24/7</span>
+                    <span class="label">Emergency Care</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row gy-4 mt-5">
+
+          <div class="col-12" data-aos="fade-up" data-aos-delay="100">
+            <div class="service-overview">
+              <div class="row align-items-center">
+
+                <div class="col-lg-6">
+                  <h3>Why Choose Our Neurology Department</h3>
+                  <p>Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore
+                    et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut
+                    aliquip ex ea commodo consequat.</p>
+
+                  <div class="features-grid">
+                    <div class="feature">
+                      <i class="bi bi-award"></i>
+                      <span>Board Certified Specialists</span>
+                    </div>
+                    <div class="feature">
+                      <i class="bi bi-clock-history"></i>
+                      <span>Same Day Appointments</span>
+                    </div>
+                    <div class="feature">
+                      <i class="bi bi-shield-plus"></i>
+                      <span>Advanced Treatment Options</span>
+                    </div>
+                    <div class="feature">
+                      <i class="bi bi-heart-pulse"></i>
+                      <span>Patient-Centered Care</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-6">
+                  <div class="treatment-areas">
+                    <h4>Conditions We Treat</h4>
+                    <div class="condition-tags">
+                      <span class="tag">Stroke Recovery</span>
+                      <span class="tag">Epilepsy Management</span>
+                      <span class="tag">Memory Disorders</span>
+                      <span class="tag">Headache Disorders</span>
+                      <span class="tag">Movement Disorders</span>
+                      <span class="tag">Peripheral Neuropathy</span>
+                      <span class="tag">Multiple Sclerosis</span>
+                      <span class="tag">Parkinson's Disease</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="row gy-4 mt-5">
+
+          <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="100">
+            <div class="action-card primary">
+              <div class="card-header">
+                <i class="bi bi-calendar-check"></i>
+                <h4>Schedule Consultation</h4>
+              </div>
+              <p>Book your neurological evaluation with our expert team</p>
+              <div class="card-footer">
+                <a href="#!" class="btn-action">Book Now</a>
+                <span class="availability">Next available: Tomorrow</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="200">
+            <div class="action-card secondary">
+              <div class="card-header">
+                <i class="bi bi-telephone"></i>
+                <h4>Emergency Consultation</h4>
+              </div>
+              <p>24/7 neurological emergency support and rapid response</p>
+              <div class="card-footer">
+                <a href="tel:+15551234567" class="btn-action">Call Now</a>
+                <span class="availability">+1 (555) 123-4567</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4" data-aos="zoom-in" data-aos-delay="300">
+            <div class="action-card tertiary">
+              <div class="card-header">
+                <i class="bi bi-file-text"></i>
+                <h4>Get Second Opinion</h4>
+              </div>
+              <p>Expert review of existing diagnoses and treatment plans</p>
+              <div class="card-footer">
+                <a href="#!" class="btn-action">Request Review</a>
+                <span class="availability">Response within 48h</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section><!-- /Service Details 2 Section -->
+
+  </main>
+
+  {% include 'footer.html' %}
+
+  <!-- Scroll Top -->
+  <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <div id="preloader"></div>
+
+  <!-- Vendor JS Files -->
+  <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
+  <script src="{% static 'assets/aos/aos.js' %}"></script>
+  <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+</body>
+
+</html>

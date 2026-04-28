@@ -1,0 +1,122 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+
+    <link href="{% static 'assets/css/doctor.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <i class="bi bi-stethoscope"></i>
+            </div>
+            <h2 class="sidebar-title">MediCare</h2>
+        </div>
+        <ul class="sidebar-menu">
+              <!-- Doctor only -->
+            {% if request.user.innermember.role == 'doctor' %}
+            <!-- Dashboard (dono ke liye) -->
+            <li>
+                <a href="{% url 'doctor:dashboard' %}" class="active">
+                    <i class="bi bi-house-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+          
+
+            <li>
+                <a href="#" class="menu-toggle">
+                    <div class="menu-toggle-label">
+                        <i class="bi bi-people-fill"></i>
+                        <span>Patients</span>
+                    </div>
+                    <i class="bi bi-chevron-down arrow-icon"></i>
+                </a>
+                <ul class="submenu">
+                    <li>
+                        <a href="{% url 'doctor:add_patient' %}">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Add Patient</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'doctor:manage_patients' %}">
+                            <i class="bi bi-pencil-square"></i>
+                            <span>Manage Patients</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <li>
+                <a href="{% url 'appointment:manage_appointments' %}">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Appointments</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="#">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Visits</span>
+                </a>
+            </li>
+
+            {% endif %}
+
+            <!-- Billing (dono ke liye) -->
+            <li>
+                <a href="{% url 'doctor:billing' %}">
+                    <i class="bi bi-receipt"></i>
+                    <span>Billing</span>
+                </a>
+            </li>
+
+        </ul>
+
+        
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- TOP NAVBAR -->
+    <nav class="navbar-custom" id="navbar">
+        <div class="navbar-left">
+            <button class="toggle-sidebar" id="toggleSidebar" type="button" aria-label="Toggle sidebar"
+                aria-controls="sidebar" aria-expanded="false">
+                <i class="bi bi-list"></i>
+            </button>
+            <h1 class="navbar-brand-text">
+                <i class="bi bi-stethoscope"></i>
+                Doctor Dashboard
+            </h1>
+        </div>
+        <div class="navbar-right">
+            <div class="user-info">
+                <div class="user-avatar">
+                    DR
+                </div>
+                <span class="user-name">{{ request.user.first_name }}</span>
+            </div>
+            <button class="logout-btn" onclick="handleLogout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </nav>
+    {% block content %}
+    {% endblock %}
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/doctor.js' %}"></script>
+</body>
+
+</html>

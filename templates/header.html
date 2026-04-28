@@ -1,0 +1,80 @@
+<header id="header" class="header fixed-top">
+
+  <div class="branding d-flex align-items-center">
+
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
+        <h1 class="sitename">Clinic</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a href="{% url 'index' %}" class="active">Home</a></li>
+          <li><a href="{% url 'appointment:appointment' %}">Appointment</a></li>
+          <li><a href="{% url 'services' %}">Services</a></li>
+          <li><a href="{% url 'departments' %}">Departments</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="{% url 'about' %}">About</a></li>
+          <li><a href="{% url 'terms' %}">Terms & Privacy</a></li>
+
+          {% if user.is_authenticated %}
+          <li class="dropdown profile-nav">
+            <a href="#">
+              <div class="profile-avatar">
+                {{ user.first_name|slice:":1"|upper }}
+              </div>
+              <i class="bi toggle-dropdown"></i>
+            </a>
+            <ul>
+              <li><a href="{% url 'profile' %}">My Profile</a></li>
+              <li><a href="{% url 'resetpass' %}">Password</a></li>
+              <li>
+                <hr style="margin: 5px 0; opacity: 0.1;">
+              </li>
+              <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')">Logout</a></li>
+            </ul>
+          </li>
+          {% else %}
+          <li><a href="{% url 'login' %}">Login</a></li>
+          {% endif %}
+
+
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+
+    </div>
+
+  </div>
+
+</header>
+
+<style>
+  /* Profile Avatar Circle */
+  .profile-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #1977cc;
+    /* Clinic theme blue */
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid rgba(25, 119, 204, 0.2);
+    transition: 0.3s;
+  }
+
+  .profile-nav:hover .profile-avatar {
+    background-color: #1561a8;
+    transform: scale(1.05);
+  }
+
+  /* Dropdown Alignment Fix */
+  .navmenu .profile-nav ul {
+    right: 0;
+    left: auto;
+  }
+</style>

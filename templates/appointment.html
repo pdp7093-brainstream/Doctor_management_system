@@ -1,0 +1,342 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Appointment - Clinic Bootstrap Template</title>
+  <meta name="description" content="">
+  <meta name="keywords" content="">
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+
+  <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: Clinic
+  * Template URL: https://bootstrapmade.com/clinic-bootstrap-template/
+  * Updated: Jul 23 2025 with Bootstrap v5.3.7
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<style>
+  .time-btn {
+    font-size: 11px !important;
+    /* Chota font */
+    padding: 5px 2px !important;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    font-weight: bolder;
+  }
+
+  @media (max-width: 576px) {
+    .row-cols-3>* {
+      flex: 0 0 auto;
+      width: 33.333333%;
+      /* Mobile pe 3 buttons ek line mein */
+    }
+  }
+</style>
+
+<body class="appointment-page">
+
+  {% include 'header.html' %}
+
+  <main class="main">
+
+    <!-- Page Title -->
+    <div class="page-title">
+      <div class="heading">
+        <div class="container">
+          <div class="row d-flex justify-content-center text-center">
+            <div class="col-lg-8">
+              <h1 class="heading-title">Appointment</h1>
+              <p class="mb-0">
+                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
+                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
+                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
+                ipsum dolorem.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <nav class="breadcrumbs">
+        <div class="container">
+          <ol>
+            <li><a href="{% url 'index' %}">Home</a></li>
+            <li class="current">Appointment</li>
+          </ol>
+        </div>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <!-- Appointmnet Section -->
+    <section id="appointmnet" class="appointmnet section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <div class="row">
+          <div class="col-lg-8 mx-auto">
+            <div class="booking-wrapper">
+              <div class="booking-header text-center" data-aos="fade-up" data-aos-delay="200">
+                <h2>Schedule Your Appointment</h2>
+                <p>Book your medical appointment in just a few simple steps. Our experienced healthcare professionals
+                  are ready to provide you with the best care possible.</p>
+              </div>
+
+              <div class="booking-steps" data-aos="fade-up" data-aos-delay="300">
+                <div class="step">
+                  <div class="step-icon">
+                    <i class="bi bi-calendar-check"></i>
+                  </div>
+                  <div class="step-content">
+                    <h4>Select Service</h4>
+                    <p>Choose the medical service you need</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-icon">
+                    <i class="bi bi-clock"></i>
+                  </div>
+                  <div class="step-content">
+                    <h4>Pick Date &amp; Time</h4>
+                    <p>Select your preferred appointment slot</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-icon">
+                    <i class="bi bi-person-check"></i>
+                  </div>
+                  <div class="step-content">
+                    <h4>Confirm Details</h4>
+                    <p>Provide your information and confirm</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="appointment-form" data-aos="fade-up" data-aos-delay="400">
+                <form action="{% url 'appointment:book_appointment' %}" method="POST" class="php-email-form">
+                  {% csrf_token %}
+                  <div class="row gy-4">
+                    <div class="col-md-6">
+                      <input type="text" name="name" class="form-control" placeholder="Full Name" required="">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="email" name="email" class="form-control" placeholder="Email Address" required=""
+                        value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="tel" name="phone" class="form-control" placeholder="Phone Number" required="">
+                    </div>
+                    <div class="col-md-6">
+                      <input type="date" name="date" id="appointment_date" class="form-control" required="">
+                    </div>
+
+                    <div class="col-12 mt-3" id="time-slot-wrapper" style="display: none;">
+                      <label class="mb-2"><strong>Select Preferred Time:</strong></label>
+                      <div class="row g-2 row-cols-3 row-cols-md-6">
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="09:00 AM">09:00 AM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="09:30 AM">09:30 AM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="10:00 AM">10:00 AM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="10:30 AM">10:30 AM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="11:00 AM">11:00 AM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="11:30 AM">11:30 AM</button></div>
+
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="02:00 PM">02:00 PM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="02:30 PM">02:30 PM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="03:00 PM">03:00 PM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="03:30 PM">03:30 PM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="04:00 PM">04:00 PM</button></div>
+                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
+                            data-time="04:30 PM">04:30 PM</button></div>
+                      </div>
+                    </div>
+
+                    <input type="hidden" name="time_slot" id="selected_time" required>
+
+                    <div class="col-12">
+                      <textarea name="message" class="form-control" rows="4"
+                        placeholder="Additional notes or symptoms (optional)"></textarea>
+                    </div>
+                    <div class="col-12">
+                      <div class="loading">Loading</div>
+                      <div class="error-message"></div>
+                      <div class="sent-message">Your appointment has been scheduled. Thank you!</div>
+                      <button type="submit" id="submitBtn" class="btn-book">Book Appointment Now</button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+
+              <div class="emergency-info" data-aos="fade-up" data-aos-delay="500">
+                <p><i class="bi bi-exclamation-triangle"></i> For medical emergencies, please call <strong>911</strong>
+                  or go to the nearest emergency room.</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section><!-- /Appointmnet Section -->
+
+  </main>
+
+  {% include 'footer.html' %}
+
+  <!-- Scroll Top -->
+  <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+      class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Preloader -->
+  <!-- <div id="preloader"></div> -->
+
+  <!-- Vendor JS Files -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/aos/aos.js' %}"></script>
+  <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+
+  <!-- Main JS File -->
+  <script src="{% static 'assets/js/main.js' %}"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dateInput = document.getElementById('appointment_date');
+      const timeWrapper = document.getElementById('time-slot-wrapper');
+      const timeButtons = document.querySelectorAll('.time-btn');
+      const hiddenInput = document.getElementById('selected_time');
+
+      // --- 1. Past Dates Disable Karo ---
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.setAttribute('min', today);
+
+      // --- 2. Date Selection logic ---
+      dateInput.addEventListener('change', function () {
+        if (this.value) {
+          // Label aur slots dono ek saath dikhenge
+          timeWrapper.style.display = 'block';
+        } else {
+          timeWrapper.style.display = 'none';
+        }
+      });
+
+      // --- 3. Slot Click logic ---
+      timeButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          timeButtons.forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+          });
+          this.classList.remove('btn-outline-primary');
+          this.classList.add('btn-primary');
+          hiddenInput.value = this.getAttribute('data-time');
+        });
+      });
+    });
+  </script>
+
+  <script>
+    document.getElementById('submitBtn').addEventListener('click', function () {
+      // 1. Pehle Surety (Confirmation) Pop-up
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to book this appointment?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, Book it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // 2. Agar OK kiya, toh Heart Animation wala loader dikhao
+          Swal.fire({
+            title: 'Booking...',
+            html: '<i class="bi bi-heart-fill" style="color:red; font-size: 3rem; animation: pulse 1s infinite;"></i>',
+            showConfirmButton: false,
+            timer: 2000, // 2 second tak dikhayega
+            didOpen: () => {
+              Swal.showLoading();
+            }
+          });
+
+          // 3. Form submit kar do (AJAX ya normal)
+          setTimeout(() => {
+            document.getElementById('appointmentForm').submit();
+          }, 2000);
+        }
+      });
+    });
+
+    document.querySelectorAll('.time-btn').forEach(button => {
+      button.addEventListener('click', function () {
+        // Remove active class from other buttons
+        document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+
+        // Add active class to clicked button
+        this.classList.add('active');
+
+        // Set the hidden input value to the 24-hour format from data-time
+        document.getElementById('selected_time').value = this.getAttribute('data-time');
+      });
+    });
+
+    
+  </script>
+
+  <style>
+    /* Heart pulse animation */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.2);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+  </style>
+
+</body>
+
+</html>

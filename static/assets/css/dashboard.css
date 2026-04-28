@@ -1,0 +1,167 @@
+/* Custom CSS for Patient Dashboard */
+:root {
+    --primary-color: #4988ff; /* Navy Blue */
+    --secondary-color: #dbeafe; /* Light Blue */
+    --accent-color: #3580f9; /* Blue */
+    --text-color: #1f2937; /* Dark Gray */
+    --bg-color: #ffffff; /* White */
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--secondary-color);
+    margin: 0;
+    padding: 0;
+}
+
+/* Layout */
+.dashboard {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 240px;
+    background: linear-gradient(180deg, var(--primary-color), #71a3ff);
+    color: #fff;
+    padding: 25px;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 12px;
+}
+
+.sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+    border-radius: 8px;
+    transition: background 0.3s;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li.active a {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar ul li a i {
+    margin-right: 10px;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    margin-left: 240px;
+    padding: 30px;
+}
+
+/* Header */
+.header h3 {
+    color: var(--text-color);
+}
+
+.card-profile{
+    width: 60%;
+    display: flex;  
+    margin: 0 auto;
+}
+
+/* Stats Cards */
+.stat-card {
+    background: var(--bg-color);
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card .card-body {
+    padding: 20px;
+}
+
+.stat-card h3 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+}
+
+.stat-card p {
+    color: var(--text-color);
+    margin: 0;
+}
+
+/* Table */
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.8rem;
+}
+
+/* Modal */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+
+.modal-header {
+    background-color: var(--secondary-color);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-title {
+    color: var(--primary-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+    }
+    .main-content {
+        margin-left: 0;
+    }
+    .stats {
+        flex-direction: column;
+    }
+    .stat-card {
+        margin-bottom: 15px;
+    }
+}

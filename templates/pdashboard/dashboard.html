@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
+</head>
+
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2><i class="fas fa-clinic-medical"></i> Clinic</h2>
+            <ul>
+                <li class="active"><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
+                <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <div class="header d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3><i class="fas fa-user-circle"></i> Welcome, {{ request.user.first_name }} {{ request.user.last_name }}</h3>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row stats mb-4">
+                <div class="col-md-4">
+                    <div class="card stat-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-eye fa-2x text-primary mb-2"></i>
+                            <h3>{{ total_visits }}</h3>
+                            <p>Total Visits</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-calendar-alt fa-2x text-warning mb-2"></i>
+                            <h3>{{ pending_appointments }}</h3>
+                            <p>Pending Appointments</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-rupee-sign fa-2x text-success mb-2"></i>
+                            <h3>₹{{ total_spent }}</h3>
+                            <p>Total Spent</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Table -->
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-calendar-check"></i> My Appointments</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Doctor Name</th>
+                                    <th>Specialty</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                <tr>
+                                    <td>{{ appointment.date }}</td>
+                                    <td>{{ appointment.doctor.name }}</td>
+                                    <td>{{ appointment.doctor.specialty }}</td>
+                                    <td>
+                                        {% if appointment.status == 'confirmed' %}
+                                            <span class="badge bg-success">Confirmed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#appointmentModal" data-appointment-id="{{ appointment.id }}">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Details Modal -->
+    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appointmentModalLabel">Appointment Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="appointment-details">
+                        <!-- Details will be loaded here via JavaScript or Django -->
+                        <p><strong>Date:</strong> <span id="modal-date"></span></p>
+                        <p><strong>Doctor:</strong> <span id="modal-doctor"></span></p>
+                        <p><strong>Specialty:</strong> <span id="modal-specialty"></span></p>
+                        <p><strong>Status:</strong> <span id="modal-status"></span></p>
+                        <p><strong>Doctor's Notes:</strong> <span id="modal-notes"></span></p>
+                        <p><strong>Prescription:</strong> <span id="modal-prescription"></span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // JavaScript to populate modal (example, adjust as needed)
+        const appointmentModal = document.getElementById('appointmentModal');
+        appointmentModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const appointmentId = button.getAttribute('data-appointment-id');
+            // Fetch details via AJAX or pre-load, for now placeholder
+            document.getElementById('modal-date').textContent = '2023-10-01'; // Example
+            document.getElementById('modal-doctor').textContent = 'Dr. Smith';
+            document.getElementById('modal-specialty').textContent = 'Cardiology';
+            document.getElementById('modal-status').textContent = 'Confirmed';
+            document.getElementById('modal-notes').textContent = 'Patient reports chest pain.';
+            document.getElementById('modal-prescription').textContent = 'Aspirin 100mg daily.';
+        });
+    </script>
+</body>
+
+</html>

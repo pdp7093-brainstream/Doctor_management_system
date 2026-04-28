@@ -1,0 +1,297 @@
+{% extends "doctor/main.html" %}
+{% block title %}Patient Visit & Prescription - Doctor Dashboard{% endblock %}
+{% block content %}
+<main class="main-content" id="mainContent">
+    <div class="container-fluid px-4 py-5">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <div>
+                <h1 class="h3 text-dark fw-bold mb-1">Patient Visit</h1>
+                <p class="text-muted small mb-0">Document visit details and create prescription</p>
+            </div>
+            <a href="{% url 'doctor:manage_appointments' %}" class="btn btn-outline-secondary rounded-2">
+                <i class="bi bi-arrow-left me-2"></i>Back to Appointments
+            </a>
+        </div>
+
+        <!-- Main Form -->
+        <form method="post" id="visitForm">
+            {% csrf_token %}
+            
+            <div class="row g-4 align-items-start">
+                <!-- Left Column -->
+                <div class="col-lg-8">
+
+                    <!-- Patient Info Card -->
+                    <div class="card border-0 shadow-sm rounded-3 mb-4">
+                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
+                            <h5 class="card-title mb-0 fw-semibold text-dark">Patient Information</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
+                                    <input type="text" class="form-control form-control-lg" value="John Anderson" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
+                                    <input type="text" class="form-control form-control-lg" value="2026-04-25" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark mb-2">Time Slot</label>
+                                    <input type="text" class="form-control form-control-lg" value="10:00 AM" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold text-dark mb-2">Visit Status</label>
+                                    <span class="badge bg-warning text-dark fs-6 p-2">In Progress</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visit Details Card -->
+                    <div class="card border-0 shadow-sm rounded-3 mb-4">
+                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
+                            <h5 class="card-title mb-0 fw-semibold text-dark">Visit Details</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Symptoms -->
+                            <div class="mb-4">
+                                <label for="symptoms" class="form-label fw-semibold text-dark mb-2">
+                                    Symptoms <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="symptoms" name="symptoms" rows="3" 
+                                    placeholder="Describe patient's symptoms..." required></textarea>
+                            </div>
+
+                            <!-- Diagnosis -->
+                            <div class="mb-4">
+                                <label for="diagnosis" class="form-label fw-semibold text-dark mb-2">
+                                    Diagnosis <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3"
+                                    placeholder="Document the medical diagnosis..." required></textarea>
+                            </div>
+
+                            <!-- Notes -->
+                            <div class="mb-0">
+                                <label for="notes" class="form-label fw-semibold text-dark mb-2">
+                                    Additional Notes <span class="text-muted">(Optional)</span>
+                                </label>
+                                <textarea class="form-control" id="notes" name="notes" rows="2"
+                                    placeholder="Any additional observations or recommendations..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Prescription Card -->
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0 fw-semibold text-dark">Prescription</h5>
+                            <button type="button" class="btn btn-sm btn-primary rounded-2" id="addMedicineBtn">
+                                <i class="bi bi-plus-circle me-1"></i>Add Medicine
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Prescription Table -->
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="prescriptionTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-dark fw-semibold">Medicine Name</th>
+                                            <th class="text-dark fw-semibold">Dosage</th>
+                                            <th class="text-dark fw-semibold">Days</th>
+                                            <th class="text-dark fw-semibold text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="medicineList">
+                                        <!-- Medicine rows will be added here -->
+                                    </tbody>
+                                </table>
+                                <div id="emptyMessage" class="text-center py-4 text-muted">
+                                    <p class="mb-0">No medicines added yet. Click "Add Medicine" to start.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column - Quick Actions -->
+                <div class="col-lg-4">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
+                            <h5 class="card-title mb-0 fw-semibold text-dark">Quick Actions</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="d-grid gap-3">
+                                <button type="submit" class="btn btn-primary btn-lg rounded-2" id="saveBtn">
+                                    <i class="bi bi-floppy me-2"></i>Save Visit
+                                </button>
+                                <button type="button" class="btn btn-success btn-lg rounded-2" id="completeBtn">
+                                    <i class="bi bi-check-circle me-2"></i>Complete Visit
+                                </button>
+                            </div>
+
+                            <!-- Visit Summary -->
+                            <div class="mt-4 p-3 bg-light rounded-2">
+                                <h6 class="fw-semibold text-dark mb-3">Visit Summary</h6>
+                                <ul class="list-unstyled mb-0 small">
+                                    <li class="mb-2">
+                                        <span class="text-muted">Medicines Added:</span>
+                                        <span class="fw-semibold" id="medicineCount">0</span>
+                                    </li>
+                                    <li>
+                                        <span class="text-muted">Status:</span>
+                                        <span class="badge bg-warning text-dark" id="statusBadge">In Progress</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Inline JavaScript -->
+    <script>
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPrescriptions();
+            
+            // Add Medicine button
+            document.getElementById('addMedicineBtn').addEventListener('click', addMedicineRow);
+            
+            // Save button
+            document.getElementById('saveBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                savePrescription();
+            });
+            
+            // Complete Visit button
+            document.getElementById('completeBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                completeVisit();
+            });
+        });
+
+        // Load prescriptions (if any exist)
+        function loadPrescriptions() {
+            const medicineList = document.getElementById('medicineList');
+            const emptyMessage = document.getElementById('emptyMessage');
+            
+            // Check if there are any medicines
+            if (medicineList.children.length === 0) {
+                emptyMessage.style.display = 'block';
+            }
+        }
+
+        // Add new medicine row
+        function addMedicineRow() {
+            const medicineList = document.getElementById('medicineList');
+            const emptyMessage = document.getElementById('emptyMessage');
+            const rowId = 'medicine_' + Date.now();
+            
+            const newRow = document.createElement('tr');
+            newRow.id = rowId;
+            newRow.innerHTML = `
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="medicine_name" 
+                        placeholder="Enter medicine name" required>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="dosage" 
+                        placeholder="e.g., 1-0-1" value="" required>
+                </td>
+                <td>
+                    <input type="number" class="form-control form-control-sm" name="days" 
+                        placeholder="Days" min="1" max="365" required>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-2" 
+                        onclick="removeMedicineRow('${rowId}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+            
+            medicineList.appendChild(newRow);
+            emptyMessage.style.display = 'none';
+            updateMedicineCount();
+            
+            // Focus on medicine name input
+            newRow.querySelector('input[name="medicine_name"]').focus();
+        }
+
+        // Remove medicine row
+        function removeMedicineRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove();
+                updateMedicineCount();
+                
+                // Show empty message if no medicines
+                const medicineList = document.getElementById('medicineList');
+                const emptyMessage = document.getElementById('emptyMessage');
+                if (medicineList.children.length === 0) {
+                    emptyMessage.style.display = 'block';
+                }
+            }
+        }
+
+        // Update medicine count
+        function updateMedicineCount() {
+            const medicineList = document.getElementById('medicineList');
+            const count = medicineList.children.length;
+            document.getElementById('medicineCount').textContent = count;
+        }
+
+        // Save prescription
+        function savePrescription() {
+            const form = document.getElementById('visitForm');
+            
+            // Validate required fields
+            if (!document.getElementById('symptoms').value.trim()) {
+                alert('Please enter symptoms');
+                return;
+            }
+            if (!document.getElementById('diagnosis').value.trim()) {
+                alert('Please enter diagnosis');
+                return;
+            }
+            if (document.getElementById('medicineList').children.length === 0) {
+                alert('Please add at least one medicine');
+                return;
+            }
+            
+            // Show success message
+            alert('Visit and prescription saved successfully!');
+            console.log('Form data:', new FormData(form));
+            // form.submit(); // Uncomment to actually submit
+        }
+
+        // Complete visit
+        function completeVisit() {
+            const form = document.getElementById('visitForm');
+            
+            // Validate required fields
+            if (!document.getElementById('symptoms').value.trim()) {
+                alert('Please enter symptoms before completing');
+                return;
+            }
+            if (!document.getElementById('diagnosis').value.trim()) {
+                alert('Please enter diagnosis before completing');
+                return;
+            }
+            
+            // Confirm completion
+            if (confirm('Are you sure you want to complete this visit?')) {
+                alert('Visit marked as complete!');
+                // Perform completion logic
+                // window.location.href = '/doctor/manage-appointments/'; // Redirect after completion
+            }
+        }
+    </script>
+</main>
+{% endblock %}
