@@ -31,16 +31,20 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
-                                    <input type="text" class="form-control form-control-lg" value="John Anderson"
+                                    <input type="text" class="form-control form-control-lg"
+                                        value="{% if visit %}{{ visit.patient.user.get_full_name }} {% endif %}"
                                         readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
-                                    <input type="text" class="form-control form-control-lg" value="2026-04-25" readonly>
+                                    <input type="text" class="form-control form-control-lg"
+                                        value="{% if visit %}{{ visit.appointment.appointment_date }} {% endif %}"
+                                        readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Time Slot</label>
-                                    <input type="text" class="form-control form-control-lg" value="10:00 AM" readonly>
+                                    <input type="text" class="form-control form-control-lg"
+                                        value="{% if visit %}{{ visit.appointment.time_slot }} {% endif %}" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Visit Status</label>

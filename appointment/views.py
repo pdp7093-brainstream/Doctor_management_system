@@ -1,9 +1,9 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.views import View
 from doctor.decorators import role_required
 from accounts.models import Patient
-from doctor.models import InnerMember
-from .models import Appointment
+from doctor.models import InnerMember,Medicine
+from .models import * 
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -142,3 +142,35 @@ class Book_appointment(View):
 
         messages.success(request, "Appointment booked successfully!")
         return redirect('appointment:appointment')
+
+# ------------------- Views for prescription -------------------- 
+
+@method_decorator([never_cache, role_required("doctor")], name="dispatch")
+class PrescriptionView(View):
+    def get(self, request, *args, **kwargs):
+        appointment_id = kwargs.get("appointment_id")
+        appointment = get_object_or_404(Appointment,id=appointment_id)
+        
+        visit,created  = Visit.objects.get_or_create(
+            appointment=appointment,
+            defaults ={
+                "patient":appointment.patient,
+                "doctor":appointment.doctor,
+            }
+        )
+        return render(request, "doctor/prescription.html", {
+        "visit": visit})
+
+    def post(self,request):
+        appointment_id = request.POST.get("appointment_id")
+        symptoms = request.POST.get("symptoms")
+        diagnosis = request.POST.get("diagnosis")
+        notes = request.POST.get("notes")
+
+        appointment = Appointment.objects.get(id=appointment_id)
+        visit = Visit.objects.get(appointment=appointment)
+        visit.symptoms = symptoms
+        visit.diagnosis = diagnosis
+        visit.notes = notes
+        visit.save()
+        return redirect('appointment:manage_appointments')

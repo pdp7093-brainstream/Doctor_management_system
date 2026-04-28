@@ -37,6 +37,9 @@ class Visit(models.Model):
     appointment = models.ForeignKey(Appointment,on_delete=models.CASCADE,null=True)
 
     visted_status = models.CharField(max_length=20, default='in_progress')
+
+    symptoms = models.TextField(blank=True, null=True)
+    diagnosis = models.TextField(blank=True, null=True)
     notes = models.TextField(blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -65,12 +65,5 @@ def add_patient(request):
 
 @never_cache
 @login_required
-def prescription(request):
-     return render(request, 'doctor/prescription.html')
-
-
-
-@never_cache
-@login_required
 def billing(request):
      return render(request, 'doctor/billing.html')
