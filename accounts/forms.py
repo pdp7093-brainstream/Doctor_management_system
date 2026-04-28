@@ -4,11 +4,15 @@ from django.core.exceptions import ValidationError
 import re
 
 class RegistrationForm(forms.Form):
-    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Full Name'}))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'}))
-    phone = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Phone Number'}))
+    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Dany jhonson'}))
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'dany@gmail.com '}))
+    phone = forms.CharField(max_length=10, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'+91 0987654321'}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
     confirm_password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirm Password'}))
+    # address = forms.CharField(
+    #     widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': '201, Second Floor, IT Tower 4 InfoCity Gate - 1, Infocity', 'rows': 3}),
+    #     required=False 
+    # )
 
     def clean_email(self):
         email = self.cleaned_data.get('email').lower()

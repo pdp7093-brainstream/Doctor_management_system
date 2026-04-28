@@ -1,65 +1,177 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile Settings</title>
+    <title>Patient Profile Settings</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
+    <style>
+        .profile-picture-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(99, 102, 241, 0.1);
+            display: none; /* Hidden by default */
+        }
+        
+        .profile-img-preview {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid #6366f1;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-img-preview:hover {
+            transform: scale(1.05);
+        }
+        
+        .profile-upload-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .profile-upload-input {
+            display: none;
+        }
+        
+        .profile-upload-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .profile-upload-label:hover {
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .profile-upload-label i {
+            margin-right: 8px;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-top: 10px;
+        }
+        
+        .profile-email {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-top: 5px;
+        }
+    </style>
 </head>
-
 <body>
     <div class="dashboard">
-        <!-- Sidebar -->
         <div class="sidebar">
-            <h2><i class="fas fa-clinic-medical"></i> Clinic</h2>
+            <h2><a href="{% url 'index' %}" style="text-decoration: none;color:inherit"><i class="fas fa-clinic-medical"></i> Clinic</a></h2>
             <ul>
-                <li class="active"><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
+                <li><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li class="active"><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
                 <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Header -->
             <div class="header d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3><i class="fas fa-user-cog"></i> Profile Settings</h3>
-                </div>
+                <h3><i class="fas fa-id-card"></i> Comprehensive Patient Profile</h3>
             </div>
 
-            <!-- Profile Form -->
-            <div class="card-profile card">
-                <div class="card-header">
-                    <h4>Update Your Profile</h4>
+            <div class="card-profile card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center bg-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit"></i> Edit Your Profile</h5>
+                    <button id="edit-btn" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit"></i> Edit Profile
+                    </button>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data">
+                    <form method="post" action="{% url 'profile-setting' %}" enctype="multipart/form-data">
                         {% csrf_token %}
-
-                        <div class="row">
-                            <div class=" mb-3">
-                                <label for="first_name" class="form-label">Full name</label>
-                                <input type="text" class="form-control" id="first_name" name="first_name" value="{{ request.user.first_name }}">
+                        
+                        <!-- Profile Picture Section -->
+                        <div class="profile-picture-section">
+                            {% if request.user.patient.profile_picture %}
+                                <img id="preview" src="{{ request.user.patient.profile_picture.url }}" alt="Profile Picture" class="profile-img-preview">
+                            {% else %}
+                                <div class="profile-img-preview" style="background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem; font-weight: 700;">
+                                    {{ request.user.first_name|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                            
+                            <div class="profile-name">{{ request.user.first_name }}</div>
+                            <div class="profile-email">{{ request.user.email }}</div>
+                            
+                            <div class="profile-upload-wrapper mt-3">
+                                <input type="file" id="photo-upload" name="profile_picture" class="profile-upload-input" accept="image/*">
+                                <label for="photo-upload" class="profile-upload-label">
+                                    <i class="fas fa-camera"></i> Change Profile Picture
+                                </label>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}">
+                        
+                        <h6 class="section-title"><i class="fas fa-user"></i> Personal Information</h6>
+                        <div class="row">
+                        
+                            <div class="col-md-9">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-control profile-input" name="first_name" value="{{ request.user.first_name }}" readonly>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label">Date of Birth</label>
+                                        <input type="date" class="form-control profile-input" name="dob" value="{{ request.user.patient.dob|date:'Y-m-d' }}" readonly>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Gender</label>
+                                        <input type="text" class="form-control profile-input" name="gender" value="{{ request.user.patient.gender }}" readonly>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="form-label">Blood Group</label>
+                                        <input type="text" class="form-control profile-input" name="bld_grop" value="{{ request.user.patient.bld_grop }}" readonly>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="phone" class="form-label">Phone Number</label>
-                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ request.user.patient.phone }}">
+
+                        <h6 class="section-title mt-4"><i class="fas fa-address-book"></i> Contact Details</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mobile Number</label>
+                                <input type="tel" class="form-control profile-input" name="phone" value="{{ request.user.patient.phone }}" readonly>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email Address</label>
+                                <input type="email" class="form-control profile-input" name="email" value="{{ request.user.email }}" readonly>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Complete Address</label>
+                                <textarea class="form-control profile-input" name="address" rows="2" readonly>{{ request.user.patient.address }}</textarea>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="address" class="form-label">Address</label>
-                            <textarea class="form-control" id="address" name="address" rows="3">{{ request.user.patient.address }}</textarea>
+
+                        <div class="text-center mt-5 mb-3">
+                            <button type="submit" id="save-btn" class="btn btn-primary btn-lg shadow" style="display: none;">
+                                <i class="fas fa-save"></i> Save All Changes
+                            </button>
                         </div>
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Update Profile</button>
                     </form>
                 </div>
             </div>
@@ -67,6 +179,46 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+    <script>
+        document.getElementById('edit-btn').addEventListener('click', function () {
+            const inputs = document.querySelectorAll('.profile-input');
+            const saveBtn = document.getElementById('save-btn');
+            const photoUpload = document.getElementById('photo-upload');
+            const profilePictureSection = document.querySelector('.profile-picture-section');
 
+            inputs.forEach(input => {
+                if (input.hasAttribute('readonly')) {
+                    input.removeAttribute('readonly');
+                    input.removeAttribute('disabled');
+                    input.style.backgroundColor = "#fff";
+                } else {
+                    input.setAttribute('readonly', true);
+                    input.setAttribute('disabled', true);
+                    input.style.backgroundColor = "";
+                }
+            });
+
+            if (saveBtn.style.display === "none") {
+                saveBtn.style.display = "inline-block";
+                profilePictureSection.style.display = "flex"; // Show profile picture section
+                this.innerHTML = '<i class="fas fa-times"></i> Cancel';
+                this.classList.replace('btn-outline-secondary', 'btn-outline-danger');
+            } else {
+                saveBtn.style.display = "none";
+                profilePictureSection.style.display = "none"; // Hide profile picture section
+                this.innerHTML = '<i class="fas fa-edit"></i> Edit Profile';
+                this.classList.replace('btn-outline-danger', 'btn-outline-secondary');
+            }
+        });
+
+        // Photo Preview Logic
+        document.getElementById('photo-upload').addEventListener('change', function(e) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('preview').src = reader.result;
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+    </script>
+</body>
 </html>

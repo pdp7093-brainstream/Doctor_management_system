@@ -51,7 +51,11 @@
           <li class="dropdown profile-nav">
             <a href="#">
               <div class="profile-avatar">
-                {{ user.first_name|slice:":1"|upper }}
+                {% if user.patient.profile_picture %}
+                    <img src="{{ user.patient.profile_picture.url }}" alt="Profile" class="profile-avatar-img">
+                {% else %}
+                    {{ user.first_name|slice:":1"|upper }}
+                {% endif %}
               </div>
               <i class="bi toggle-dropdown"></i>
             </a>
@@ -83,8 +87,8 @@
 <style>
   /* Profile Avatar Circle */
   .profile-avatar {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     background-color: #1977cc;
     /* Clinic theme blue */
     color: #fff;
@@ -96,11 +100,21 @@
     font-size: 14px;
     border: 2px solid rgba(25, 119, 204, 0.2);
     transition: 0.3s;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
   }
 
   .profile-nav:hover .profile-avatar {
     background-color: #1561a8;
-    transform: scale(1.05);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(25, 119, 204, 0.3);
   }
 
   /* Dropdown Alignment Fix */

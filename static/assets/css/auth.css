@@ -18,6 +18,11 @@ body {
     max-width: 400px;
 }
 
+.container-1 {
+    width: 150%;
+    max-width: 400px;
+}
+
 .auth-box {
     background: #fff;
     padding: 40px;

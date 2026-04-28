@@ -8,6 +8,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile 
 
 def home(request):
     return render(request, 'index.html')
@@ -55,17 +58,19 @@ class SignupView(View):
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            phone = form.cleaned_data.get('phone')
+
         
             # User & Patient Creation
             user = User.objects.create_user(username=email, email=email, password=password, first_name=name)
-            Patient.objects.create(user=user,phone=phone)
-
+            Patient.objects.create(
+                user=user,
+            )
             auth_login(request, user)
             return redirect('login')
         
         # Agar invalid hai toh errors ke saath wapas bhej do
         return render(request, 'authentication/register.html', {'form': form})
+    
 
 class LoginView(View):
     def get(self, request):
@@ -87,8 +92,6 @@ class LoginView(View):
 def logout_view(request):
     auth_logout(request)
     return redirect('index')
-
-
 
 class ChangePasswordView(LoginRequiredMixin, View):
     login_url = 'login'
@@ -117,4 +120,44 @@ class ChangePasswordView(LoginRequiredMixin, View):
         
         return render(request, 'authentication/change_password.html', {'form': form})
 
+# Update user profile
 
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Patient
+@login_required
+def profile_settings(request):
+    user = request.user
+    patient = user.patient # Current logged-in user ka patient profile
+
+    if request.method == 'POST':
+        # 1. User basic info update karein
+        user.first_name = request.POST.get('first_name')
+        user.email = request.POST.get('email')
+        user.save()
+
+        # 2. Nayi fields jo aapne model mein add kari hain, unhe yahan save karein
+        patient.phone = request.POST.get('phone')
+        patient.address = request.POST.get('address')
+        patient.dob = request.POST.get('dob')
+        patient.gender = request.POST.get('gender')
+        patient.bld_grop = request.POST.get('bld_grop') # Jo field name models.py mein hai
+        
+        # Additional fields (Medical History etc.)
+        patient.city = request.POST.get('city')
+        patient.state = request.POST.get('state')
+        patient.pin = request.POST.get('pin')
+        patient.diseases = request.POST.get('diseases')
+        patient.allergies = request.POST.get('allergies')
+        
+        # Handle Profile Picture Upload
+        if 'profile_picture' in request.FILES:
+            patient.profile_picture = request.FILES['profile_picture']
+        
+        patient.save()
+
+        messages.success(request, "Profile updated successfully!")
+        return redirect('profile') # Wapas profile page par bhej dein
+
+    return render(request, 'authentication/profile.html')
