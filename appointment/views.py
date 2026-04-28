@@ -7,7 +7,7 @@ from .models import Appointment
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from .forms import AppointmentForm
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from datetime import datetime
@@ -28,8 +28,8 @@ class Manage_appointments(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Add_appointment(View):
     def get(self, request):
-        form = AppointmentForm()
-        return render(request, "doctor/add_appointment.html", {"form": form})
+        
+        return render(request, "doctor/add_appointment.html")
 
     
     
