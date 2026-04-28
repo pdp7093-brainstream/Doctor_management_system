@@ -51,10 +51,10 @@
           <li class="dropdown profile-nav">
             <a href="#">
               <div class="profile-avatar">
-                {% if user.patient.profile_picture %}
+                {% if user.patient.profile_picture and user.patient.profile_picture.name != 'profile_pictures/default-avatar.png' %}
                     <img src="{{ user.patient.profile_picture.url }}" alt="Profile" class="profile-avatar-img">
                 {% else %}
-                    {{ user.first_name|slice:":1"|upper }}
+                    {{ user.first_name|default:user.username|slice:":1"|upper }}
                 {% endif %}
               </div>
               <i class="bi toggle-dropdown"></i>

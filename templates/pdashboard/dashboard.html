@@ -42,7 +42,7 @@
                             <p>Total Visits</p>
                         </div>
                     </div>
-                </div>
+                </div>  
                 <div class="col-md-4">
                     <div class="card stat-card text-center">
                         <div class="card-body">
@@ -66,16 +66,17 @@
             <!-- Appointments Table -->
             <div class="card">
                 <div class="card-header">
-                    <h4><i class="fas fa-calendar-check"></i> My Appointments</h4>
+                    <h4><i class="fas fa-calendar-check"></i> All Appointments</h4>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
+                    <div class="table-responsive table-scroll">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <th>Date</th>
-                                    <th>Doctor Name</th>
-                                    <th>Specialty</th>
+                                    <th>Time</th>
+                                    <th>Patient</th>
+                                    <th>Doctor</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -83,21 +84,47 @@
                             <tbody>
                                 {% for appointment in appointments %}
                                 <tr>
-                                    <td>{{ appointment.date }}</td>
-                                    <td>{{ appointment.doctor.name }}</td>
-                                    <td>{{ appointment.doctor.specialty }}</td>
+                                    <td>{{ appointment.appointment_date }}</td>
+                                    <td>{{ appointment.time_slot }}</td>
+                                    <td>
+                                        {% if appointment.patient and appointment.patient.user %}
+                                            {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                        {% else %}
+                                            {{ appointment.full_name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if appointment.doctor and appointment.doctor.user %}
+                                            {{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}
+                                        {% else %}
+                                            Not assigned
+                                        {% endif %}
+                                    </td>
                                     <td>
                                         {% if appointment.status == 'confirmed' %}
                                             <span class="badge bg-success">Confirmed</span>
+                                        {% elif appointment.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Cancelled</span>
                                         {% else %}
                                             <span class="badge bg-warning">Pending</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#appointmentModal" data-appointment-id="{{ appointment.id }}">
+                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#appointmentModal"
+                                            data-appointment-date="{{ appointment.appointment_date }}"
+                                            data-appointment-time="{{ appointment.time_slot }}"
+                                            data-appointment-doctor="{% if appointment.doctor and appointment.doctor.user %}{{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}{% else %}Not assigned{% endif %}"
+                                            data-appointment-status="{{ appointment.status|capfirst }}"
+                                            data-appointment-notes="{{ appointment.notes|default:'No notes available'|escape }}"
+                                            data-appointment-fullname="{% if appointment.patient and appointment.patient.user %}{{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}{% else %}{{ appointment.full_name|escape }}{% endif %}"
+                                            data-appointment-phone="{{ appointment.phone|escape }}">
                                             <i class="fas fa-eye"></i> View
                                         </button>
                                     </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No appointments found yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -118,13 +145,14 @@
                 </div>
                 <div class="modal-body">
                     <div id="appointment-details">
-                        <!-- Details will be loaded here via JavaScript or Django -->
+                        <!-- Details will be loaded here via JavaScript -->
+                        <p><strong>Patient Name:</strong> <span id="modal-fullname"></span></p>
+                        <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
                         <p><strong>Date:</strong> <span id="modal-date"></span></p>
+                        <p><strong>Time:</strong> <span id="modal-time"></span></p>
                         <p><strong>Doctor:</strong> <span id="modal-doctor"></span></p>
-                        <p><strong>Specialty:</strong> <span id="modal-specialty"></span></p>
                         <p><strong>Status:</strong> <span id="modal-status"></span></p>
-                        <p><strong>Doctor's Notes:</strong> <span id="modal-notes"></span></p>
-                        <p><strong>Prescription:</strong> <span id="modal-prescription"></span></p>
+                        <p><strong>Notes:</strong> <span id="modal-notes"></span></p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -136,18 +164,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // JavaScript to populate modal (example, adjust as needed)
+        // JavaScript to populate modal from the selected appointment row
         const appointmentModal = document.getElementById('appointmentModal');
         appointmentModal.addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
-            const appointmentId = button.getAttribute('data-appointment-id');
-            // Fetch details via AJAX or pre-load, for now placeholder
-            document.getElementById('modal-date').textContent = '2023-10-01'; // Example
-            document.getElementById('modal-doctor').textContent = 'Dr. Smith';
-            document.getElementById('modal-specialty').textContent = 'Cardiology';
-            document.getElementById('modal-status').textContent = 'Confirmed';
-            document.getElementById('modal-notes').textContent = 'Patient reports chest pain.';
-            document.getElementById('modal-prescription').textContent = 'Aspirin 100mg daily.';
+            document.getElementById('modal-fullname').textContent = button.dataset.appointmentFullname;
+            document.getElementById('modal-phone').textContent = button.dataset.appointmentPhone;
+            document.getElementById('modal-date').textContent = button.dataset.appointmentDate;
+            document.getElementById('modal-time').textContent = button.dataset.appointmentTime;
+            document.getElementById('modal-doctor').textContent = button.dataset.appointmentDoctor;
+            document.getElementById('modal-status').textContent = button.dataset.appointmentStatus;
+            document.getElementById('modal-notes').textContent = button.dataset.appointmentNotes;
         });
     </script>
 </body>

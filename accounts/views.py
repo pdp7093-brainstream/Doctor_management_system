@@ -1,16 +1,13 @@
-from django.shortcuts import render, redirect
 from .models import *
 from .forms import *
+from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,logout as auth_logout, login as auth_login
+from django.contrib.auth import authenticate,logout as auth_logout, login as auth_login,update_session_auth_hash
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import update_session_auth_hash
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile 
+from appointment.models import Appointment
 
 def home(request):
     return render(request, 'index.html')
@@ -35,10 +32,22 @@ def login(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request,'pdashboard/dashboard.html')
+    appointments = Appointment.objects.filter(patient__user=request.user).select_related('patient__user', 'doctor__user').order_by('-appointment_date', '-time_slot')
+    total_visits = appointments.count()
+    pending_appointments = appointments.filter(status='pending').count()
+    total_spent = 0
+
+    context = {
+        'appointments': appointments,
+        'total_visits': total_visits,
+        'pending_appointments': pending_appointments,
+        'total_spent': total_spent,
+    }
+    return render(request, 'pdashboard/dashboard.html', context)
 
 @login_required(login_url='login')
 def profile(request):
+    Patient.objects.get_or_create(user=request.user)
     return render(request,'pdashboard/profile.html')
 
 def report(request):
@@ -122,34 +131,23 @@ class ChangePasswordView(LoginRequiredMixin, View):
 
 # Update user profile
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from .models import Patient
 @login_required
 def profile_settings(request):
     user = request.user
-    patient = user.patient # Current logged-in user ka patient profile
+    patient, created = Patient.objects.get_or_create(user=user)
 
     if request.method == 'POST':
-        # 1. User basic info update karein
+        
         user.first_name = request.POST.get('first_name')
         user.email = request.POST.get('email')
         user.save()
 
-        # 2. Nayi fields jo aapne model mein add kari hain, unhe yahan save karein
+        
         patient.phone = request.POST.get('phone')
         patient.address = request.POST.get('address')
-        patient.dob = request.POST.get('dob')
-        patient.gender = request.POST.get('gender')
-        patient.bld_grop = request.POST.get('bld_grop') # Jo field name models.py mein hai
-        
-        # Additional fields (Medical History etc.)
-        patient.city = request.POST.get('city')
-        patient.state = request.POST.get('state')
-        patient.pin = request.POST.get('pin')
-        patient.diseases = request.POST.get('diseases')
-        patient.allergies = request.POST.get('allergies')
+        patient.dob = request.POST.get('dob') or None
+        patient.gender = request.POST.get('gender') or None
+        patient.bld_grop = request.POST.get('bld_grop') or None
         
         # Handle Profile Picture Upload
         if 'profile_picture' in request.FILES:

@@ -350,6 +350,15 @@ textarea.form-control {
     box-shadow: var(--shadow-md);
 }
 
+.table-scroll {
+    max-height: calc(10 * 68px + 80px);
+    overflow-y: auto;
+}
+
+.table-scroll .table {
+    margin-bottom: 0;
+}
+
 .table {
     margin-bottom: 0;
 }

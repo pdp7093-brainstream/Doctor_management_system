@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import User
 from doctor.models import InnerMember,Medicine
 from accounts.models import Patient
 
@@ -7,7 +6,7 @@ from accounts.models import Patient
 class Appointment(models.Model):
     status_choices = [
         ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'),
+        ('confirmed', 'Confirmed'), 
         ('cancelled', 'Cancelled'),
     ]
 
