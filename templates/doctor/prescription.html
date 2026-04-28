@@ -9,7 +9,7 @@
                 <h1 class="h3 text-dark fw-bold mb-1">Patient Visit</h1>
                 <p class="text-muted small mb-0">Document visit details and create prescription</p>
             </div>
-            <a href="{% url 'doctor:manage_appointments' %}" class="btn btn-outline-secondary rounded-2">
+            <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-secondary rounded-2">
                 <i class="bi bi-arrow-left me-2"></i>Back to Appointments
             </a>
         </div>
@@ -17,7 +17,7 @@
         <!-- Main Form -->
         <form method="post" id="visitForm">
             {% csrf_token %}
-            
+
             <div class="row g-4 align-items-start">
                 <!-- Left Column -->
                 <div class="col-lg-8">
@@ -31,7 +31,8 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
-                                    <input type="text" class="form-control form-control-lg" value="John Anderson" readonly>
+                                    <input type="text" class="form-control form-control-lg" value="John Anderson"
+                                        readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
@@ -60,7 +61,7 @@
                                 <label for="symptoms" class="form-label fw-semibold text-dark mb-2">
                                     Symptoms <span class="text-danger">*</span>
                                 </label>
-                                <textarea class="form-control" id="symptoms" name="symptoms" rows="3" 
+                                <textarea class="form-control" id="symptoms" name="symptoms" rows="3"
                                     placeholder="Describe patient's symptoms..." required></textarea>
                             </div>
 
@@ -86,7 +87,8 @@
 
                     <!-- Prescription Card -->
                     <div class="card border-0 shadow-sm rounded-3">
-                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3 d-flex justify-content-between align-items-center">
+                        <div
+                            class="card-header bg-light border-0 rounded-top-3 px-4 py-3 d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Prescription</h5>
                             <button type="button" class="btn btn-sm btn-primary rounded-2" id="addMedicineBtn">
                                 <i class="bi bi-plus-circle me-1"></i>Add Medicine
@@ -157,20 +159,20 @@
     <!-- Inline JavaScript -->
     <script>
         // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadPrescriptions();
-            
+
             // Add Medicine button
             document.getElementById('addMedicineBtn').addEventListener('click', addMedicineRow);
-            
+
             // Save button
-            document.getElementById('saveBtn').addEventListener('click', function(e) {
+            document.getElementById('saveBtn').addEventListener('click', function (e) {
                 e.preventDefault();
                 savePrescription();
             });
-            
+
             // Complete Visit button
-            document.getElementById('completeBtn').addEventListener('click', function(e) {
+            document.getElementById('completeBtn').addEventListener('click', function (e) {
                 e.preventDefault();
                 completeVisit();
             });
@@ -180,7 +182,7 @@
         function loadPrescriptions() {
             const medicineList = document.getElementById('medicineList');
             const emptyMessage = document.getElementById('emptyMessage');
-            
+
             // Check if there are any medicines
             if (medicineList.children.length === 0) {
                 emptyMessage.style.display = 'block';
@@ -192,7 +194,7 @@
             const medicineList = document.getElementById('medicineList');
             const emptyMessage = document.getElementById('emptyMessage');
             const rowId = 'medicine_' + Date.now();
-            
+
             const newRow = document.createElement('tr');
             newRow.id = rowId;
             newRow.innerHTML = `
@@ -215,11 +217,11 @@
                     </button>
                 </td>
             `;
-            
+
             medicineList.appendChild(newRow);
             emptyMessage.style.display = 'none';
             updateMedicineCount();
-            
+
             // Focus on medicine name input
             newRow.querySelector('input[name="medicine_name"]').focus();
         }
@@ -230,7 +232,7 @@
             if (row) {
                 row.remove();
                 updateMedicineCount();
-                
+
                 // Show empty message if no medicines
                 const medicineList = document.getElementById('medicineList');
                 const emptyMessage = document.getElementById('emptyMessage');
@@ -250,7 +252,7 @@
         // Save prescription
         function savePrescription() {
             const form = document.getElementById('visitForm');
-            
+
             // Validate required fields
             if (!document.getElementById('symptoms').value.trim()) {
                 alert('Please enter symptoms');
@@ -264,7 +266,7 @@
                 alert('Please add at least one medicine');
                 return;
             }
-            
+
             // Show success message
             alert('Visit and prescription saved successfully!');
             console.log('Form data:', new FormData(form));
@@ -274,7 +276,7 @@
         // Complete visit
         function completeVisit() {
             const form = document.getElementById('visitForm');
-            
+
             // Validate required fields
             if (!document.getElementById('symptoms').value.trim()) {
                 alert('Please enter symptoms before completing');
@@ -284,7 +286,7 @@
                 alert('Please enter diagnosis before completing');
                 return;
             }
-            
+
             // Confirm completion
             if (confirm('Are you sure you want to complete this visit?')) {
                 alert('Visit marked as complete!');

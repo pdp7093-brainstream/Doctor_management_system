@@ -138,66 +138,70 @@
               </div>
 
               <div class="appointment-form" data-aos="fade-up" data-aos-delay="400">
-                <form action="{% url 'appointment:book_appointment' %}" method="POST" class="php-email-form">
+
+                <!-- display messages  -->
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                  {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Form -->
+                <form method="POST">
                   {% csrf_token %}
+
+                  {% if error %}
+                  <div class="alert alert-danger">{{ error }}</div>
+                  {% endif %}
+
+                  {% if success %}
+                  <div class="alert alert-success">{{ success }}</div>
+                  {% endif %}
+
                   <div class="row gy-4">
+
                     <div class="col-md-6">
-                      <input type="text" name="name" class="form-control" placeholder="Full Name" required="">
-                    </div>
-                    <div class="col-md-6">
-                      <input type="email" name="email" class="form-control" placeholder="Email Address" required=""
-                        value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
-                    </div>
-                    <div class="col-md-6">
-                      <input type="tel" name="phone" class="form-control" placeholder="Phone Number" required="">
-                    </div>
-                    <div class="col-md-6">
-                      <input type="date" name="date" id="appointment_date" class="form-control" required="">
+                      <input type="text" name="name" class="form-control" placeholder="Full Name"
+                        value="{% if request.user.is_authenticated %}{{ request.user.get_full_name  }}{% endif %}"
+                        required>
                     </div>
 
-                    <div class="col-12 mt-3" id="time-slot-wrapper" style="display: none;">
-                      <label class="mb-2"><strong>Select Preferred Time:</strong></label>
-                      <div class="row g-2 row-cols-3 row-cols-md-6">
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="09:00 AM">09:00 AM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="09:30 AM">09:30 AM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="10:00 AM">10:00 AM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="10:30 AM">10:30 AM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="11:00 AM">11:00 AM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="11:30 AM">11:30 AM</button></div>
+                    <div class="col-md-6">
+                      <input type="email" name="email" class="form-control" placeholder="Email Address"
+                        value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}" required>
+                    </div>
 
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="02:00 PM">02:00 PM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="02:30 PM">02:30 PM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="03:00 PM">03:00 PM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="03:30 PM">03:30 PM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="04:00 PM">04:00 PM</button></div>
-                        <div class="col"><button type="button" class="btn btn-outline-primary w-100 time-btn btn-sm"
-                            data-time="04:30 PM">04:30 PM</button></div>
+                    <div class="col-md-6">
+                      <input type="tel" name="phone" class="form-control" placeholder="Phone Number"
+                        value="{% if request.user.is_authenticated %}{{ request.user.patient.phone }}{% endif %}"
+                        required>
+                    </div>
+
+                    <div class="col-md-6">
+                      <input type="date" name="date" id="appointment_date" class="form-control" required>
+                    </div>
+
+
+                    <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
+                      <label><strong>Select Preferred Time:</strong></label>
+
+                      <div class="row g-2 row-cols-3 row-cols-md-6" id="time_buttons_container">
+                        <!-- dynamic buttons yahan aayenge -->
                       </div>
                     </div>
 
-                    <input type="hidden" name="time_slot" id="selected_time" required>
+                    <input type="hidden" name="time_slot" id="selected_time">
 
                     <div class="col-12">
-                      <textarea name="message" class="form-control" rows="4"
-                        placeholder="Additional notes or symptoms (optional)"></textarea>
+                      <textarea name="message" class="form-control" rows="4" placeholder="Notes"></textarea>
                     </div>
+
                     <div class="col-12">
-                      <div class="loading">Loading</div>
-                      <div class="error-message"></div>
-                      <div class="sent-message">Your appointment has been scheduled. Thank you!</div>
-                      <button type="submit" id="submitBtn" class="btn-book">Book Appointment Now</button>
+                      <button type="submit" class="btn btn-primary">Book Appointment</button>
                     </div>
+
                   </div>
                 </form>
               </div>
@@ -238,40 +242,85 @@
   <script src="{% static 'assets/js/main.js' %}"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+
       const dateInput = document.getElementById('appointment_date');
-      const timeWrapper = document.getElementById('time-slot-wrapper');
-      const timeButtons = document.querySelectorAll('.time-btn');
+      const container = document.getElementById('time_buttons_container');
+      const wrapper = document.getElementById('time-slot-wrapper');
       const hiddenInput = document.getElementById('selected_time');
 
-      // --- 1. Past Dates Disable Karo ---
+      // disable past dates
       const today = new Date().toISOString().split('T')[0];
       dateInput.setAttribute('min', today);
 
-      // --- 2. Date Selection logic ---
       dateInput.addEventListener('change', function () {
-        if (this.value) {
-          // Label aur slots dono ek saath dikhenge
-          timeWrapper.style.display = 'block';
-        } else {
-          timeWrapper.style.display = 'none';
+
+        let date = this.value;
+
+        if (!date) {
+          wrapper.style.display = 'none';
+          return;
         }
+
+        wrapper.style.display = 'block';
+
+        fetch(`/appointment/get-slots/?appointment_date=${date}`)
+          .then(res => res.json())
+          .then(data => {
+
+            console.log("API:", data); // debug
+
+            container.innerHTML = "";
+
+            if (!data.slots || data.slots.length === 0) {
+              container.innerHTML = "<p>No slots available</p>";
+              return;
+            }
+
+            data.slots.forEach(slot => {
+
+              // 24h → 12h convert
+              let [hour, minute] = slot.split(":");
+              let h = parseInt(hour);
+              let ampm = h >= 12 ? "PM" : "AM";
+              let displayHour = h % 12 || 12;
+              let displayTime = `${displayHour}:${minute} ${ampm}`;
+
+              let col = document.createElement("div");
+              col.className = "col";
+
+              let btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "btn btn-outline-primary w-100 time-btn";
+              btn.innerText = displayTime;
+              btn.dataset.time = displayTime;
+
+              btn.onclick = function () {
+
+                document.querySelectorAll('.time-btn').forEach(b => {
+                  b.classList.remove('btn-primary');
+                  b.classList.add('btn-outline-primary');
+                });
+
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary');
+
+                hiddenInput.value = displayTime;
+              };
+
+              col.appendChild(btn);
+              container.appendChild(col);
+
+            });
+
+          })
+          .catch(err => {
+            console.error("Error:", err);
+          });
+
       });
 
-      // --- 3. Slot Click logic ---
-      timeButtons.forEach(button => {
-        button.addEventListener('click', function () {
-          timeButtons.forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-primary');
-          });
-          this.classList.remove('btn-outline-primary');
-          this.classList.add('btn-primary');
-          hiddenInput.value = this.getAttribute('data-time');
-        });
-      });
     });
   </script>
-
   <script>
     document.getElementById('submitBtn').addEventListener('click', function () {
       // 1. Pehle Surety (Confirmation) Pop-up
@@ -317,7 +366,7 @@
       });
     });
 
-    
+
   </script>
 
   <style>

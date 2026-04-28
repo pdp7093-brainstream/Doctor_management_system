@@ -23,18 +23,16 @@
             <h2 class="sidebar-title">MediCare</h2>
         </div>
         <ul class="sidebar-menu">
-              <!-- Doctor only -->
+            <!-- Doctor only -->
             {% if request.user.innermember.role == 'doctor' %}
             <!-- Dashboard (dono ke liye) -->
             <li>
-                <a href="{% url 'doctor:dashboard' %}" class="active">
+                <a href="{% url 'doctor:dashboard' %}" class="{% if '/dashboard' in request.path %}active{% endif %}">
                     <i class="bi bi-house-fill"></i>
                     <span>Dashboard</span>
                 </a>
+
             </li>
-
-          
-
             <li>
                 <a href="#" class="menu-toggle">
                     <div class="menu-toggle-label">
@@ -45,13 +43,15 @@
                 </a>
                 <ul class="submenu">
                     <li>
-                        <a href="{% url 'doctor:add_patient' %}">
+                        <a href="{% url 'doctor:add_patient' %}"
+                            class="{% if '/add_patient' in request.path %}active{% endif %}">
                             <i class="bi bi-plus-circle"></i>
                             <span>Add Patient</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'doctor:manage_patients' %}">
+                        <a href="{% url 'doctor:manage_patients' %}"
+                            class="{% if '/manage_patients' in request.path %}active{% endif %}">
                             <i class="bi bi-pencil-square"></i>
                             <span>Manage Patients</span>
                         </a>
@@ -60,7 +60,8 @@
             </li>
 
             <li>
-                <a href="{% url 'appointment:manage_appointments' %}">
+                <a href="{% url 'appointment:manage_appointments' %}"
+                    class="{% if '/manage_appointments' in request.path %}active{% endif %}">
                     <i class="bi bi-calendar-check-fill"></i>
                     <span>Appointments</span>
                 </a>
@@ -85,7 +86,7 @@
 
         </ul>
 
-        
+
     </aside>
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 

@@ -9,12 +9,42 @@
 
       <nav id="navmenu" class="navmenu">
         <ul>
-          <li><a href="{% url 'index' %}" class="active">Home</a></li>
-          <li><a href="{% url 'appointment:appointment' %}">Appointment</a></li>
-          <li><a href="{% url 'services' %}">Services</a></li>
-          <li><a href="{% url 'departments' %}">Departments</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
-          <li><a href="{% url 'about' %}">About</a></li>
+          <li>
+            <a href="{% url 'index' %}" class="{% if request.path == '/' %}active{% endif %}">
+              Home
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'appointment:appointment' %}"
+              class="{% if '/appointment' in request.path %}active{% endif %}">
+              Appointment
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'services' %}" class="{% if '/services' in request.path %}active{% endif %}">
+              Services
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'departments' %}" class="{% if '/departments' in request.path %}active{% endif %}">
+              Departments
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'contact' %}" class="{% if '/contact' in request.path %}active{% endif %}">
+              Contact
+            </a>
+          </li>
+
+          <li>
+            <a href="{% url 'about' %}" class="{% if '/about' in request.path %}active{% endif %}">
+              About
+            </a>
+          </li>
           <li><a href="{% url 'terms' %}">Terms & Privacy</a></li>
 
           {% if user.is_authenticated %}
@@ -31,7 +61,8 @@
               <li>
                 <hr style="margin: 5px 0; opacity: 0.1;">
               </li>
-              <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')">Logout</a></li>
+              <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')">Logout</a>
+              </li>
             </ul>
           </li>
           {% else %}

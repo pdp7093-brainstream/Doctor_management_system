@@ -23,3 +23,18 @@ class InnerMember(models.Model):
         return self.user.username
     
 
+# Medicine Model
+class Medicine(models.Model):
+    name = models.CharField(max_length=100)
+    stock = models.IntegerField(default=0)
+    price = models.FloatField(default=0)
+
+    mfg_date = models.DateField()
+    expiry_date = models.DateField()
+
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.name

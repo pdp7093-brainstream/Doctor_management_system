@@ -35,39 +35,95 @@
                     </div>
 
                     <div class="card-body p-5">
-                        <form method="post">
+                        <form method="post" novalidate class="needs-validation">
                             {% csrf_token %}
 
-                            <!-- Patient -->
+                            <!-- Patient Selection Section -->
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Patient</label>
-                                {{ form.patient }}
-                                {{ form.patient.errors }} ← Errors automatic!
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-person-circle text-primary" style="font-size: 1.3rem;"></i>
+                                    <label for="id_patient" class="form-label fw-bold text-dark mb-0">Select
+                                        Patient</label>
+                                    <span class="badge bg-danger ms-auto">Required</span>
+                                </div>
+                                <select class="form-select form-select-lg border-2 border-primary-subtle"
+                                    id="id_patient" name="patient" required>
+                                    <option value="">-- Choose a Patient --</option>
+                                    {% if record %}
+                                    {% for patient in record %}
+                                    <option value="{{ patient.id }}">{{ patient.user.get_full_name }}</option>
+                                    {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <small class="d-block text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>Select the patient for this appointment
+                                </small>
                             </div>
 
-                            <!-- Date -->
+                            <!-- Appointment Date Section -->
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Date</label>
-                                {{ form.appointment_date }}
-                                {{ form.appointment_date.errors }}
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-calendar3 text-primary" style="font-size: 1.3rem;"></i>
+                                    <label for="id_appointment_date"
+                                        class="form-label fw-bold text-dark mb-0">Appointment Date</label>
+                                    <span class="badge bg-danger ms-auto">Required</span>
+                                </div>
+                                <input type="date" class="form-control form-control-lg border-2 border-primary-subtle"
+                                    id="id_appointment_date" name="appointment_date" required>
+                                <small class="d-block text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>Select a future date for the appointment
+                                </small>
                             </div>
 
-                            <!-- Time Slot -->
+                            <!-- Time Slot Section -->
                             <div class="mb-4">
-                                <label class="form-label fw-bold">Time Slot</label>
-                                {{ form.time_slot }}
-                                {{ form.time_slot.errors }}
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-clock-history text-primary" style="font-size: 1.3rem;"></i>
+                                    <label for="id_time_slot" class="form-label fw-bold text-dark mb-0">Time
+                                        Slot</label>
+                                    <span class="badge bg-danger ms-auto">Required</span>
+                                </div>
+                                <select id="id_time_slot"
+                                    class="form-select form-select-lg border-2 border-primary-subtle" name="time_slot"
+                                    required>
+                                    <option value="">-- Select Time --</option>
+                                </select>
+                                <small class="d-block text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>Available time slots from 9:00 AM to 6:00 PM
+                                    (30-min intervals)
+                                </small>
                             </div>
 
-                            <!-- Notes -->
-                            <div class="mb-4">
-                                <label class="form-label fw-bold">Notes</label>
-                                {{ form.notes }}
+                            <!-- Notes Section -->
+                            <div class="mb-5">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-chat-left-text text-primary" style="font-size: 1.3rem;"></i>
+                                    <label for="id_notes" class="form-label fw-bold text-dark mb-0">Additional
+                                        Notes</label>
+                                    <span class="badge bg-secondary ms-auto">Optional</span>
+                                </div>
+                                <textarea class="form-control border-2 border-primary-subtle" id="id_notes" name="notes"
+                                    rows="4"
+                                    placeholder="Add special notes, symptoms, medical history, or any other relevant information..."></textarea>
+                                <small class="d-block text-muted mt-2">
+                                    <i class="bi bi-info-circle me-1"></i>This helps you remember important details
+                                    about the appointment
+                                </small>
                             </div>
 
-                            <button type="submit" class="btn btn-primary">
-                                Schedule Appointment
-                            </button>
+                            <!-- Divider -->
+                            <hr class="my-4">
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3 justify-content-end pt-2">
+                                <a href="{% url 'appointment:manage_appointments' %}"
+                                    class="btn btn-outline-secondary btn-lg px-5 rounded-3 fw-semibold">
+                                    <i class="bi bi-x-lg me-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 fw-semibold">
+                                    <i class="bi bi-check-lg me-2"></i>Schedule Appointment
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -77,111 +133,7 @@
 
     <!-- Enhanced JavaScript -->
     <script>
-        // Store all time slots
-        let allTimeSlots = [];
-
         // Generate time slots
-        function generateTimeSlots() {
-            const select = document.getElementById("id_time_slot");
-            select.innerHTML = '<option value="">-- Select Time --</option>';
-
-            const start = 9 * 60;   // 09:00 AM
-            const end = 22 * 60;    // 06:00 PM
-
-            for (let i = start; i < end; i += 30) {
-                const hours = Math.floor(i / 60);
-                const minutes = i % 60;
-
-                // 24-hour format (Django will accept this)
-                const time24 = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-
-                // 12-hour format for Display
-                const ampm = hours >= 12 ? 'PM' : 'AM';
-                const displayHours = hours % 12 || 12;
-                const timeDisplay = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-
-                const option = document.createElement("option");
-                option.value = time24;
-                option.textContent = timeDisplay;
-                option.dataset.time24 = time24;
-                select.appendChild(option);
-
-                // Store slot info
-                allTimeSlots.push({
-                    value: time24,
-                    display: timeDisplay,
-                    hours: hours,
-                    minutes: minutes
-                });
-            }
-        }
-
-        // Filter available time slots based on date
-        function filterTimeSlots() {
-            const dateInput = document.getElementById('id_appointment_date');
-            const select = document.getElementById("id_time_slot");
-            const warningContainer = document.getElementById('slot-warning-container');
-
-            // Remove previous warning if exists
-            const existingWarning = document.getElementById('slot-warning');
-            if (existingWarning) existingWarning.remove();
-
-            if (!dateInput.value) {
-                select.disabled = true;
-                select.classList.add('text-muted');
-                return;
-            }
-
-            select.disabled = false;
-            select.classList.remove('text-muted');
-
-            const selectedDate = dateInput.value;
-            const today = new Date().toISOString().split('T')[0];
-            const isToday = selectedDate === today;
-
-            // Reset select to show all slots first
-            select.innerHTML = '<option value="">-- Select Time --</option>';
-            let availableCount = 0;
-
-            if (isToday) {
-                const now = new Date();
-                const currentMinutes = now.getHours() * 60 + now.getMinutes() + 30;
-
-                allTimeSlots.forEach(slot => {
-                    const slotMinutes = slot.hours * 60 + slot.minutes;
-
-                    if (slotMinutes > currentMinutes) {
-                        const option = document.createElement("option");
-                        option.value = slot.value;
-                        option.textContent = slot.display;
-                        select.appendChild(option);
-                        availableCount++;
-                    }
-                });
-
-                // Show warning if no slots available
-                if (availableCount === 0) {
-                    const warning = document.createElement('div');
-                    warning.id = 'slot-warning';
-                    warning.className = 'alert alert-warning mt-3';
-                    warning.innerHTML = '<i class="bi bi-clock-history me-2"></i>No time slots available for today. Please select another date.';
-                    warningContainer.appendChild(warning);
-                    select.disabled = true;
-                }
-            } else {
-                // Show all slots for future dates
-                allTimeSlots.forEach(slot => {
-                    const option = document.createElement("option");
-                    option.value = slot.value;
-                    option.textContent = slot.display;
-                    select.appendChild(option);
-                    availableCount++;
-                });
-            }
-
-            // Reset selected value
-            select.value = '';
-        }
 
         // Date validation - prevent past dates
         function setMinDate() {
@@ -223,23 +175,52 @@
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function () {
-            generateTimeSlots();
+
             setMinDate();
             setupFormValidation();
+        });
+    </script>
+    <script>
+        document.getElementById('id_appointment_date').addEventListener('change', function () {
+            let date = this.value;
 
-            // Create warning container
-            const timeSlotSelect = document.getElementById('id_time_slot');
-            const warningContainer = document.createElement('div');
-            warningContainer.id = 'slot-warning-container';
-            timeSlotSelect.parentElement.appendChild(warningContainer);
+            console.log("Selected Date:", date);
 
-            // Add date change listener
-            const dateInput = document.getElementById('id_appointment_date');
-            dateInput.addEventListener('change', filterTimeSlots);
+            fetch(`/appointment/get-slots/?appointment_date=${date}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log("API Response:", data);
 
-            // Disable time slot select initially
-            timeSlotSelect.disabled = true;
-            timeSlotSelect.classList.add('text-muted');
+                    let select = document.getElementById("id_time_slot");
+                    select.innerHTML = '<option value="">-- Select Time --</option>';
+
+                    if (data.slots && data.slots.length > 0) {
+                        data.slots.forEach(slot => {
+
+                            // 🔥 24h → 12h convert
+                            let [hour, minute] = slot.split(":");
+
+                            let h = parseInt(hour);
+                            let ampm = h >= 12 ? "PM" : "AM";
+                            let displayHour = h % 12 || 12;
+
+                            let displayTime = `${displayHour}:${minute} ${ampm}`;
+
+                            let option = document.createElement("option");
+                            option.value = slot;           // backend ke liye (24h)
+                            option.textContent = displayTime; // UI ke liye (12h)
+
+                            select.appendChild(option);
+                        });
+                    } else {
+                        let option = document.createElement("option");
+                        option.textContent = "No slots available";
+                        select.appendChild(option);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
         });
     </script>
 </main>
