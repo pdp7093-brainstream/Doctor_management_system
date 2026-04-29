@@ -76,6 +76,13 @@
 
             {% endif %}
 
+            <li>
+                <a href="{% url 'doctor:manage_medicine' %}"
+                    class="{% if '/manage-medicines' in request.path %}active{% endif %}">
+                    <i class="bi bi-capsule"></i>
+                    <span>Medicine Store</span>
+                </a>
+            </li>
             <!-- Billing (dono ke liye) -->
             <li>
                 <a href="{% url 'doctor:billing' %}">

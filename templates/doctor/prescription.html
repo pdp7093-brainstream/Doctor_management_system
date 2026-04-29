@@ -18,7 +18,8 @@
         <form method="post" id="visitForm">
             {% csrf_token %}
 
-            <div class="row g-4 align-items-start">
+            <!-- Top Row: Patient Info + Visit Details | Quick Actions -->
+            <div class="row g-4 align-items-start mb-4">
                 <!-- Left Column -->
                 <div class="col-lg-8">
 
@@ -31,16 +32,21 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
-                                    <input type="text" class="form-control form-control-lg" value="John Anderson"
+                                    <input type="text" class="form-control form-control-lg"
+                                        value="{% if visit %}{{ visit.patient.user.get_full_name }}{% endif %}"
                                         readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
-                                    <input type="text" class="form-control form-control-lg" value="2026-04-25" readonly>
+                                    <input type="text" class="form-control form-control-lg"
+                                        value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}"
+                                        readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Time Slot</label>
-                                    <input type="text" class="form-control form-control-lg" value="10:00 AM" readonly>
+                                    <input type="text" class="form-control form-control-lg"
+                                        value="{% if visit %}{{ visit.appointment.time_slot|time:'h:i A' }}{% endif %}"
+                                        readonly>
                                 </div>
 
                             </div>
@@ -48,7 +54,7 @@
                     </div>
 
                     <!-- Visit Details Card -->
-                    <div class="card border-0 shadow-sm rounded-3 mb-4">
+                    <div class="card border-0 shadow-sm rounded-3">
                         <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Visit Details</h5>
                         </div>
@@ -59,7 +65,8 @@
                                     Symptoms <span class="text-danger">*</span>
                                 </label>
                                 <textarea class="form-control" id="symptoms" name="symptoms" rows="3"
-                                    placeholder="Describe patient's symptoms..." required></textarea>
+                                    placeholder="Describe patient's symptoms..."
+                                    required>{{ visit.symptoms }}</textarea>
                             </div>
 
                             <!-- Diagnosis -->
@@ -68,7 +75,8 @@
                                     Diagnosis <span class="text-danger">*</span>
                                 </label>
                                 <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3"
-                                    placeholder="Document the medical diagnosis..." required></textarea>
+                                    placeholder="Document the medical diagnosis..."
+                                    required>{{ visit.diagnosis }}</textarea>
                             </div>
 
                             <!-- Notes -->
@@ -77,39 +85,7 @@
                                     Additional Notes <span class="text-muted">(Optional)</span>
                                 </label>
                                 <textarea class="form-control" id="notes" name="notes" rows="2"
-                                    placeholder="Any additional observations or recommendations..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Prescription Card -->
-                    <div class="card border-0 shadow-sm rounded-3">
-                        <div
-                            class="card-header bg-light border-0 rounded-top-3 px-4 py-3 d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">Prescription</h5>
-                            <button type="button" class="btn btn-sm btn-primary rounded-2" id="addMedicineBtn">
-                                <i class="bi bi-plus-circle me-1"></i>Add Medicine
-                            </button>
-                        </div>
-                        <div class="card-body p-4">
-                            <!-- Prescription Table -->
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0" id="prescriptionTable">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th class="text-dark fw-semibold">Medicine Name</th>
-                                            <th class="text-dark fw-semibold">Dosage</th>
-                                            <th class="text-dark fw-semibold">Days</th>
-                                            <th class="text-dark fw-semibold text-center">Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="medicineList">
-                                        <!-- Medicine rows will be added here -->
-                                    </tbody>
-                                </table>
-                                <div id="emptyMessage" class="text-center py-4 text-muted">
-                                    <p class="mb-0">No medicines added yet. Click "Add Medicine" to start.</p>
-                                </div>
+                                    placeholder="Any additional observations or recommendations...">{{ visit.notes }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -125,7 +101,8 @@
                         <div class="card-body p-4">
                             <div class="d-grid gap-3">
 
-                                <button type="submit" class="btn btn-success btn-lg rounded-2" id="completeBtn">
+                                <button type="submit" name="complete_visit" class="btn btn-success btn-lg rounded-2"
+                                    id="completeBtn">
                                     <i class="bi bi-check-circle me-2"></i>Complete Visit
                                 </button>
                             </div>
@@ -148,6 +125,66 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Full-Width Prescription Row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-3">
+                        <div
+                            class="card-header bg-light border-0 rounded-top-3 px-4 py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0 fw-semibold text-dark">Prescription</h5>
+                            <button type="button" class="btn btn-sm btn-primary rounded-2" id="addMedicineBtn">
+                                <i class="bi bi-plus-circle me-1"></i>Add Medicine
+                            </button>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0" id="prescriptionTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-dark fw-semibold">Medicine Name</th>
+                                            <th class="text-dark fw-semibold">Dosage</th>
+                                            <th class="text-dark fw-semibold">Days</th>
+                                            <th class="text-dark fw-semibold text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="medicineList">
+                                        {% for item in items %}
+                                        <tr>
+                                            <td>
+                                                <select name="medicine" class="form-control form-control-sm" required>
+                                                    {% for med in medicines %}
+                                                    <option value="{{ med.id }}" {% if med.id == item.medicine.id %}selected{% endif %}>
+                                                        {{ med.name }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="text" name="dosage" value="{{ item.dosage }}"
+                                                    class="form-control form-control-sm">
+                                            </td>
+                                            <td>
+                                                <input type="number" name="days" value="{{ item.days }}"
+                                                    class="form-control form-control-sm">
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-danger"
+                                                    onclick="removeMedicineRow(this)">X</button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div id="emptyMessage" class="text-center py-4 text-muted">
+                                    <p class="mb-0">No medicines added yet. Click "Add Medicine" to start.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </form>
     </div>
 
@@ -162,8 +199,25 @@
 
             // Complete Visit button
             document.getElementById('completeBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                completeVisit();
+
+                // validate
+                if (!document.getElementById('symptoms').value.trim()) {
+                    alert('Please enter symptoms before completing');
+                    e.preventDefault();
+                    return;
+                }
+
+                if (!document.getElementById('diagnosis').value.trim()) {
+                    alert('Please enter diagnosis before completing');
+                    e.preventDefault();
+                    return;
+                }
+
+                // confirm
+                if (!confirm('Are you sure you want to complete this visit?')) {
+                    e.preventDefault(); // ❗ only cancel if user clicks NO
+                }
+
             });
         });
 
@@ -172,62 +226,73 @@
             const medicineList = document.getElementById('medicineList');
             const emptyMessage = document.getElementById('emptyMessage');
 
-            // Check if there are any medicines
             if (medicineList.children.length === 0) {
                 emptyMessage.style.display = 'block';
+            } else {
+                emptyMessage.style.display = 'none';
             }
+
+            updateMedicineCount();
         }
 
         // Add new medicine row
         function addMedicineRow() {
             const medicineList = document.getElementById('medicineList');
             const emptyMessage = document.getElementById('emptyMessage');
-            const rowId = 'medicine_' + Date.now();
 
             const newRow = document.createElement('tr');
-            newRow.id = rowId;
+
             newRow.innerHTML = `
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="medicine_name" 
-                        placeholder="Enter medicine name" required>
-                </td>
-                <td>
-                    <input type="text" class="form-control form-control-sm" name="dosage" 
-                        placeholder="e.g., 1-0-1" value="" required>
-                </td>
-                <td>
-                    <input type="number" class="form-control form-control-sm" name="days" 
-                        placeholder="Days" min="1" max="365" required>
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-outline-danger rounded-2" 
-                        onclick="removeMedicineRow('${rowId}')">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-            `;
+        <td>
+            <select name="medicine" class="form-control form-control-sm" required>
+                <option value="">Select Medicine</option>
+                {% for med in medicines %}
+                    <option value="{{ med.id }}">{{ med.name }}</option>
+                {% endfor %}
+            </select>
+        </td>
+
+        <!-- 🔥 Dosage (structured) -->
+        <td>
+            <div style="display:flex; gap:5px;">
+                <input type="number" name="morning" min="0" max="2" value="0" class="form-control form-control-sm" placeholder="M">
+                <input type="number" name="afternoon" min="0" max="2" value="0" class="form-control form-control-sm" placeholder="A">
+                <input type="number" name="night" min="0" max="2" value="0" class="form-control form-control-sm" placeholder="N">
+            </div>
+
+            <select name="meal" class="form-control form-control-sm mt-1">
+                <option value="after_food">After Food</option>
+                <option value="before_food">Before Food</option>
+            </select>
+        </td>
+
+        <td>
+            <input type="number" name="days" class="form-control form-control-sm" required>
+        </td>
+
+        <td class="text-center">
+            <button type="button" class="btn btn-sm btn-danger" onclick="removeMedicineRow(this)">X</button>
+        </td>
+    `;
 
             medicineList.appendChild(newRow);
-            emptyMessage.style.display = 'none';
             updateMedicineCount();
-
-            // Focus on medicine name input
-            newRow.querySelector('input[name="medicine_name"]').focus();
+            emptyMessage.style.display = 'none';
         }
 
-        // Remove medicine row
-        function removeMedicineRow(rowId) {
-            const row = document.getElementById(rowId);
-            if (row) {
-                row.remove();
-                updateMedicineCount();
 
-                // Show empty message if no medicines
-                const medicineList = document.getElementById('medicineList');
-                const emptyMessage = document.getElementById('emptyMessage');
-                if (medicineList.children.length === 0) {
-                    emptyMessage.style.display = 'block';
-                }
+        // Remove medicine row
+        function removeMedicineRow(btn) {
+            const row = btn.closest('tr');  // 🔥 correct way
+            row.remove();
+
+            updateMedicineCount();
+
+            const medicineList = document.getElementById('medicineList');
+            const emptyMessage = document.getElementById('emptyMessage');
+
+            if (medicineList.children.length === 0) {
+                emptyMessage.style.display = 'block';
             }
         }
 

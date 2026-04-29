@@ -37,24 +37,31 @@ class Visit(models.Model):
 
     visted_status = models.CharField(max_length=20, default='in_progress')
     notes = models.TextField(blank=True, null=True)
-
+    symptoms = models.TextField(blank=True, null=True)
+    diagnosis = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.patient.user.username} - {self.doctor.user.username} on {self.appointment.appointment_date}"
 
+# # Medicine 
+# class Medicine(models.Model):
+#     name = models.CharField(max_length=255)
+
+#     def __str__(self):
+#         return self.name
+
 
 # Prescription Model 
 class Prescription(models.Model):
-    visit = models.ForeignKey(Visit,on_delete=models.CASCADE)
-    prescription = models.TextField()
+    visit = models.OneToOneField(Visit, on_delete=models.CASCADE)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"Prescription for {self.visit.patient.user.username} on {self.visit.appointment.appointment_date}"
-
 
 # Prescription list 
 class PrescriptionItem(models.Model):
