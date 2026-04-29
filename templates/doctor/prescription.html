@@ -42,10 +42,7 @@
                                     <label class="form-label fw-semibold text-dark mb-2">Time Slot</label>
                                     <input type="text" class="form-control form-control-lg" value="10:00 AM" readonly>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold text-dark mb-2">Visit Status</label>
-                                    <span class="badge bg-warning text-dark fs-6 p-2">In Progress</span>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -127,10 +124,8 @@
                         </div>
                         <div class="card-body p-4">
                             <div class="d-grid gap-3">
-                                <button type="submit" class="btn btn-primary btn-lg rounded-2" id="saveBtn">
-                                    <i class="bi bi-floppy me-2"></i>Save Visit
-                                </button>
-                                <button type="button" class="btn btn-success btn-lg rounded-2" id="completeBtn">
+
+                                <button type="submit" class="btn btn-success btn-lg rounded-2" id="completeBtn">
                                     <i class="bi bi-check-circle me-2"></i>Complete Visit
                                 </button>
                             </div>
@@ -164,12 +159,6 @@
 
             // Add Medicine button
             document.getElementById('addMedicineBtn').addEventListener('click', addMedicineRow);
-
-            // Save button
-            document.getElementById('saveBtn').addEventListener('click', function (e) {
-                e.preventDefault();
-                savePrescription();
-            });
 
             // Complete Visit button
             document.getElementById('completeBtn').addEventListener('click', function (e) {
@@ -249,29 +238,6 @@
             document.getElementById('medicineCount').textContent = count;
         }
 
-        // Save prescription
-        function savePrescription() {
-            const form = document.getElementById('visitForm');
-
-            // Validate required fields
-            if (!document.getElementById('symptoms').value.trim()) {
-                alert('Please enter symptoms');
-                return;
-            }
-            if (!document.getElementById('diagnosis').value.trim()) {
-                alert('Please enter diagnosis');
-                return;
-            }
-            if (document.getElementById('medicineList').children.length === 0) {
-                alert('Please add at least one medicine');
-                return;
-            }
-
-            // Show success message
-            alert('Visit and prescription saved successfully!');
-            console.log('Form data:', new FormData(form));
-            // form.submit(); // Uncomment to actually submit
-        }
 
         // Complete visit
         function completeVisit() {
