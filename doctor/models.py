@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 
 class InnerMember(models.Model):
     ROLE_CHOICES = (
-        ('Doctor', 'doctor'),
-        ('Biller', 'biller'),
+        ('doctor', 'doctor'),
+        ('biller', 'biller'),
        
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
