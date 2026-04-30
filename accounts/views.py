@@ -63,40 +63,44 @@ class SignupView(View):
     def post(self, request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            # Data extraction from cleaned form
             name = form.cleaned_data['name']
-            email = form.cleaned_data['email']
+            phone = form.cleaned_data['phone']  # ← phone lo
             password = form.cleaned_data['password']
 
-        
-            # User & Patient Creation
-            user = User.objects.create_user(username=email, email=email, password=password, first_name=name)
+            # Phone number as username save karo
+            user = User.objects.create_user(
+                username=phone,       # ← phone = username
+                password=password,
+                first_name=name
+            )
             Patient.objects.create(
                 user=user,
+                phone=phone           # ← Patient mein bhi save karo
             )
             auth_login(request, user)
             return redirect('login')
-        
-        # Agar invalid hai toh errors ke saath wapas bhej do
+
         return render(request, 'authentication/register.html', {'form': form})
-    
+
 
 class LoginView(View):
     def get(self, request):
         return render(request, 'authentication/login.html')
 
     def post(self, request):
-        email = request.POST.get('email')
+        phone = request.POST.get('phone')      # ← phone lo
         password = request.POST.get('password')
-        
-        user = authenticate(request, username=email, password=password)
-        
+
+        # Phone number as username authenticate karo
+        user = authenticate(request, username=phone, password=password)
+
         if user is not None:
             auth_login(request, user)
             return redirect('index')
         else:
-            return render(request, 'authentication/login.html', {'error': 'Invalid credentials'})
-        
+            return render(request, 'authentication/login.html', {'error': 'Invalid phone or password'})
+
+
 # --- LOGOUT VIEW (Optional but recommended) ---
 def logout_view(request):
     auth_logout(request)
