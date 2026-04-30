@@ -88,9 +88,9 @@
                                     <td>{{ appointment.time_slot }}</td>
                                     <td>
                                         {% if appointment.patient and appointment.patient.user %}
-                                            {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                            {{ appointment.full_name }}   
                                         {% else %}
-                                            {{ appointment.full_name }}
+                                            {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
                                         {% endif %}
                                     </td>
                                     <td>
@@ -116,7 +116,7 @@
                                             data-appointment-doctor="{% if appointment.doctor and appointment.doctor.user %}{{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}{% else %}Not assigned{% endif %}"
                                             data-appointment-status="{{ appointment.status|capfirst }}"
                                             data-appointment-notes="{{ appointment.notes|default:'No notes available'|escape }}"
-                                            data-appointment-fullname="{% if appointment.patient and appointment.patient.user %}{{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}{% else %}{{ appointment.full_name|escape }}{% endif %}"
+                                            data-appointment-fullname="{% if appointment.patient and appointment.patient.user %}{{ appointment.full_name|escape }}{% endif %}"
                                             data-appointment-phone="{{ appointment.phone|escape }}">
                                             <i class="fas fa-eye"></i> View
                                         </button>

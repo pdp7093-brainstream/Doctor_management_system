@@ -115,7 +115,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTHENTICATION_BACKENDS = [
     'accounts.backends.PhoneBackend',      # ← Phone se login
-    'django.contrib.auth.backends.ModelBackend',  # ← Normal bhi rakho
 ]
 
 # Internationalization

@@ -22,9 +22,15 @@ class RegistrationForm(forms.Form):
 
     def clean_phone(self):
         phone = self.cleaned_data.get('phone')
-        # Basic regex to ensure it's not empty and has enough digits
+
+        # Format validation
         if not re.match(r'^\+?1?\d{9,15}$', phone.replace(" ", "")):
             raise ValidationError("Enter a valid phone number.")
+
+        # ✅ Duplicate check (MAIN FIX)
+        if User.objects.filter(username=phone).exists():
+            raise ValidationError("Phone number already registered!")
+
         return phone
 
     def clean(self):

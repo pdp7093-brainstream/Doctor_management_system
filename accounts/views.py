@@ -64,20 +64,25 @@ class SignupView(View):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
-            phone = form.cleaned_data['phone']  # ← phone lo
+            phone = form.cleaned_data['phone']
             password = form.cleaned_data['password']
 
-            # Phone number as username save karo
             user = User.objects.create_user(
-                username=phone,       # ← phone = username
+                username=phone,
                 password=password,
                 first_name=name
             )
+
             Patient.objects.create(
                 user=user,
-                phone=phone           # ← Patient mein bhi save karo
+                phone=phone
             )
-            auth_login(request, user)
+
+            # ✅ important fix
+            user = authenticate(request, username=phone, password=password)
+            if user is not None:
+                auth_login(request, user)
+
             return redirect('login')
 
         return render(request, 'authentication/register.html', {'form': form})
