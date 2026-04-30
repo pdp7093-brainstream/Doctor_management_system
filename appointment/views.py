@@ -1,9 +1,9 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from django.views import View
 from doctor.decorators import role_required
 from accounts.models import Patient
 from doctor.models import InnerMember
-from .models import Appointment
+from .models import *
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -131,7 +131,7 @@ class Book_appointment(View):
             messages.error(request, "This time slot is already booked. Please choose another.")
             return redirect('appointment:appointment')
 
-        # ✅ SAVE
+        
         Appointment.objects.create(
             patient=patient,
             doctor=doctor,
@@ -142,3 +142,97 @@ class Book_appointment(View):
 
         messages.success(request, "Appointment booked successfully!")
         return redirect('appointment:appointment')
+
+
+class StartVisitView(View):
+    def get(self,request,appointment_id):
+        appointment = get_object_or_404(Appointment,id=appointment_id)
+
+        visit, created = Visit.objects.get_or_create(
+            appointment = appointment,
+            defaults = {
+                "patient":appointment.patient,
+                "doctor":appointment.doctor,
+                "visted_status":'in_progress'
+            }
+        )
+
+        return redirect("appointment:prescription",visit_id=visit.id)
+
+
+class PrescriptionView(View):
+    def get(self, request, visit_id):
+        visit = get_object_or_404(Visit, id=visit_id)
+
+        # get or create prescription
+        prescription,created = Prescription.objects.get_or_create(visit=visit)
+        
+        medicines = Medicine.objects.all()
+        items = prescription.items.all()
+        
+        
+        return render(request, 'doctor/prescription.html', {
+            'visit': visit,
+            'medicines':medicines,
+            'items':items
+        })
+
+    def post(self, request, visit_id):
+        visit = get_object_or_404(Visit, id=visit_id)
+
+        # 🔹 Visit update
+        visit.symptoms = request.POST.get("symptoms")
+        visit.diagnosis = request.POST.get("diagnosis")
+        visit.notes = request.POST.get("notes")
+
+        if "complete_visit" in request.POST:
+            visit.visted_status = "completed"
+        else:
+            visit.visted_status = "in_progress"
+
+        visit.save()
+
+        # 🔹 Prescription
+        prescription, created = Prescription.objects.get_or_create(visit=visit)
+
+        # 🔹 Get form lists
+        medicine_ids = request.POST.getlist("medicine")
+        morning_list = request.POST.getlist("morning")
+        afternoon_list = request.POST.getlist("afternoon")
+        night_list = request.POST.getlist("night")
+        meal_list = request.POST.getlist("meal")
+        days_list = request.POST.getlist("days")
+
+        # 🔥 DELETE ONLY IF NEW DATA EXISTS
+        if any(medicine_ids):
+            prescription.items.all().delete()
+
+        # 🔹 Save new items
+        for med_id, m, a, n, meal, days in zip(
+            medicine_ids,
+            morning_list,
+            afternoon_list,
+            night_list,
+            meal_list,
+            days_list
+        ):
+            if not med_id:
+                continue
+
+            med = Medicine.objects.get(id=med_id)
+
+            dosage = f"{m}-{a}-{n} ({meal})"
+
+            PrescriptionItem.objects.create(
+                prescription=prescription,
+                medicine=med,
+                dosage=dosage,
+                days=int(days),
+            )
+
+        # 🔹 Appointment complete
+        appointment = visit.appointment
+        appointment.status = "completed"
+        appointment.save()
+
+        return redirect("appointment:manage_appointments")
