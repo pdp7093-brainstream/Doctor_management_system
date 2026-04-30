@@ -1,0 +1,94 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Edit Patient{% endblock %}
+{% block content %}
+<main class="main-content" id="mainContent">
+    <div class="patient-form-shell">
+        <div class="page-header patient-form-header">
+            <div>
+                <h2 class="page-title mb-0">Edit Patient</h2>
+                <p class="page-subtitle">Update patient contact and medical profile information.</p>
+            </div>
+
+            <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn">
+                Back to Patients
+            </a>
+        </div>
+
+        {% if messages %}
+        <div class="alert alert-danger" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="patient-form-card">
+            <form method="POST" enctype="multipart/form-data" class="patient-form-grid">
+                {% csrf_token %}
+
+                <div class="patient-form-row">
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-name">Full Name</label>
+                        <input id="patient-name" type="text" name="name" class="patient-input" value="{{ patient.user.first_name }}" required>
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-email">Email</label>
+                        <input id="patient-email" type="email" name="email" class="patient-input" value="{{ patient.user.email }}" required>
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-dob">Date of Birth</label>
+                        <input id="patient-dob" type="date" name="dob" class="patient-input" value="{{ patient.dob|date:'Y-m-d' }}">
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-gender">Gender</label>
+                        <select id="patient-gender" name="gender" class="patient-input">
+                            <option value="">Select Gender</option>
+                            <option value="male" {% if patient.gender == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if patient.gender == 'female' %}selected{% endif %}>Female</option>
+                            <option value="other" {% if patient.gender == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="patient-form-row">
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-phone">Phone</label>
+                        <input id="patient-phone" type="text" name="phone" class="patient-input" value="{{ patient.phone }}" placeholder="Enter phone number">
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-blood-group">Blood Group</label>
+                        <select id="patient-blood-group" name="bld_grop" class="patient-input">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+" {% if patient.bld_grop == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-" {% if patient.bld_grop == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+" {% if patient.bld_grop == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-" {% if patient.bld_grop == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if patient.bld_grop == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if patient.bld_grop == 'AB-' %}selected{% endif %}>AB-</option>
+                            <option value="O+" {% if patient.bld_grop == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-" {% if patient.bld_grop == 'O-' %}selected{% endif %}>O-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="patient-field">
+                    <label class="patient-label" for="patient-address">Address</label>
+                    <textarea id="patient-address" name="address" class="patient-input patient-textarea" rows="4" placeholder="Enter complete address">{{ patient.address }}</textarea>
+                </div>
+
+                <div class="patient-form-actions">
+                    <button type="submit" class="patient-submit-btn">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Update Patient</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+{% endblock %}

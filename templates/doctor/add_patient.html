@@ -16,18 +16,26 @@
         </div>
 
         <div class="patient-form-card">
-            <form method="POST" class="patient-form-grid">
+            <form method="POST" enctype="multipart/form-data" class="patient-form-grid">
                 {% csrf_token %}
 
-                <div class="patient-field">
-                    <label class="patient-label" for="patient-name">Patient Name</label>
-                    <input id="patient-name" type="text" name="name" class="patient-input" placeholder="Enter patient name" required>
-                </div>
 
                 <div class="patient-form-row">
                     <div class="patient-field">
-                        <label class="patient-label" for="patient-age">Age</label>
-                        <input id="patient-age" type="number" name="age" class="patient-input" placeholder="Enter age" required>
+                        <label class="patient-label" for="patient-name">Full Name</label>
+                        <input id="patient-name" type="text" name="name" class="patient-input"
+                            placeholder="Enter full name" required>
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-email">Email</label>
+                        <input id="patient-email" type="email" name="email" class="patient-input"
+                            placeholder="Enter email address" required>
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-dob">Date of Birth</label>
+                        <input id="patient-dob" type="date" name="dob" class="patient-input">
                     </div>
 
                     <div class="patient-field">
@@ -36,19 +44,40 @@
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="patient-form-row">
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-phone">Phone</label>
+                        <input id="patient-phone" type="text" name="phone" class="patient-input"
+                            placeholder="Enter phone number">
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="patient-blood-group">Blood Group</label>
+                        <select id="patient-blood-group" name="bld_grop" class="patient-input">
+                            <option value="">Select Blood Group</option>
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="AB+">AB+</option>
+                            <option value="AB-">AB-</option>
+                            <option value="O+">O+</option>
+                            <option value="O-">O-</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="patient-field">
-                    <label class="patient-label" for="patient-phone">Phone</label>
-                    <input id="patient-phone" type="text" name="phone" class="patient-input" placeholder="Enter phone number">
+                    <label class="patient-label" for="patient-address">Address</label>
+                    <textarea id="patient-address" name="address" class="patient-input patient-textarea" rows="4"
+                        placeholder="Enter complete address"></textarea>
                 </div>
 
-                <div class="patient-field">
-                    <label class="patient-label" for="patient-address">Address</label>
-                    <textarea id="patient-address" name="address" class="patient-input patient-textarea" rows="4" placeholder="Enter address"></textarea>
-                </div>
 
                 <div class="patient-form-actions">
                     <button type="submit" class="patient-submit-btn">

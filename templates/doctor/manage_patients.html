@@ -5,30 +5,37 @@
 {% block content %}
 
 <main class="main-content" id="mainContent">
-    <!-- Page Header -->
     <div class="page-header d-flex justify-content-between align-items-center">
-
-        <h2 class="page-title mb-0">Manage Patients</h2>
-
+        <div>
+            <h2 class="page-title mb-0">Manage Patients</h2>
+            <p class="page-subtitle">View, edit, and remove patient profiles from the clinic roster.</p>
+        </div>
         <a href="{% url 'doctor:add_patient' %}" class="btn btn-primary add-patient-btn">
             <i class="bi bi-plus-lg"></i> Add Patient
         </a>
-
     </div>
 
-    <!-- Search Bar -->
+    {% if messages %}
+    <div class="alert alert-success" role="alert">
+        {% for message in messages %}
+            {{ message }}
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="search-container">
-        <input type="text" class="search-input" id="searchInput" placeholder="Search by name or phone...">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search patient...">
+        </div>
     </div>
 
-    <!-- Table Section -->
     <div class="table-section">
-        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+        <div id="tableContainer" class="table-scroll-wrapper">
             <table class="table table-custom" style="min-width: 700px; width: 100%;">
                 <thead>
                     <tr>
                         <th>Patient Name</th>
-                        <th>Age</th>
                         <th>Gender</th>
                         <th>Phone</th>
                         <th>Last Visit</th>
@@ -36,118 +43,62 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <!-- Sample data - Replace with Django template loop -->
+                    {% for patient in patients %}
                     <tr>
-                        <td class="patient-name">John Anderson</td>
-                        <td class="patient-info">35</td>
-                        <td class="patient-info">Male</td>
-                        <td class="patient-info">+1 (555) 123-4567</td>
-                        <td class="patient-info">2024-04-15</td>
+                        <td class="patient-name">{{ patient.user.first_name }}</td>
+                        <td class="patient-info">{{ patient.gender|default:"-"|capfirst }}</td>
+                        <td class="patient-info">{{ patient.phone|default:"-" }}</td>
+                        <td class="patient-info">{{ patient.user.last_login|date:"Y-m-d"|default:"-" }}</td>
                         <td>
                             <div class="action-buttons">
-                                <button class="action-btn btn btn-primary" onclick="viewPatient(1)" title="View Patient">
+                                <a href="{% url 'doctor:view_patient' patient.id %}" class="action-btn btn btn-primary" title="View Patient">
                                     <i class="bi bi-eye"></i> View
-                                </button>
-                                <button class="action-btn btn btn-warning" onclick="editPatient(1)" title="Edit Patient">
+                                </a>
+                                <a href="{% url 'doctor:edit_patient' patient.id %}" class="action-btn btn btn-warning" title="Edit Patient">
                                     <i class="bi bi-pencil"></i> Edit
-                                </button>
-                                <button class="action-btn btn btn-danger" onclick="deletePatient(1)" title="Delete Patient">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
+                                </a>
+                                <form method="post" action="{% url 'doctor:delete_patient' patient.id %}" style="display: inline-block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn btn btn-danger" onclick="return confirm('Delete this patient permanently?');" title="Delete Patient">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
+                    {% empty %}
                     <tr>
-                        <td class="patient-name">Sarah Williams</td>
-                        <td class="patient-info">28</td>
-                        <td class="patient-info">Female</td>
-                        <td class="patient-info">+1 (555) 234-5678</td>
-                        <td class="patient-info">2024-04-18</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn btn-view" onclick="viewPatient(2)" title="View Patient">
-                                    <i class="bi bi-eye"></i> View
-                                </button>
-                                <button class="action-btn btn-edit" onclick="editPatient(2)" title="Edit Patient">
-                                    <i class="bi bi-pencil"></i> Edit
-                                </button>
-                                <button class="action-btn btn-delete" onclick="deletePatient(2)" title="Delete Patient">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            </div>
-                        </td>
+                        <td colspan="6" class="text-center">No patients found yet.</td>
                     </tr>
-                    <tr>
-                        <td class="patient-name">Michael Johnson</td>
-                        <td class="patient-info">45</td>
-                        <td class="patient-info">Male</td>
-                        <td class="patient-info">+1 (555) 345-6789</td>
-                        <td class="patient-info">2024-04-10</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn btn-view" onclick="viewPatient(3)" title="View Patient">
-                                    <i class="bi bi-eye"></i> View
-                                </button>
-                                <button class="action-btn btn-edit" onclick="editPatient(3)" title="Edit Patient">
-                                    <i class="bi bi-pencil"></i> Edit
-                                </button>
-                                <button class="action-btn btn-delete" onclick="deletePatient(3)" title="Delete Patient">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="patient-name">Emily Brown</td>
-                        <td class="patient-info">32</td>
-                        <td class="patient-info">Female</td>
-                        <td class="patient-info">+1 (555) 456-7890</td>
-                        <td class="patient-info">2024-04-12</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn btn-view" onclick="viewPatient(4)" title="View Patient">
-                                    <i class="bi bi-eye"></i> View
-                                </button>
-                                <button class="action-btn btn-edit" onclick="editPatient(4)" title="Edit Patient">
-                                    <i class="bi bi-pencil"></i> Edit
-                                </button>
-                                <button class="action-btn btn-delete" onclick="deletePatient(4)" title="Delete Patient">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="patient-name">Robert Davis</td>
-                        <td class="patient-info">58</td>
-                        <td class="patient-info">Male</td>
-                        <td class="patient-info">+1 (555) 567-8901</td>
-                        <td class="patient-info">2024-04-20</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn btn-view" onclick="viewPatient(5)" title="View Patient">
-                                    <i class="bi bi-eye"></i> View
-                                </button>
-                                <button class="action-btn btn-edit" onclick="editPatient(5)" title="Edit Patient">
-                                    <i class="bi bi-pencil"></i> Edit
-                                </button>
-                                <button class="action-btn btn-delete" onclick="deletePatient(5)" title="Delete Patient">
-                                    <i class="bi bi-trash"></i> Delete
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
 
-        <!-- Empty State (Hidden by default) -->
         <div class="empty-state" id="emptyState" style="display: none;">
             <div class="empty-state-icon">
                 <i class="bi bi-inbox"></i>
             </div>
-            <p class="empty-state-text">No patients found</p>
+            <p class="empty-state-text">No patients match your search.</p>
         </div>
     </div>
 </main>
+
+<script>
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const query = this.value.trim().toLowerCase();
+        const rows = document.querySelectorAll('#tableBody tr');
+        let visible = 0;
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const match = text.includes(query);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        document.getElementById('emptyState').style.display = visible ? 'none' : 'block';
+    });
+</script>
+
 {% endblock %}

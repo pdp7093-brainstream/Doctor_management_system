@@ -1,0 +1,61 @@
+<!-- TABLE ROWS -->
+<tbody id="tableBody">
+    {% for appointment in appointments %}
+    <tr>
+        <td>
+            {% if appointment.patient %}
+            {{ appointment.patient.user.get_full_name }}
+            {% else %}
+            {{ appointment.full_name }}
+            {% endif %}
+        </td>
+        <td>
+            {% if appointment.doctor %}
+                {{ appointment.doctor.user.get_full_name }}
+            {% else %}
+            <span class="text-muted">Not Assigned</span>
+            {% endif %}
+        </td>
+        <td>{{ appointment.appointment_date }}</td>
+        <td>{{ appointment.time_slot|time:"h:i A" }}</td>
+        <td>
+            <span class="badge 
+                {% if appointment.status == 'pending' %}bg-warning text-dark
+                {% elif appointment.status == 'confirmed' %}bg-success
+                {% elif appointment.status == 'cancelled' %}bg-danger
+                {% elif appointment.status == 'completed' %}bg-primary
+                {% endif %}">
+                {{ appointment.status|capfirst }}
+            </span>
+        </td>
+        <td>
+            <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">Start</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="6" class="text-center text-muted">No appointments found</td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+<!-- PAGINATION -->
+<div id="paginationWrapper" class="d-flex justify-content-center mt-3">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link pagination-link" data-page="{{ page_obj.previous_page_number }}" href="#">Prev</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link pagination-link" data-page="{{ page_obj.next_page_number }}" href="#">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</div>

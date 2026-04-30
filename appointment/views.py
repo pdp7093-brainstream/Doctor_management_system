@@ -10,6 +10,8 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db.models import Q, Value
+from django.db.models.functions import Concat
 from datetime import datetime,time, timedelta
 # Create your views here.
 
@@ -65,18 +67,66 @@ def get_slots(request):
 
     return JsonResponse({'slots': filtered})
 # ------------ Slot generate end  --------------
+from django.utils.decorators import method_decorator
+from django.views import View
+from django.shortcuts import render
+from django.db.models import Q
+from django.views.decorators.cache import never_cache
+from doctor.decorators import role_required
+from .models import Appointment
+from doctor.models import InnerMember
 
-
+from django.core.paginator import Paginator
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
         doctor = InnerMember.objects.get(user=request.user)
-        appointments = Appointment.objects.filter(doctor=doctor).order_by(
-            "-appointment_date"
-        )
-        context = {"appointments": appointments}
-        return render(request, "doctor/manage_appointments.html", context)
 
+        # ✅ doctor=NULL wale bhi dikhao
+        appointments = Appointment.objects.filter(
+            Q(doctor=doctor) | Q(doctor__isnull=True)
+        )
+
+        search = request.GET.get("search", "")
+        appointment_date = request.GET.get("appointment_date", "")
+        status = request.GET.get("status", "all")
+
+        if search:
+            appointments = appointments.filter(
+                Q(full_name__icontains=search) |
+                Q(phone__icontains=search) |
+                Q(patient__user__first_name__icontains=search) |
+                Q(patient__user__last_name__icontains=search)
+            )
+
+        if appointment_date:
+            appointments = appointments.filter(appointment_date=appointment_date)
+
+        if status and status != "all":
+            appointments = appointments.filter(status=status)
+
+        appointments = appointments.order_by('-appointment_date', '-time_slot')
+
+        paginator = Paginator(appointments, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(request, "doctor/partials/appointments_table.html", {
+                "appointments": page_obj,
+                "page_obj": page_obj,
+                "search": search,
+                "appointment_date": appointment_date,
+                "status": status,
+            })
+
+        return render(request, "doctor/manage_appointments.html", {
+            "appointments": page_obj,
+            "page_obj": page_obj,
+            "search": search,
+            "appointment_date": appointment_date,
+            "status": status,
+        })
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Add_appointment(View):
