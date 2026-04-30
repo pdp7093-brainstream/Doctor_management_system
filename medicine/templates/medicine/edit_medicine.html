@@ -1,13 +1,13 @@
 {% extends "doctor/main.html" %}
 {% load static %}
-{% block title %}Add Medicine - Doctor Dashboard{% endblock %}
+{% block title %}Edit Medicine - Doctor Dashboard{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="patient-form-shell">
         <div class="page-header patient-form-header">
             <div>
-                <h2 class="page-title mb-0">Add Medicine</h2>
-                <p class="page-subtitle">Add a new medicine to the store inventory.</p>
+                <h2 class="page-title mb-0">Edit Medicine</h2>
+                <p class="page-subtitle">Update the details for {{ medicine.name }}.</p>
             </div>
             <a href="{% url 'medicine:manage_medicine' %}" class="patient-link-btn">
                 Medicine Store
@@ -15,7 +15,7 @@
         </div>
 
         <div class="patient-form-card">
-            <form method="POST" action="{% url 'medicine:add_medicine' %}" class="patient-form-grid">
+            <form method="POST" action="{% url 'medicine:edit_medicine' medicine.pk %}" class="patient-form-grid">
                 {% csrf_token %}
 
                 <!-- Row 1: Medicine Name + Short Name -->
@@ -23,12 +23,12 @@
                     <div class="patient-field">
                         <label class="patient-label" for="medicine-name">Medicine Name</label>
                         <input id="medicine-name" type="text" name="name" class="patient-input"
-                            placeholder="e.g., Paracetamol" required>
+                            value="{{ medicine.name }}" required>
                     </div>
                     <div class="patient-field">
                         <label class="patient-label" for="medicine-short-name">Short Name</label>
                         <input id="medicine-short-name" type="text" name="short_name" class="patient-input"
-                            placeholder="e.g., PCM" required>
+                            value="{{ medicine.short_name }}" required>
                     </div>
                 </div>
 
@@ -37,16 +37,16 @@
                     <div class="patient-field">
                         <label class="patient-label" for="medicine-type">Medicine Type</label>
                         <select id="medicine-type" name="medicine_type" class="patient-input" required>
-                            <option value="" disabled selected>Select type...</option>
+                            <option value="" disabled>Select type...</option>
                             {% for value, label in medicine_types %}
-                                <option value="{{ value }}">{{ label }}</option>
+                                <option value="{{ value }}" {% if medicine.medicine_type == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="patient-field">
                         <label class="patient-label" for="medicine-company">Company</label>
                         <input id="medicine-company" type="text" name="company" class="patient-input"
-                            placeholder="e.g., Sun Pharma">
+                            value="{{ medicine.company }}" placeholder="e.g., Sun Pharma">
                     </div>
                 </div>
 
@@ -54,12 +54,13 @@
                 <div class="patient-field">
                     <label class="patient-label" for="medicine-desc">Description</label>
                     <textarea id="medicine-desc" name="description" class="patient-input"
-                        rows="2" placeholder="Optional notes about this medicine..."></textarea>
+                        rows="2" placeholder="Optional notes...">{{ medicine.description }}</textarea>
                 </div>
 
                 <!-- Is Active -->
                 <div class="patient-field" style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" id="medicine-active" name="is_active" checked
+                    <input type="checkbox" id="medicine-active" name="is_active"
+                        {% if medicine.is_active %}checked{% endif %}
                         style="width:18px; height:18px; cursor:pointer;">
                     <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">Active (available in store)</label>
                 </div>
@@ -75,19 +76,52 @@
                     </div>
 
                     <div id="variantsContainer">
-                        <!-- Default first variant row -->
+                        {% for variant in medicine.variants.all %}
                         <div class="variant-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;">
+                            <!-- Hidden: keeps the variant ID so the server knows which to update -->
+                            <input type="hidden" name="variant_id[]" value="{{ variant.pk }}">
                             <div>
                                 <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                                <input type="text" name="power[]" class="patient-input" placeholder="e.g., 500mg" required>
+                                <input type="text" name="power[]" class="patient-input"
+                                    value="{{ variant.power }}" required>
                             </div>
                             <div>
                                 <label class="patient-label" style="font-size:0.78rem;">Price (₹)</label>
-                                <input type="number" name="price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
+                                <input type="number" name="price[]" class="patient-input"
+                                    value="{{ variant.price }}" min="0" step="0.01" required>
                             </div>
                             <div>
                                 <label class="patient-label" style="font-size:0.78rem;">Stock</label>
-                                <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0" required>
+                                <input type="number" name="stock[]" class="patient-input"
+                                    value="{{ variant.stock }}" min="0" required>
+                            </div>
+                            <div>
+                                <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
+                                <input type="number" name="low_stock_alert[]" class="patient-input"
+                                    value="{{ variant.low_stock_alert }}" min="0">
+                            </div>
+                            <div style="padding-bottom:2px;">
+                                <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn"
+                                    style="border-radius:8px;">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <!-- No existing variants — show one blank row -->
+                        <div class="variant-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;">
+                            <input type="hidden" name="variant_id[]" value="">
+                            <div>
+                                <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
+                                <input type="text" name="power[]" class="patient-input" placeholder="e.g., 500mg">
+                            </div>
+                            <div>
+                                <label class="patient-label" style="font-size:0.78rem;">Price (₹)</label>
+                                <input type="number" name="price[]" class="patient-input" placeholder="0.00" min="0" step="0.01">
+                            </div>
+                            <div>
+                                <label class="patient-label" style="font-size:0.78rem;">Stock</label>
+                                <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0">
                             </div>
                             <div>
                                 <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
@@ -100,6 +134,7 @@
                                 </button>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -107,7 +142,7 @@
                 <div class="patient-form-actions">
                     <button type="submit" class="patient-submit-btn">
                         <i class="bi bi-check2-circle"></i>
-                        <span>Save Medicine</span>
+                        <span>Update Medicine</span>
                     </button>
                 </div>
             </form>
@@ -121,17 +156,29 @@
 
     function updateRemoveBtns() {
         const rows = variantsContainer.querySelectorAll('.variant-row');
-        rows.forEach((row, idx) => {
+        rows.forEach(row => {
             const btn = row.querySelector('.remove-variant-btn');
             btn.disabled = rows.length === 1;
         });
     }
+
+    function attachRemoveListener(row) {
+        row.querySelector('.remove-variant-btn').addEventListener('click', function () {
+            row.remove();
+            updateRemoveBtns();
+        });
+    }
+
+    // Attach to existing rows on load
+    variantsContainer.querySelectorAll('.variant-row').forEach(attachRemoveListener);
+    updateRemoveBtns();
 
     addVariantBtn.addEventListener('click', function () {
         const row = document.createElement('div');
         row.className = 'variant-row';
         row.style.cssText = 'display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;';
         row.innerHTML = `
+            <input type="hidden" name="variant_id[]" value="">
             <div>
                 <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
                 <input type="text" name="power[]" class="patient-input" placeholder="e.g., 250mg" required>
@@ -154,16 +201,7 @@
                 </button>
             </div>`;
         variantsContainer.appendChild(row);
-        row.querySelector('.remove-variant-btn').addEventListener('click', function () {
-            row.remove();
-            updateRemoveBtns();
-        });
-        updateRemoveBtns();
-    });
-
-    // First row remove button
-    variantsContainer.querySelector('.remove-variant-btn').addEventListener('click', function () {
-        this.closest('.variant-row').remove();
+        attachRemoveListener(row);
         updateRemoveBtns();
     });
 </script>

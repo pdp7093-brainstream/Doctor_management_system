@@ -1,0 +1,203 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Manage Medicines - Doctor Dashboard{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <h2 class="page-title mb-0">Medicine Store</h2>
+        <a href="{% url 'medicine:add_medicine' %}" class="btn btn-primary add-patient-btn">
+            <i class="bi bi-plus-lg"></i> Add Medicine
+        </a>
+    </div>
+
+    <!-- Search Bar --> 
+    <div class="search-container">
+        <div class="input-group" style="max-width: 420px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control border-start-0 search-input ps-0"
+                id="searchInput" placeholder="Search by medicine name, type or company...">
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+            <table class="table table-custom" style="min-width: 820px; width: 100%;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine Name</th>
+                        <th>Short Name</th>
+                        <th>Type</th>
+                        <th>Company</th>
+                        <th>Variants</th>
+                        <th>Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for medicine in medicines %}
+                    <tr class="medicine-main-row" onclick="toggleVariants('variant-row-{{ medicine.pk }}')" style="cursor: pointer;" title="Click to view variants">
+                        <td class="patient-info">{{ forloop.counter }}</td>
+                        <td class="patient-name fw-semibold text-primary">{{ medicine.name }}</td>
+                        <td class="patient-info">{{ medicine.short_name }}</td>
+                        <td class="patient-info">
+                            <span class="badge bg-secondary text-white" style="font-size:0.78rem; padding: 4px 10px; border-radius: 20px;">
+                                {{ medicine.get_medicine_type_display }}
+                            </span>
+                        </td>
+                        <td class="patient-info">{{ medicine.company|default:"—" }}</td>
+                        <td class="patient-info">
+                            <span class="badge bg-info text-dark rounded-pill px-3">
+                                {{ medicine.variants.count }} variant{{ medicine.variants.count|pluralize }}
+                                <i class="bi bi-chevron-down ms-1" style="font-size: 0.75rem;"></i>
+                            </span>
+                        </td>
+                        <td class="patient-info">
+                            {% if medicine.is_active %}
+                                <span class="badge bg-success" style="font-size:0.78rem; padding:4px 10px; border-radius:20px;">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger" style="font-size:0.78rem; padding:4px 10px; border-radius:20px;">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td onclick="event.stopPropagation();">
+                            <div class="action-buttons justify-content-center">
+                                <a href="{% url 'medicine:edit_medicine' medicine.pk %}"
+                                    class="action-btn btn btn-warning" title="Edit">
+                                    <i class="bi bi-pencil"></i> 
+                                </a>
+                                <form method="post"
+                                    action="{% url 'medicine:delete_medicine' medicine.pk %}"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Delete {{ medicine.name }} and all its variants?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn btn btn-danger" title="Delete">
+                                        <i class="bi bi-trash"></i> 
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- Expanded Variant Details -->
+                    <tr id="variant-row-{{ medicine.pk }}" class="variant-row" style="display: none; background-color: #f8fbff;">
+                        <td colspan="8" class="p-0 border-0">
+                            <div class="p-3 border-bottom border-start border-primary border-4 ms-3 my-2 rounded-end" style="background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h6 class="mb-3 text-primary" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
+                                    <i class="bi bi-box-seam me-1"></i> Available Variants for {{ medicine.name }}
+                                </h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for v in medicine.variants.all %}
+                                        <div class="border rounded-3 p-2" style="font-size: 0.85rem; background-color: #fff; border-color: #e2e8f0 !important;">
+                                            <strong class="text-dark">{{ v.power }}</strong>
+                                            <span class="mx-2 text-muted">|</span>
+                                            <span class="text-success fw-bold">₹{{ v.price }}</span>
+                                            <span class="mx-2 text-muted">|</span>
+                                            <span class="text-muted small">Stock:</span> 
+                                            <span class="fw-bold {% if v.stock <= v.low_stock_alert %}text-danger{% else %}text-dark{% endif %}">
+                                                {{ v.stock }}
+                                            </span>
+                                        </div>
+                                    {% empty %}
+                                        <span class="text-muted small"><i class="bi bi-info-circle me-1"></i> No variants configured.</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr class="medicine-main-row">
+                        <td colspan="8" class="text-center text-muted py-4">
+                            No medicines found. <a href="{% url 'medicine:add_medicine' %}">Add one now</a>.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if medicines.has_other_pages %}
+        <nav aria-label="Medicine pagination" class="mt-4 mb-3 d-flex justify-content-center">
+            <ul class="pagination pagination-sm shadow-sm">
+                {% if medicines.has_previous %}
+                    <li class="page-item"><a class="page-link text-primary" href="?page={{ medicines.previous_page_number }}">&laquo; Prev</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">&laquo; Prev</span></li>
+                {% endif %}
+
+                {% for num in medicines.paginator.page_range %}
+                    {% if medicines.number == num %}
+                        <li class="page-item active"><span class="page-link border-primary bg-primary text-white">{{ num }}</span></li>
+                    {% elif num > medicines.number|add:'-3' and num < medicines.number|add:'3' %}
+                        <li class="page-item"><a class="page-link text-primary" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if medicines.has_next %}
+                    <li class="page-item"><a class="page-link text-primary" href="?page={{ medicines.next_page_number }}">Next &raquo;</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        <!-- Empty State (search fallback) -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <div class="empty-state-icon">
+                <i class="bi bi-capsule"></i>
+            </div>
+            <p class="empty-state-text">No medicines found</p>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // Toggle Variant Accordion
+    function toggleVariants(rowId) {
+        const row = document.getElementById(rowId);
+        if (row.style.display === 'none') {
+            row.style.display = 'table-row';
+            // Optional: hide other open variants if you want an accordion effect
+            // document.querySelectorAll('.variant-row').forEach(r => { if(r.id !== rowId) r.style.display = 'none'; });
+        } else {
+            row.style.display = 'none';
+        }
+    }
+
+    // Live search
+    const searchInput = document.getElementById('searchInput');
+    const tableBody   = document.getElementById('tableBody');
+    const emptyState  = document.getElementById('emptyState');
+
+    searchInput.addEventListener('input', function () {
+        const q = this.value.toLowerCase();
+        // Only target the main medicine rows
+        const rows = tableBody.querySelectorAll('tr.medicine-main-row');
+        let visible = 0;
+        
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const show = text.includes(q);
+            row.style.display = show ? '' : 'none';
+            
+            // If hiding the main row, also hide its variant row if it's open
+            if (!show) {
+                const nextRow = row.nextElementSibling;
+                if (nextRow && nextRow.classList.contains('variant-row')) {
+                    nextRow.style.display = 'none';
+                }
+            }
+            
+            if (show) visible++;
+        });
+        emptyState.style.display = visible === 0 ? 'block' : 'none';
+    });
+</script>
+{% endblock %}

@@ -3,6 +3,7 @@ from django.views import View
 from doctor.decorators import role_required
 from accounts.models import Patient
 from doctor.models import InnerMember
+from medicine.models import *
 from .models import *
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
@@ -143,7 +144,7 @@ class Book_appointment(View):
         messages.success(request, "Appointment booked successfully!")
         return redirect('appointment:appointment')
 
-
+@method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
     def get(self,request,appointment_id):
         appointment = get_object_or_404(Appointment,id=appointment_id)
@@ -159,7 +160,7 @@ class StartVisitView(View):
 
         return redirect("appointment:prescription",visit_id=visit.id)
 
-
+@method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class PrescriptionView(View):
     def get(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
@@ -167,20 +168,41 @@ class PrescriptionView(View):
         # get or create prescription
         prescription,created = Prescription.objects.get_or_create(visit=visit)
         
-        medicines = Medicine.objects.all()
-        items = prescription.items.all()
+        # MedicineVariant 
+        variants = MedicineVariant.objects.filter(
+            medicine__is_active=True
+        )
+
+
+        items = prescription.items.select_related(
+            'medicine_variant','medicine_variant__medicine'
+        )
         
+        # 🔹 Parse dosage for the template
+        for item in items:
+            try:
+                parts = item.dosage.split(' (')
+                m_a_n = parts[0].split('-')
+                item.parsed_morning = int(m_a_n[0])
+                item.parsed_afternoon = int(m_a_n[1])
+                item.parsed_night = int(m_a_n[2])
+                item.parsed_meal = parts[1].replace(')', '')
+            except Exception:
+                item.parsed_morning = 0
+                item.parsed_afternoon = 0
+                item.parsed_night = 0
+                item.parsed_meal = 'after_food'
         
         return render(request, 'doctor/prescription.html', {
             'visit': visit,
-            'medicines':medicines,
+            'variants':variants,
             'items':items
         })
 
     def post(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
 
-        # 🔹 Visit update
+        #  Visit update
         visit.symptoms = request.POST.get("symptoms")
         visit.diagnosis = request.POST.get("diagnosis")
         visit.notes = request.POST.get("notes")
@@ -196,39 +218,56 @@ class PrescriptionView(View):
         prescription, created = Prescription.objects.get_or_create(visit=visit)
 
         # 🔹 Get form lists
-        medicine_ids = request.POST.getlist("medicine")
+        variant_ids = request.POST.getlist("variant_id[]")
+        item_ids = request.POST.getlist("item_id[]")
         morning_list = request.POST.getlist("morning")
         afternoon_list = request.POST.getlist("afternoon")
         night_list = request.POST.getlist("night")
         meal_list = request.POST.getlist("meal")
         days_list = request.POST.getlist("days")
 
-        # 🔥 DELETE ONLY IF NEW DATA EXISTS
-        if any(medicine_ids):
-            prescription.items.all().delete()
+        existing_item_ids = list(prescription.items.values_list('id', flat=True))
+        submitted_item_ids = []
 
-        # 🔹 Save new items
-        for med_id, m, a, n, meal, days in zip(
-            medicine_ids,
+        # 🔹 Save or update items
+        for item_id_str, v_id, m, a, n, meal, days in zip(
+            item_ids,
+            variant_ids,
             morning_list,
             afternoon_list,
             night_list,
             meal_list,
             days_list
         ):
-            if not med_id:
+            if not v_id:
                 continue
 
-            med = Medicine.objects.get(id=med_id)
-
+            variant = MedicineVariant.objects.get(id=v_id)
             dosage = f"{m}-{a}-{n} ({meal})"
 
-            PrescriptionItem.objects.create(
-                prescription=prescription,
-                medicine=med,
-                dosage=dosage,
-                days=int(days),
-            )
+            if item_id_str:
+                try:
+                    item_id_int = int(item_id_str)
+                    submitted_item_ids.append(item_id_int)
+                    item = PrescriptionItem.objects.get(id=item_id_int, prescription=prescription)
+                    item.medicine_variant = variant
+                    item.dosage = dosage
+                    item.days = int(days)
+                    item.save()
+                except PrescriptionItem.DoesNotExist:
+                    pass
+            else:
+                PrescriptionItem.objects.create(
+                    prescription=prescription,
+                    medicine_variant=variant,
+                    dosage=dosage,
+                    days=int(days),
+                )
+
+        # 🔥 Delete any items that were removed by the user
+        items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
+        if items_to_delete:
+            PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
 
         # 🔹 Appointment complete
         appointment = visit.appointment

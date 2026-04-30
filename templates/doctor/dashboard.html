@@ -14,7 +14,7 @@
             <div class="dashboard-stat-item">
                 <div class="stat-card">
                     <div class="stat-content">
-                        <div class="stat-number">120</div>
+                        <div class="stat-number">{{ total }}</div>
                         <div class="stat-label">Today's Total Appointments</div>
                     </div>
                     <div class="stat-icon primary">
@@ -22,11 +22,11 @@
                     </div>
                 </div>
             </div>
-
+            
             <div class="dashboard-stat-item">
                 <div class="stat-card success">
                     <div class="stat-content">
-                        <div class="stat-number">28</div>
+                        <div class="stat-number">{{ remaining_today }}</div>
                         <div class="stat-label">Remaining Today Appointments</div>
                     </div>
                     <div class="stat-icon success">
@@ -65,78 +65,31 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for appointment in today_appointments %}
                         <tr>
-                            <td class="patient-name">John Anderson</td>
-                            <td class="appointment-time">09:00 AM</td>
+                            <td class="patient-name">{{ appointment.patient.user.get_full_name }}</td>
+                            <td class="appointment-time">{{ appointment.time_slot }}</td>
                             <td>
-                                <span class="status-badge status-pending">Pending</span>
+                                <span class="status-badge status-pending">{{ appointment.status }}</span>
                             </td>
                             <td>
-                                <button class="action-btn" onclick="startVisit('John Anderson')">
-                                    <i class="bi bi-play-circle"></i> Start Visit
-                                </button>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'appointment:start_visit' appointment.id %}"
+                                    class="btn btn-primary btn-sm">Start Visit</a>
+
+                                <a href="#" class="btn btn-danger btn-sm">Cancel</a>
+                            </div>
                             </td>
                         </tr>
+                        {% endfor %}
+
+                        {% if not today_appointments %}
                         <tr>
-                            <td class="patient-name">Sarah Williams</td>
-                            <td class="appointment-time">09:30 AM</td>
-                            <td>
-                                <span class="status-badge status-done">Done</span>
-                            </td>
-                            <td>
-                                <button class="action-btn" disabled>
-                                    <i class="bi bi-check-circle"></i> Completed
-                                </button>
-                            </td>
+                            <td colspan="4" class="text-center">No appointments today</td>
                         </tr>
-                        <tr>
-                            <td class="patient-name">Michael Johnson</td>
-                            <td class="appointment-time">10:00 AM</td>
-                            <td>
-                                <span class="status-badge status-pending">Pending</span>
-                            </td>
-                            <td>
-                                <button class="action-btn" onclick="startVisit('Michael Johnson')">
-                                    <i class="bi bi-play-circle"></i> Start Visit
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="patient-name">Emily Brown</td>
-                            <td class="appointment-time">10:30 AM</td>
-                            <td>
-                                <span class="status-badge status-done">Done</span>
-                            </td>
-                            <td>
-                                <button class="action-btn" disabled>
-                                    <i class="bi bi-check-circle"></i> Completed
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="patient-name">Robert Davis</td>
-                            <td class="appointment-time">11:00 AM</td>
-                            <td>
-                                <span class="status-badge status-pending">Pending</span>
-                            </td>
-                            <td>
-                                <button class="action-btn" onclick="startVisit('Robert Davis')">
-                                    <i class="bi bi-play-circle"></i> Start Visit
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="patient-name">Jessica Martinez</td>
-                            <td class="appointment-time">11:30 AM</td>
-                            <td>
-                                <span class="status-badge status-cancelled">Cancelled</span>
-                            </td>
-                            <td>
-                                <button class="action-btn" disabled>
-                                    <i class="bi bi-x-circle"></i> Cancelled
-                                </button>
-                            </td>
-                        </tr>
+                        {% endif %}
+                        
+                        
                     </tbody>
                 </table>
             </div>
