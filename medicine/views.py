@@ -4,20 +4,17 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Medicine, MedicineVariant
-
-
 from django.core.paginator import Paginator
+
 
 class ManageMedicineView(LoginRequiredMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request):
         medicines_list = Medicine.objects.prefetch_related('variants').all().order_by('-created_at')
-        
-        paginator = Paginator(medicines_list, 20) # Show 20 medicines per page
+        paginator = Paginator(medicines_list, 20)
         page_number = request.GET.get('page')
         medicines = paginator.get_page(page_number)
-        
         return render(request, 'medicine/manage_medicine.html', {'medicines': medicines})
 
 
@@ -26,7 +23,11 @@ class AddMedicineView(LoginRequiredMixin, View):
 
     def get(self, request):
         medicine_types = Medicine.MEDICINE_TYPE
-        return render(request, 'medicine/add_medicine1.html', {'medicine_types': medicine_types})
+        unit_choices = MedicineVariant.UNIT_CHOICES
+        return render(request, 'medicine/add_medicine1.html', {
+            'medicine_types': medicine_types,
+            'unit_choices': unit_choices,
+        })
 
     def post(self, request):
         name        = request.POST.get('name', '').strip()
@@ -45,20 +46,29 @@ class AddMedicineView(LoginRequiredMixin, View):
             is_active=is_active,
         )
 
-        # Dynamic variants from POST (power[], price[], stock[], low_stock_alert[])
-        powers      = request.POST.getlist('power[]')
-        prices      = request.POST.getlist('price[]')
-        stocks      = request.POST.getlist('stock[]')
-        low_alerts  = request.POST.getlist('low_stock_alert[]')
+        powers          = request.POST.getlist('power[]')
+        cost_prices     = request.POST.getlist('cost_price[]')
+        selling_prices  = request.POST.getlist('selling_price[]')
+        stocks          = request.POST.getlist('stock[]')
+        units           = request.POST.getlist('unit[]')
+        unit_per_strips = request.POST.getlist('unit_per_strip[]')
+        low_alerts      = request.POST.getlist('low_stock_alert[]')
+        mfg_dates       = request.POST.getlist('mfg_date[]')
+        exp_dates       = request.POST.getlist('exp_date[]')
 
         for i, power in enumerate(powers):
             if power.strip():
                 MedicineVariant.objects.create(
                     medicine=medicine,
                     power=power.strip(),
-                    price=prices[i] if i < len(prices) else 0,
+                    cost_price=cost_prices[i] if i < len(cost_prices) else 0,
+                    selling_price=selling_prices[i] if i < len(selling_prices) else 0,
                     stock=stocks[i] if i < len(stocks) else 0,
+                    unit=units[i] if i < len(units) else 'piece',
+                    unit_per_strip=unit_per_strips[i] if i < len(unit_per_strips) and unit_per_strips[i] else None,
                     low_stock_alert=low_alerts[i] if i < len(low_alerts) else 10,
+                    mfg_date=mfg_dates[i] if i < len(mfg_dates) and mfg_dates[i] else None,
+                    exp_date=exp_dates[i] if i < len(exp_dates) and exp_dates[i] else None,
                 )
 
         return redirect('medicine:manage_medicine')
@@ -69,7 +79,7 @@ class DeleteMedicineView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         medicine = get_object_or_404(Medicine, pk=pk)
-        medicine.delete()  # variants bhi cascade delete honge
+        medicine.delete()
         return redirect('medicine:manage_medicine')
 
 
@@ -79,54 +89,70 @@ class EditMedicineView(LoginRequiredMixin, View):
     def get(self, request, pk):
         medicine = get_object_or_404(Medicine, pk=pk)
         medicine_types = Medicine.MEDICINE_TYPE
+        unit_choices = MedicineVariant.UNIT_CHOICES
         return render(request, 'medicine/edit_medicine.html', {
             'medicine': medicine,
             'medicine_types': medicine_types,
+            'unit_choices': unit_choices,
         })
 
     def post(self, request, pk):
         medicine = get_object_or_404(Medicine, pk=pk)
-        medicine.name        = request.POST.get('name', '').strip()
-        medicine.short_name  = request.POST.get('short_name', '').strip()
+        medicine.name          = request.POST.get('name', '').strip()
+        medicine.short_name    = request.POST.get('short_name', '').strip()
         medicine.medicine_type = request.POST.get('medicine_type', '')
-        medicine.company     = request.POST.get('company', '').strip()
-        medicine.description = request.POST.get('description', '').strip()
-        medicine.is_active   = request.POST.get('is_active') == 'on'
+        medicine.company       = request.POST.get('company', '').strip()
+        medicine.description   = request.POST.get('description', '').strip()
+        medicine.is_active     = request.POST.get('is_active') == 'on'
         medicine.save()
 
-        # Delete removed variants (client sends kept variant IDs)
         kept_ids = request.POST.getlist('variant_id[]')
         medicine.variants.exclude(pk__in=[i for i in kept_ids if i]).delete()
 
-        # Update existing variants
-        variant_ids    = request.POST.getlist('variant_id[]')
-        powers         = request.POST.getlist('power[]')
-        prices         = request.POST.getlist('price[]')
-        stocks         = request.POST.getlist('stock[]')
-        low_alerts     = request.POST.getlist('low_stock_alert[]')
+        variant_ids     = request.POST.getlist('variant_id[]')
+        powers          = request.POST.getlist('power[]')
+        cost_prices     = request.POST.getlist('cost_price[]')
+        selling_prices  = request.POST.getlist('selling_price[]')
+        stocks          = request.POST.getlist('stock[]')
+        units           = request.POST.getlist('unit[]')
+        unit_per_strips = request.POST.getlist('unit_per_strip[]')
+        low_alerts      = request.POST.getlist('low_stock_alert[]')
+        mfg_dates       = request.POST.getlist('mfg_date[]')
+        exp_dates       = request.POST.getlist('exp_date[]')
 
         for i, vid in enumerate(variant_ids):
-            if vid:  # existing variant — update
+            if vid:
                 try:
                     variant = MedicineVariant.objects.get(pk=vid, medicine=medicine)
-                    variant.power           = powers[i].strip()
-                    variant.price           = prices[i]
-                    variant.stock           = stocks[i]
+                    variant.power          = powers[i].strip()
+                    variant.cost_price     = cost_prices[i]
+                    variant.selling_price  = selling_prices[i]
+                    variant.stock          = stocks[i]
+                    variant.unit           = units[i]
+                    variant.unit_per_strip = unit_per_strips[i] if unit_per_strips[i] else None
                     variant.low_stock_alert = low_alerts[i]
+                    variant.mfg_date       = mfg_dates[i] if mfg_dates[i] else None
+                    variant.exp_date       = exp_dates[i] if exp_dates[i] else None
                     variant.save()
                 except MedicineVariant.DoesNotExist:
                     pass
-            else:  # new variant (vid is empty string)
+            else:
                 if powers[i].strip():
                     MedicineVariant.objects.create(
                         medicine=medicine,
                         power=powers[i].strip(),
-                        price=prices[i],
+                        cost_price=cost_prices[i],
+                        selling_price=selling_prices[i],
                         stock=stocks[i],
+                        unit=units[i],
+                        unit_per_strip=unit_per_strips[i] if unit_per_strips[i] else None,
                         low_stock_alert=low_alerts[i],
+                        mfg_date=mfg_dates[i] if mfg_dates[i] else None,
+                        exp_date=exp_dates[i] if exp_dates[i] else None,
                     )
 
         return redirect('medicine:manage_medicine')
+
 
 class MedicineSearchView(LoginRequiredMixin, View):
     login_url = 'doctor:login'
@@ -149,9 +175,10 @@ class MedicineSearchView(LoginRequiredMixin, View):
                 {
                     'id': v.id,
                     'power': v.power,
-                    'price': str(v.price),
+                    'price': str(v.selling_price),  # ← selling_price use karo
                     'stock': v.stock,
                     'is_low_stock': v.is_low_stock,
+                    'is_expired': v.is_expired,
                 }
                 for v in med.variants.all()
             ]

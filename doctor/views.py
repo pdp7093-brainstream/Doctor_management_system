@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -110,7 +111,7 @@ def billing(request):
 @never_cache
 @role_required('doctor')
 def manage_patients(request):
-    patients = Patient.objects.select_related('user').all().order_by('user__first_name')
+    patients = Patient.objects.all().order_by('user__first_name')
     return render(request, 'doctor/manage_patients.html', {'patients': patients})
 
 
@@ -186,18 +187,35 @@ def add_patient(request):
             messages.error(request, 'A user with this email already exists.')
             return render(request, 'doctor/add_patient.html')
 
-        user = User.objects.create_user(username=email, email=email, first_name=name, password='defaultpassword123')
+        # Split name into first and last name
+        name_parts = name.strip().split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
 
-        Patient.objects.create(
-            user=user,
-            phone=phone,
-            address=address,
-            dob=dob if dob else None,
-            gender=gender,
-            bld_grop=bld_grop,
-        )
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email, 
+                    email=email, 
+                    first_name=first_name, 
+                    last_name=last_name, 
+                    
+                )
 
-        messages.success(request, 'Patient added successfully.')
-        return redirect('doctor:manage_patients')
+                Patient.objects.create(
+                    user=user,
+                    phone=phone,
+                    address=address,
+                    dob=dob if dob else None,
+                    gender=gender,
+                    bld_grop=bld_grop,
+                )
+            
+            messages.success(request, 'Patient added successfully.')
+            return redirect('doctor:manage_patients')
+            
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}')
+            return render(request, 'doctor/add_patient.html')
 
     return render(request, 'doctor/add_patient.html')

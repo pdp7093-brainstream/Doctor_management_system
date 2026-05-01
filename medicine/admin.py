@@ -16,5 +16,5 @@ class MedicineAdmin(admin.ModelAdmin):
 
 @admin.register(MedicineVariant)
 class MedicineVariantAdmin(admin.ModelAdmin):
-    list_display = ['medicine','power','price','stock','is_low_stock']
+    list_display = ['medicine','power','selling_price','stock','is_low_stock']
     search_fields = ['medicine__name','medicine__short_name']

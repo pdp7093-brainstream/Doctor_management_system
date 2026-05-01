@@ -56,7 +56,7 @@ class Visit(models.Model):
 # Prescription Model 
 class Prescription(models.Model):
     visit = models.OneToOneField(Visit, on_delete=models.CASCADE)
-
+    is_stock_deducted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -67,7 +67,7 @@ class Prescription(models.Model):
 class PrescriptionItem(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name="items")
 
-    medicine_variant = models.ForeignKey(   # 🔥 NEW FIELD
+    medicine_variant = models.ForeignKey(   
         'medicine.MedicineVariant',
         on_delete=models.CASCADE,
         null=True,
@@ -75,7 +75,8 @@ class PrescriptionItem(models.Model):
     )
     dosage = models.CharField(max_length=100)
     days = models.IntegerField()
-
+    should_deduct    = models.BooleanField(default=True) 
+    was_deducted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
