@@ -22,14 +22,15 @@
             width: 100%;
             max-width: 400px;
             background: #fff;
-            border-radius: 15px;
+            border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             border: none;
         }
 
         .auth-header {
-            background: #4183ff; /* Purple color from image */
+            background: #4183ff;
+            /* Purple color from image */
             color: white;
             padding: 40px 20px;
             text-align: center;
@@ -103,6 +104,18 @@
             text-decoration: none;
             font-weight: 700;
         }
+
+        .signup-link {
+            color: #4183ff;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 5px;
+        }
+
+        .signup-link:hover {
+            text-decoration: underline;
+            color: #1b90e3;
+        }
     </style>
 </head>
 
@@ -135,15 +148,19 @@
                     <input type="password" name="password" class="form-control" placeholder="Enter password" required>
                 </div>
 
-                <a href="{% url 'resetpass' %}" class="forgot-link">Forgot Password?</a>
+                <!-- <a href="{% url 'resetpass' %}" class="forgot-link">Forgot Password?</a> -->
 
                 <button type="submit" class="btn btn-login shadow-sm">Login</button>
+                <p class="text-center mt-3 mb-0" style="font-size: 0.9rem;">
+                    Not registered?
+                    <a href="{% url 'signup' %}" class="signup-link">Sign Up</a>
+                </p>
             </form>
         </div>
 
         <!-- Footer Section (Contact Admin) -->
         <div class="auth-footer">
-            If you are Doctor, <a href="{% url 'doctor:login' %}">login</a> here
+            If you are Doctor, <a href="{% url 'doctor:login' %}">Login</a> here
         </div>
     </div>
 
