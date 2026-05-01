@@ -4,18 +4,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
 from .decorators import role_required
 from .models import InnerMember
-from medicine.models import Medicine, MedicineVariant
 from appointment.models import Appointment
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-
-
-
-
+from accounts.models import Patient
+from django.contrib import messages
 
 def login_view(request):
     if request.method == 'POST':
@@ -34,7 +29,7 @@ def login_view(request):
             except InnerMember.DoesNotExist:
                 return render(request, 'doctor/login.html', {'error': 'Role not assigned'})
 
-            # 🔥 YAHAN CHANGE
+            # YAHAN CHANGE
             if role == 'doctor':
                 return redirect('doctor:dashboard')
             else:
@@ -49,7 +44,6 @@ def login_view(request):
 def logout_view(request):
      logout(request)
      return redirect('doctor:login')
-
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):
@@ -92,57 +86,6 @@ class DashboardView(View):
 
         return render(request, "doctor/dashboard.html", context)
 
-
-
-
-# @method_decorator([never_cache, role_required("doctor")], name="dispatch")
-# class Manage_appointments(View):
-#     def get(self, request):
-#         doctor = InnerMember.objects.get(user=request.user)
-#         appointments = Appointment.objects.filter(doctor=doctor).order_by(
-#             "-appointment_date"
-#         )
-#         context = {"appointments": appointments}
-#         return render(request, "doctor/manage_appointments.html", context)
-
-
-
-    # # 🔥 safe doctor fetch (error avoid karega)
-    # try:
-    #     doctor = InnerMember.objects.get(user=request.user)
-    # except InnerMember.DoesNotExist:
-    #     return render(request, 'doctor/dashboard.html', {
-    #         'error': 'Doctor profile not found'
-    #     })
-
-    # # 🔥 DEBUG (temporary laga ke check karo)
-    # print("LOGGED IN DOCTOR ID:", doctor.id)
-    # print("TODAY DATE:", today)
-
-    # # 🔥 appointments filter
-    # appointments = Appointment.objects.filter(
-    #     doctor=doctor,
-    #     appointment_date=today
-    # ).order_by('time_slot')
-
-    # # 🔥 DEBUG
-    # print("TOTAL FOUND:", appointments.count())
-
-    # # counts
-    # total_appointments = appointments.count()
-    # pending_appointments = appointments.filter(status='pending').count()
-    # confirmed_appointments = appointments.filter(status='confirmed').count()
-    # cancelled_appointments = appointments.filter(status='cancelled').count()
-
-    # context = {
-    #     'total_appointments': total_appointments,
-    #     'pending_appointments': pending_appointments,
-    #     'confirmed_appointments': confirmed_appointments,
-    #     'cancelled_appointments': cancelled_appointments,
-    #     'appointments': appointments
-    # }
-
-    # return render(request, 'doctor/dashboard.html', context)
 
 @never_cache
 @login_required
