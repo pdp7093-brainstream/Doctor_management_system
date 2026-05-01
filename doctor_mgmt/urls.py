@@ -24,7 +24,7 @@ urlpatterns = [
     path('',include('accounts.urls')),
     path('doctor/', include(('doctor.urls', 'doctor'), namespace='doctor')),
     path('appointment/', include(('appointment.urls', 'appointment'), namespace='appointment')),
-
+    path('medicine/', include(('medicine.urls', 'medicine'), namespace='medicine')),
 ]
 
 # Serve media files during development

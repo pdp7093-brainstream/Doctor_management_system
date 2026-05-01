@@ -67,7 +67,12 @@ class Prescription(models.Model):
 class PrescriptionItem(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name="items")
 
-    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    medicine_variant = models.ForeignKey(   # 🔥 NEW FIELD
+        'medicine.MedicineVariant',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     dosage = models.CharField(max_length=100)
     days = models.IntegerField()
 

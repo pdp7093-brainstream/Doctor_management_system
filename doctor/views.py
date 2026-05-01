@@ -7,9 +7,15 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .decorators import role_required
-from .models import InnerMember, Medicine
-from accounts.models import Patient
-from django.contrib import messages
+from .models import InnerMember
+from medicine.models import Medicine, MedicineVariant
+from appointment.models import Appointment
+from django.utils import timezone
+from django.utils.decorators import method_decorator
+
+
+
+
 
 def login_view(request):
     if request.method == 'POST':
@@ -45,52 +51,98 @@ def logout_view(request):
      return redirect('doctor:login')
 
 
-from django.utils.timezone import now
-from appointment.models import Appointment
-from .models import InnerMember
-
-
-@never_cache
-@role_required('doctor')
-def dashboard(request):
-    today = now().date()
-
-    # 🔥 safe doctor fetch (error avoid karega)
-    try:
+@method_decorator(login_required(login_url='login'), name='dispatch')
+class DashboardView(View):
+    def get(self, request):
         doctor = InnerMember.objects.get(user=request.user)
-    except InnerMember.DoesNotExist:
-        return render(request, 'doctor/dashboard.html', {
-            'error': 'Doctor profile not found'
-        })
 
-    # 🔥 DEBUG (temporary laga ke check karo)
-    print("LOGGED IN DOCTOR ID:", doctor.id)
-    print("TODAY DATE:", today)
+        appointments = Appointment.objects.filter(doctor=doctor)
 
-    # 🔥 appointments filter
-    appointments = Appointment.objects.filter(
-        doctor=doctor,
-        appointment_date=today
-    ).order_by('time_slot')
+        today = timezone.localdate()
 
-    # 🔥 DEBUG
-    print("TOTAL FOUND:", appointments.count())
+        # today appointments
+        today_appointments = appointments.filter(appointment_date=today)
 
-    # counts
-    total_appointments = appointments.count()
-    pending_appointments = appointments.filter(status='pending').count()
-    confirmed_appointments = appointments.filter(status='confirmed').count()
-    cancelled_appointments = appointments.filter(status='cancelled').count()
+        # upcoming
+        upcoming_appointments = appointments.filter(
+            appointment_date__gt=today
+        ).order_by("appointment_date", "time_slot")
 
-    context = {
-        'total_appointments': total_appointments,
-        'pending_appointments': pending_appointments,
-        'confirmed_appointments': confirmed_appointments,
-        'cancelled_appointments': cancelled_appointments,
-        'appointments': appointments
-    }
+        # Completed
+        completed = appointments.filter(
+            status="completed"
+        ).order_by("-appointment_date")
 
-    return render(request, 'doctor/dashboard.html', context)
+        # 🔹 Pending (today but not started)
+        pending = today_appointments.filter(
+            status="pending"
+        ).order_by("time_slot")
+
+        context = {
+            "today_appointments": today_appointments,
+            "upcoming_appointments": upcoming_appointments,
+            "completed": completed,
+            "pending": pending,
+            "total": today_appointments.count(),
+            "remaining_today": today_appointments.filter(
+                status__in=["pending"]
+            ).count(),
+            
+        }
+
+        return render(request, "doctor/dashboard.html", context)
+
+
+
+
+# @method_decorator([never_cache, role_required("doctor")], name="dispatch")
+# class Manage_appointments(View):
+#     def get(self, request):
+#         doctor = InnerMember.objects.get(user=request.user)
+#         appointments = Appointment.objects.filter(doctor=doctor).order_by(
+#             "-appointment_date"
+#         )
+#         context = {"appointments": appointments}
+#         return render(request, "doctor/manage_appointments.html", context)
+
+
+
+    # # 🔥 safe doctor fetch (error avoid karega)
+    # try:
+    #     doctor = InnerMember.objects.get(user=request.user)
+    # except InnerMember.DoesNotExist:
+    #     return render(request, 'doctor/dashboard.html', {
+    #         'error': 'Doctor profile not found'
+    #     })
+
+    # # 🔥 DEBUG (temporary laga ke check karo)
+    # print("LOGGED IN DOCTOR ID:", doctor.id)
+    # print("TODAY DATE:", today)
+
+    # # 🔥 appointments filter
+    # appointments = Appointment.objects.filter(
+    #     doctor=doctor,
+    #     appointment_date=today
+    # ).order_by('time_slot')
+
+    # # 🔥 DEBUG
+    # print("TOTAL FOUND:", appointments.count())
+
+    # # counts
+    # total_appointments = appointments.count()
+    # pending_appointments = appointments.filter(status='pending').count()
+    # confirmed_appointments = appointments.filter(status='confirmed').count()
+    # cancelled_appointments = appointments.filter(status='cancelled').count()
+
+    # context = {
+    #     'total_appointments': total_appointments,
+    #     'pending_appointments': pending_appointments,
+    #     'confirmed_appointments': confirmed_appointments,
+    #     'cancelled_appointments': cancelled_appointments,
+    #     'appointments': appointments
+    # }
+
+    # return render(request, 'doctor/dashboard.html', context)
 
 @never_cache
 @login_required
@@ -104,64 +156,6 @@ def add_patient(request):
      return render(request, 'doctor/add_patient.html')
 
 
-
-
-class ManageMedicineView(LoginRequiredMixin, View):
-    login_url = 'doctor:login'
-
-    def get(self, request):
-        medicines = Medicine.objects.all().order_by('-created_at')
-        return render(request, 'doctor/manage_medicine.html', {'medicines': medicines})
-
-
-class AddMedicineView(LoginRequiredMixin, View):
-    login_url = 'doctor:login'
-
-    def get(self, request):
-        return render(request, 'doctor/add_medicine.html')
-
-    def post(self, request):
-        name = request.POST.get('name')
-        stock = request.POST.get('stock')
-        price = request.POST.get('price')
-        mfg_date = request.POST.get('mfg_date')
-        exp_date = request.POST.get('exp_date')
-
-        Medicine.objects.create(
-            name=name,
-            stock=stock,
-            price=price,
-            mfg_date=mfg_date,
-            expiry_date=exp_date,
-        )
-        return redirect('doctor:manage_medicine')
-
-
-class DeleteMedicineView(LoginRequiredMixin, View):
-    login_url = 'doctor:login'
-
-    def post(self, request, pk):
-        medicine = get_object_or_404(Medicine, pk=pk)
-        medicine.delete()
-        return redirect('doctor:manage_medicine')
-
-
-class EditMedicineView(LoginRequiredMixin, View):
-    login_url = 'doctor:login'
-
-    def get(self, request, pk):
-        medicine = get_object_or_404(Medicine, pk=pk)
-        return render(request, 'doctor/edit_medicine.html', {'medicine': medicine})
-
-    def post(self, request, pk):
-        medicine = get_object_or_404(Medicine, pk=pk)
-        medicine.name = request.POST.get('name')
-        medicine.stock = request.POST.get('stock')
-        medicine.price = request.POST.get('price')
-        medicine.mfg_date = request.POST.get('mfg_date')
-        medicine.expiry_date = request.POST.get('exp_date')
-        medicine.save()
-        return redirect('doctor:manage_medicine')
 
 @never_cache
 @login_required

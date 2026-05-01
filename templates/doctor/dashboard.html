@@ -9,6 +9,7 @@
         <p class="page-subtitle">Here's what's happening with your practice today</p>
     </div>
 
+<<<<<<< HEAD
     <!-- Stat Cards -->
     <div class="dashboard-stats">
         <div class="dashboard-stat-item">
@@ -19,10 +20,48 @@
                 </div>
                 <div class="stat-icon primary">
                     <i class="bi bi-calendar-check"></i>
+=======
+        <!-- Stat Cards -->
+        <div class="dashboard-stats">
+            <div class="dashboard-stat-item">
+                <div class="stat-card">
+                    <div class="stat-content">
+                        <div class="stat-number">{{ total }}</div>
+                        <div class="stat-label">Today's Total Appointments</div>
+                    </div>
+                    <div class="stat-icon primary">
+                        <i class="bi bi-calendar-check"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-stat-item">
+                <div class="stat-card success">
+                    <div class="stat-content">
+                        <div class="stat-number">{{ remaining_today }}</div>
+                        <div class="stat-label">Remaining Today Appointments</div>
+                    </div>
+                    <div class="stat-icon success">
+                        <i class="bi bi-clock"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-stat-item">
+                <div class="stat-card warning">
+                    <div class="stat-content">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Total Staff</div>
+                    </div>
+                    <div class="stat-icon warning">
+                        <i class="bi bi-people"></i>
+                    </div>
+>>>>>>> 72e47fb274dbb2a72dcc7408b10b9998411f65d1
                 </div>
             </div>
         </div>
 
+<<<<<<< HEAD
         <div class="dashboard-stat-item">
             <div class="stat-card warning">
                 <div class="stat-content">
@@ -32,6 +71,52 @@
                 <div class="stat-icon warning">
                     <i class="bi bi-clock"></i>
                 </div>
+=======
+        <!-- Appointments Table -->
+        <div class="table-section">
+            <h3 class="table-title">
+                <i class="bi bi-calendar-event"></i>
+                Today's Appointments
+            </h3>
+            <div class="table-responsive">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Patient Name</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in today_appointments %}
+                        <tr>
+                            <td class="patient-name">{{ appointment.patient.user.get_full_name }}</td>
+                            <td class="appointment-time">{{ appointment.time_slot }}</td>
+                            <td>
+                                <span class="status-badge status-pending">{{ appointment.status }}</span>
+                            </td>
+                            <td>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'appointment:start_visit' appointment.id %}"
+                                    class="btn btn-primary btn-sm">Start Visit</a>
+
+                                <a href="#" class="btn btn-danger btn-sm">Cancel</a>
+                            </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        {% if not today_appointments %}
+                        <tr>
+                            <td colspan="4" class="text-center">No appointments today</td>
+                        </tr>
+                        {% endif %}
+                        
+                        
+                    </tbody>
+                </table>
+>>>>>>> 72e47fb274dbb2a72dcc7408b10b9998411f65d1
             </div>
         </div>
 

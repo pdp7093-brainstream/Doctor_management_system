@@ -3,6 +3,7 @@
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="container-fluid px-4 py-5">
+
         <!-- Page Header -->
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
@@ -18,14 +19,14 @@
         <form method="post" id="visitForm">
             {% csrf_token %}
 
-            <!-- Top Row: Patient Info + Visit Details | Quick Actions -->
             <div class="row g-4 align-items-start mb-4">
+
                 <!-- Left Column -->
                 <div class="col-lg-8">
 
-                    <!-- Patient Info Card -->
+                    <!-- Patient Info -->
                     <div class="card border-0 shadow-sm rounded-3 mb-4">
-                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
+                        <div class="card-header bg-light border-0 px-4 py-3">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Patient Information</h5>
                         </div>
                         <div class="card-body p-4">
@@ -33,81 +34,66 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
                                     <input type="text" class="form-control form-control-lg"
-                                        value="{% if visit %}{{ visit.patient.user.get_full_name }}{% endif %}"
-                                        readonly>
+                                        value="{% if visit %}{{ visit.patient.user.get_full_name }}{% endif %}" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
                                     <input type="text" class="form-control form-control-lg"
-                                        value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}"
-                                        readonly>
+                                        value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}" readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Time Slot</label>
                                     <input type="text" class="form-control form-control-lg"
-                                        value="{% if visit %}{{ visit.appointment.time_slot|time:'h:i A' }}{% endif %}"
-                                        readonly>
+                                        value="{% if visit %}{{ visit.appointment.time_slot|time:'h:i A' }}{% endif %}" readonly>
                                 </div>
-
                             </div>
                         </div>
                     </div>
 
-                    <!-- Visit Details Card -->
+                    <!-- Visit Details -->
                     <div class="card border-0 shadow-sm rounded-3">
-                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
+                        <div class="card-header bg-light border-0 px-4 py-3">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Visit Details</h5>
                         </div>
                         <div class="card-body p-4">
-                            <!-- Symptoms -->
                             <div class="mb-4">
                                 <label for="symptoms" class="form-label fw-semibold text-dark mb-2">
                                     Symptoms <span class="text-danger">*</span>
                                 </label>
                                 <textarea class="form-control" id="symptoms" name="symptoms" rows="3"
-                                    placeholder="Describe patient's symptoms..."
-                                    required>{{ visit.symptoms }}</textarea>
+                                    placeholder="Describe patient's symptoms..." required>{{ visit.symptoms }}</textarea>
                             </div>
-
-                            <!-- Diagnosis -->
                             <div class="mb-4">
                                 <label for="diagnosis" class="form-label fw-semibold text-dark mb-2">
                                     Diagnosis <span class="text-danger">*</span>
                                 </label>
                                 <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3"
-                                    placeholder="Document the medical diagnosis..."
-                                    required>{{ visit.diagnosis }}</textarea>
+                                    placeholder="Document the medical diagnosis..." required>{{ visit.diagnosis }}</textarea>
                             </div>
-
-                            <!-- Notes -->
                             <div class="mb-0">
                                 <label for="notes" class="form-label fw-semibold text-dark mb-2">
                                     Additional Notes <span class="text-muted">(Optional)</span>
                                 </label>
                                 <textarea class="form-control" id="notes" name="notes" rows="2"
-                                    placeholder="Any additional observations or recommendations...">{{ visit.notes }}</textarea>
+                                    placeholder="Any additional observations...">{{ visit.notes }}</textarea>
                             </div>
                         </div>
                     </div>
-
                 </div>
 
-                <!-- Right Column - Quick Actions -->
+                <!-- Right Column -->
                 <div class="col-lg-4">
                     <div class="card border-0 shadow-sm rounded-3">
-                        <div class="card-header bg-light border-0 rounded-top-3 px-4 py-3">
+                        <div class="card-header bg-light border-0 px-4 py-3">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Quick Actions</h5>
                         </div>
                         <div class="card-body p-4">
-                            <div class="d-grid gap-3">
-
-                                <button type="submit" name="complete_visit" class="btn btn-success btn-lg rounded-2"
-                                    id="completeBtn">
+                            <div class="d-grid">
+                                <button type="submit" name="complete_visit"
+                                    class="btn btn-success btn-lg rounded-2" id="completeBtn">
                                     <i class="bi bi-check-circle me-2"></i>Complete Visit
                                 </button>
                             </div>
-
-                            <!-- Visit Summary -->
                             <div class="mt-4 p-3 bg-light rounded-2">
                                 <h6 class="fw-semibold text-dark mb-3">Visit Summary</h6>
                                 <ul class="list-unstyled mb-0 small">
@@ -117,7 +103,7 @@
                                     </li>
                                     <li>
                                         <span class="text-muted">Status:</span>
-                                        <span class="badge bg-warning text-dark" id="statusBadge">In Progress</span>
+                                        <span class="badge bg-warning text-dark">In Progress</span>
                                     </li>
                                 </ul>
                             </div>
@@ -126,24 +112,27 @@
                 </div>
             </div>
 
-            <!-- Full-Width Prescription Row -->
+            <!-- Prescription Table -->
             <div class="row">
                 <div class="col-12">
                     <div class="card border-0 shadow-sm rounded-3">
-                        <div
-                            class="card-header bg-light border-0 rounded-top-3 px-4 py-3 d-flex justify-content-between align-items-center">
+                        <div class="card-header bg-light border-0 px-4 py-3 d-flex justify-content-between align-items-center">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Prescription</h5>
-                            <button type="button" class="btn btn-sm btn-primary rounded-2" id="addMedicineBtn">
+                            <button type="button" class="btn btn-sm btn-primary rounded-2"
+                                data-bs-toggle="modal" data-bs-target="#medicineModal">
                                 <i class="bi bi-plus-circle me-1"></i>Add Medicine
                             </button>
                         </div>
                         <div class="card-body p-4">
                             <div class="table-responsive">
-                                <table class="table table-hover mb-0" id="prescriptionTable">
+                                <table class="table table-hover mb-0">
                                     <thead class="table-light">
                                         <tr>
                                             <th class="text-dark fw-semibold">Medicine Name</th>
-                                            <th class="text-dark fw-semibold">Dosage</th>
+                                            <th class="text-dark fw-semibold">Morning</th>
+                                            <th class="text-dark fw-semibold">Afternoon</th>
+                                            <th class="text-dark fw-semibold">Night</th>
+                                            <th class="text-dark fw-semibold">Meal</th>
                                             <th class="text-dark fw-semibold">Days</th>
                                             <th class="text-dark fw-semibold text-center">Action</th>
                                         </tr>
@@ -152,32 +141,46 @@
                                         {% for item in items %}
                                         <tr>
                                             <td>
-                                                <select name="medicine" class="form-control form-control-sm" required>
-                                                    {% for med in medicines %}
-                                                    <option value="{{ med.id }}" {% if med.id == item.medicine.id %}selected{% endif %}>
-                                                        {{ med.name }}
-                                                    </option>
-                                                    {% endfor %}
-                                                </select>
+                                                <span class="fw-semibold">
+                                                    {{ item.medicine_variant.medicine.name }} - {{ item.medicine_variant.power }}
+                                                </span>
+                                                <input type="hidden" name="variant_id[]" value="{{ item.medicine_variant.id }}">
+                                                <input type="hidden" name="item_id[]" value="{{ item.id }}">
                                             </td>
-                                            <td>
-                                                <input type="text" name="dosage" value="{{ item.dosage }}"
-                                                    class="form-control form-control-sm">
+                                            <td class="text-center align-middle">
+                                                {{ item.parsed_morning }}
+                                                <input type="hidden" name="morning" value="{{ item.parsed_morning }}">
                                             </td>
-                                            <td>
-                                                <input type="number" name="days" value="{{ item.days }}"
-                                                    class="form-control form-control-sm">
+                                            <td class="text-center align-middle">
+                                                {{ item.parsed_afternoon }}
+                                                <input type="hidden" name="afternoon" value="{{ item.parsed_afternoon }}">
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                {{ item.parsed_night }}
+                                                <input type="hidden" name="night" value="{{ item.parsed_night }}">
+                                            </td>
+                                            <td class="align-middle">
+                                                {% if item.parsed_meal == 'after_food' %}After Food{% else %}Before Food{% endif %}
+                                                <input type="hidden" name="meal" value="{{ item.parsed_meal }}">
+                                            </td>
+                                            <td class="text-center align-middle">
+                                                {{ item.days }}
+                                                <input type="hidden" name="days" value="{{ item.days }}">
                                             </td>
                                             <td class="text-center">
                                                 <button type="button" class="btn btn-sm btn-danger"
-                                                    onclick="removeMedicineRow(this)">X</button>
+                                                    onclick="removeMedicineRow(this)">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                                <div id="emptyMessage" class="text-center py-4 text-muted">
-                                    <p class="mb-0">No medicines added yet. Click "Add Medicine" to start.</p>
+                                <div id="emptyMessage" class="text-center py-4 text-muted"
+                                    {% if items %}style="display:none;"{% endif %}>
+                                    <i class="bi bi-capsule" style="font-size:2rem; opacity:0.3;"></i>
+                                    <p class="mb-0 mt-2">No medicines added yet. Click "Add Medicine" to start.</p>
                                 </div>
                             </div>
                         </div>
@@ -188,142 +191,377 @@
         </form>
     </div>
 
-    <!-- Inline JavaScript -->
+    <!-- ===== Medicine Modal ===== -->
+    <div class="modal fade" id="medicineModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+
+                <div class="modal-header border-0 px-4 pt-4 pb-2">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="bi bi-plus-circle me-2 text-primary"></i>Add Medicine
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body px-4 pb-2">
+
+                    <!-- Search -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-dark mb-2">
+                            <i class="bi bi-search me-1 text-primary"></i>Search Medicine
+                        </label>
+                        <input type="text" id="modalSearchInput"
+                            class="form-control form-control-lg rounded-3"
+                            placeholder="Type medicine name or short name..."
+                            autocomplete="off">
+                        <small class="text-muted mt-1 d-block">
+                            <i class="bi bi-info-circle me-1"></i>Type at least 2 characters
+                        </small>
+                    </div>
+
+                    <!-- Search Results -->
+                    <div id="modalSearchResults" class="mb-3" style="min-height:60px; max-height:220px; overflow-y:auto;">
+                        <div class="text-center py-3 text-muted">
+                            <i class="bi bi-capsule" style="font-size:2rem; opacity:0.3;"></i>
+                            <p class="mt-2 mb-0 small">Start typing to search medicines</p>
+                        </div>
+                    </div>
+
+                    <!-- Selected Medicine Info -->
+                    <div id="selectedMedicineInfo"
+                        class="alert alert-primary d-flex align-items-center gap-2 py-2 px-3 mb-3"
+                        style="display:none !important;">
+                        <i class="bi bi-check-circle-fill text-primary"></i>
+                        <span id="selectedMedicineName" class="fw-semibold"></span>
+                        <button type="button" class="btn-close btn-close-sm ms-auto"
+                            onclick="clearSelectedMedicine()"></button>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <!-- Dosage Form -->
+                    <div>
+                        <label class="form-label fw-semibold text-dark mb-3">
+                            <i class="bi bi-capsule me-1 text-primary"></i>Dosage Details
+                        </label>
+                        <div class="row g-3 mb-3">
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">
+                                    <i class="bi bi-sunrise me-1"></i>Morning
+                                </label>
+                                <input type="number" id="modal_morning" value="0" min="0" max="3"
+                                    class="form-control form-control-lg text-center">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">
+                                    <i class="bi bi-sun me-1"></i>Afternoon
+                                </label>
+                                <input type="number" id="modal_afternoon" value="0" min="0" max="3"
+                                    class="form-control form-control-lg text-center">
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">
+                                    <i class="bi bi-moon me-1"></i>Night
+                                </label>
+                                <input type="number" id="modal_night" value="0" min="0" max="3"
+                                    class="form-control form-control-lg text-center">
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">
+                                    <i class="bi bi-egg-fried me-1"></i>Meal Timing
+                                </label>
+                                <select id="modal_meal" class="form-select form-select-lg">
+                                    <option value="after_food">After Food</option>
+                                    <option value="before_food">Before Food</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold text-muted text-uppercase">
+                                    <i class="bi bi-calendar3 me-1"></i>Days
+                                </label>
+                                <input type="number" id="modal_days" value="7" min="1"
+                                    class="form-control form-control-lg" placeholder="e.g. 7">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-footer border-0 px-4 pb-4 pt-2 gap-2">
+                    <button type="button" class="btn btn-outline-secondary rounded-2" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-outline-primary rounded-2" onclick="saveMedicine(false)">
+                        <i class="bi bi-plus-circle me-1"></i>Add Another
+                    </button>
+                    <button type="button" class="btn btn-primary rounded-2" onclick="saveMedicine(true)">
+                        <i class="bi bi-check-lg me-1"></i>Add Medicine
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .med-result-card {
+            border: 1px solid #e8eef5;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            transition: border-color 0.2s;
+        }
+        .med-result-card:hover { border-color: #0d6efd; background: #f8fbff; }
+        .variant-btn {
+            display: inline-block;
+            background: #f0f7ff;
+            color: #1a3a6b;
+            border: 1px solid #c8d8f0;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 0.8rem;
+            margin: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .variant-btn:hover { background: #0d6efd; color: white; border-color: #0d6efd; }
+        .variant-btn.selected { background: #0d6efd; color: white; border-color: #0d6efd; }
+        .variant-btn.out-of-stock {
+            background: #fff0f0; color: #dc3545;
+            border-color: #f5c6cb; cursor: not-allowed; opacity: 0.6;
+        }
+    </style>
+
     <script>
-        // Initialize the page
+        // ← Variant id store karo — medicine id nahi!
+        let selectedVariantId = null;
+        let selectedMedicineName = '';
+
         document.addEventListener('DOMContentLoaded', function () {
-            loadPrescriptions();
+            updateMedicineCount();
 
-            // Add Medicine button
-            document.getElementById('addMedicineBtn').addEventListener('click', addMedicineRow);
+            const list = document.getElementById('medicineList');
+            if (list.children.length > 0) {
+                document.getElementById('emptyMessage').style.display = 'none';
+            }
 
-            // Complete Visit button
             document.getElementById('completeBtn').addEventListener('click', function (e) {
-
-                // validate
                 if (!document.getElementById('symptoms').value.trim()) {
                     alert('Please enter symptoms before completing');
-                    e.preventDefault();
-                    return;
+                    e.preventDefault(); return;
                 }
-
                 if (!document.getElementById('diagnosis').value.trim()) {
                     alert('Please enter diagnosis before completing');
-                    e.preventDefault();
-                    return;
+                    e.preventDefault(); return;
                 }
-
-                // confirm
                 if (!confirm('Are you sure you want to complete this visit?')) {
-                    e.preventDefault(); // ❗ only cancel if user clicks NO
+                    e.preventDefault();
                 }
+            });
 
+            document.getElementById('medicineModal').addEventListener('shown.bs.modal', function () {
+                resetModalForm();
+                document.getElementById('modalSearchInput').focus();
             });
         });
 
-        // Load prescriptions (if any exist)
-        function loadPrescriptions() {
-            const medicineList = document.getElementById('medicineList');
-            const emptyMessage = document.getElementById('emptyMessage');
+        // ===== Reset Modal =====
+        function resetModalForm() {
+            selectedVariantId = null;
+            selectedMedicineName = '';
+            document.getElementById('modalSearchInput').value = '';
+            document.getElementById('modalSearchResults').innerHTML = `
+                <div class="text-center py-3 text-muted">
+                    <i class="bi bi-capsule" style="font-size:2rem; opacity:0.3;"></i>
+                    <p class="mt-2 mb-0 small">Start typing to search medicines</p>
+                </div>`;
+            document.getElementById('selectedMedicineInfo').style.display = 'none';
+            document.getElementById('modal_morning').value = 0;
+            document.getElementById('modal_afternoon').value = 0;
+            document.getElementById('modal_night').value = 0;
+            document.getElementById('modal_meal').value = 'after_food';
+            document.getElementById('modal_days').value = 7;
+        }
 
-            if (medicineList.children.length === 0) {
-                emptyMessage.style.display = 'block';
+        // ===== Clear Selected =====
+        function clearSelectedMedicine() {
+            selectedVariantId = null;
+            selectedMedicineName = '';
+            document.getElementById('selectedMedicineInfo').style.display = 'none';
+            document.getElementById('modalSearchInput').value = '';
+            document.getElementById('modalSearchInput').focus();
+        }
+
+        // ===== Live Search =====
+        let searchTimer;
+        document.getElementById('modalSearchInput').addEventListener('input', function () {
+            const query = this.value.trim();
+            const results = document.getElementById('modalSearchResults');
+            clearTimeout(searchTimer);
+
+            if (query.length < 2) {
+                results.innerHTML = `
+                    <div class="text-center py-3 text-muted">
+                        <i class="bi bi-capsule" style="font-size:2rem; opacity:0.3;"></i>
+                        <p class="mt-2 mb-0 small">Type at least 2 characters</p>
+                    </div>`;
+                return;
+            }
+
+            results.innerHTML = `
+                <div class="text-center py-3 text-muted">
+                    <div class="spinner-border spinner-border-sm text-primary me-2"></div>
+                    Searching...
+                </div>`;
+
+            searchTimer = setTimeout(() => {
+                fetch(`/medicine/search/?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (!data.medicines || data.medicines.length === 0) {
+                            results.innerHTML = `
+                                <div class="text-center py-3 text-muted">
+                                    <i class="bi bi-search" style="font-size:2rem; opacity:0.3;"></i>
+                                    <p class="mt-2 mb-0 small">No medicines found for "<strong>${query}</strong>"</p>
+                                </div>`;
+                            return;
+                        }
+
+                        results.innerHTML = data.medicines.map(med => `
+                            <div class="med-result-card">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <strong class="text-dark">${med.name}</strong>
+                                    <span class="badge bg-secondary" style="font-size:0.7rem;">${med.short_name}</span>
+                                    <span class="badge bg-primary" style="font-size:0.7rem;">${med.type}</span>
+                                    ${med.company ? `<span class="text-muted small">${med.company}</span>` : ''}
+                                </div>
+                                <div>
+                                    ${med.variants.length > 0
+                                        ? med.variants.map(v => `
+                                            <span class="variant-btn ${v.stock <= 0 ? 'out-of-stock' : ''}"
+                                                ${v.stock > 0
+                                                    ? `onclick="selectVariant(${v.id}, '${med.name} - ${v.power}', this)"`
+                                                    : 'title="Out of Stock"'}>
+                                                ${v.power} &nbsp;₹${v.price}&nbsp;
+                                                ${v.stock <= 0
+                                                    ? '<span style="color:#dc3545;">Out of Stock</span>'
+                                                    : `<span style="color:green;">(${v.stock})</span>`}
+                                            </span>
+                                        `).join('')
+                                        : `<span class="variant-btn"
+                                            onclick="selectVariant(0, '${med.name}', this)">
+                                            Select
+                                          </span>`
+                                    }
+                                </div>
+                            </div>
+                        `).join('');
+                    });
+            }, 300);
+        });
+
+        // ===== Select Variant ← Yahi sahi function hai =====
+        function selectVariant(variantId, name, el) {
+            document.querySelectorAll('.variant-btn.selected').forEach(b => {
+                b.classList.remove('selected');
+            });
+
+            el.classList.add('selected');
+            selectedVariantId = variantId;      // ← Variant id save karo
+            selectedMedicineName = name;
+
+            const info = document.getElementById('selectedMedicineInfo');
+            document.getElementById('selectedMedicineName').textContent = name;
+            info.style.display = 'flex';
+
+            document.getElementById('modal_days').focus();
+        }
+
+        // ===== Save Medicine =====
+        function saveMedicine(closeModal) {
+            if (!selectedVariantId) {
+                alert('Please select a medicine variant first!');
+                return;
+            }
+
+            const days = document.getElementById('modal_days').value;
+            if (!days || days < 1) {
+                alert('Please enter number of days!');
+                document.getElementById('modal_days').focus();
+                return;
+            }
+
+            const morning = document.getElementById('modal_morning').value;
+            const afternoon = document.getElementById('modal_afternoon').value;
+            const night = document.getElementById('modal_night').value;
+            const meal = document.getElementById('modal_meal').value;
+
+            const medicineList = document.getElementById('medicineList');
+            document.getElementById('emptyMessage').style.display = 'none';
+
+            const tr = document.createElement('tr');
+            
+            let mealText = meal === 'after_food' ? 'After Food' : 'Before Food';
+
+            tr.innerHTML = `
+                <td>
+                    <span class="fw-semibold">${selectedMedicineName}</span>
+                    <input type="hidden" name="variant_id[]" value="${selectedVariantId}">
+                    <input type="hidden" name="item_id[]" value="">
+                </td>
+                <td class="text-center align-middle">
+                    ${morning}
+                    <input type="hidden" name="morning" value="${morning}">
+                </td>
+                <td class="text-center align-middle">
+                    ${afternoon}
+                    <input type="hidden" name="afternoon" value="${afternoon}">
+                </td>
+                <td class="text-center align-middle">
+                    ${night}
+                    <input type="hidden" name="night" value="${night}">
+                </td>
+                <td class="align-middle">
+                    ${mealText}
+                    <input type="hidden" name="meal" value="${meal}">
+                </td>
+                <td class="text-center align-middle">
+                    ${days}
+                    <input type="hidden" name="days" value="${days}">
+                </td>
+                <td class="text-center align-middle">
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeMedicineRow(this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            medicineList.appendChild(tr);
+            updateMedicineCount();
+
+            if (closeModal) {
+                bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide();
             } else {
-                emptyMessage.style.display = 'none';
+                resetModalForm();
+                document.getElementById('modalSearchInput').focus();
             }
-
-            updateMedicineCount();
         }
 
-        // Add new medicine row
-        function addMedicineRow() {
-            const medicineList = document.getElementById('medicineList');
-            const emptyMessage = document.getElementById('emptyMessage');
-
-            const newRow = document.createElement('tr');
-
-            newRow.innerHTML = `
-        <td>
-            <select name="medicine" class="form-control form-control-sm" required>
-                <option value="">Select Medicine</option>
-                {% for med in medicines %}
-                    <option value="{{ med.id }}">{{ med.name }}</option>
-                {% endfor %}
-            </select>
-        </td>
-
-        <!-- 🔥 Dosage (structured) -->
-        <td>
-            <div style="display:flex; gap:5px;">
-                <input type="number" name="morning" min="0" max="2" value="0" class="form-control form-control-sm" placeholder="M">
-                <input type="number" name="afternoon" min="0" max="2" value="0" class="form-control form-control-sm" placeholder="A">
-                <input type="number" name="night" min="0" max="2" value="0" class="form-control form-control-sm" placeholder="N">
-            </div>
-
-            <select name="meal" class="form-control form-control-sm mt-1">
-                <option value="after_food">After Food</option>
-                <option value="before_food">Before Food</option>
-            </select>
-        </td>
-
-        <td>
-            <input type="number" name="days" class="form-control form-control-sm" required>
-        </td>
-
-        <td class="text-center">
-            <button type="button" class="btn btn-sm btn-danger" onclick="removeMedicineRow(this)">X</button>
-        </td>
-    `;
-
-            medicineList.appendChild(newRow);
-            updateMedicineCount();
-            emptyMessage.style.display = 'none';
-        }
-
-
-        // Remove medicine row
+        // ===== Remove Row =====
         function removeMedicineRow(btn) {
-            const row = btn.closest('tr');  // 🔥 correct way
-            row.remove();
-
+            btn.closest('tr').remove();
             updateMedicineCount();
-
-            const medicineList = document.getElementById('medicineList');
-            const emptyMessage = document.getElementById('emptyMessage');
-
-            if (medicineList.children.length === 0) {
-                emptyMessage.style.display = 'block';
+            if (document.getElementById('medicineList').children.length === 0) {
+                document.getElementById('emptyMessage').style.display = 'block';
             }
         }
 
-        // Update medicine count
+        // ===== Count =====
         function updateMedicineCount() {
-            const medicineList = document.getElementById('medicineList');
-            const count = medicineList.children.length;
-            document.getElementById('medicineCount').textContent = count;
-        }
-
-
-        // Complete visit
-        function completeVisit() {
-            const form = document.getElementById('visitForm');
-
-            // Validate required fields
-            if (!document.getElementById('symptoms').value.trim()) {
-                alert('Please enter symptoms before completing');
-                return;
-            }
-            if (!document.getElementById('diagnosis').value.trim()) {
-                alert('Please enter diagnosis before completing');
-                return;
-            }
-
-            // Confirm completion
-            if (confirm('Are you sure you want to complete this visit?')) {
-                alert('Visit marked as complete!');
-                // Perform completion logic
-                // window.location.href = '/doctor/manage-appointments/'; // Redirect after completion
-            }
+            document.getElementById('medicineCount').textContent =
+                document.getElementById('medicineList').children.length;
         }
     </script>
 </main>
