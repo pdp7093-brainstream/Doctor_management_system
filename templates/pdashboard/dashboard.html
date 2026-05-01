@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,173 +9,198 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
 </head>
-
 <body>
-    <div class="dashboard">
-        <!-- Sidebar -->
-        <div class="sidebar">
-             <h2><a href="{% url 'index' %}" style="text-decoration: none; color: inherit;"><i class="fas fa-clinic-medical"></i> Clinic</a></h2>
-            <ul>
-                <li class="active"><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-                <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
-                <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-            </ul>
-        </div>
+<div class="dashboard">
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="header d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h3><i class="fas fa-user-circle"></i> Welcome, {{ request.user.first_name }} {{ request.user.last_name }}</h3>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="row stats mb-4">
-                <div class="col-md-4">
-                    <div class="card stat-card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-eye fa-2x text-primary mb-2"></i>
-                            <h3>{{ total_visits }}</h3>
-                            <p>Total Visits</p>
-                        </div>
-                    </div>
-                </div>  
-                <div class="col-md-4">
-                    <div class="card stat-card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-calendar-alt fa-2x text-warning mb-2"></i>
-                            <h3>{{ pending_appointments }}</h3>
-                            <p>Pending Appointments</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card stat-card text-center">
-                        <div class="card-body">
-                            <i class="fas fa-rupee-sign fa-2x text-success mb-2"></i>
-                            <h3>₹{{ total_spent }}</h3>
-                            <p>Total Spent</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Appointments Table -->
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="fas fa-calendar-check"></i> All Appointments</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive table-scroll">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Time</th>
-                                    <th>Patient</th>
-                                    <th>Doctor</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for appointment in appointments %}
-                                <tr>
-                                    <td>{{ appointment.appointment_date }}</td>
-                                    <td>{{ appointment.time_slot }}</td>
-                                    <td>
-                                        {% if appointment.patient and appointment.patient.user %}
-                                            {{ appointment.full_name }}   
-                                        {% else %}
-                                            {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if appointment.doctor and appointment.doctor.user %}
-                                            {{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}
-                                        {% else %}
-                                            Not assigned
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if appointment.status == 'confirmed' %}
-                                            <span class="badge bg-success">Confirmed</span>
-                                        {% elif appointment.status == 'cancelled' %}
-                                            <span class="badge bg-danger">Cancelled</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">Pending</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#appointmentModal"
-                                            data-appointment-date="{{ appointment.appointment_date }}"
-                                            data-appointment-time="{{ appointment.time_slot }}"
-                                            data-appointment-doctor="{% if appointment.doctor and appointment.doctor.user %}{{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}{% else %}Not assigned{% endif %}"
-                                            data-appointment-status="{{ appointment.status|capfirst }}"
-                                            data-appointment-notes="{{ appointment.notes|default:'No notes available'|escape }}"
-                                            data-appointment-fullname="{% if appointment.patient and appointment.patient.user %}{{ appointment.full_name|escape }}{% endif %}"
-                                            data-appointment-phone="{{ appointment.phone|escape }}">
-                                            <i class="fas fa-eye"></i> View
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center text-muted py-4">No appointments found yet.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>
+            <a href="{% url 'index' %}">
+                <i class="fas fa-clinic-medical"></i> Clinic
+            </a>
+        </h2>
+        <ul>
+            <li class="active"><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile</a></li>
+            <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
     </div>
 
-    <!-- Appointment Details Modal -->
-    <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="appointmentModalLabel">Appointment Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Main Content -->
+    <div class="main-content">
+
+        <!-- Header -->
+        <div class="header d-flex justify-content-between align-items-center mb-4">
+            <h3><i class="fas fa-user-circle"></i> Welcome, {{ request.user.first_name }}</h3>
+        </div>
+
+        <!-- Stats -->
+        <div class="row stats g-3 mb-4">
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-lg text-primary"></i>
+                    <h3>{{ total_visits }}</h3>
+                    <p>Total Visits  </p>
+                    
                 </div>
-                <div class="modal-body">
-                    <div id="appointment-details">
-                        <!-- Details will be loaded here via JavaScript -->
-                        <p><strong>Patient Name:</strong> <span id="modal-fullname"></span></p>
-                        <p><strong>Phone:</strong> <span id="modal-phone"></span></p>
-                        <p><strong>Date:</strong> <span id="modal-date"></span></p>
-                        <p><strong>Time:</strong> <span id="modal-time"></span></p>
-                        <p><strong>Doctor:</strong> <span id="modal-doctor"></span></p>
-                        <p><strong>Status:</strong> <span id="modal-status"></span></p>
-                        <p><strong>Notes:</strong> <span id="modal-notes"></span></p>
-                    </div>
+                
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card">
+                    <i class="fas fa-lg text-warning"></i>
+                    <h3 class="text-warning">{{ pending_appointments }}</h3>
+                    <p>Pending Appointments</p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+            <div class="col-md-4">  
+                <div class="stat-card">
+                    <i class="fas fa-lg text-success"></i>
+                    <h3 class="text-success">₹{{ total_spent }}</h3>
+                    <p>Total Spent</p>
                 </div>
             </div>
         </div>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // JavaScript to populate modal from the selected appointment row
-        const appointmentModal = document.getElementById('appointmentModal');
-        appointmentModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            document.getElementById('modal-fullname').textContent = button.dataset.appointmentFullname;
-            document.getElementById('modal-phone').textContent = button.dataset.appointmentPhone;
-            document.getElementById('modal-date').textContent = button.dataset.appointmentDate;
-            document.getElementById('modal-time').textContent = button.dataset.appointmentTime;
-            document.getElementById('modal-doctor').textContent = button.dataset.appointmentDoctor;
-            document.getElementById('modal-status').textContent = button.dataset.appointmentStatus;
-            document.getElementById('modal-notes').textContent = button.dataset.appointmentNotes;
+        <!-- Appointments Table -->
+        <div class="card">
+            <div class="card-header">
+                <h4><i class="fas fa-calendar-check"></i> All Appointments</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table" id="appointmentsTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Patient</th>
+                                <th>Booked by</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            {% for appointment in appointments %}
+                            <tr>
+                                <td>{{ appointment.appointment_date }}</td>
+                                <td>{{ appointment.time_slot }}</td>
+                                <td>
+                                    {% if appointment.patient and appointment.patient.user %}
+                                        {{ appointment.full_name }}
+                                    {% else %}
+                                        {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if appointment.doctor and appointment.doctor.user %}
+                                        {{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}
+                                    {% else %}
+                                        Not assigned
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if appointment.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% elif appointment.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'appointment:appointment_detail' appointment.id %}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr id="emptyRow">
+                                <td colspan="6" class="text-center text-muted py-4">No appointments found yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-wrapper" id="paginationWrapper" style="display:none;">
+                    <span id="pageInfo" class="text-muted" style="font-size:0.85rem;"></span>
+                    <ul class="pagination" id="pagination"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const ROWS_PER_PAGE = 10;
+    const tbody = document.getElementById('tableBody');
+    const allRows = Array.from(tbody.querySelectorAll('tr:not(#emptyRow)'));
+    const pagination = document.getElementById('pagination');
+    const pageInfo = document.getElementById('pageInfo');
+    const paginationWrapper = document.getElementById('paginationWrapper');
+    let currentPage = 1;
+
+    function totalPages() {
+        return Math.ceil(allRows.length / ROWS_PER_PAGE);
+    }
+
+    function showPage(page) {
+        currentPage = page;
+        const start = (page - 1) * ROWS_PER_PAGE;
+        const end = start + ROWS_PER_PAGE;
+
+        allRows.forEach((row, i) => {
+            row.style.display = (i >= start && i < end) ? '' : 'none';
         });
-    </script>
-</body>
 
+        pageInfo.textContent = `Showing ${start + 1}–${Math.min(end, allRows.length)} of ${allRows.length} appointments`;
+        renderPagination();
+    }
+
+    function renderPagination() {
+        pagination.innerHTML = '';
+        const total = totalPages();
+
+        // Prev
+        const prev = document.createElement('li');
+        prev.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
+        prev.innerHTML = `<a class="page-link" href="#">&lsaquo;</a>`;
+        prev.addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) showPage(currentPage - 1); });
+        pagination.appendChild(prev);
+
+        // Page numbers
+        for (let i = 1; i <= total; i++) {
+            // Show: first, last, current ±1, and ellipsis
+            if (i === 1 || i === total || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                const li = document.createElement('li');
+                li.className = 'page-item' + (i === currentPage ? ' active' : '');
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                li.addEventListener('click', e => { e.preventDefault(); showPage(i); });
+                pagination.appendChild(li);
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                const li = document.createElement('li');
+                li.className = 'page-item disabled';
+                li.innerHTML = `<span class="page-link">…</span>`;
+                pagination.appendChild(li);
+            }
+        }
+
+        // Next
+        const next = document.createElement('li');
+        next.className = 'page-item' + (currentPage === total ? ' disabled' : '');
+        next.innerHTML = `<a class="page-link" href="#">&rsaquo;</a>`;
+        next.addEventListener('click', e => { e.preventDefault(); if (currentPage < total) showPage(currentPage + 1); });
+        pagination.appendChild(next);
+    }
+
+    // Init
+    if (allRows.length > ROWS_PER_PAGE) {
+        paginationWrapper.style.display = 'flex';
+        showPage(1);
+    }
+</script>
+</body>
 </html>

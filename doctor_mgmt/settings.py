@@ -115,8 +115,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.PhoneBackend',      # ← Phone se login
-    'django.contrib.auth.backends.ModelBackend',  # ← Normal bhi rakho
+    'accounts.backends.PhoneBackend',      
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 # Internationalization
@@ -129,7 +129,6 @@ TIME_ZONE = 'Asia/Kolkata'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/

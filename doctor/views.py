@@ -5,7 +5,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.views import View
-from django.urls import reverse_lazy
 from .decorators import role_required
 from .models import InnerMember
 from appointment.models import Appointment
@@ -13,7 +12,6 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from accounts.models import Patient
 from django.contrib import messages
-
 
 def login_view(request):
     if request.method == 'POST':
@@ -32,7 +30,7 @@ def login_view(request):
             except InnerMember.DoesNotExist:
                 return render(request, 'doctor/login.html', {'error': 'Role not assigned'})
 
-            # 🔥 YAHAN CHANGE
+            # YAHAN CHANGE
             if role == 'doctor':
                 return redirect('doctor:dashboard')
             else:
@@ -47,7 +45,6 @@ def login_view(request):
 def logout_view(request):
      logout(request)
      return redirect('doctor:login')
-
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):

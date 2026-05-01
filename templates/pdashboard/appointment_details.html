@@ -1,0 +1,278 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
+    <style>
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .info-grid.full { grid-template-columns: 1fr; }
+        @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+
+        .info-box {
+            background: #f7f9ff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 14px;
+        }
+        .info-box .label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            margin-bottom: 3px;
+        }
+        .info-box .value {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }
+        .status-confirmed { background:#dcfce7; color:#16a34a; }
+        .status-cancelled { background:#fee2e2; color:#dc2626; }
+        .status-pending   { background:#fef3c7; color:#d97706; }
+        .visit-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; background:#e0f2fe; color:#0369a1; }
+
+        .detail-section { margin-bottom: 28px; }
+        .detail-section:last-child { margin-bottom: 0; }
+
+        .rx-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+        .rx-table thead th { background:var(--primary); color:#fff; padding:10px 12px; text-align:left; font-weight:600; }
+        .rx-table tbody td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .rx-table tbody tr:last-child td { border-bottom:none; }
+        .rx-table tbody tr:hover { background:#f7f9ff; }
+
+        .btn-cancel-appt {
+            background:transparent; color:#dc2626; border:1.5px solid #dc2626;
+            border-radius:8px; padding:7px 14px; font-weight:600; font-size:0.88rem;
+            cursor:pointer; transition:all 0.2s; font-family:inherit;
+        }
+        .btn-cancel-appt:hover { background:#dc2626; color:#fff; }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+
+    <!-- Header -->
+    <div class="header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <h3><i class="fas fa-calendar-check"></i> Appointment Details</h3>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Card 1: Appointment + Patient + Doctor -->
+    <div class="detail-card mb-4">
+
+        <!-- Appointment Info -->
+        <div class="detail-section">
+            <div class="section-title"><i class="fas fa-calendar-alt"></i> Appointment Info</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Date</div>
+                    <div class="value">{{ appointment.appointment_date }}</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Time</div>
+                    <div class="value">{{ appointment.time_slot }}</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Status</div>
+                    <div class="value">
+                        {% if appointment.status == 'confirmed' %}
+                            <span class="status-badge status-confirmed">Confirmed</span>
+                        {% elif appointment.status == 'cancelled' %}
+                            <span class="status-badge status-cancelled">Cancelled</span>
+                        {% else %}
+                            <span class="status-badge status-pending">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Booked On</div>
+                    <div class="value">{{ appointment.create_at|date:"d M Y, h:i A" }}</div>
+                </div>
+            </div>
+            {% if appointment.notes %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Reason for Visit / Notes</div>
+                    <div class="value">{{ appointment.notes }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Patient Info -->
+        <div class="detail-section">
+            <div class="section-title"><i class="fas fa-user"></i> Patient Info</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Full Name</div>
+                    <div class="value">{{ appointment.full_name }}</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Phone</div>
+                    <div class="value">{{ appointment.phone }}</div>
+                </div>
+                {% if appointment.patient.dob %}
+                <div class="info-box">
+                    <div class="label">Date of Birth</div>
+                    <div class="value">{{ appointment.patient.dob|date:"d M Y" }}</div>
+                </div>
+                {% endif %}
+                {% if appointment.patient.gender %}
+                <div class="info-box">
+                    <div class="label">Gender</div>
+                    <div class="value">{{ appointment.patient.gender|capfirst }}</div>
+                </div>
+                {% endif %}
+                {% if appointment.patient.bld_grop %}
+                <div class="info-box">
+                    <div class="label">Blood Group</div>
+                    <div class="value">{{ appointment.patient.bld_grop }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Doctor Info -->
+        <div class="detail-section mb-0">
+            <div class="section-title"><i class="fas fa-user-md"></i> Doctor</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Doctor Name</div>
+                    <div class="value">
+                        {% if appointment.doctor and appointment.doctor.user %}
+                            Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}
+                        {% else %}
+                            Not assigned yet
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Card 2: Visit Details (only if visit exists) -->
+    {% if visit %}
+    <div class="detail-card mb-4">
+        <div class="detail-section mb-0">
+            <div class="section-title"><i class="fas fa-stethoscope"></i> Visit Details</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Visit Status</div>
+                    <div class="value"><span class="visit-badge">{{ visit.visted_status|capfirst }}</span></div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Visit Date</div>
+                    <div class="value">{{ visit.created_at|date:"d M Y" }}</div>
+                </div>
+            </div>
+            {% if visit.symptoms %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Symptoms</div>
+                    <div class="value">{{ visit.symptoms }}</div>   
+                </div>
+            </div>
+            {% endif %}
+            {% if visit.diagnosis %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Diagnosis</div>
+                    <div class="value">{{ visit.diagnosis }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if visit.notes %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Doctor's Notes</div>
+                    <div class="value">{{ visit.notes }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Card 3: Prescription (only if exists) -->
+    {% if prescription and prescription_items %}
+    <div class="detail-card mb-4">
+        <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Prescription</div>
+        <div style="overflow-x:auto; border-radius:8px; border:1px solid var(--border);">
+            <table class="rx-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Type</th>
+                        <th>Power</th>
+                        <th>Dosage</th>
+                        <th>Days</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prescription_items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {% if item.medicine_variant %}
+                                {{ item.medicine_variant.medicine.name }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if item.medicine_variant %}
+                                {{ item.medicine_variant.medicine.get_medicine_type_display }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            {% if item.medicine_variant %}
+                                {{ item.medicine_variant.power }}
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ item.dosage }}</td>
+                        <td>{{ item.days }} days</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-2" style="font-size:0.8rem; color:var(--muted);">
+            Prescribed on: {{ prescription.created_at|date:"d M Y" }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <!-- <div class="d-flex gap-3 flex-wrap">
+        {% if appointment.status == 'pending' %}
+        <form method="post" action="#"
+              onsubmit="return confirm('Are you sure you want to cancel this appointment?')">
+            {% csrf_token %}
+            <button type="submit" class="btn-cancel-appt">
+                <i class="fas fa-times-circle"></i> Cancel Appointment
+            </button>
+        </form>
+        {% endif %}
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div> -->
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
