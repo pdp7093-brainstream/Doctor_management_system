@@ -1,20 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from .decorators import role_required
 from .models import InnerMember
-from medicine.models import Medicine, MedicineVariant
 from appointment.models import Appointment
 from django.utils import timezone
 from django.utils.decorators import method_decorator
-
-
-
+from accounts.models import Patient
+from django.contrib import messages
 
 
 def login_view(request):
@@ -93,57 +91,6 @@ class DashboardView(View):
         return render(request, "doctor/dashboard.html", context)
 
 
-
-
-# @method_decorator([never_cache, role_required("doctor")], name="dispatch")
-# class Manage_appointments(View):
-#     def get(self, request):
-#         doctor = InnerMember.objects.get(user=request.user)
-#         appointments = Appointment.objects.filter(doctor=doctor).order_by(
-#             "-appointment_date"
-#         )
-#         context = {"appointments": appointments}
-#         return render(request, "doctor/manage_appointments.html", context)
-
-
-
-    # # 🔥 safe doctor fetch (error avoid karega)
-    # try:
-    #     doctor = InnerMember.objects.get(user=request.user)
-    # except InnerMember.DoesNotExist:
-    #     return render(request, 'doctor/dashboard.html', {
-    #         'error': 'Doctor profile not found'
-    #     })
-
-    # # 🔥 DEBUG (temporary laga ke check karo)
-    # print("LOGGED IN DOCTOR ID:", doctor.id)
-    # print("TODAY DATE:", today)
-
-    # # 🔥 appointments filter
-    # appointments = Appointment.objects.filter(
-    #     doctor=doctor,
-    #     appointment_date=today
-    # ).order_by('time_slot')
-
-    # # 🔥 DEBUG
-    # print("TOTAL FOUND:", appointments.count())
-
-    # # counts
-    # total_appointments = appointments.count()
-    # pending_appointments = appointments.filter(status='pending').count()
-    # confirmed_appointments = appointments.filter(status='confirmed').count()
-    # cancelled_appointments = appointments.filter(status='cancelled').count()
-
-    # context = {
-    #     'total_appointments': total_appointments,
-    #     'pending_appointments': pending_appointments,
-    #     'confirmed_appointments': confirmed_appointments,
-    #     'cancelled_appointments': cancelled_appointments,
-    #     'appointments': appointments
-    # }
-
-    # return render(request, 'doctor/dashboard.html', context)
-
 @never_cache
 @login_required
 def manage_patients(request):
@@ -167,7 +114,7 @@ def billing(request):
 @never_cache
 @role_required('doctor')
 def manage_patients(request):
-    patients = Patient.objects.select_related('user').all().order_by('user__first_name')
+    patients = Patient.objects.all().order_by('user__first_name')
     return render(request, 'doctor/manage_patients.html', {'patients': patients})
 
 
@@ -243,18 +190,35 @@ def add_patient(request):
             messages.error(request, 'A user with this email already exists.')
             return render(request, 'doctor/add_patient.html')
 
-        user = User.objects.create_user(username=email, email=email, first_name=name, password='defaultpassword123')
+        # Split name into first and last name
+        name_parts = name.strip().split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
 
-        Patient.objects.create(
-            user=user,
-            phone=phone,
-            address=address,
-            dob=dob if dob else None,
-            gender=gender,
-            bld_grop=bld_grop,
-        )
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email, 
+                    email=email, 
+                    first_name=first_name, 
+                    last_name=last_name, 
+                    
+                )
 
-        messages.success(request, 'Patient added successfully.')
-        return redirect('doctor:manage_patients')
+                Patient.objects.create(
+                    user=user,
+                    phone=phone,
+                    address=address,
+                    dob=dob if dob else None,
+                    gender=gender,
+                    bld_grop=bld_grop,
+                )
+            
+            messages.success(request, 'Patient added successfully.')
+            return redirect('doctor:manage_patients')
+            
+        except Exception as e:
+            messages.error(request, f'An error occurred: {str(e)}')
+            return render(request, 'doctor/add_patient.html')
 
     return render(request, 'doctor/add_patient.html')

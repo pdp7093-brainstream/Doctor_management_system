@@ -76,58 +76,64 @@ from django.views.decorators.cache import never_cache
 from doctor.decorators import role_required
 from .models import Appointment
 from doctor.models import InnerMember
-
 from django.core.paginator import Paginator
+
+
+
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
         doctor = InnerMember.objects.get(user=request.user)
+        
+        search = request.GET.get('search', '')
+        appointment_date = request.GET.get('appointment_date', '')
+        status = request.GET.get('status', 'all')
 
-        # ✅ doctor=NULL wale bhi dikhao
         appointments = Appointment.objects.filter(
-            Q(doctor=doctor) | Q(doctor__isnull=True)
-        )
+            doctor=doctor
+        ).order_by("-appointment_date", "-time_slot")
 
-        search = request.GET.get("search", "")
-        appointment_date = request.GET.get("appointment_date", "")
-        status = request.GET.get("status", "all")
-
+        # Search filter
         if search:
             appointments = appointments.filter(
-                Q(full_name__icontains=search) |
-                Q(phone__icontains=search) |
                 Q(patient__user__first_name__icontains=search) |
-                Q(patient__user__last_name__icontains=search)
+                Q(patient__user__last_name__icontains=search) |
+                Q(patient__phone__icontains=search)
             )
 
+        # Date filter
         if appointment_date:
             appointments = appointments.filter(appointment_date=appointment_date)
 
-        if status and status != "all":
+        # Status filter
+        if status and status != 'all':
             appointments = appointments.filter(status=status)
 
-        appointments = appointments.order_by('-appointment_date', '-time_slot')
-
-        paginator = Paginator(appointments, 10)
-        page_number = request.GET.get('page')
+        # Pagination — 20 per page
+        paginator = Paginator(appointments, 20)
+        page_number = request.GET.get('page', 1)
         page_obj = paginator.get_page(page_number)
 
+        # AJAX request
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return render(request, "doctor/partials/appointments_table.html", {
-                "appointments": page_obj,
-                "page_obj": page_obj,
-                "search": search,
-                "appointment_date": appointment_date,
-                "status": status,
+            return render(request, 'doctor/manage_appointments.html', {
+                'appointments': page_obj,
+                'page_obj': page_obj,
+                'search': search,
+                'appointment_date': appointment_date,
+                'status': status,
             })
 
-        return render(request, "doctor/manage_appointments.html", {
-            "appointments": page_obj,
-            "page_obj": page_obj,
-            "search": search,
-            "appointment_date": appointment_date,
-            "status": status,
+        return render(request, 'doctor/manage_appointments.html', {
+            'appointments': page_obj,
+            'page_obj': page_obj,
+            'search': search,
+            'appointment_date': appointment_date,
+            'status': status,
         })
+
+
+
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Add_appointment(View):
@@ -214,114 +220,165 @@ class StartVisitView(View):
 class PrescriptionView(View):
     def get(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
-
-        # get or create prescription
-        prescription,created = Prescription.objects.get_or_create(visit=visit)
-        
-        # MedicineVariant 
-        variants = MedicineVariant.objects.filter(
-            medicine__is_active=True
-        )
-
-
+        prescription, created = Prescription.objects.get_or_create(visit=visit)
+        variants = MedicineVariant.objects.filter(medicine__is_active=True)
         items = prescription.items.select_related(
-            'medicine_variant','medicine_variant__medicine'
+            'medicine_variant', 'medicine_variant__medicine'
         )
-        
-        # 🔹 Parse dosage for the template
+
         for item in items:
             try:
                 parts = item.dosage.split(' (')
                 m_a_n = parts[0].split('-')
-                item.parsed_morning = int(m_a_n[0])
+                item.parsed_morning   = int(m_a_n[0])
                 item.parsed_afternoon = int(m_a_n[1])
-                item.parsed_night = int(m_a_n[2])
-                item.parsed_meal = parts[1].replace(')', '')
+                item.parsed_night     = int(m_a_n[2])
+                item.parsed_meal      = parts[1].replace(')', '')
             except Exception:
-                item.parsed_morning = 0
+                item.parsed_morning   = 0
                 item.parsed_afternoon = 0
-                item.parsed_night = 0
-                item.parsed_meal = 'after_food'
-        
+                item.parsed_night     = 0
+                item.parsed_meal      = 'after_food'
+
         return render(request, 'doctor/prescription.html', {
             'visit': visit,
-            'variants':variants,
-            'items':items
+            'variants': variants,
+            'items': items
         })
+
+    def reduce_stock(self, prescription):
+        """
+        Sirf un items ka stock minus karo jinka should_deduct = True hai.
+        Complete hone ke baad should_deduct = False ho jaayega automatically.
+        """
+        errors = []
+
+        pending_items = prescription.items.select_related(
+            'medicine_variant__medicine'
+        ).filter(should_deduct=True)
+
+        for item in pending_items:
+            variant = item.medicine_variant
+
+            try:
+                parts = item.dosage.split(' (')
+                m_a_n = parts[0].split('-')
+                morning   = int(m_a_n[0])
+                afternoon = int(m_a_n[1])
+                night     = int(m_a_n[2])
+            except Exception:
+                morning = afternoon = night = 0
+
+            total_qty = (morning + afternoon + night) * item.days
+
+            if total_qty <= 0:
+                item.should_deduct = False
+                item.was_deducted  = True
+                item.save()
+                continue
+
+            if variant.stock >= total_qty:
+                variant.stock -= total_qty
+                variant.save()
+            else:
+                errors.append(
+                    f"{variant.medicine.name} - {variant.power}: "
+                    f"Required {total_qty}, Available {variant.stock}"
+                )
+                variant.stock = 0
+                variant.save()
+
+            # ✅ Stock minus ho gaya — toggle OFF, history ON
+            item.should_deduct = False
+            item.was_deducted  = True
+            item.save()
+
+        return errors
 
     def post(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
 
-        #  Visit update
-        visit.symptoms = request.POST.get("symptoms")
+        visit.symptoms  = request.POST.get("symptoms")
         visit.diagnosis = request.POST.get("diagnosis")
-        visit.notes = request.POST.get("notes")
+        visit.notes     = request.POST.get("notes")
 
-        if "complete_visit" in request.POST:
+        is_completing = "complete_visit" in request.POST
+
+        if is_completing:
             visit.visted_status = "completed"
         else:
             visit.visted_status = "in_progress"
 
         visit.save()
 
-        # 🔹 Prescription
         prescription, created = Prescription.objects.get_or_create(visit=visit)
 
-        # 🔹 Get form lists
-        variant_ids = request.POST.getlist("variant_id[]")
-        item_ids = request.POST.getlist("item_id[]")
-        morning_list = request.POST.getlist("morning")
-        afternoon_list = request.POST.getlist("afternoon")
-        night_list = request.POST.getlist("night")
-        meal_list = request.POST.getlist("meal")
-        days_list = request.POST.getlist("days")
+        variant_ids      = request.POST.getlist("variant_id[]")
+        item_ids         = request.POST.getlist("item_id[]")
+        morning_list     = request.POST.getlist("morning")
+        afternoon_list   = request.POST.getlist("afternoon")
+        night_list       = request.POST.getlist("night")
+        meal_list        = request.POST.getlist("meal")
+        days_list        = request.POST.getlist("days")
+        # ✅ Toggle values — checked = "on", unchecked = missing
+        deduct_list      = request.POST.getlist("should_deduct[]")
 
-        existing_item_ids = list(prescription.items.values_list('id', flat=True))
+        existing_item_ids  = list(prescription.items.values_list('id', flat=True))
         submitted_item_ids = []
 
-        # 🔹 Save or update items
-        for item_id_str, v_id, m, a, n, meal, days in zip(
-            item_ids,
-            variant_ids,
-            morning_list,
-            afternoon_list,
-            night_list,
-            meal_list,
-            days_list
-        ):
+        for i, (item_id_str, v_id, m, a, n, meal, days) in enumerate(zip(
+            item_ids, variant_ids,
+            morning_list, afternoon_list, night_list,
+            meal_list, days_list
+        )):
             if not v_id:
                 continue
 
             variant = MedicineVariant.objects.get(id=v_id)
-            dosage = f"{m}-{a}-{n} ({meal})"
+            dosage  = f"{m}-{a}-{n} ({meal})"
+
+            # ✅ Toggle: checkbox name = "should_deduct[]" with value = index
+            should_deduct = str(i) in deduct_list
 
             if item_id_str:
                 try:
                     item_id_int = int(item_id_str)
                     submitted_item_ids.append(item_id_int)
-                    item = PrescriptionItem.objects.get(id=item_id_int, prescription=prescription)
+                    item = PrescriptionItem.objects.get(
+                        id=item_id_int, prescription=prescription
+                    )
                     item.medicine_variant = variant
-                    item.dosage = dosage
-                    item.days = int(days)
+                    item.dosage           = dosage
+                    item.days             = int(days)
+                    item.should_deduct    = should_deduct  # ✅ Toggle save
                     item.save()
                 except PrescriptionItem.DoesNotExist:
                     pass
             else:
-                PrescriptionItem.objects.create(
-                    prescription=prescription,
-                    medicine_variant=variant,
-                    dosage=dosage,
-                    days=int(days),
+                new_item = PrescriptionItem.objects.create(
+                    prescription     = prescription,
+                    medicine_variant = variant,
+                    dosage           = dosage,
+                    days             = int(days),
+                    should_deduct    = should_deduct,  # ✅ Toggle save
+                    was_deducted     = False,
                 )
+                submitted_item_ids.append(new_item.id)
 
-        # 🔥 Delete any items that were removed by the user
+        # Delete removed items
         items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
         if items_to_delete:
             PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
 
-        # 🔹 Appointment complete
+        # ✅ Stock minus — sirf complete_visit pe
+        if is_completing:
+            stock_errors = self.reduce_stock(prescription)
+            if stock_errors:
+                for err in stock_errors:
+                    messages.warning(request, f"Low stock: {err}")
+
         appointment = visit.appointment
-        appointment.status = "completed"
+        appointment.status = "completed" if is_completing else "confirmed"
         appointment.save()
 
         return redirect("appointment:manage_appointments")

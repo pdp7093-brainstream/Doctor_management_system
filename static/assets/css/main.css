@@ -1479,7 +1479,7 @@ section,
 
 .home-about .about-content .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 2rem;
   margin-bottom: 3rem;
 }
@@ -1688,276 +1688,368 @@ section,
 }
 
 /*--------------------------------------------------------------
-# Featured Departments Section
+# Featured Departments Section (REDESIGNED)
 --------------------------------------------------------------*/
 .featured-departments .specialty-card {
   background: var(--surface-color);
-  border-radius: 20px;
+  border-radius: 32px;
   overflow: hidden;
-  box-shadow: 0 8px 40px color-mix(in srgb, var(--default-color), transparent 92%);
-  transition: all 0.4s ease;
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+  box-shadow: none;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .featured-departments .specialty-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 60px color-mix(in srgb, var(--default-color), transparent 85%);
+  transform: translateY(-10px);
+  border-color: var(--accent-color);
+  box-shadow: 0 30px 60px color-mix(in srgb, var(--accent-color), transparent 85%);
 }
 
 .featured-departments .specialty-content {
-  padding: 40px;
+  padding: 50px 40px;
   flex: 1;
   display: flex;
   flex-direction: column;
+  background: linear-gradient(to bottom, var(--surface-color), color-mix(in srgb, var(--surface-color), transparent 20%));
 }
 
 .featured-departments .specialty-meta {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .featured-departments .specialty-meta .specialty-label {
   display: inline-block;
-  background: color-mix(in srgb, var(--accent-color), transparent 90%);
+  background: transparent;
   color: var(--accent-color);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 8px 16px;
-  border-radius: 20px;
+  letter-spacing: 1.5px;
+  padding: 0;
+  border-radius: 0;
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .featured-departments h3 {
-  font-size: 28px;
-  font-weight: 300;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
   color: var(--heading-color);
   margin-bottom: 20px;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .featured-departments .specialty-card p {
-  color: color-mix(in srgb, var(--default-color), transparent 25%);
+  color: color-mix(in srgb, var(--default-color), transparent 15%);
   font-size: 16px;
-  line-height: 1.7;
-  margin-bottom: 25px;
+  line-height: 1.8;
+  margin-bottom: 30px;
   flex: 1;
 }
 
 .featured-departments .specialty-features {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 30px;
+  gap: 15px;
+  margin-bottom: 35px;
+  background: color-mix(in srgb, var(--default-color), transparent 97%);
+  padding: 20px;
+  border-radius: 16px;
 }
 
 .featured-departments .specialty-features span {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: color-mix(in srgb, var(--default-color), transparent 15%);
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--heading-color);
 }
 
 .featured-departments .specialty-features span i {
   color: var(--accent-color);
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .featured-departments .specialty-link {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  color: var(--accent-color);
-  font-weight: 400;
+  background: var(--accent-color);
+  color: var(--contrast-color);
+  font-weight: 500;
   font-size: 16px;
+  padding: 15px 30px;
+  border-radius: 50px;
   text-decoration: none;
   transition: all 0.3s ease;
+  align-self: flex-start;
 }
 
 .featured-departments .specialty-link:hover {
-  color: color-mix(in srgb, var(--accent-color), transparent 20%);
-  transform: translateX(5px);
-}
-
-.featured-departments .specialty-link i {
-  transition: transform 0.3s ease;
-}
-
-.featured-departments .specialty-link:hover i {
-  transform: translateX(3px);
+  background: var(--heading-color);
+  color: var(--contrast-color);
+  transform: translateX(0) scale(1.05);
 }
 
 .featured-departments .specialty-visual {
-  height: 250px;
+  height: 280px;
   position: relative;
   overflow: hidden;
+  border-radius: 0 0 32px 32px;
 }
 
 .featured-departments .specialty-visual img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: grayscale(80%) sepia(10%) contrast(1.1);
+}
+
+.featured-departments .specialty-card:hover .specialty-visual img {
+  transform: scale(1.1);
+  filter: grayscale(0%) sepia(0%) contrast(1);
 }
 
 .featured-departments .specialty-visual .visual-overlay {
   position: absolute;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
-  width: 50px;
-  height: 50px;
-  background: color-mix(in srgb, var(--contrast-color), transparent 10%);
+  top: auto;
+  width: 60px;
+  height: 60px;
+  background: var(--surface-color);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  transition: all 0.5s ease;
+  z-index: 2;
+}
+
+.featured-departments .specialty-card:hover .specialty-visual .visual-overlay {
+  background: var(--accent-color);
+  transform: rotate(360deg);
+}
+
+.featured-departments .specialty-card:hover .specialty-visual .visual-overlay i {
+  color: var(--contrast-color);
 }
 
 .featured-departments .specialty-visual .visual-overlay i {
   color: var(--accent-color);
-  font-size: 24px;
+  font-size: 26px;
+  transition: color 0.5s ease;
 }
 
-.featured-departments .specialty-card:hover .specialty-visual img {
-  transform: scale(1.08);
-}
-
+/* Highlight Cards Redesign */
 .featured-departments .department-highlight {
-  background: var(--surface-color);
-  border-radius: 16px;
-  padding: 40px 30px;
+  background: var(--accent-color);
+  color: var(--contrast-color);
+  border-radius: 32px;
+  padding: 50px 40px;
   height: 100%;
-  text-align: center;
-  border: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
-  transition: all 0.3s ease;
+  text-align: left;
+  border: none;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-departments .department-highlight::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--contrast-color), transparent 85%) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
 }
 
 .featured-departments .department-highlight:hover {
-  border-color: color-mix(in srgb, var(--accent-color), transparent 70%);
-  transform: translateY(-3px);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--accent-color), transparent 60%);
+}
+
+.featured-departments .department-highlight:hover::before {
+  opacity: 1;
 }
 
 .featured-departments .highlight-icon {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color), #667eea 30%));
-  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  background: transparent;
+  border: 2px solid color-mix(in srgb, var(--contrast-color), transparent 80%);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 25px;
+  margin: 0 0 30px 0;
+  transition: all 0.3s ease;
+}
+
+.featured-departments .department-highlight:hover .highlight-icon {
+  border-color: var(--contrast-color);
+  background: color-mix(in srgb, var(--contrast-color), transparent 85%);
 }
 
 .featured-departments .highlight-icon i {
   color: var(--contrast-color);
-  font-size: 32px;
+  font-size: 30px;
+}
+
+.featured-departments .department-highlight:hover .highlight-icon i {
+  color: var(--contrast-color);
 }
 
 .featured-departments h4 {
-  font-size: 22px;
-  font-weight: 400;
-  color: var(--heading-color);
-  margin-bottom: 15px;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--contrast-color);
+  margin-bottom: 20px;
 }
 
 .featured-departments .department-highlight p {
-  color: color-mix(in srgb, var(--default-color), transparent 25%);
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 25px;
+  color: color-mix(in srgb, var(--contrast-color), transparent 30%);
+  font-size: 16px;
+  line-height: 1.7;
+  margin-bottom: 30px;
 }
 
 .featured-departments .highlight-list {
   list-style: none;
   padding: 0;
-  margin: 0 0 30px 0;
+  margin: 0 0 40px 0;
 }
 
 .featured-departments .highlight-list li {
-  padding: 8px 0;
-  color: color-mix(in srgb, var(--default-color), transparent 20%);
-  font-size: 14px;
+  padding: 10px 0;
+  color: color-mix(in srgb, var(--contrast-color), transparent 10%);
+  font-size: 15px;
   position: relative;
+  border-bottom: 1px solid color-mix(in srgb, var(--contrast-color), transparent 90%);
 }
 
 .featured-departments .highlight-list li:before {
-  content: "→";
-  color: var(--accent-color);
+  content: "✓";
+  color: var(--contrast-color);
   font-weight: bold;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 .featured-departments .highlight-cta {
-  color: var(--accent-color);
+  color: var(--contrast-color);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 15px;
   transition: all 0.3s ease;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 4px;
 }
 
 .featured-departments .highlight-cta:hover {
-  color: color-mix(in srgb, var(--accent-color), transparent 20%);
+  color: color-mix(in srgb, var(--contrast-color), transparent 20%);
+  border-bottom-color: color-mix(in srgb, var(--contrast-color), transparent 20%);
 }
 
 .featured-departments .emergency-banner {
-  background: linear-gradient(135deg, var(--accent-color), color-mix(in srgb, var(--accent-color), #667eea 30%));
-  border-radius: 20px;
-  padding: 40px;
+  background: var(--surface-color);
+  border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+  border-radius: 32px;
+  padding: 50px;
   margin-top: 60px;
-  color: var(--contrast-color);
+  color: var(--heading-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 15px 30px color-mix(in srgb, var(--default-color), transparent 95%);
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-departments .emergency-banner::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-color), transparent 95%));
+  z-index: 1;
+}
+
+.featured-departments .emergency-banner .emergency-content {
+  position: relative;
+  z-index: 2;
 }
 
 .featured-departments .emergency-banner h3 {
-  color: var(--contrast-color);
-  font-size: 28px;
-  font-weight: 400;
-  margin-bottom: 10px;
+  color: var(--heading-color);
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 15px;
 }
 
 .featured-departments .emergency-banner p {
-  color: color-mix(in srgb, var(--contrast-color), transparent 15%);
-  font-size: 16px;
+  color: color-mix(in srgb, var(--default-color), transparent 20%);
+  font-size: 18px;
   line-height: 1.6;
   margin-bottom: 0;
 }
 
 .featured-departments .emergency-btn {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  background: var(--contrast-color);
-  color: var(--accent-color);
-  padding: 16px 30px;
+  gap: 15px;
+  background: var(--accent-color);
+  color: var(--contrast-color);
+  padding: 20px 40px;
   border-radius: 50px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 16px;
-  transition: all 0.3s ease;
+  font-size: 18px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 25px color-mix(in srgb, var(--accent-color), transparent 60%);
 }
 
 .featured-departments .emergency-btn:hover {
-  background: color-mix(in srgb, var(--contrast-color), transparent 10%);
-  transform: translateY(-2px);
-  color: var(--accent-color);
+  background: var(--heading-color);
+  color: var(--contrast-color);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 15px 35px color-mix(in srgb, var(--heading-color), transparent 70%);
 }
 
 .featured-departments .emergency-btn i {
-  font-size: 18px;
+  font-size: 22px;
 }
 
 @media (max-width: 992px) {
   .featured-departments .specialty-card {
     flex-direction: column;
   }
-
-  .featured-departments .specialty-visual {
-    height: 200px;
-    order: -1;
+  .featured-departments .emergency-banner {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px 30px;
+  }
+  .featured-departments .emergency-banner .emergency-btn {
+    margin-top: 30px;
   }
 }
 
@@ -1965,44 +2057,20 @@ section,
   .featured-departments .specialty-content {
     padding: 30px 25px;
   }
-
   .featured-departments h3 {
-    font-size: 24px;
+    font-size: 26px;
   }
-
   .featured-departments .department-highlight {
-    padding: 30px 20px;
-    text-align: center;
+    padding: 40px 30px;
   }
-
   .featured-departments .highlight-icon {
-    width: 60px;
-    height: 60px;
-    margin-bottom: 20px;
+    margin: 0 auto 25px auto;
   }
-
-  .featured-departments .highlight-icon i {
-    font-size: 24px;
-  }
-
-  .featured-departments h4 {
-    font-size: 20px;
-  }
-
-  .featured-departments .emergency-banner {
-    padding: 30px 25px;
+  .featured-departments .department-highlight {
     text-align: center;
   }
-
-  .featured-departments .emergency-banner h3 {
+  .featured-departments h4 {
     font-size: 24px;
-    margin-bottom: 15px;
-  }
-
-  .featured-departments .emergency-banner .emergency-btn {
-    margin-top: 20px;
-    padding: 14px 25px;
-    font-size: 15px;
   }
 }
 

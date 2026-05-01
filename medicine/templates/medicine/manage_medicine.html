@@ -90,17 +90,19 @@
                                 <h6 class="mb-3 text-primary" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
                                     <i class="bi bi-box-seam me-1"></i> Available Variants for {{ medicine.name }}
                                 </h6>
-                                <div class="d-flex flex-wrap gap-2">
+                                <div class="d-flex flex-wrap gap-3 mt-2">
                                     {% for v in medicine.variants.all %}
-                                        <div class="border rounded-3 p-2" style="font-size: 0.85rem; background-color: #fff; border-color: #e2e8f0 !important;">
-                                            <strong class="text-dark">{{ v.power }}</strong>
-                                            <span class="mx-2 text-muted">|</span>
-                                            <span class="text-success fw-bold">₹{{ v.price }}</span>
-                                            <span class="mx-2 text-muted">|</span>
-                                            <span class="text-muted small">Stock:</span> 
-                                            <span class="fw-bold {% if v.stock <= v.low_stock_alert %}text-danger{% else %}text-dark{% endif %}">
-                                                {{ v.stock }}
-                                            </span>
+                                        <div class="d-flex align-items-center bg-white border rounded-pill shadow-sm overflow-hidden" style="border-color: #e2e8f0 !important; font-size: 0.85rem; transition: transform 0.2s ease;">
+                                            <div class="bg-primary text-white fw-bold px-3 py-2 d-flex align-items-center h-100">
+                                                <i class="bi bi-capsule me-2"></i>{{ v.power }}
+                                            </div>
+                                            <div class="px-3 py-2 d-flex align-items-center">
+                                                <span class="text-muted small me-2 fw-medium">Stock:</span> 
+                                                <span class="badge {% if v.stock <= v.low_stock_alert %}bg-danger{% else %}bg-success{% endif %} rounded-pill px-2 py-1" style="font-size: 0.8rem;">
+                                                    {% if v.stock <= v.low_stock_alert %}<i class="bi bi-exclamation-triangle-fill me-1"></i>{% endif %}
+                                                    {{ v.stock }}
+                                                </span>
+                                            </div>
                                         </div>
                                     {% empty %}
                                         <span class="text-muted small"><i class="bi bi-info-circle me-1"></i> No variants configured.</span>

@@ -2,83 +2,157 @@
 {% block title %}Manage Appointments{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
-    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
         <h2 class="page-title mb-0">Manage Appointments</h2>
         <a href="{% url 'appointment:add_appointment' %}" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> Add Appointment
         </a>
     </div>
 
-    <!-- FILTERS (live - no button) -->
+    <!-- Filters -->
     <div class="table-section mb-4">
         <div class="row g-3 align-items-end">
+
+            <!-- Search -->
             <div class="col-md-4">
                 <label class="form-label fw-semibold">Search Patient</label>
-                <input type="text" id="search" class="form-control" 
-                       placeholder="Name or phone..." value="{{ search }}">
+                <input type="text" id="search" class="form-control"
+                    placeholder="Name or phone..." value="{{ search }}">
             </div>
 
+            <!-- Date -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Date</label>
-                <input type="date" id="appointmentDate" class="form-control" 
-                       value="{{ appointment_date }}">
+                <input type="date" id="appointmentDate" class="form-control"
+                    value="{{ appointment_date }}">
             </div>
 
+            <!-- Status -->
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Status</label>
                 <select id="appointmentStatus" class="form-select">
-                    <option value="all"    {% if status == "all"       %}selected{% endif %}>All</option>
-                    <option value="pending"    {% if status == "pending"   %}selected{% endif %}>Pending</option>
-                    <option value="confirmed"  {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
-                    <option value="cancelled"  {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
-                    <option value="completed"  {% if status == "completed" %}selected{% endif %}>Completed</option>
+                    <option value="all"       {% if status == "all"       %}selected{% endif %}>All</option>
+                    <option value="pending"   {% if status == "pending"   %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
+                    <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
+                    <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
                 </select>
             </div>
 
+            <!-- Clear -->
             <div class="col-md-2">
-                <button id="clearBtn" class="btn btn-outline-secondary mt-4 w-100">Clear</button>
+                <button id="clearBtn" class="btn btn-outline-secondary w-100">Clear</button>
             </div>
+
         </div>
     </div>
 
-    <!-- TABLE -->
+    <!-- Table -->
     <div class="table-section">
-        <div style="overflow-x:auto;">
-            <table class="table table-custom">
+        <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; display:block;">
+            <table class="table table-custom" style="min-width:700px; width:100%;">
                 <thead>
                     <tr>
                         <th>Patient</th>
-                        <th>Doctor</th>
                         <th>Date</th>
                         <th>Time</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <!-- tbody + pagination partial se aayega -->
-                {% include "doctor/appointments_table.html" %}
+                <tbody id="tableBody">
+                    {% for appointment in appointments %}
+                    <tr>
+                        <td class="patient-name">
+                            {% if appointment.patient %}
+                                {{ appointment.patient.user.get_full_name }}
+                            {% else %}
+                                {{ appointment.full_name }}
+                            {% endif %}
+                        </td>
+                        
+                        <td class="patient-info">{{ appointment.appointment_date }}</td>
+                        <td class="patient-info">{{ appointment.time_slot|time:"h:i A" }}</td>
+                        <td>
+                            <span class="badge
+                                {% if appointment.status == 'pending' %}bg-warning text-dark
+                                {% elif appointment.status == 'confirmed' %}bg-success
+                                {% elif appointment.status == 'cancelled' %}bg-danger
+                                {% elif appointment.status == 'completed' %}bg-primary
+                                {% endif %}">
+                                {{ appointment.status|capfirst }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'appointment:start_visit' appointment.id %}"
+                                class="btn btn-sm btn-primary">
+                                <i class="bi bi-play-circle me-1"></i>Start
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No appointments found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 
+        <!-- Pagination -->
         <div id="paginationContainer">
-            <!-- pagination partial se already render ho gaya upar -->
+            <div id="paginationWrapper" class="d-flex justify-content-center mt-3">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link"
+                            data-page="{{ page_obj.previous_page_number }}"
+                            href="#">Prev</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link"
+                            data-page="{{ page_obj.next_page_number }}"
+                            href="#">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <div class="empty-state-icon">
+                <i class="bi bi-calendar-x"></i>
+            </div>
+            <p class="empty-state-text">No appointments found</p>
         </div>
     </div>
+
 </main>
 
 <script>
-    const searchInput      = document.getElementById("search");
-    const dateInput        = document.getElementById("appointmentDate");
-    const statusInput      = document.getElementById("appointmentStatus");
-    const clearBtn         = document.getElementById("clearBtn");
+    const searchInput  = document.getElementById('search');
+    const dateInput    = document.getElementById('appointmentDate');
+    const statusInput  = document.getElementById('appointmentStatus');
+    const clearBtn     = document.getElementById('clearBtn');
 
-    let currentPage = 1;
     let debounceTimer;
 
-    // ─── Main fetch function ───────────────────────────────────────────────
+    // ─── Fetch Function ───────────────────────────────────────────
     function fetchAppointments(page = 1) {
-        currentPage = page;
-
         const params = new URLSearchParams({
             search:           searchInput.value,
             appointment_date: dateInput.value,
@@ -91,17 +165,14 @@
         })
         .then(res => res.text())
         .then(html => {
-            // partial HTML me tbody + pagination dono hain
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = html;
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
 
-            // tbody replace
-            const newTbody = wrapper.querySelector('#tableBody');
+            const newTbody = doc.querySelector('#tableBody');
             const oldTbody = document.querySelector('#tableBody');
             if (newTbody && oldTbody) oldTbody.replaceWith(newTbody);
 
-            // pagination replace
-            const newPagination = wrapper.querySelector('#paginationWrapper');
+            const newPagination = doc.querySelector('#paginationWrapper');
             const oldPagination = document.querySelector('#paginationWrapper');
             if (newPagination && oldPagination) {
                 oldPagination.replaceWith(newPagination);
@@ -109,42 +180,40 @@
                 document.getElementById('paginationContainer').appendChild(newPagination);
             }
 
-            // naye pagination links ko bind karo
             bindPaginationLinks();
         })
-        .catch(err => console.error("Fetch error:", err));
+        .catch(err => console.error('Fetch error:', err));
     }
 
-    // ─── Pagination links bind ─────────────────────────────────────────────
+    // ─── Pagination Bind ──────────────────────────────────────────
     function bindPaginationLinks() {
         document.querySelectorAll('.pagination-link').forEach(link => {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
-                const page = this.getAttribute('data-page');
-                fetchAppointments(parseInt(page));
+                fetchAppointments(parseInt(this.getAttribute('data-page')));
             });
         });
     }
 
-    // ─── Debounce for search ───────────────────────────────────────────────
+    // ─── Debounce ─────────────────────────────────────────────────
     function debounce(fn, delay = 350) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(fn, delay);
     }
 
-    // ─── Event listeners ──────────────────────────────────────────────────
-    searchInput.addEventListener('input',  () => debounce(() => fetchAppointments(1)));
-    dateInput.addEventListener('change',   () => fetchAppointments(1));
-    statusInput.addEventListener('change', () => fetchAppointments(1));
+    // ─── Events ───────────────────────────────────────────────────
+    searchInput.addEventListener('input',   () => debounce(() => fetchAppointments(1)));
+    dateInput.addEventListener('change',    () => fetchAppointments(1));
+    statusInput.addEventListener('change',  () => fetchAppointments(1));
 
     clearBtn.addEventListener('click', () => {
-        searchInput.value  = '';
-        dateInput.value    = '';
-        statusInput.value  = 'all';
+        searchInput.value = '';
+        dateInput.value   = '';
+        statusInput.value = 'all';
         fetchAppointments(1);
     });
 
-    // ─── Page load pe pagination bind karo ───────────────────────────────
     bindPaginationLinks();
 </script>
+
 {% endblock %}

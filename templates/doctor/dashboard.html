@@ -9,18 +9,6 @@
         <p class="page-subtitle">Here's what's happening with your practice today</p>
     </div>
 
-<<<<<<< HEAD
-    <!-- Stat Cards -->
-    <div class="dashboard-stats">
-        <div class="dashboard-stat-item">
-            <div class="stat-card">
-                <div class="stat-content">
-                    <div class="stat-number">{{ total_appointments }}</div>
-                    <div class="stat-label">Today's incoming Total Appointments</div>
-                </div>
-                <div class="stat-icon primary">
-                    <i class="bi bi-calendar-check"></i>
-=======
         <!-- Stat Cards -->
         <div class="dashboard-stats">
             <div class="dashboard-stat-item">
@@ -56,22 +44,10 @@
                     <div class="stat-icon warning">
                         <i class="bi bi-people"></i>
                     </div>
->>>>>>> 72e47fb274dbb2a72dcc7408b10b9998411f65d1
                 </div>
             </div>
         </div>
 
-<<<<<<< HEAD
-        <div class="dashboard-stat-item">
-            <div class="stat-card warning">
-                <div class="stat-content">
-                    <div class="stat-number">{{ pending_appointments }}</div>
-                    <div class="stat-label">Remaining Today Appointments</div>
-                </div>
-                <div class="stat-icon warning">
-                    <i class="bi bi-clock"></i>
-                </div>
-=======
         <!-- Appointments Table -->
         <div class="table-section">
             <h3 class="table-title">
@@ -116,92 +92,12 @@
                         
                     </tbody>
                 </table>
->>>>>>> 72e47fb274dbb2a72dcc7408b10b9998411f65d1
             </div>
         </div>
 
-        <div class="dashboard-stat-item">
-            <div class="stat-card success">
-                <div class="stat-content">
-                    <div class="stat-number">{{ confirmed_appointments }}</div>
-                    <div class="stat-label">Total Confirmed Appointments</div>
-                </div>
-                <div class="stat-icon success">
-                    <i class="bi bi-people"></i>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Appointments Table -->
-    <div class="table-section">
-        <h3 class="table-title">
-            <i class="bi bi-calendar-event"></i>
-            Today's Appointments
-        </h3>
-        <div class="table-responsive">
-            <table class="table table-custom">
-                <thead>
-                    <tr>
-                        <th>Patient Name</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for appointment in appointments %}
-                    <tr>
-                        <td class="patient-name">
-                            {{ appointment.patient.user.get_full_name }}
-                        </td>
-
-                        <td class="appointment-time">
-                            {{ appointment.time_slot|time:"h:i A" }}
-                        </td>
-
-                        <td>
-                            {% if appointment.status == 'pending' %}
-                            <span class="status-badge status-pending">Pending</span>
-
-                            {% elif appointment.status == 'confirmed' %}
-                            <span class="status-badge status-done">Confirmed</span>
-
-                            {% elif appointment.status == 'cancelled' %}
-                            <span class="status-badge status-cancelled">Cancelled</span>
-                            {% endif %}
-                        </td>
-
-                        <td>
-                            {% if appointment.status == 'pending' %}
-                            <a href="{% url 'appointment:start_visit' appointment.id %}" class="action-btn">
-                                <i class="bi bi-play-circle"></i> Start Visit
-                            </a>
-
-                            {% elif appointment.status == 'confirmed' %}
-                            <button class="action-btn" disabled>
-                                <i class="bi bi-check-circle"></i> Completed
-                            </button>
-
-                            {% elif appointment.status == 'cancelled' %}
-                            <button class="action-btn" disabled>
-                                <i class="bi bi-x-circle"></i> Cancelled
-                            </button>
-                            {% endif %}
-                        </td>
-                    </tr>
-
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center text-muted py-4">
-                            No appointments for today
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    
 </main>
 
 {% endblock %}

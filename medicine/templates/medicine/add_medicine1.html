@@ -6,7 +6,7 @@
     <div class="patient-form-shell">
         <div class="page-header patient-form-header">
             <div>
-                <h2 class="page-title mb-0">Add Medicine 1</h2>
+                <h2 class="page-title mb-0">Add Medicine</h2>
                 <p class="page-subtitle">Add a new medicine to the store inventory.</p>
             </div>
             <a href="{% url 'medicine:manage_medicine' %}" class="patient-link-btn">
@@ -54,20 +54,27 @@
                 <div class="patient-field">
                     <label class="patient-label" for="medicine-desc">Description</label>
                     <textarea id="medicine-desc" name="description" class="patient-input"
-                        rows="2" placeholder="Optional notes about this medicine..."></textarea>
+                        rows="2" placeholder="Optional notes..."></textarea>
                 </div>
 
                 <!-- Is Active -->
                 <div class="patient-field" style="display:flex; align-items:center; gap:10px;">
                     <input type="checkbox" id="medicine-active" name="is_active" checked
                         style="width:18px; height:18px; cursor:pointer;">
-                    <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">Active (available in store)</label>
+                    <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">
+                        Active (available in store)
+                    </label>
                 </div>
 
-                <!-- ── Variants Section ── -->
-                <div style="margin-top: 8px;">
+                <!-- Variants Section -->
+                <div style="margin-top:8px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <label class="patient-label mb-0">Variants <span style="font-weight:400; font-size:0.82rem; color:#888;">(Power / Price / Stock)</span></label>
+                        <label class="patient-label mb-0">
+                            Variants
+                            <span style="font-weight:400; font-size:0.82rem; color:#888;">
+                                (Power / Cost / Selling / Stock / Unit / Dates)
+                            </span>
+                        </label>
                         <button type="button" id="addVariantBtn" class="btn btn-sm btn-outline-primary"
                             style="border-radius:8px; font-size:0.82rem;">
                             <i class="bi bi-plus-circle"></i> Add Variant
@@ -76,28 +83,62 @@
 
                     <div id="variantsContainer">
                         <!-- Default first variant row -->
-                        <div class="variant-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;">
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                                <input type="text" name="power[]" class="patient-input" placeholder="e.g., 500mg" required>
+                        <div class="variant-row" style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
+                                    <input type="text" name="power[]" class="patient-input"
+                                        placeholder="e.g., 500mg" required>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
+                                    <input type="number" name="cost_price[]" class="patient-input"
+                                        placeholder="0.00" min="0" step="0.01" required>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
+                                    <input type="number" name="selling_price[]" class="patient-input"
+                                        placeholder="0.00" min="0" step="0.01" required>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Stock</label>
+                                    <input type="number" name="stock[]" class="patient-input"
+                                        placeholder="0" min="0" required>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
+                                    <input type="number" name="low_stock_alert[]" class="patient-input"
+                                        value="10" min="0">
+                                </div>
                             </div>
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Price (₹)</label>
-                                <input type="number" name="price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
-                            </div>
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Stock</label>
-                                <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0" required>
-                            </div>
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                                <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
-                            </div>
-                            <div style="padding-bottom:2px;">
-                                <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn"
-                                    style="border-radius:8px;" disabled>
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end;">
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Unit</label>
+                                    <select name="unit[]" class="patient-input">
+                                        {% for value, label in unit_choices %}
+                                            <option value="{{ value }}">{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
+                                    <input type="number" name="unit_per_strip[]" class="patient-input"
+                                        placeholder="e.g., 10" min="1">
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
+                                    <input type="date" name="mfg_date[]" class="patient-input">
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Exp Date</label>
+                                    <input type="date" name="exp_date[]" class="patient-input">
+                                </div>
+                                <div style="padding-bottom:2px;">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn"
+                                        style="border-radius:8px;" disabled>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -119,51 +160,79 @@
     const variantsContainer = document.getElementById('variantsContainer');
     const addVariantBtn     = document.getElementById('addVariantBtn');
 
+    // Unit choices from Django
+    const unitOptions = `{% for value, label in unit_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}`;
+
     function updateRemoveBtns() {
         const rows = variantsContainer.querySelectorAll('.variant-row');
-        rows.forEach((row, idx) => {
+        rows.forEach(row => {
             const btn = row.querySelector('.remove-variant-btn');
             btn.disabled = rows.length === 1;
         });
     }
 
-    addVariantBtn.addEventListener('click', function () {
-        const row = document.createElement('div');
-        row.className = 'variant-row';
-        row.style.cssText = 'display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;';
-        row.innerHTML = `
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                <input type="text" name="power[]" class="patient-input" placeholder="e.g., 250mg" required>
-            </div>
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Price (₹)</label>
-                <input type="number" name="price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
-            </div>
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Stock</label>
-                <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0" required>
-            </div>
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
-            </div>
-            <div style="padding-bottom:2px;">
-                <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn" style="border-radius:8px;">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>`;
-        variantsContainer.appendChild(row);
+    function attachRemoveListener(row) {
         row.querySelector('.remove-variant-btn').addEventListener('click', function () {
             row.remove();
             updateRemoveBtns();
         });
-        updateRemoveBtns();
-    });
+    }
 
-    // First row remove button
-    variantsContainer.querySelector('.remove-variant-btn').addEventListener('click', function () {
-        this.closest('.variant-row').remove();
+    variantsContainer.querySelectorAll('.variant-row').forEach(attachRemoveListener);
+
+    addVariantBtn.addEventListener('click', function () {
+        const row = document.createElement('div');
+        row.className = 'variant-row';
+        row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
+        row.innerHTML = `
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
+                    <input type="text" name="power[]" class="patient-input" placeholder="e.g., 250mg" required>
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
+                    <input type="number" name="cost_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
+                    <input type="number" name="selling_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Stock</label>
+                    <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0" required>
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
+                    <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end;">
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Unit</label>
+                    <select name="unit[]" class="patient-input">${unitOptions}</select>
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
+                    <input type="number" name="unit_per_strip[]" class="patient-input" placeholder="e.g., 10" min="1">
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
+                    <input type="date" name="mfg_date[]" class="patient-input">
+                </div>
+                <div>
+                    <label class="patient-label" style="font-size:0.78rem;">Exp Date</label>
+                    <input type="date" name="exp_date[]" class="patient-input">
+                </div>
+                <div style="padding-bottom:2px;">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn" style="border-radius:8px;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>`;
+
+        variantsContainer.appendChild(row);
+        attachRemoveListener(row);
         updateRemoveBtns();
     });
 </script>
