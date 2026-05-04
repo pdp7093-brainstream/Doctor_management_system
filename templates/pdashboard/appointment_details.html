@@ -236,7 +236,7 @@
                         <td>
                             {% if item.medicine_variant %}
                                 {{ item.medicine_variant.medicine.get_medicine_type_display }}
-                            {% else %}—{% endif %}
+                            {% else %}{% endif %}
                         </td>
                         <td>
                             {% if item.medicine_variant %}
@@ -245,7 +245,7 @@
                         </td>
                         <td>{{ item.dosage }}</td>
                         <td>{{ item.days }} days</td>
-                    </tr>
+                    </tr>   
                     {% endfor %}
                 </tbody>
             </table>
