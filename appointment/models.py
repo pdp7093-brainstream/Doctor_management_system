@@ -6,7 +6,6 @@ from accounts.models import Patient
 class Appointment(models.Model):
     status_choices = [
         ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'), 
         ('cancelled', 'Cancelled'),
     ]
 

@@ -139,3 +139,99 @@ document.addEventListener('keydown', function (event) {
 
 // Add smooth scroll behavior
 document.documentElement.style.scrollBehavior = 'smooth';
+
+
+// ===== Low Stock Alert System =====
+
+// Bell dropdown toggle
+function toggleBellDropdown() {
+    const dropdown = document.getElementById('bellDropdown');
+    if (dropdown.style.display === 'none') {
+        dropdown.style.display = 'block';
+        loadBellAlerts();
+    } else {
+        dropdown.style.display = 'none';
+    }
+}
+
+// Bahar click karne pe close
+document.addEventListener('click', function(e) {
+    const bell = document.getElementById('bellBtn');
+    const dropdown = document.getElementById('bellDropdown');
+    if (bell && dropdown && !bell.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
+
+// Low stock count fetch karo
+function fetchLowStockCount() {
+    fetch('/medicine/low-stock-count/')
+        .then(res => res.json())
+        .then(data => {
+            const count = data.count;
+
+            // Bell badge
+            const badge = document.getElementById('bellBadge');
+            if (badge) {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'inline' : 'none';
+            }
+
+            // Sidebar badge
+            const sidebarBadge = document.getElementById('sidebarLowStockBadge');
+            const sidebarCount = document.getElementById('sidebarLowStockCount');
+            if (sidebarBadge) {
+                sidebarBadge.textContent = count;
+                sidebarBadge.style.display = count > 0 ? 'inline' : 'none';
+            }
+            if (sidebarCount) {
+                sidebarCount.textContent = count;
+                sidebarCount.style.display = count > 0 ? 'inline' : 'none';
+            }
+        });
+}
+
+// Bell dropdown alerts load karo
+function loadBellAlerts() {
+    fetch('/medicine/low-stock-list/')
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('bellAlertList');
+            if (!data.alerts.length) {
+                list.innerHTML = `
+                    <div class="text-center py-4 text-muted small">
+                        <i class="bi bi-check-circle text-success d-block mb-2"
+                            style="font-size:1.5rem;"></i>
+                        All medicines well stocked!
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = data.alerts.map(a => `
+                <div style="padding:10px 16px; border-bottom:1px solid #f0f0f0;
+                            display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:0.88rem; font-weight:600; color:#1a2744;">
+                            ${a.name}
+                            <span style="font-size:0.75rem; color:#888; font-weight:400;">
+                                ${a.power}
+                            </span>
+                        </div>
+                        <div style="font-size:0.78rem; color:#888;">
+                            Alert at: ${a.low_alert}
+                        </div>
+                    </div>
+                    <span style="
+                        background:${a.is_out ? '#dc3545' : '#fd7e14'};
+                        color:#fff; border-radius:20px;
+                        padding:3px 10px; font-size:0.75rem; font-weight:700;">
+                        ${a.is_out ? 'OUT' : a.stock + ' left'}
+                    </span>
+                </div>
+            `).join('');
+        });
+}
+
+// Page load pe aur har 60 second pe check karo
+fetchLowStockCount();
+setInterval(fetchLowStockCount, 60000);

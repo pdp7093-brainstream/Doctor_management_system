@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Medicine, MedicineVariant
+from .models import *
 # Register your models here.
 
 class MedicineVariantInline(admin.TabularInline):
@@ -18,3 +18,7 @@ class MedicineAdmin(admin.ModelAdmin):
 class MedicineVariantAdmin(admin.ModelAdmin):
     list_display = ['medicine','power','selling_price','stock','is_low_stock']
     search_fields = ['medicine__name','medicine__short_name']
+
+admin.site.register(Vendor)
+admin.site.register(Purchase)
+admin.site.register(PurchaseItem)

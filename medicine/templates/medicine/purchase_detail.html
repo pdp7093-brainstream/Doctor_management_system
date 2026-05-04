@@ -1,0 +1,152 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Purchase Details - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="page-title mb-1">Purchase Order #{{ purchase.id }}</h2>
+            <p class="text-muted small mb-0">View purchase details and items</p>
+        </div>
+        <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn">
+            <i class="bi bi-arrow-left me-2"></i>Purchase List
+        </a>
+    </div>
+
+    <!-- Vendor & Date Info Card -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <h6 class="text-muted small fw-semibold mb-3">
+                    <i class="bi bi-building me-2" style="color: #0066cc;"></i>Vendor Details
+                </h6>
+                <div style="border-left: 3px solid #0066cc; padding-left: 15px;">
+                    <div class="mb-3">
+                        <div class="text-muted small">Vendor Name</div>
+                        <div class="fw-semibold" style="font-size: 1.1rem;">{{ purchase.vendor.name }}</div>
+                    </div>
+                    {% if purchase.vendor.phone %}
+                    <div class="mb-3">
+                        <div class="text-muted small">Phone</div>
+                        <a href="tel:{{ purchase.vendor.phone }}" class="text-decoration-none">
+                            <i class="bi bi-telephone me-1" style="color: #28a745;"></i>{{ purchase.vendor.phone }}
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if purchase.vendor.email %}
+                    <div class="mb-3">
+                        <div class="text-muted small">Email</div>
+                        <a href="mailto:{{ purchase.vendor.email }}" class="text-decoration-none">
+                            <i class="bi bi-envelope me-1" style="color: #fd7e14;"></i>{{ purchase.vendor.email }}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-3 p-4">
+                <h6 class="text-muted small fw-semibold mb-3">
+                    <i class="bi bi-calendar-event me-2" style="color: #fd7e14;"></i>Order Summary
+                </h6>
+                <div style="border-left: 3px solid #fd7e14; padding-left: 15px;">
+                    <div class="mb-3">
+                        <div class="text-muted small">Order Date</div>
+                        <div class="fw-semibold" style="font-size: 1.1rem;">{{ purchase.date|date:"d M, Y" }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="text-muted small">Total Items</div>
+                        <div class="fw-semibold" style="font-size: 1.1rem;">{{ purchase.items.count }}</div>
+                    </div>
+                    <div>
+                        <div class="text-muted small">Total Amount</div>
+                        <div class="fw-bold" style="font-size: 1.5rem; color: #28a745;">₹{{ purchase.total_amount|floatformat:2 }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purchase Items Table -->
+    <div class="table-section">
+        <h5 class="mb-3 fw-semibold">
+            <i class="bi bi-box-seam me-2" style="color: #0066cc;"></i>Purchase Items
+        </h5>
+        <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+            <table class="table table-custom" style="min-width: 950px; width: 100%;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Power</th>
+                        <th>Qty Strips</th>
+                        <th>Unit/Strip</th>
+                        <th>Cost/Strip (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in purchase.items.all %}
+                    <tr>
+                        <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
+                        
+                        <td class="patient-name fw-semibold">
+                            {{ item.medicine_variant.medicine.name }}
+                        </td>
+
+                        <td class="patient-info">
+                            <span class="badge bg-secondary">{{ item.medicine_variant.power }}</span>
+                        </td>
+
+                        <td class="patient-info text-center fw-semibold">
+                            {{ item.quantity_strips }}
+                        </td>
+
+                        <td class="patient-info text-center fw-semibold">
+                            {{ item.unit_per_strip }}
+                        </td>
+
+                        <td class="patient-info text-end fw-semibold">
+                            ₹{{ item.cost_strip|floatformat:2 }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            No items in this purchase order
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div style="background:#f8fbff; border:2px solid #0066cc; border-radius:10px; padding:20px; margin-top:20px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
+            <div>
+                <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:8px;">
+                    Ordered Items Count
+                </div>
+                <div style="font-size:1.8rem; color:#0066cc; font-weight:700;">
+                    {{ purchase.items.count }}
+                </div>
+            </div>
+            <div>
+                <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:8px;">
+                    Total Purchase Amount
+                </div>
+                <div style="font-size:1.8rem; color:#28a745; font-weight:700;">
+                    ₹{{ purchase.total_amount|floatformat:2 }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+{% endblock %}
