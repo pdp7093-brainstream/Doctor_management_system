@@ -12,13 +12,8 @@
 <body>
 <div class="dashboard">
 
-    <!-- Sidebar -->
     <div class="sidebar">
-        <h2>
-            <a href="{% url 'index' %}">
-                <i class="fas fa-clinic-medical"></i> Clinic
-            </a>
-        </h2>
+        <h2><a href="{% url 'index' %}"><i class="fas fa-clinic-medical"></i> Clinic</a></h2>
         <ul>
             <li class="active"><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile</a></li>
@@ -26,42 +21,36 @@
         </ul>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
 
-        <!-- Header -->
         <div class="header d-flex justify-content-between align-items-center mb-4">
             <h3><i class="fas fa-user-circle"></i> Welcome, {{ request.user.first_name }}</h3>
         </div>
 
-        <!-- Stats -->
         <div class="row stats g-3 mb-4">
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="stat-card">
                     <i class="fas fa-lg text-primary"></i>
                     <h3>{{ total_visits }}</h3>
-                    <p>Total Visits  </p>
-                    
+                    <p>Total Visits</p>
                 </div>
-                
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
                 <div class="stat-card">
                     <i class="fas fa-lg text-warning"></i>
                     <h3 class="text-warning">{{ pending_appointments }}</h3>
                     <p>Pending Appointments</p>
                 </div>
             </div>
-            <div class="col-md-4">  
+            <!-- <div class="col-md-4">
                 <div class="stat-card">
-                    <i class="fas fa-lg text-success"></i>
+                    <i class="fas fa-rupee-sign fa-lg text-success"></i>
                     <h3 class="text-success">₹{{ total_spent }}</h3>
                     <p>Total Spent</p>
                 </div>
             </div>
-        </div>
+        </div> -->
 
-        <!-- Appointments Table -->
         <div class="card">
             <div class="card-header">
                 <h4><i class="fas fa-calendar-check"></i> All Appointments</h4>
@@ -74,7 +63,7 @@
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Patient</th>
-                                <th>Booked by</th>
+                                <th>Doctor</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -84,29 +73,43 @@
                             <tr>
                                 <td>{{ appointment.appointment_date }}</td>
                                 <td>{{ appointment.time_slot }}</td>
+
+                                <!-- Patient Name -->
                                 <td>
-                                    {% if appointment.patient and appointment.patient.user %}
-                                        {{ appointment.full_name }}
+                                    {% if appointment.family_member %}
+                                        {{ appointment.family_member.name }}
+                                        <span style="font-size:0.75rem;color:var(--muted);display:block;">
+                                            {{ appointment.family_member.relation }}
+                                        </span>
                                     {% else %}
-                                        {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                        {{ appointment.patient.user.first_name }}
+                                        {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
                                     {% endif %}
                                 </td>
+
+                                <!-- Doctor -->
                                 <td>
                                     {% if appointment.doctor and appointment.doctor.user %}
-                                        {{ appointment.doctor.user.first_name }}{% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}
+                                        Dr. {{ appointment.doctor.user.first_name }}
+                                        {% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}
                                     {% else %}
-                                        Not assigned
+                                        <span style="color:var(--muted);font-size:0.85rem;">Not assigned</span>
                                     {% endif %}
                                 </td>
+
+                                <!-- Status -->
                                 <td>
                                     {% if appointment.status == 'confirmed' %}
                                         <span class="badge bg-success">Confirmed</span>
                                     {% elif appointment.status == 'cancelled' %}
                                         <span class="badge bg-danger">Cancelled</span>
+                                    {% elif appointment.status == 'completed' %}
+                                        <span class="badge" style="background:#e0f2fe;color:#0369a1;">Completed</span>
                                     {% else %}
                                         <span class="badge bg-warning">Pending</span>
                                     {% endif %}
                                 </td>
+
                                 <td>
                                     <a href="{% url 'appointment:appointment_detail' appointment.id %}" class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye"></i> View
@@ -122,14 +125,12 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="pagination-wrapper" id="paginationWrapper" style="display:none;">
                     <span id="pageInfo" class="text-muted" style="font-size:0.85rem;"></span>
                     <ul class="pagination" id="pagination"></ul>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -143,19 +144,13 @@
     const paginationWrapper = document.getElementById('paginationWrapper');
     let currentPage = 1;
 
-    function totalPages() {
-        return Math.ceil(allRows.length / ROWS_PER_PAGE);
-    }
+    function totalPages() { return Math.ceil(allRows.length / ROWS_PER_PAGE); }
 
     function showPage(page) {
         currentPage = page;
         const start = (page - 1) * ROWS_PER_PAGE;
         const end = start + ROWS_PER_PAGE;
-
-        allRows.forEach((row, i) => {
-            row.style.display = (i >= start && i < end) ? '' : 'none';
-        });
-
+        allRows.forEach((row, i) => { row.style.display = (i >= start && i < end) ? '' : 'none'; });
         pageInfo.textContent = `Showing ${start + 1}–${Math.min(end, allRows.length)} of ${allRows.length} appointments`;
         renderPagination();
     }
@@ -163,17 +158,12 @@
     function renderPagination() {
         pagination.innerHTML = '';
         const total = totalPages();
-
-        // Prev
         const prev = document.createElement('li');
         prev.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
         prev.innerHTML = `<a class="page-link" href="#">&lsaquo;</a>`;
         prev.addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) showPage(currentPage - 1); });
         pagination.appendChild(prev);
-
-        // Page numbers
         for (let i = 1; i <= total; i++) {
-            // Show: first, last, current ±1, and ellipsis
             if (i === 1 || i === total || (i >= currentPage - 1 && i <= currentPage + 1)) {
                 const li = document.createElement('li');
                 li.className = 'page-item' + (i === currentPage ? ' active' : '');
@@ -187,8 +177,6 @@
                 pagination.appendChild(li);
             }
         }
-
-        // Next
         const next = document.createElement('li');
         next.className = 'page-item' + (currentPage === total ? ' disabled' : '');
         next.innerHTML = `<a class="page-link" href="#">&rsaquo;</a>`;
@@ -196,7 +184,6 @@
         pagination.appendChild(next);
     }
 
-    // Init
     if (allRows.length > ROWS_PER_PAGE) {
         paginationWrapper.style.display = 'flex';
         showPage(1);

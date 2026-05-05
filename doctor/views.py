@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User 
 from django.views.decorators.cache import never_cache
 from django.views import View
 from .decorators import role_required
@@ -12,6 +12,9 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from accounts.models import Patient
 from django.contrib import messages
+
+def staff_view(request):
+    return render(request,'doctor/staff.html')
 
 def login_view(request):
     if request.method == 'POST':
@@ -219,3 +222,175 @@ def add_patient(request):
             return render(request, 'doctor/add_patient.html')
 
     return render(request, 'doctor/add_patient.html')
+
+# doctor/views.py mein yeh views add karo
+# Imports (jo pehle se nahi hain wo add karo):
+# from django.contrib.auth.hashers import make_password
+# from django.http import JsonResponse
+# import json
+
+import json
+from django.contrib.auth.hashers import make_password
+from django.http import JsonResponse
+
+
+# ─────────────────────────────────────────
+# Staff List (billers only)
+# ─────────────────────────────────────────
+
+@never_cache
+@role_required('doctor')
+def staff_view(request):
+    billers = InnerMember.objects.filter(role='biller').select_related('user')
+    return render(request, 'doctor/staff.html', {'billers': billers})
+
+
+# ─────────────────────────────────────────
+# Add Staff (biller)
+# ─────────────────────────────────────────
+
+@never_cache
+@role_required('doctor')
+def add_staff(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+    try:
+        data      = json.loads(request.body)
+        name      = data.get('name', '').strip()
+        username  = data.get('username', '').strip()
+        phone     = data.get('phone', '').strip()
+        email     = data.get('email', '').strip()
+        password  = data.get('password', '').strip()
+
+        if not name or not username or not password:
+            return JsonResponse({'success': False, 'error': 'Name, username and password are required.'})
+
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({'success': False, 'error': 'Username already taken.'})
+
+        if email and User.objects.filter(email=email).exists():
+            return JsonResponse({'success': False, 'error': 'Email already in use.'})
+
+        # Split name
+        parts      = name.split(' ', 1)
+        first_name = parts[0]
+        last_name  = parts[1] if len(parts) > 1 else ''
+
+        user = User.objects.create_user(
+            username   = username,
+            password   = password,        # Django auto-hashes via create_user
+            email      = email,
+            first_name = first_name,
+            last_name  = last_name,
+        )
+
+        member = InnerMember.objects.create(
+            user  = user,
+            role  = 'biller',
+            phone = phone,
+        )
+
+        return JsonResponse({
+            'success': True,
+            'staff': {
+                'id'      : member.id,
+                'name'    : user.get_full_name() or username,
+                'username': user.username,
+                'email'   : user.email,
+                'phone'   : member.phone,
+                'active'  : user.is_active,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ─────────────────────────────────────────
+# Edit Staff
+# ─────────────────────────────────────────
+
+@never_cache
+@role_required('doctor')
+def edit_staff(request, member_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+    try:
+        member = get_object_or_404(InnerMember, id=member_id, role='biller')
+        data   = json.loads(request.body)
+
+        name     = data.get('name', '').strip()
+        email    = data.get('email', '').strip()
+        phone    = data.get('phone', '').strip()
+        is_active = data.get('is_active', True)
+
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Name is required.'})
+
+        # Email uniqueness check (exclude self)
+        if email and User.objects.filter(email=email).exclude(pk=member.user.pk).exists():
+            return JsonResponse({'success': False, 'error': 'Email already in use by another user.'})
+
+        parts = name.split(' ', 1)
+        member.user.first_name = parts[0]
+        member.user.last_name  = parts[1] if len(parts) > 1 else ''
+        member.user.email      = email
+        member.user.is_active  = is_active
+        member.user.save()
+
+        member.phone = phone
+        member.save()
+
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ─────────────────────────────────────────
+# Reset Staff Password
+# ─────────────────────────────────────────
+
+@never_cache
+@role_required('doctor')
+def reset_staff_password(request, member_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+    try:
+        member   = get_object_or_404(InnerMember, id=member_id, role='biller')
+        data     = json.loads(request.body)
+        password = data.get('password', '').strip()
+
+        if not password or len(password) < 6:
+            return JsonResponse({'success': False, 'error': 'Password must be at least 6 characters.'})
+
+        # make_password → hashed format, set_password karta hai same kaam
+        member.user.set_password(password)   # auto hashes
+        member.user.save()
+
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+# ─────────────────────────────────────────
+# Delete Staff
+# ─────────────────────────────────────────
+
+@never_cache
+@role_required('doctor')
+def delete_staff(request, member_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+    try:
+        member = get_object_or_404(InnerMember, id=member_id, role='biller')
+        member.user.delete()   # cascades → InnerMember bhi delete hoga
+        return JsonResponse({'success': True})
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

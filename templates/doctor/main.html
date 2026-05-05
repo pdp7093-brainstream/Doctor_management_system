@@ -82,6 +82,14 @@
             </li>
             {% endif %}
 
+             <li>
+                <a href="{% url 'doctor:staff' %}" class="{% if '/staff' in request.path %}active{% endif %}">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <span>Staff</span>
+                </a>
+            </li>
+
+
             
             <!-- Billing (dono ke liye) -->
             <li>

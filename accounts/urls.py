@@ -14,11 +14,16 @@ urlpatterns = [
     path('user-profile/',views.profile,name='profile'), 
     path('change-password/', views.ChangePasswordView.as_view(), name='resetpass'),
 
-    #Authentication
+    #Authentication urls
     path('login-up/',views.login,name='login'),
     path('sign-up/', SignupView.as_view(), name='signup'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/',views.logout_view, name='logout'),
     path('profile-setting/',views.profile_settings,name='profile-setting'),
+
+    #Family member urls
+    path('add-family-member/', views.add_family_member, name='add_family_member'),
+    path('update-family-member/<int:member_id>/', views.update_family_member, name='update_family_member'),
+    path('delete-family-member/<int:member_id>/', views.delete_family_member, name='delete_family_member'),
    
 ]

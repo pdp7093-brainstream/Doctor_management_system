@@ -1,28 +1,26 @@
 from django.db import models
 from doctor.models import InnerMember,Medicine
-from accounts.models import Patient
+from accounts.models import *
 
 # Create your models here.
 class Appointment(models.Model):
+
     status_choices = [
         ('pending', 'Pending'),
-        ('confirmed', 'Confirmed'), 
+        ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
+        ('completed', 'Completed'),
     ]
 
-    patient = models.ForeignKey(Patient,on_delete=models.CASCADE)
-    doctor = models.ForeignKey(InnerMember,on_delete=models.CASCADE,null=True)
-    full_name = models.CharField(max_length=100,default="example name")
-    phone = models.CharField(max_length=10,default="1234567890")
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+    family_member = models.ForeignKey(FamilyMember, on_delete=models.CASCADE, null=True, blank=True)
+    doctor = models.ForeignKey(InnerMember, on_delete=models.CASCADE, null=True)
 
-    appointment_date = models.DateField()   
+    appointment_date = models.DateField()
     time_slot = models.TimeField()
+
     status = models.CharField(max_length=20, choices=status_choices, default='pending')
-    notes = models.TextField(blank=True , null=True)
-
-    create_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
+    notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.patient.user.username} - {self.appointment_date} at {self.time_slot}"

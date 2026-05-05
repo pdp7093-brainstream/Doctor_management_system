@@ -1,6 +1,8 @@
+import json
 from .models import *
 from .forms import *
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,logout as auth_logout, login as auth_login,update_session_auth_hash
 from django.views import View
@@ -30,6 +32,106 @@ def contact(request):
 def login(request):
     return render(request,'authentication/login.html')
 
+
+# ─────────────────────────────────────────
+# accounts/views.py mein add karo
+# ─────────────────────────────────────────
+@login_required
+def add_family_member(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+
+    try:
+        data     = json.loads(request.body)
+        name     = data.get('name', '').strip()
+        relation = data.get('relation', '').strip()
+        phone    = data.get('phone', '').strip()
+        gender   = data.get('gender', '').strip()
+        dob      = data.get('dob', '').strip() or None
+        bld_grop = data.get('bld_grop', '').strip()
+
+        if not name or not relation:
+            return JsonResponse({'success': False, 'error': 'Name and relation are required.'})
+
+        patient = request.user.patient
+
+        # Duplicate check
+        if FamilyMember.objects.filter(patient=patient, name__iexact=name, relation__iexact=relation).exists():
+            return JsonResponse({'success': False, 'error': f'"{name} ({relation})" already added.'})
+
+        member = FamilyMember.objects.create(
+            patient  = patient,
+            name     = name,
+            relation = relation,
+            phone    = phone,
+            gender   = gender or None,
+            dob      = dob,
+            bld_grop = bld_grop or None,
+        )
+
+        return JsonResponse({
+            'success': True,
+            'member': {
+                'id'      : member.id,
+                'name'    : member.name,
+                'relation': member.relation,
+                'phone'   : member.phone,
+            }
+        })
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required
+def update_family_member(request, member_id):
+    """AJAX — family member update"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    try:
+        member = get_object_or_404(FamilyMember, id=member_id, patient=request.user.patient)
+        data     = json.loads(request.body)
+        name     = data.get('name', '').strip()
+        relation = data.get('relation', '').strip()
+ 
+        if not name or not relation:
+            return JsonResponse({'success': False, 'error': 'Name and relation are required.'})
+ 
+        # Duplicate check (exclude self)
+        if FamilyMember.objects.filter(
+            patient=request.user.patient,
+            name__iexact=name,
+            relation__iexact=relation
+        ).exclude(id=member_id).exists():
+            return JsonResponse({'success': False, 'error': f'"{name} ({relation})" already exists.'})
+ 
+        member.name     = name
+        member.relation = relation
+        member.gender   = data.get('gender') or None
+        member.dob      = data.get('dob') or None
+        member.bld_grop = data.get('bld_grop') or None
+        member.phone    = data.get('phone', '').strip()
+        member.save()
+ 
+        return JsonResponse({'success': True})
+ 
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+ 
+ 
+@login_required
+def delete_family_member(request, member_id):
+    """AJAX — family member delete"""
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'})
+    try:
+        member = get_object_or_404(FamilyMember, id=member_id, patient=request.user.patient)
+        member.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+ 
+
 @login_required(login_url='login')
 def dashboard(request):
     appointments = Appointment.objects.filter(patient__user=request.user).select_related('patient__user', 'doctor__user').order_by('-appointment_date', '-time_slot')
@@ -45,13 +147,14 @@ def dashboard(request):
     }
     return render(request, 'pdashboard/dashboard.html', context)
 
+
 @login_required(login_url='login')
 def profile(request):
     Patient.objects.get_or_create(user=request.user)
-    return render(request,'pdashboard/profile.html')
-
-def report(request):
-    return render(request,'pdashboard/reports.html')
+    family_members = FamilyMember.objects.filter(patient=request.user.patient)
+    return render(request, 'pdashboard/profile.html', {
+        'family_members': family_members,
+    })
 
 #Authentication
 
@@ -78,7 +181,7 @@ class SignupView(View):
                 phone=phone
             )
 
-            # ✅ important fix
+            # important fix
             user = authenticate(request, username=phone, password=password)
             if user is not None:
                 auth_login(request, user)
@@ -93,7 +196,7 @@ class LoginView(View):
         return render(request, 'authentication/login.html')
 
     def post(self, request):
-        phone = request.POST.get('phone')      # ← phone lo
+        phone = request.POST.get('phone')      
         password = request.POST.get('password')
 
         # Phone number as username authenticate karo
@@ -110,6 +213,7 @@ class LoginView(View):
 def logout_view(request):
     auth_logout(request)
     return redirect('index')
+
 
 class ChangePasswordView(LoginRequiredMixin, View):
     login_url = 'login'

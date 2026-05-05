@@ -290,7 +290,17 @@ body {
     margin-top: var(--navbar-height);
     padding: 30px;
     min-height: 100vh;
+    width: calc(100% - var(--sidebar-width));
     transition: margin-left 0.3s ease, padding 0.3s ease;
+}
+
+/* For pages without .main-content wrapper (like staff.html) */
+.staff-card {
+    margin-left: var(--sidebar-width);
+    margin-top: var(--navbar-height);
+    margin-right: 0;
+    margin-bottom: 30px;
+    width: calc(100% - var(--sidebar-width));
 }
 
 .sidebar-overlay {
@@ -600,6 +610,13 @@ body {
     .main-content {
         margin-left: 0;
         padding: 24px 18px;
+    }
+
+    .staff-card {
+        margin-left: 0;
+        margin-top: var(--navbar-height);
+        width: 100%;
+        padding: 20px;
     }
 
     .dashboard-stats {

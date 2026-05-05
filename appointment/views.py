@@ -155,20 +155,25 @@ class Add_appointment(View):
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class Book_appointment(View):
     def get(self, request):
-        return render(request, "appointment.html")
-
+        from accounts.models import FamilyMember
+        family_members = FamilyMember.objects.filter(patient=request.user.patient)
+        return render(request, "appointment.html", {'family_members': family_members})
+ 
     def post(self, request):
-        name             = request.POST.get('name')
+        from accounts.models import FamilyMember
+ 
+        name             = request.POST.get('name', '').strip()
         appointment_date = request.POST.get("date")
         time_slot        = request.POST.get("time_slot")
         notes            = request.POST.get("message")
-
+        family_member_id = request.POST.get("family_member_id")
+ 
         # Convert 12hr → 24hr
         time_24 = datetime.strptime(time_slot, "%I:%M %p").time()
-
+ 
         patient = Patient.objects.get(user=request.user)
-        doctor  = InnerMember.objects.first()   # simple assign — update logic later
-
+        doctor  = InnerMember.objects.first()
+ 
         # Double booking prevention
         if Appointment.objects.filter(
             appointment_date=appointment_date,
@@ -176,16 +181,24 @@ class Book_appointment(View):
         ).exists():
             messages.error(request, "This time slot is already booked. Please choose another.")
             return redirect('appointment:appointment')
-
+ 
+        # Family member resolve
+        family_member = None
+        if family_member_id:
+            try:
+                family_member = FamilyMember.objects.get(id=family_member_id, patient=patient)
+            except FamilyMember.DoesNotExist:
+                pass
+ 
         Appointment.objects.create(
-            full_name        = name,
             patient          = patient,
+            family_member    = family_member,
             doctor           = doctor,
             appointment_date = appointment_date,
             time_slot        = time_24,
             notes            = notes,
         )
-
+ 
         messages.success(request, "Appointment booked successfully!")
         return redirect('appointment:appointment')
 
