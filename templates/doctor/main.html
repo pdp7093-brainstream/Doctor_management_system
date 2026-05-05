@@ -94,8 +94,8 @@
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'medicine:low_stock' %}" class="{% if 'low-stock' in request.path %}active{% endif %}"
-                            style="color:#dc3545;">
+                        <a href="{% url 'medicine:low_stock' %}"
+                            class="{% if 'low-stock' in request.path %}active{% endif %}" style="color:#dc3545;">
                             <i class="bi bi-exclamation-triangle"></i>
                             <span>Low Stock Alert</span>
                             <span id="sidebarLowStockCount" style="display:none; background:#dc3545; color:#fff;
@@ -119,10 +119,7 @@
                     </li>
                 </ul>
             </li>
-
-            {% endif %}
-
-             <li>
+            <li>
                 <a href="{% url 'doctor:staff' %}" class="{% if '/staff' in request.path %}active{% endif %}">
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Staff</span>
@@ -130,10 +127,13 @@
             </li>
 
 
-            
+            {% endif %}
+
+
+
             <!-- Billing (dono ke liye) -->
             <li>
-                <a href="{% url 'doctor:billing' %}">
+                <a href="{% url 'billing:bill_list' %}" class="{% if 'billing' in request.path %}active{% endif %}">
                     <i class="bi bi-receipt"></i>
                     <span>Billing</span>
                 </a>
@@ -180,8 +180,8 @@
                 <div id="bellDropdown" style="display:none; position:absolute; right:0; top:120%;
                background:#fff; border-radius:12px; min-width:300px;
                box-shadow:0 8px 30px rgba(0,0,0,0.15); z-index:9999;
-               border:1px solid #eee; overflow:hidden;" >
-                    
+               border:1px solid #eee; overflow:hidden;">
+
                     <!-- Header -->
                     <div style="padding:12px 16px; background:#f8f9fa; border-bottom:1px solid #eee;
                     display:flex; justify-content:space-between; align-items:center;">

@@ -79,3 +79,5 @@ class PrescriptionItem(models.Model):
 
     def __str__(self):
         return f"Prescription Item for {self.prescription.visit.patient.user.username} on {self.prescription.visit.appointment.appointment_date}"
+    
+

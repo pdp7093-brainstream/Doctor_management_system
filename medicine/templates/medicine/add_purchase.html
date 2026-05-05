@@ -7,8 +7,8 @@
     <div class="patient-form-shell">
         <div class="page-header patient-form-header">
             <div>
-                <h2 class="page-title mb-0">Add Purchase Order</h2>
-                <p class="page-subtitle">Create a new purchase order from a vendor.</p>
+                <h2 class="page-title mb-0">Add Purchase</h2>
+                <p class="page-subtitle">Create a new purchase order from vendor.</p>
             </div>
             <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn">
                 <i class="bi bi-arrow-left me-2"></i>Purchase List
@@ -16,135 +16,183 @@
         </div>
 
         <div class="patient-form-card">
-            <form method="POST" class="patient-form-grid" id="addPurchaseForm">
+            <form method="POST" action="{% url 'medicine:add_purchase' %}" class="patient-form-grid">
                 {% csrf_token %}
 
-                <!-- Messages -->
                 {% if messages %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {% for message in messages %}
-                            <i class="bi bi-exclamation-circle me-2"></i>{{ message }}
-                        {% endfor %}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {% for message in messages %}
+                        <i class="bi bi-exclamation-circle me-2"></i>{{ message }}
+                    {% endfor %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
                 {% endif %}
 
-                <!-- Vendor Selection -->
+                <!-- Vendor Select -->
                 <div class="patient-field">
-                    <label class="patient-label" for="vendor-select">
-                        <i class="bi bi-building me-1" style="color: #0066cc;"></i>Select Vendor
-                        <span style="color: #dc3545;">*</span>
+                    <label class="patient-label" for="vendor">
+                        <i class="bi bi-building me-1" style="color:#0066cc;"></i>
+                        Select Vendor <span style="color:#dc3545;">*</span>
                     </label>
-                    <select id="vendor-select" name="vendor" class="patient-input" required>
-                        <option value="" disabled selected>Choose a vendor...</option>
+                    <select id="vendor" name="vendor" class="patient-input" required>
+                        <option value="">-- Select Vendor --</option>
                         {% for vendor in vendors %}
-                            <option value="{{ vendor.id }}">{{ vendor.name }}</option>
+                            <option value="{{ vendor.pk }}">
+                                {{ vendor.name }}
+                                {% if vendor.phone %}({{ vendor.phone }}){% endif %}
+                            </option>
                         {% endfor %}
                     </select>
-                    <small class="text-muted d-block mt-1">Select the supplier for this purchase</small>
+                    <small class="text-muted mt-1 d-block">
+                        Don't have a vendor?
+                        <a href="{% url 'medicine:add_vendor' %}" target="_blank">Add Vendor</a>
+                    </small>
                 </div>
 
-                <!-- Purchase Items Section -->
-                <div style="margin-top: 12px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <!-- Purchase Items -->
+                <div style="margin-top:8px;">
+                    <div style="display:flex; justify-content:space-between;
+                                align-items:center; margin-bottom:12px;">
                         <label class="patient-label mb-0">
-                            <i class="bi bi-box-seam me-1" style="color: #fd7e14;"></i>Purchase Items
-                            <span style="font-weight:400; font-size:0.82rem; color:#888;">
-                                (Medicine / Qty / Unit / Cost)
-                            </span>
+                            <i class="bi bi-box-seam me-1" style="color:#0066cc;"></i>
+                            Purchase Items
                         </label>
-                        <button type="button" id="addItemBtn" class="btn btn-sm btn-outline-primary"
+                        <button type="button" id="addItemBtn"
+                            class="btn btn-sm btn-outline-primary"
                             style="border-radius:8px; font-size:0.82rem;">
                             <i class="bi bi-plus-circle"></i> Add Item
                         </button>
                     </div>
 
                     <div id="itemsContainer">
-                        <!-- Default first item row -->
-                        <div class="item-row" style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
 
-                            <!-- Row: Medicine Search / Quantity Strips / Unit Per Strip / Cost Per Strip -->
-                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:10px; margin-bottom:8px;">
-                                <!-- Medicine Search with Autocomplete -->
-                                <div style="position: relative;">
-                                    <label class="patient-label" style="font-size:0.78rem;">Search Medicine</label>
-                                    <input type="text" class="patient-input medicine-search" 
+                        {% if preselected_variant %}
+                        <!-- Pre-selected from Low Stock -->
+                        <div class="purchase-item-row"
+                            style="background:#f8fbff; border:1px solid #c8d8f0;
+                                   border-radius:10px; padding:14px; margin-bottom:12px;">
+
+                            <!-- Low stock badge -->
+                            <div class="mb-2">
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Low Stock Order
+                                </span>
+                                <span class="ms-2 text-muted small">
+                                    Current Stock: {{ preselected_variant.stock }}
+                                    (Alert at {{ preselected_variant.low_stock_alert }})
+                                </span>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto;
+                                        gap:10px; align-items:end;">
+                                <div style="position:relative;">
+                                    <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
+                                    <input type="text" class="patient-input medicine-search"
+                                        value="{{ preselected_variant.medicine.name }}"
                                         placeholder="Name, short name, or company..." autocomplete="off">
-                                    <input type="hidden" name="variant_id[]" class="variant-id" required>
-                                    
-                                    <!-- Autocomplete Dropdown -->
-                                    <div class="autocomplete-list" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; max-height:300px; overflow-y:auto; z-index:1000; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                                    <input type="hidden" name="variant_id[]" class="variant-id"
+                                        value="{{ preselected_variant.pk }}">
+                                    <div class="autocomplete-list"
+                                        style="display:none; position:absolute; top:100%; left:0; right:0;
+                                               background:white; border:1px solid #ddd; border-top:none;
+                                               border-radius:0 0 8px 8px; max-height:280px; overflow-y:auto;
+                                               z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,0.12);">
                                     </div>
                                 </div>
-
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
-                                    <input type="number" name="quantity_strips[]" class="patient-input qty-strips"
-                                        placeholder="0" min="1" step="1" required>
+                                    <input type="number" name="quantity_strips[]"
+                                        class="patient-input" placeholder="e.g. 10"
+                                        min="1" required>
                                 </div>
-
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
-                                    <input type="number" name="unit_per_strip[]" class="patient-input unit-per-strip"
-                                        placeholder="0" min="1" step="1" required>
+                                    <input type="number" name="unit_per_strip[]"
+                                        class="patient-input"
+                                        value="{{ preselected_variant.unit_per_strip|default:10 }}"
+                                        min="1" required>
                                 </div>
-
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Cost/Strip (₹)</label>
-                                    <input type="number" name="cost_strip[]" class="patient-input cost-strip"
-                                        placeholder="0.00" min="0" step="0.01" required>
+                                    <input type="number" name="cost_strip[]"
+                                        class="patient-input" placeholder="0.00"
+                                        min="0" step="0.01" required>
+                                </div>
+                                <div style="padding-bottom:2px;">
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-danger remove-item-btn"
+                                        style="border-radius:8px;" disabled>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </div>
-
-                            <!-- Item Total -->
-                            <div style="background:white; padding:10px; border-radius:6px; border-left:3px solid #0066cc;">
-                                <div style="display:flex; justify-content:space-between; align-items:center;">
-                                    <span style="font-size:0.85rem; color:#666; font-weight:500;">Item Total:</span>
-                                    <span class="item-total" style="font-size:1.05rem; color:#28a745; font-weight:700;">₹0.00</span>
-                                </div>
-                                <div style="font-size:0.75rem; color:#999; margin-top:4px;">
-                                    <span class="item-units">0</span> units
-                                </div>
-                            </div>
-
-                            <!-- Remove Button -->
-                            <button type="button" class="remove-item-btn btn btn-sm btn-danger" 
-                                style="margin-top:10px; width:100%; border-radius:6px;"
-                                onclick="removeItem(this)">
-                                <i class="bi bi-trash me-1"></i>Remove Item
-                            </button>
                         </div>
+
+                        {% else %}
+                        <!-- Default blank row -->
+                        <div class="purchase-item-row"
+                            style="background:#f8fbff; border:1px solid #e2e8f0;
+                                   border-radius:10px; padding:14px; margin-bottom:12px;">
+                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto;
+                                        gap:10px; align-items:end;">
+                                <div style="position:relative;">
+                                    <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
+                                    <input type="text" class="patient-input medicine-search"
+                                        placeholder="Name, short name, or company..." autocomplete="off">
+                                    <input type="hidden" name="variant_id[]" class="variant-id">
+                                    <div class="autocomplete-list"
+                                        style="display:none; position:absolute; top:100%; left:0; right:0;
+                                               background:white; border:1px solid #ddd; border-top:none;
+                                               border-radius:0 0 8px 8px; max-height:280px; overflow-y:auto;
+                                               z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,0.12);">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
+                                    <input type="number" name="quantity_strips[]"
+                                        class="patient-input" placeholder="e.g. 10"
+                                        min="1" required>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
+                                    <input type="number" name="unit_per_strip[]"
+                                        class="patient-input" placeholder="e.g. 10"
+                                        min="1" required>
+                                </div>
+                                <div>
+                                    <label class="patient-label" style="font-size:0.78rem;">Cost/Strip (₹)</label>
+                                    <input type="number" name="cost_strip[]"
+                                        class="patient-input" placeholder="0.00"
+                                        min="0" step="0.01" required>
+                                </div>
+                                <div style="padding-bottom:2px;">
+                                    <button type="button"
+                                        class="btn btn-sm btn-outline-danger remove-item-btn"
+                                        style="border-radius:8px;" disabled>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
                     </div>
                 </div>
 
-                <!-- Purchase Summary Card -->
-                <div style="background:#f8fbff; border:2px solid #0066cc; border-radius:10px; padding:16px; margin-top:20px;">
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
-                        <div>
-                            <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:6px;">
-                                Total Items
-                            </div>
-                            <div id="totalItems" style="font-size:1.8rem; color:#0066cc; font-weight:700;">0</div>
-                        </div>
-                        <div>
-                            <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:6px;">
-                                Total Amount
-                            </div>
-                            <div id="totalAmount" style="font-size:1.8rem; color:#28a745; font-weight:700;">₹0.00</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
+                <!-- Actions -->
                 <div class="patient-form-actions">
                     <button type="submit" class="patient-submit-btn">
                         <i class="bi bi-check2-circle"></i>
-                        <span>Create Purchase Order</span>
+                        <span>Save Purchase</span>
                     </button>
-                    <a href="{% url 'medicine:purchase_list' %}" class="btn btn-outline-secondary" style="border-radius: 8px; padding: 10px 20px; font-weight: 600;">
+                    <a href="{% url 'medicine:purchase_list' %}"
+                        class="btn btn-outline-secondary"
+                        style="border-radius:8px; padding:10px 20px; font-weight:600;">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </a>
                 </div>
+
             </form>
         </div>
     </div>
@@ -152,75 +200,83 @@
 
 <script>
     const itemsContainer = document.getElementById('itemsContainer');
-    const addItemBtn = document.getElementById('addItemBtn');
-    const totalItemsEl = document.getElementById('totalItems');
-    const totalAmountEl = document.getElementById('totalAmount');
+    const addItemBtn     = document.getElementById('addItemBtn');
     const medicineSearchUrl = "{% url 'medicine:search_medicine' %}";
     const autocompleteTimers = new WeakMap();
 
-    // Add Item Button
-    addItemBtn.addEventListener('click', function() {
-        const newItem = document.createElement('div');
-        newItem.classList.add('item-row');
-        newItem.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
-        
-        newItem.innerHTML = `
-            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:10px; margin-bottom:8px;">
-                <div style="position: relative;">
-                    <label class="patient-label" style="font-size:0.78rem;">Search Medicine</label>
+    function updateRemoveBtns() {
+        const rows = itemsContainer.querySelectorAll('.purchase-item-row');
+        rows.forEach(row => {
+            const btn = row.querySelector('.remove-item-btn');
+            if (btn) btn.disabled = rows.length === 1;
+        });
+    }
+
+    function attachRemoveListener(row) {
+        const btn = row.querySelector('.remove-item-btn');
+        if (btn) {
+            btn.addEventListener('click', function () {
+                row.remove();
+                updateRemoveBtns();
+            });
+        }
+    }
+
+    // Existing rows
+    itemsContainer.querySelectorAll('.purchase-item-row').forEach(attachRemoveListener);
+
+    addItemBtn.addEventListener('click', function () {
+        const row = document.createElement('div');
+        row.className = 'purchase-item-row';
+        row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
+        row.innerHTML = `
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto;
+                        gap:10px; align-items:end;">
+                <div style="position:relative;">
+                    <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
                     <input type="text" class="patient-input medicine-search"
                         placeholder="Name, short name, or company..." autocomplete="off">
-                    <input type="hidden" name="variant_id[]" class="variant-id" required>
-                    <div class="autocomplete-list" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; max-height:300px; overflow-y:auto; z-index:1000; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                    <input type="hidden" name="variant_id[]" class="variant-id">
+                    <div class="autocomplete-list"
+                        style="display:none; position:absolute; top:100%; left:0; right:0;
+                               background:white; border:1px solid #ddd; border-top:none;
+                               border-radius:0 0 8px 8px; max-height:280px; overflow-y:auto;
+                               z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,0.12);">
                     </div>
                 </div>
-
                 <div>
                     <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
-                    <input type="number" name="quantity_strips[]" class="patient-input qty-strips"
-                        placeholder="0" min="1" step="1" required>
+                    <input type="number" name="quantity_strips[]"
+                        class="patient-input" placeholder="e.g. 10" min="1" required>
                 </div>
-
                 <div>
                     <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
-                    <input type="number" name="unit_per_strip[]" class="patient-input unit-per-strip"
-                        placeholder="0" min="1" step="1" required>
+                    <input type="number" name="unit_per_strip[]"
+                        class="patient-input" placeholder="e.g. 10" min="1" required>
                 </div>
-
                 <div>
                     <label class="patient-label" style="font-size:0.78rem;">Cost/Strip (₹)</label>
-                    <input type="number" name="cost_strip[]" class="patient-input cost-strip"
-                        placeholder="0.00" min="0" step="0.01" required>
+                    <input type="number" name="cost_strip[]"
+                        class="patient-input" placeholder="0.00" min="0" step="0.01" required>
                 </div>
-            </div>
-
-            <div style="background:white; padding:10px; border-radius:6px; border-left:3px solid #0066cc;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.85rem; color:#666; font-weight:500;">Item Total:</span>
-                    <span class="item-total" style="font-size:1.05rem; color:#28a745; font-weight:700;">₹0.00</span>
+                <div style="padding-bottom:2px;">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"
+                        style="border-radius:8px;">
+                        <i class="bi bi-trash"></i>
+                    </button>
                 </div>
-                <div style="font-size:0.75rem; color:#999; margin-top:4px;">
-                    <span class="item-units">0</span> units
-                </div>
-            </div>
+            </div>`;
 
-            <button type="button" class="remove-item-btn btn btn-sm btn-danger" 
-                style="margin-top:10px; width:100%; border-radius:6px;"
-                onclick="removeItem(this)">
-                <i class="bi bi-trash me-1"></i>Remove Item
-            </button>
-        `;
-
-        itemsContainer.appendChild(newItem);
-        attachItemListeners(newItem);
+        itemsContainer.appendChild(row);
+        attachRemoveListener(row);
+        updateRemoveBtns();
     });
 
     function hideAutocomplete(row) {
         const dropdown = row.querySelector('.autocomplete-list');
-        if (dropdown) {
-            dropdown.style.display = 'none';
-            dropdown.innerHTML = '';
-        }
+        if (!dropdown) return;
+        dropdown.style.display = 'none';
+        dropdown.innerHTML = '';
     }
 
     function showAutocompleteMessage(dropdown, message) {
@@ -245,17 +301,17 @@
             const item = document.createElement('button');
             item.type = 'button';
             item.className = 'autocomplete-item';
-            item.style.cssText = 'width:100%; border:0; background:#fff; padding:10px 12px; text-align:left; cursor:pointer; border-bottom:1px solid #eef2f7;';
             item.dataset.variantId = medicine.id;
             item.dataset.medicineName = medicine.name;
+            item.style.cssText = 'width:100%; border:0; background:#fff; padding:10px 12px; text-align:left; cursor:pointer; border-bottom:1px solid #eef2f7;';
 
             const title = document.createElement('div');
-            title.style.cssText = 'font-weight:700; color:#1f2937; font-size:0.9rem;';
             title.textContent = `${medicine.name}${medicine.power ? ' - ' + medicine.power : ''}`;
+            title.style.cssText = 'font-weight:700; color:#1f2937; font-size:0.9rem;';
 
             const meta = document.createElement('div');
+            meta.textContent = medicine.company || 'Generic';
             meta.style.cssText = 'font-size:0.78rem; color:#6b7280; margin-top:2px;';
-            meta.textContent = [medicine.short_name, medicine.company].filter(Boolean).join(' | ') || 'Generic';
 
             item.appendChild(title);
             item.appendChild(meta);
@@ -268,7 +324,7 @@
     }
 
     function searchMedicines(input) {
-        const row = input.closest('.item-row');
+        const row = input.closest('.purchase-item-row');
         const dropdown = row.querySelector('.autocomplete-list');
         const variantIdInput = row.querySelector('.variant-id');
         const query = input.value.trim();
@@ -284,15 +340,11 @@
 
         fetch(`${medicineSearchUrl}?q=${encodeURIComponent(query)}`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Search request failed');
-                }
+                if (!response.ok) throw new Error('Search request failed');
                 return response.json();
             })
             .then(medicines => {
-                if (input.value.trim() !== query) {
-                    return;
-                }
+                if (input.value.trim() !== query) return;
                 renderMedicineResults(row, medicines);
             })
             .catch(() => {
@@ -300,26 +352,21 @@
             });
     }
 
-    document.addEventListener('keyup', function(e) {
-        if (!e.target.classList.contains('medicine-search')) {
-            return;
-        }
+    document.addEventListener('keyup', function (e) {
+        if (!e.target.classList.contains('medicine-search')) return;
 
         const input = e.target;
-        const existingTimer = autocompleteTimers.get(input);
-        if (existingTimer) {
-            clearTimeout(existingTimer);
-        }
+        const timer = autocompleteTimers.get(input);
+        if (timer) clearTimeout(timer);
 
-        const timer = setTimeout(() => searchMedicines(input), 300);
-        autocompleteTimers.set(input, timer);
+        autocompleteTimers.set(input, setTimeout(() => searchMedicines(input), 300));
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         const item = e.target.closest('.autocomplete-item');
 
         if (item) {
-            const row = item.closest('.item-row');
+            const row = item.closest('.purchase-item-row');
             row.querySelector('.medicine-search').value = item.dataset.medicineName;
             row.querySelector('.variant-id').value = item.dataset.variantId;
             hideAutocomplete(row);
@@ -327,73 +374,23 @@
         }
 
         if (!e.target.closest('.autocomplete-list') && !e.target.classList.contains('medicine-search')) {
-            document.querySelectorAll('.item-row').forEach(row => hideAutocomplete(row));
+            itemsContainer.querySelectorAll('.purchase-item-row').forEach(row => hideAutocomplete(row));
         }
     });
 
-    // Remove Item
-    function removeItem(btn) {
-        btn.closest('.item-row').remove();
-        calculateTotals();
-    }
-
-    // Attach listeners to item rows
-    function attachItemListeners(itemRow) {
-        const inputs = itemRow.querySelectorAll('.qty-strips, .unit-per-strip, .cost-strip');
-        inputs.forEach(input => {
-            input.addEventListener('change', () => {
-                updateItemTotal(itemRow);
-                calculateTotals();
-            });
-        });
-    }
-
-    // Update single item total
-    function updateItemTotal(itemRow) {
-        const qtyStrips = parseFloat(itemRow.querySelector('.qty-strips').value) || 0;
-        const unitPerStrip = parseFloat(itemRow.querySelector('.unit-per-strip').value) || 0;
-        const costStrip = parseFloat(itemRow.querySelector('.cost-strip').value) || 0;
-
-        const itemTotal = qtyStrips * costStrip;
-        const totalUnits = qtyStrips * unitPerStrip;
-
-        itemRow.querySelector('.item-total').textContent = '₹' + itemTotal.toFixed(2);
-        itemRow.querySelector('.item-units').textContent = totalUnits;
-    }
-
-    // Calculate all totals
-    function calculateTotals() {
-        let totalItems = 0;
-        let totalAmount = 0;
-
-        document.querySelectorAll('.item-row').forEach(row => {
-            const qtyStrips = parseFloat(row.querySelector('.qty-strips').value) || 0;
-            const unitPerStrip = parseFloat(row.querySelector('.unit-per-strip').value) || 0;
-            const costStrip = parseFloat(row.querySelector('.cost-strip').value) || 0;
-
-            totalItems += qtyStrips * unitPerStrip;
-            totalAmount += qtyStrips * costStrip;
+    document.querySelector('form').addEventListener('submit', function (e) {
+        const invalidRow = Array.from(itemsContainer.querySelectorAll('.purchase-item-row')).find(row => {
+            return !row.querySelector('.variant-id').value;
         });
 
-        totalItemsEl.textContent = totalItems;
-        totalAmountEl.textContent = '₹' + totalAmount.toFixed(2);
-    }
-
-    // Attach listeners to initial item
-    document.querySelectorAll('.item-row').forEach(row => {
-        attachItemListeners(row);
-    });
-
-    // Recalculate on input
-    document.addEventListener('input', function(e) {
-        if (e.target.classList.contains('qty-strips') || 
-            e.target.classList.contains('unit-per-strip') || 
-            e.target.classList.contains('cost-strip')) {
-            const itemRow = e.target.closest('.item-row');
-            updateItemTotal(itemRow);
-            calculateTotals();
+        if (invalidRow) {
+            e.preventDefault();
+            invalidRow.querySelector('.medicine-search').focus();
+            alert('Please select a medicine from the search results.');
         }
     });
+
+    updateRemoveBtns();
 </script>
 
 {% endblock %}

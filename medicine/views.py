@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef, Subquery
 from .models import *
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+
 
 class ManageMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
@@ -320,9 +321,21 @@ class LowStockView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
+        pending_order_items = PurchaseItem.objects.filter(
+            medicine_variant=OuterRef("pk"),
+            purchase__status="ordered",
+        ).order_by("-purchase_id")
+
         low_stock_variants = (
             MedicineVariant.objects.filter(
-                stock__lte=db_models.F("low_stock_alert"), medicine__is_active=True
+                stock__lte=db_models.F("low_stock_alert"),
+                medicine__is_active=True
+            )
+            .annotate(
+                is_ordered=Exists(pending_order_items),
+                pending_purchase_id=Subquery(
+                    pending_order_items.values("purchase_id")[:1]
+                ),
             )
             .select_related("medicine")
             .order_by("stock")
@@ -340,26 +353,23 @@ class LowStockView(LoginRequiredMixin, View):
             },
         )
 
-
-
 def low_stock_count(request):
     # Fixed: 'low_stock_alerts' changed to 'low_stock_alert'
     count = MedicineVariant.objects.filter(
-        stock__lte=db_models.F("low_stock_alert"), 
-        medicine__is_active=True
+        stock__lte=db_models.F("low_stock_alert"), medicine__is_active=True
     ).count()
     return JsonResponse({"count": count})
+
 
 def low_stock_list(request):
     # Base queryset
     base_query = MedicineVariant.objects.filter(
-        stock__lte=db_models.F("low_stock_alert"), 
-        medicine__is_active=True
+        stock__lte=db_models.F("low_stock_alert"), medicine__is_active=True
     )
-    
+
     # Get total count for the whole system
     total_count = base_query.count()
-    
+
     # Get just the top 10 for the UI
     variants = base_query.select_related("medicine").order_by("stock")[:10]
 
@@ -373,159 +383,295 @@ def low_stock_list(request):
         }
         for v in variants
     ]
-    
-    return JsonResponse({
-        "alerts": data, 
-        "count": total_count  # Now returns the true total
-    })
 
+    return JsonResponse(
+        {"alerts": data, "count": total_count}  # Now returns the true total
+    )
 
 
 class VendorListView(LoginRequiredMixin, View):
-    login_url = 'doctor:login'
+    login_url = "doctor:login"
 
-    def get(self,request):
-        vendors = Vendor.objects.all().order_by('name')
-        return render(request,'medicine/vendor_list.html',{'vendors':vendors})
-    
+    def get(self, request):
+        vendors = Vendor.objects.all().order_by("name")
+        return render(request, "medicine/vendor_list.html", {"vendors": vendors})
 
-class AddVendorView(LoginRequiredMixin,View):
-    login_url = 'doctor:login'
 
-    def get(self,request):
-        return render(request,'medicine/add_vendor.html')
+class AddVendorView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
 
-    def post(self,request):
-        name = request.POST.get('name','').strip()
-        phone = request.POST.get('phone','').strip()
-        email = request.POST.get('email','').strip()
-        address = request.POST.get('address','').strip()
+    def get(self, request):
+        return render(request, "medicine/add_vendor.html")
+
+    def post(self, request):
+        name = request.POST.get("name", "").strip()
+        phone = request.POST.get("phone", "").strip()
+        email = request.POST.get("email", "").strip()
+        address = request.POST.get("address", "").strip()
 
         Vendor.objects.create(
             name=name,
-            phone = phone,
+            phone=phone,
             email=email,
-            address = address,
+            address=address,
         )
         messages.success(request, f'Vendor "{name}" added successfully!')
-        return redirect('medicine/vendor_list')
+        return redirect("medicine/vendor_list")
 
 
-class EditVendorView(LoginRequiredMixin,View):
+class EditVendorView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
-    def get(self,request,pk):
-        vendor= get_object_or_404(Vendor,pk=pk)
-        return render(request, 'medicine/edit_vendor.html',{'vendor':vendor})
+    def get(self, request, pk):
+        vendor = get_object_or_404(Vendor, pk=pk)
+        return render(request, "medicine/edit_vendor.html", {"vendor": vendor})
 
-    def post(self,request,pk):
-        vendor = get_object_or_404(Vendor,pk =pk)
-        vendor.name = request.POST.get('name','').strip()
-        vendor.phone = request.POST.get('phone','').strip()
-        vendor.email = request.POST.get('email','').strip()
-        vendor.address = request.POST.get('address','').strip()
+    def post(self, request, pk):
+        vendor = get_object_or_404(Vendor, pk=pk)
+        vendor.name = request.POST.get("name", "").strip()
+        vendor.phone = request.POST.get("phone", "").strip()
+        vendor.email = request.POST.get("email", "").strip()
+        vendor.address = request.POST.get("address", "").strip()
         vendor.save()
 
         messages.success(request, f'Vendor "{vendor.name}" updated!')
-        return redirect('medicine:vendor_list')
-    
-class DeleteVendorView(LoginRequiredMixin,View):
-    login_url = 'doctor:login'
+        return redirect("medicine:vendor_list")
 
-    def post(self,request,pk):
-        vendor = get_object_or_404(Vendor,pk=pk)
-        name = vendor.name 
+
+class DeleteVendorView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def post(self, request, pk):
+        vendor = get_object_or_404(Vendor, pk=pk)
+        name = vendor.name
         vendor.delete()
         messages.success(request, f'Vendor "{name}" deleted!')
 
 
+# Purchase Views
+class PurchaseListView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
 
-# Purchase Views 
-class PurchaseListView(LoginRequiredMixin,View):
-    login_url = 'doctor:login'
+    def get(self, request):
+        search = request.GET.get("search", "").strip()
+        purchase_date = request.GET.get("purchase_date", "").strip()
+        status = request.GET.get("status", "all").strip()
 
-    def get(self,request):
-        purchases = Purchase.objects.select_related('vendor').order_by('-date')
-        return render(request, 'medicine/purchase_list.html',{'purchases':purchases})
-
-
-class AddPurchaseView(LoginRequiredMixin,View):
-    login_url = 'doctor:login'
-
-    def get(self,request):
-        vendors = Vendor.objects.all().order_by('name')
-        return render(request, 'medicine/add_purchase.html',{
-            'vendors': vendors,
-        })
-
-    
-    def post(self,request):
-        vendor_id = request.POST.get('vendor')
-        vendor = get_object_or_404(Vendor,pk=vendor_id)
-
-        variant_ids = request.POST.getlist('variant_id[]')
-        qty_strips_list = request.POST.getlist('quantity_strips[]')
-        ups_list = request.POST.getlist('unit_per_strip[]')
-        cost_list = request.POST.getlist('cost_strip[]')
-
-        # Validation 
-
-        if not any(variant_ids):
-            messages.error(request, 'Please add at least one medicine!')
-            return redirect('medicine:add_purchase')
-        
-        total_amount = 0
-
-        #Purchase create 
-        purchase = Purchase.objects.create(
-            vendor = vendor ,
-            total_amount = 0 
+        purchases = Purchase.objects.select_related("vendor").prefetch_related(
+            "items__medicine_variant__medicine"
         )
 
+        if search:
+            purchases = purchases.filter(
+                Q(vendor__name__icontains=search)
+                | Q(items__medicine_variant__medicine__name__icontains=search)
+                | Q(items__medicine_variant__medicine__short_name__icontains=search)
+                | Q(items__medicine_variant__medicine__company__icontains=search)
+            )
+
+        if purchase_date:
+            purchases = purchases.filter(date=purchase_date)
+
+        if status and status != "all":
+            purchases = purchases.filter(status=status)
+
+        purchases = purchases.distinct().order_by("-date", "-id")
+        filtered_purchase_ids = purchases.values("pk")
+
+        stats = Purchase.objects.filter(pk__in=filtered_purchase_ids).aggregate(
+            total_spending=db_models.Sum("total_amount"),
+            total_purchases=db_models.Count("id"),
+        )
+
+        paginator = Paginator(purchases, 20)
+        page_number = request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            "purchases": page_obj,
+            "page_obj": page_obj,
+            "search": search,
+            "purchase_date": purchase_date,
+            "status": status,
+            "total_purchases": stats["total_purchases"] or 0,
+            "total_spending": stats["total_spending"] or 0,
+        }
+
+        return render(request, "medicine/purchase_list.html", context)
+
+
+class DeletePurchaseView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def post(self, request, pk):
+        purchase = get_object_or_404(Purchase, pk=pk)
+        purchase.delete()
+        messages.success(request, "Purchase deleted successfully.")
+        return redirect("medicine:purchase_list")
+
+
+class AddPurchaseView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def get(self, request):
+        vendors = Vendor.objects.all().order_by("name")
+
+        # ← Low stock se aaya hai to pre-select karo
+        preselected_variant = None
+        variant_id = request.GET.get("variant")
+        if variant_id:
+            try:
+                preselected_variant = MedicineVariant.objects.select_related(
+                    "medicine"
+                ).get(pk=variant_id)
+            except MedicineVariant.DoesNotExist:
+                pass
+            else:
+                pending_purchase = (
+                    Purchase.objects.filter(
+                        items__medicine_variant=preselected_variant,
+                        status="ordered",
+                    )
+                    .order_by("-id")
+                    .first()
+                )
+                if pending_purchase:
+                    messages.warning(
+                        request,
+                        f"{preselected_variant.medicine.name} already has a pending order.",
+                    )
+                    return redirect(
+                        "medicine:purchase_detail", pk=pending_purchase.pk
+                    )
+
+        return render(
+            request,
+            "medicine/add_purchase.html",
+            {
+                "vendors": vendors,
+                "preselected_variant": preselected_variant,
+            },
+        )
+
+    def post(self, request):
+        vendor_id = request.POST.get("vendor")
+        vendor = get_object_or_404(Vendor, pk=vendor_id)
+
+        variant_ids = request.POST.getlist("variant_id[]")
+        qty_strips_list = request.POST.getlist("quantity_strips[]")
+        ups_list = request.POST.getlist("unit_per_strip[]")
+        cost_list = request.POST.getlist("cost_strip[]")
+
+        # Validation
+
+        if not any(variant_ids):
+            messages.error(request, "Please add at least one medicine!")
+            return redirect("medicine:add_purchase")
+
+        selected_variant_ids = [v_id for v_id in variant_ids if v_id]
+
+        if len(selected_variant_ids) != len(set(selected_variant_ids)):
+            messages.error(request, "Please add each medicine only once in a purchase.")
+            return redirect("medicine:add_purchase")
+
+        pending_item = (
+            PurchaseItem.objects.select_related(
+                "purchase", "medicine_variant__medicine"
+            )
+            .filter(
+                medicine_variant_id__in=selected_variant_ids,
+                purchase__status="ordered",
+            )
+            .order_by("-purchase__created_at", "-purchase_id")
+            .first()
+        )
+
+        if pending_item:
+            medicine_name = pending_item.medicine_variant.medicine.name
+            messages.error(
+                request,
+                f"{medicine_name} already has a pending purchase order.",
+            )
+            return redirect(
+                "medicine:purchase_detail", pk=pending_item.purchase_id
+            )
+
+        total_amount = 0
+
+        # Purchase create
+        purchase = Purchase.objects.create(vendor=vendor, total_amount=0)
+
         for v_id, qty_str, ups_str, cost_str in zip(
-            variant_ids, qty_strips_list,ups_list,cost_list
+            variant_ids, qty_strips_list, ups_list, cost_list
         ):
             if not v_id:
-                continue 
+                continue
 
             variant = get_object_or_404(MedicineVariant, pk=v_id)
             qty_strips = int(qty_str) if qty_str else 0
-            ups = int(ups_str) if ups_str else 1 
-            cost_strip = float(cost_str) if cost_str else 0 
+            ups = int(ups_str) if ups_str else 1
+            cost_strip = float(cost_str) if cost_str else 0
 
-
-            # Puchase item save karo 
+            # Puchase item save karo
             PurchaseItem.objects.create(
-                purchase = purchase, 
-                medicine_variant = variant, 
-                quantity_strips = qty_strips, 
-                unit_per_strip = ups,
-                cost_strip = cost_strip,
+                purchase=purchase,
+                medicine_variant=variant,
+                quantity_strips=qty_strips,
+                unit_per_strip=ups,
+                cost_strip=cost_strip,
             )
 
-            # Stock Update 
-            total_units = qty_strips * ups 
-            variant.stock += total_units 
-            variant.cost_price = cost_strip/ups if ups else cost_strip 
-            variant.unit_per_strip = ups 
-            variant.save()
+            # # Stock Update
+            # total_units = qty_strips * ups
+            # variant.stock += total_units
+            # variant.cost_price = cost_strip/ups if ups else cost_strip
+            # variant.unit_per_strip = ups
+            # variant.save()
 
             total_amount += qty_strips * cost_strip
 
-        # Total update karo 
-        purchase.total_amount = total_amount 
+        # Total update karo
+        purchase.total_amount = total_amount
         purchase.save()
 
-        messages.success(request, f'Purchase added! Total : {total_amount:.2f}')
-        return redirect('medicine:purchase_list')
-    
+        messages.success(request, f"Purchase added! Total : {total_amount:.2f}")
+        return redirect("medicine:purchase_list")
+
+
+def receive_purchase(request, pk):
+    purchase = get_object_or_404(Purchase, pk=pk)
+
+    if purchase.status == "received":
+        messages.warning(request, "Already received")
+        return redirect("medicine:purchase_list")
+
+    for item in purchase.items.all():
+        variant = item.medicine_variant
+
+        total_units = item.quantity_strips * item.unit_per_strip
+        variant.stock += total_units
+        variant.cost_price = (
+            item.cost_strip / item.unit_per_strip
+            if item.unit_per_strip
+            else item.cost_strip
+        )
+        variant.save()
+
+    purchase.status = "received"
+    purchase.save()
+
+    messages.success(request, "Stock updated successfully!")
+    return redirect("medicine:purchase_list")
+
+
 class PurchaseDetailView(LoginRequiredMixin, View):
-    login_url = 'doctor:login'
+    login_url = "doctor:login"
 
     def get(self, request, pk):
         purchase = get_object_or_404(
-            Purchase.objects.select_related('vendor').prefetch_related(
-                'items__medicine_variant__medicine'
-            ), pk=pk
+            Purchase.objects.select_related("vendor").prefetch_related(
+                "items__medicine_variant__medicine"
+            ),
+            pk=pk,
         )
-        return render(request, 'medicine/purchase_detail.html', {'purchase': purchase})
+        return render(request, "medicine/purchase_detail.html", {"purchase": purchase})

@@ -25,5 +25,6 @@ urlpatterns = [
     path('purchases/',PurchaseListView.as_view(),name='purchase_list'),
     path('purchases/add/',AddPurchaseView.as_view(),name='add_purchase'),   
     path('purchases/<int:pk>/',PurchaseDetailView.as_view(),name='purchase_detail'),    
-
+    path('purchases/<int:pk>/receive/', views.receive_purchase, name='receive_purchase'),
+    path('purchases/<int:pk>/delete/', DeletePurchaseView.as_view(), name='delete_purchase'),
 ]

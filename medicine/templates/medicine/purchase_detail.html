@@ -8,12 +8,33 @@
     <!-- Page Header -->
     <div class="page-header d-flex justify-content-between align-items-center">
         <div>
-            <h2 class="page-title mb-1">Purchase Order #{{ purchase.id }}</h2>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="page-title mb-0">Purchase Order #{{ purchase.id }}</h2>
+                {% if purchase.status == "received" %}
+                    <span class="badge bg-success">Received</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% endif %}
+            </div>
             <p class="text-muted small mb-0">View purchase details and items</p>
         </div>
-        <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn">
-            <i class="bi bi-arrow-left me-2"></i>Purchase List
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            {% if purchase.status == "received" %}
+                <button type="button" class="btn btn-secondary btn-sm" disabled>
+                    <i class="bi bi-check-circle me-2"></i>Already Received
+                </button>
+            {% else %}
+                <form method="POST" action="{% url 'medicine:receive_purchase' purchase.id %}" class="mb-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-sm">
+                        Mark as Received
+                    </button>
+                </form>
+            {% endif %}
+            <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn btn-sm">
+                <i class="bi bi-arrow-left me-2"></i>Purchase List
+            </a>
+        </div>
     </div>
 
     <!-- Vendor & Date Info Card -->
@@ -92,7 +113,7 @@
                     {% for item in purchase.items.all %}
                     <tr>
                         <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
-                        
+
                         <td class="patient-name fw-semibold">
                             {{ item.medicine_variant.medicine.name }}
                         </td>

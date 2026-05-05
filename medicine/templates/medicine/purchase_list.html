@@ -27,49 +27,47 @@
     {% endif %}
 
     <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
+    <div class="row g-3 mb-4" id="statsContainer">
+        <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div style="font-size:2rem; color:#0066cc; font-weight:700;">{{ purchases.count }}</div>
+                <div style="font-size:2rem; color:#0066cc; font-weight:700;">{{ total_purchases }}</div>
                 <div class="text-muted small">Total Purchases</div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
                 <div style="font-size:2rem; color:#fd7e14; font-weight:700;">
-                    {% with total=0 %}
-                    {% for p in purchases %}
-                        {% with total=total|add:p.total_amount %}{% endwith %}
-                    {% endfor %}
-                    ₹{{ total|floatformat:0 }}
-                    {% endwith %}
+                    ₹{{ total_spending|floatformat:0 }}
                 </div>
                 <div class="text-muted small">Total Spending</div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div style="font-size:2rem; color:#28a745; font-weight:700;">
-                    {% with count=0 %}
-                    {% for p in purchases %}
-                        {% with count=count|add:p.items.count %}{% endwith %}
-                    {% endfor %}
-                    {{ count }}
-                    {% endwith %}
-                </div>
-                <div class="text-muted small">Total Items</div>
-            </div>
-        </div>
     </div>
 
-    <!-- Search Bar -->
-    <div class="search-container">
-        <div class="input-group" style="max-width: 420px;">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-muted"></i>
-            </span>
-            <input type="text" class="form-control border-start-0 search-input ps-0"
-                id="searchInput" placeholder="Search by vendor name or date...">
+    <!-- Filters -->
+    <div class="table-section mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">Search</label>
+                <input type="text" id="purchaseSearch" class="form-control"
+                    placeholder="Vendor or medicine name..." value="{{ search }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Date</label>
+                <input type="date" id="purchaseDate" class="form-control" value="{{ purchase_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Status</label>
+                <select id="purchaseStatus" class="form-select">
+                    <option value="all" {% if status == "all" %}selected{% endif %}>All</option>
+                    <option value="ordered" {% if status == "ordered" %}selected{% endif %}>Ordered</option>
+                    <option value="received" {% if status == "received" %}selected{% endif %}>Received</option>
+                    <option value="draft" {% if status == "draft" %}selected{% endif %}>Draft</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" id="clearBtn" class="btn btn-outline-secondary w-100">Clear</button>
+            </div>
         </div>
     </div>
 
@@ -84,15 +82,14 @@
                         <th>Date</th>
                         <th>Items</th>
                         <th>Total Amount</th>
+                        <th>Status</th>
                         <th class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     {% for purchase in purchases %}
-                    <tr class="purchase-row" 
-                        data-vendor-name="{{ purchase.vendor.name|lower }}" 
-                        data-purchase-date="{{ purchase.date|date:'Y-m-d' }}">
-                        <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
+                    <tr class="purchase-row">
+                        <td class="patient-info fw-semibold">{{ page_obj.start_index|add:forloop.counter0 }}</td>
                         
                         <td class="patient-name">
                             <div class="d-flex align-items-center">
@@ -112,6 +109,11 @@
                             <span class="badge bg-info text-dark rounded-pill px-3">
                                 {{ purchase.items.count }} item{{ purchase.items.count|pluralize }}
                             </span>
+                            <div class="text-muted small mt-1">
+                                {% for item in purchase.items.all %}
+                                    {{ item.medicine_variant.medicine.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </div>
                         </td>
 
                         <td class="patient-info">
@@ -121,18 +123,28 @@
                         </td>
 
                         <td>
+                            {% if purchase.status == "received" %}
+                            <span class="badge bg-success">Received</span>
+                            {% elif purchase.status == "ordered" %}
+                            <span class="badge bg-warning text-dark">Ordered</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ purchase.status|default:"Draft"|capfirst }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
                             <div class="action-buttons justify-content-center">
                                 <a href="{% url 'medicine:purchase_detail' purchase.pk %}"
                                     class="action-btn btn btn-primary btn-sm" title="View Details">
-                                    <i class="bi bi-eye"></i> View
+                                    <i class="bi bi-eye"></i> 
                                 </a>
                                 <form method="post"
-                                    action="#"
+                                    action="{% url 'medicine:delete_purchase' purchase.pk %}"
                                     style="display:inline;"
                                     onsubmit="return confirm('Delete this purchase order?')">
                                     {% csrf_token %}
                                     <button type="submit" class="action-btn btn btn-danger btn-sm" title="Delete Purchase">
-                                        <i class="bi bi-trash"></i> Delete
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                             </div>
@@ -140,7 +152,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-5">
+                        <td colspan="7" class="text-center py-5">
                             <div class="empty-state">
                                 <div class="empty-state-icon mb-3">
                                     <i class="bi bi-inbox" style="font-size: 2.5rem; color: #ccc;"></i>
@@ -156,51 +168,108 @@
                 </tbody>
             </table>
         </div>
+
+        <div id="paginationContainer">
+            <div id="paginationWrapper" class="d-flex justify-content-center mt-3">
+                {% if page_obj.paginator.num_pages > 1 %}
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link" data-page="{{ page_obj.previous_page_number }}"
+                            href="#">Prev</a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link" data-page="{{ page_obj.next_page_number }}"
+                            href="#">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
 </main>
 
 <script>
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    const purchaseRows = document.querySelectorAll('.purchase-row');
+    const searchInput = document.getElementById('purchaseSearch');
+    const dateInput = document.getElementById('purchaseDate');
+    const statusInput = document.getElementById('purchaseStatus');
+    const clearBtn = document.getElementById('clearBtn');
+    let debounceTimer;
 
-    searchInput.addEventListener('input', function() {
-        const searchValue = this.value.toLowerCase().trim();
-
-        purchaseRows.forEach(row => {
-            const vendorName = row.getAttribute('data-vendor-name');
-            const purchaseDate = row.getAttribute('data-purchase-date');
-
-            if (vendorName.includes(searchValue) || purchaseDate.includes(searchValue)) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
+    function fetchPurchases(page = 1) {
+        const params = new URLSearchParams({
+            search: searchInput.value,
+            purchase_date: dateInput.value,
+            status: statusInput.value,
+            page: page,
         });
 
-        // Show empty state if no results
-        const visibleRows = Array.from(purchaseRows).filter(row => row.style.display !== 'none');
-        const tbody = document.querySelector('#tableBody');
-        let emptyStateRow = tbody.querySelector('.empty-state-row');
-        
-        if (visibleRows.length === 0 && !emptyStateRow) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.classList.add('empty-state-row');
-            emptyRow.innerHTML = `
-                <td colspan="6" class="text-center py-5">
-                    <div class="empty-state">
-                        <i class="bi bi-search" style="font-size: 2.5rem; color: #ccc;"></i>
-                        <p class="text-muted mt-3">No purchase orders match your search</p>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(emptyRow);
-        } else if (visibleRows.length > 0) {
-            const emptyRow = tbody.querySelector('.empty-state-row');
-            if (emptyRow) emptyRow.remove();
-        }
+        fetch(`/medicine/purchases/?${params.toString()}`, {
+            headers: { 'x-requested-with': 'XMLHttpRequest' }
+        })
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newStats = doc.querySelector('#statsContainer');
+                const oldStats = document.querySelector('#statsContainer');
+                if (newStats && oldStats) oldStats.replaceWith(newStats);
+
+                const newTbody = doc.querySelector('#tableBody');
+                const oldTbody = document.querySelector('#tableBody');
+                if (newTbody && oldTbody) oldTbody.replaceWith(newTbody);
+
+                const newPagination = doc.querySelector('#paginationWrapper');
+                const oldPagination = document.querySelector('#paginationWrapper');
+                if (newPagination && oldPagination) {
+                    oldPagination.replaceWith(newPagination);
+                } else if (newPagination) {
+                    document.getElementById('paginationContainer').appendChild(newPagination);
+                }
+
+                bindPaginationLinks();
+            })
+            .catch(err => console.error('Fetch error:', err));
+    }
+
+    function bindPaginationLinks() {
+        document.querySelectorAll('.pagination-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                fetchPurchases(parseInt(this.getAttribute('data-page')));
+            });
+        });
+    }
+
+    function debounce(fn, delay = 350) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fn, delay);
+    }
+
+    searchInput.addEventListener('input', () => debounce(() => fetchPurchases(1)));
+    dateInput.addEventListener('change', () => fetchPurchases(1));
+    statusInput.addEventListener('change', () => fetchPurchases(1));
+
+    clearBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        dateInput.value = '';
+        statusInput.value = 'all';
+        fetchPurchases(1);
     });
+
+    bindPaginationLinks();
 </script>
 
 {% endblock %}

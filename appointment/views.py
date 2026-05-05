@@ -14,7 +14,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator
 from datetime import datetime, time, timedelta
-
+from billing.views import generate_bill_from_visit
 
 # ─────────────────────────────────────────
 # Slot Generator
@@ -370,13 +370,19 @@ class PrescriptionView(View):
         # Reduce stock only on complete_visit
         if is_completing:
             stock_errors = self.reduce_stock(prescription)
-            for err in stock_errors:
-                messages.warning(request, f"Low stock: {err}")
+            if stock_errors:
+                for err in stock_errors:
+                    messages.warning(request, f"Low stock: {err}")
 
+            generate_bill_from_visit(visit)
+        
+    
         appointment        = visit.appointment
         appointment.status = "completed" if is_completing else "confirmed"
         appointment.save()
 
+        if is_completing:
+            return redirect('billing:bill_detail',visit_id=visit.id)
         return redirect("appointment:manage_appointments")
 
 

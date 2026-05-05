@@ -134,6 +134,15 @@ class Purchase(models.Model):
     date = models.DateField(auto_now_add = True)
     total_amount = models.FloatField(default=0)
 
+    status_choices = [
+    ('draft', 'Draft'),
+    ('ordered', 'Ordered'),
+    ('received', 'Received'),
+    ]
+
+    status = models.CharField(max_length=20, choices=status_choices, default='ordered',null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True,null=True, blank=True)
+
 
 class PurchaseItem(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete = models.CASCADE,related_name = "items")
