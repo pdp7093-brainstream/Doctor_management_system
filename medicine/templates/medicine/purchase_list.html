@@ -1,0 +1,206 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Purchase Orders - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="page-title mb-1">Purchase Orders</h2>
+            <p class="text-muted small mb-0">Track all medicine purchases from vendors</p>
+        </div>
+        <a href="{% url 'medicine:add_purchase' %}" class="btn btn-primary add-patient-btn">
+            <i class="bi bi-plus-lg"></i> Add Purchase
+        </a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {% for message in messages %}
+            <i class="bi bi-check-circle me-2"></i>{{ message }}
+        {% endfor %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endif %}
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div style="font-size:2rem; color:#0066cc; font-weight:700;">{{ purchases.count }}</div>
+                <div class="text-muted small">Total Purchases</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div style="font-size:2rem; color:#fd7e14; font-weight:700;">
+                    {% with total=0 %}
+                    {% for p in purchases %}
+                        {% with total=total|add:p.total_amount %}{% endwith %}
+                    {% endfor %}
+                    ₹{{ total|floatformat:0 }}
+                    {% endwith %}
+                </div>
+                <div class="text-muted small">Total Spending</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div style="font-size:2rem; color:#28a745; font-weight:700;">
+                    {% with count=0 %}
+                    {% for p in purchases %}
+                        {% with count=count|add:p.items.count %}{% endwith %}
+                    {% endfor %}
+                    {{ count }}
+                    {% endwith %}
+                </div>
+                <div class="text-muted small">Total Items</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="input-group" style="max-width: 420px;">
+            <span class="input-group-text bg-white border-end-0">
+                <i class="bi bi-search text-muted"></i>
+            </span>
+            <input type="text" class="form-control border-start-0 search-input ps-0"
+                id="searchInput" placeholder="Search by vendor name or date...">
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="table-section">
+        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+            <table class="table table-custom" style="min-width: 950px; width: 100%;">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Vendor Name</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total Amount</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for purchase in purchases %}
+                    <tr class="purchase-row" 
+                        data-vendor-name="{{ purchase.vendor.name|lower }}" 
+                        data-purchase-date="{{ purchase.date|date:'Y-m-d' }}">
+                        <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
+                        
+                        <td class="patient-name">
+                            <div class="d-flex align-items-center">
+                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
+                                    {{ purchase.vendor.name|first|upper }}
+                                </div>
+                                <span class="fw-semibold">{{ purchase.vendor.name }}</span>
+                            </div>
+                        </td>
+
+                        <td class="patient-info">
+                            <i class="bi bi-calendar-event me-2" style="color: #0066cc;"></i>
+                            <span>{{ purchase.date|date:"d M, Y" }}</span>
+                        </td>
+
+                        <td class="patient-info">
+                            <span class="badge bg-info text-dark rounded-pill px-3">
+                                {{ purchase.items.count }} item{{ purchase.items.count|pluralize }}
+                            </span>
+                        </td>
+
+                        <td class="patient-info">
+                            <div class="fw-bold" style="color: #28a745; font-size: 1.1rem;">
+                                ₹{{ purchase.total_amount|floatformat:2 }}
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="action-buttons justify-content-center">
+                                <a href="{% url 'medicine:purchase_detail' purchase.pk %}"
+                                    class="action-btn btn btn-primary btn-sm" title="View Details">
+                                    <i class="bi bi-eye"></i> View
+                                </a>
+                                <form method="post"
+                                    action="#"
+                                    style="display:inline;"
+                                    onsubmit="return confirm('Delete this purchase order?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="action-btn btn btn-danger btn-sm" title="Delete Purchase">
+                                        <i class="bi bi-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon mb-3">
+                                    <i class="bi bi-inbox" style="font-size: 2.5rem; color: #ccc;"></i>
+                                </div>
+                                <p class="text-muted mb-3">No purchase orders yet</p>
+                                <a href="{% url 'medicine:add_purchase' %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-lg me-1"></i> Create First Purchase
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    const purchaseRows = document.querySelectorAll('.purchase-row');
+
+    searchInput.addEventListener('input', function() {
+        const searchValue = this.value.toLowerCase().trim();
+
+        purchaseRows.forEach(row => {
+            const vendorName = row.getAttribute('data-vendor-name');
+            const purchaseDate = row.getAttribute('data-purchase-date');
+
+            if (vendorName.includes(searchValue) || purchaseDate.includes(searchValue)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Show empty state if no results
+        const visibleRows = Array.from(purchaseRows).filter(row => row.style.display !== 'none');
+        const tbody = document.querySelector('#tableBody');
+        let emptyStateRow = tbody.querySelector('.empty-state-row');
+        
+        if (visibleRows.length === 0 && !emptyStateRow) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.classList.add('empty-state-row');
+            emptyRow.innerHTML = `
+                <td colspan="6" class="text-center py-5">
+                    <div class="empty-state">
+                        <i class="bi bi-search" style="font-size: 2.5rem; color: #ccc;"></i>
+                        <p class="text-muted mt-3">No purchase orders match your search</p>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(emptyRow);
+        } else if (visibleRows.length > 0) {
+            const emptyRow = tbody.querySelector('.empty-state-row');
+            if (emptyRow) emptyRow.remove();
+        }
+    });
+</script>
+
+{% endblock %}

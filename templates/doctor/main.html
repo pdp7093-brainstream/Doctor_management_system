@@ -74,12 +74,52 @@
                 </a>
             </li>
             <li>
-                <a href="{% url 'medicine:manage_medicine' %}"
-                    class="{% if '/medicine' in request.path %}active{% endif %}">
-                    <i class="bi bi-capsule"></i>
-                    <span>Medicine Store</span>
+                <a href="#" class="menu-toggle {% if '/medicine' in request.path %}active{% endif %}">
+                    <div class="menu-toggle-label">
+                        <i class="bi bi-capsule"></i>
+                        <span>Medicine Store</span>
+                        <span class="low-stock-badge" id="sidebarLowStockBadge" style="display:none; background:#dc3545; color:#fff;
+                       border-radius:50%; padding:1px 6px; font-size:0.6em;
+                       margin-left:6px;">0</span>
+                    </div>
+                    <i class="arrow-icon"></i>
                 </a>
+                <!-- submenu class use karo — same as Patients! -->
+                <ul class="submenu">
+                    <li>
+                        <a href="{% url 'medicine:manage_medicine' %}"
+                            class="{% if request.path == '/medicine/' or 'manage_medicine' in request.path %}active{% endif %}">
+                            <i class="bi bi-list-ul"></i>
+                            <span>Manage Medicine</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'medicine:low_stock' %}" class="{% if 'low-stock' in request.path %}active{% endif %}"
+                            style="color:#dc3545;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span>Low Stock Alert</span>
+                            <span id="sidebarLowStockCount" style="display:none; background:#dc3545; color:#fff;
+                           border-radius:50%; padding:1px 6px; font-size:0.7rem;
+                           margin-left:6px;">0</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'medicine:vendor_list' %}"
+                            class="{% if 'vendor' in request.path %}active{% endif %}">
+                            <i class="bi bi-truck"></i>
+                            <span>Vendors</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'medicine:purchase_list' %}"
+                            class="{% if 'purchase' in request.path %}active{% endif %}">
+                            <i class="bi bi-cart-plus"></i>
+                            <span>Purchases</span>
+                        </a>
+                    </li>
+                </ul>
             </li>
+
             {% endif %}
 
              <li>
@@ -123,6 +163,52 @@
                     DR
                 </div>
                 <span class="user-name">{{ request.user.first_name }}</span>
+            </div>
+            <!-- Bell Notification -->
+            <div class="position-relative me-3" style="display:inline-block;">
+                <button id="bellBtn" onclick="toggleBellDropdown()"
+                    style="background:none; border:none; cursor:pointer; position:relative; padding:6px;">
+                    <i class="bi bi-bell-fill" style="font-size:1.3rem;"></i>
+                    <span id="bellBadge" style="display:none; position:absolute; top:-4px; right:-4px;
+                   background:#dc3545; color:#fff; border-radius:50%;
+                   padding:1px 5px; font-size:0.65rem; font-weight:700;">
+                        0
+                    </span>
+                </button>
+
+                <!-- Dropdown -->
+                <div id="bellDropdown" style="display:none; position:absolute; right:0; top:120%;
+               background:#fff; border-radius:12px; min-width:300px;
+               box-shadow:0 8px 30px rgba(0,0,0,0.15); z-index:9999;
+               border:1px solid #eee; overflow:hidden;" >
+                    
+                    <!-- Header -->
+                    <div style="padding:12px 16px; background:#f8f9fa; border-bottom:1px solid #eee;
+                    display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-weight:700; font-size:0.9rem; color:#1a2744;">
+                            <i class="bi bi-exclamation-triangle text-danger me-2"></i>Low Stock Alerts
+                        </span>
+                        <a href="{% url 'medicine:low_stock' %}"
+                            style="font-size:0.78rem; color:#0d6efd; text-decoration:none;">
+                            View All
+                        </a>
+                    </div>
+
+                    <!-- Alert Items -->
+                    <div id="bellAlertList" style="max-height:280px; overflow-y:auto;">
+                        <div class="text-center py-4 text-muted small">
+                            Loading...
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="padding:10px 16px; border-top:1px solid #eee; text-align:center;">
+                        <a href="{% url 'medicine:low_stock' %}"
+                            style="font-size:0.82rem; color:#0d6efd; text-decoration:none; font-weight:600;">
+                            Go to Low Stock Page →
+                        </a>
+                    </div>
+                </div>
             </div>
             <button class="logout-btn" onclick="handleLogout()">
                 <i class="bi bi-box-arrow-right"></i> Logout

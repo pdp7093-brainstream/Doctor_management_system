@@ -113,10 +113,6 @@ class Manage_appointments(View):
             'status'          : status,
         }
 
-        # AJAX — return only table partial
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return render(request, 'doctor/partials/appointments_table.html', context)
-
         return render(request, 'doctor/manage_appointments.html', context)
 
 

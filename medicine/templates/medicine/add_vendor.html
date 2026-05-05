@@ -1,0 +1,89 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Add Vendor - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+    <div class="patient-form-shell">
+        <div class="page-header patient-form-header">
+            <div>
+                <h2 class="page-title mb-0">Add Vendor</h2>
+                <p class="page-subtitle">Add a new medicine supplier to your vendor list.</p>
+            </div>
+            <a href="{% url 'medicine:vendor_list' %}" class="patient-link-btn">
+                <i class="bi bi-arrow-left me-2"></i>Vendor List
+            </a>
+        </div>
+
+        <div class="patient-form-card">
+            <form method="POST" class="patient-form-grid">
+                {% csrf_token %}
+
+                <!-- Messages -->
+                {% if messages %}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {% for message in messages %}
+                            <i class="bi bi-check-circle me-2"></i>{{ message }}
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endif %}
+
+                <!-- Vendor Name -->
+                <div class="patient-field">
+                    <label class="patient-label" for="vendor-name">
+                        <i class="bi bi-building me-1" style="color: #0066cc;"></i>Vendor Name
+                        <span style="color: #dc3545;">*</span>
+                    </label>
+                    <input id="vendor-name" type="text" name="name" class="patient-input"
+                        placeholder="Enter vendor company name" required>
+                    <small class="text-muted d-block mt-1">Full name or company name of the medicine supplier</small>
+                </div>
+
+                <!-- Row: Phone + Email -->
+                <div class="patient-form-row">
+                    <div class="patient-field">
+                        <label class="patient-label" for="vendor-phone">
+                            <i class="bi bi-telephone me-1" style="color: #28a745;"></i>Phone Number
+                        </label>
+                        <input id="vendor-phone" type="text" name="phone" class="patient-input"
+                            placeholder="Enter phone number" maxlength="10">
+                        <small class="text-muted d-block mt-1">10 digit phone number</small>
+                    </div>
+
+                    <div class="patient-field">
+                        <label class="patient-label" for="vendor-email">
+                            <i class="bi bi-envelope me-1" style="color: #fd7e14;"></i>Email Address
+                        </label>
+                        <input id="vendor-email" type="email" name="email" class="patient-input"
+                            placeholder="vendor@company.com">
+                        <small class="text-muted d-block mt-1">For communication and invoices</small>
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="patient-field">
+                    <label class="patient-label" for="vendor-address">
+                        <i class="bi bi-geo-alt me-1" style="color: #6c757d;"></i>Address
+                    </label>
+                    <textarea id="vendor-address" name="address" class="patient-input patient-textarea"
+                        rows="4" placeholder="Enter complete address (Street, City, State, Zip)"></textarea>
+                    <small class="text-muted d-block mt-1">Complete address for delivery and official correspondence</small>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="patient-form-actions">
+                    <button type="submit" class="patient-submit-btn">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Add Vendor</span>
+                    </button>
+                    <a href="{% url 'medicine:vendor_list' %}" class="btn btn-outline-secondary" style="border-radius: 8px; padding: 10px 20px; font-weight: 600;">
+                        <i class="bi bi-x-circle me-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
