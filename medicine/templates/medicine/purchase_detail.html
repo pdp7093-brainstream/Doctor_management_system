@@ -11,29 +11,36 @@
             <div class="d-flex align-items-center gap-2 mb-1">
                 <h2 class="page-title mb-0">Purchase Order #{{ purchase.id }}</h2>
                 {% if purchase.status == "received" %}
-                    <span class="badge bg-success">Received</span>
+                <span class="badge bg-success">Received</span>
                 {% else %}
-                    <span class="badge bg-warning text-dark">Pending</span>
+                <span class="badge bg-warning text-dark">Pending</span>
                 {% endif %}
             </div>
             <p class="text-muted small mb-0">View purchase details and items</p>
         </div>
         <div class="d-flex align-items-center gap-2">
+
             {% if purchase.status == "received" %}
-                <button type="button" class="btn btn-secondary btn-sm" disabled>
-                    <i class="bi bi-check-circle me-2"></i>Already Received
-                </button>
+
+            <button type="button" class="btn btn-secondary btn-sm" disabled>
+                <i class="bi bi-check-circle me-2"></i>
+                Already Received
+            </button>
+
             {% else %}
-                <form method="POST" action="{% url 'medicine:receive_purchase' purchase.id %}" class="mb-0">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success btn-sm">
-                        Mark as Received
-                    </button>
-                </form>
-            {% endif %}
-            <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn btn-sm">
-                <i class="bi bi-arrow-left me-2"></i>Purchase List
+
+            <a href="{% url 'medicine:receive_purchase' purchase.id %}" class="btn btn-success btn-sm">
+                <i class="bi bi-box-arrow-in-down me-2"></i>
+                Receive Purchase
             </a>
+
+            {% endif %}
+
+            <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn btn-sm">
+                <i class="bi bi-arrow-left me-2"></i>
+                Purchase List
+            </a>
+
         </div>
     </div>
 
@@ -98,22 +105,24 @@
             <i class="bi bi-box-seam me-2" style="color: #0066cc;"></i>Purchase Items
         </h5>
         <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
-            <table class="table table-custom" style="min-width: 950px; width: 100%;">
+            <table class="table table-custom" style="min-width: 1200px; width: 100%;">
                 <thead>
                     <tr>
-                        <th>#</th>
                         <th>Medicine</th>
                         <th>Power</th>
                         <th>Qty Strips</th>
                         <th>Unit/Strip</th>
-                        <th>Cost/Strip (₹)</th>
+                        <th>Total Units</th>
+                        <th>Strip Price</th>
+                        <th>Tax %</th>
+                        <th>Discount</th>
+                        <th>Final Amount</th>
+                        <th>Effective Unit Cost</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in purchase.items.all %}
                     <tr>
-                        <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
-
                         <td class="patient-name fw-semibold">
                             {{ item.medicine_variant.medicine.name }}
                         </td>
@@ -130,13 +139,34 @@
                             {{ item.unit_per_strip }}
                         </td>
 
+                        <td class="patient-info text-center fw-semibold total-units-cell"
+                            data-total-units="{{ item.total_units }}">
+                            {{ item.total_units }}
+                        </td>
+
                         <td class="patient-info text-end fw-semibold">
-                            ₹{{ item.cost_strip|floatformat:2 }}
+                            ₹{{ item.strip_price|floatformat:2 }}
+                        </td>
+
+                        <td class="patient-info text-center fw-semibold">
+                            {{ item.tax_percent|floatformat:2 }}%
+                        </td>
+
+                        <td class="patient-info text-end fw-semibold">
+                            ₹{{ item.discount_amount|floatformat:2 }}
+                        </td>
+
+                        <td class="patient-info text-end fw-semibold">
+                            ₹{{ item.final_amount|floatformat:2 }}
+                        </td>
+
+                        <td class="patient-info text-end fw-semibold">
+                            ₹{{ item.effective_unit_cost|floatformat:2 }}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">
+                        <td colspan="10" class="text-center py-4 text-muted">
                             No items in this purchase order
                         </td>
                     </tr>
@@ -151,23 +181,39 @@
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:20px;">
             <div>
                 <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:8px;">
-                    Ordered Items Count
-                </div>
-                <div style="font-size:1.8rem; color:#0066cc; font-weight:700;">
-                    {{ purchase.items.count }}
-                </div>
-            </div>
-            <div>
-                <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:8px;">
                     Total Purchase Amount
                 </div>
                 <div style="font-size:1.8rem; color:#28a745; font-weight:700;">
                     ₹{{ purchase.total_amount|floatformat:2 }}
                 </div>
             </div>
+            <div>
+                <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:8px;">
+                    Total Ordered Units
+                </div>
+                <div id="totalOrderedUnits" style="font-size:1.8rem; color:#0066cc; font-weight:700;">
+                    0
+                </div>
+            </div>
+            <div>
+                <div style="font-size:0.85rem; color:#666; font-weight:500; margin-bottom:8px;">
+                    Purchase Status
+                </div>
+                <div style="font-size:1.8rem; color:#1f2937; font-weight:700;">
+                    {{ purchase.get_status_display|default:purchase.status|default:"Draft" }}
+                </div>
+            </div>
         </div>
     </div>
 
 </main>
+
+<script>
+    const totalOrderedUnits = Array.from(document.querySelectorAll('.total-units-cell'))
+        .reduce((sum, cell) => sum + (parseInt(cell.dataset.totalUnits, 10) || 0), 0);
+
+    const totalOrderedUnitsEl = document.getElementById('totalOrderedUnits');
+    if (totalOrderedUnitsEl) totalOrderedUnitsEl.textContent = totalOrderedUnits;
+</script>
 
 {% endblock %}

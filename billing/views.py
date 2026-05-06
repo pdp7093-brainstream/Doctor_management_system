@@ -32,7 +32,6 @@ def generate_bill_from_visit(visit):
 
     bill = Bill.objects.create(
         visit=visit,
-        bill_number='TEMP',  # save() mein auto generate hoga
         subtotal=0,
         gst_percent=18,
     )
@@ -103,6 +102,7 @@ class BillDetailView(LoginRequiredMixin, View):
 
         # Update fields
         bill.gst_percent    = Decimal(request.POST.get('gst_percent', 18))
+        bill.consultation_fee = Decimal(request.POST.get('consultation_fee', 0))
         bill.discount       = Decimal(request.POST.get('discount', 0))
         bill.payment_method = request.POST.get('payment_method', 'cash')
         bill.payment_status = request.POST.get('payment_status', 'unpaid')

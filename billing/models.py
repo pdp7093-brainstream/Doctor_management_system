@@ -23,7 +23,7 @@ class Bill(models.Model):
     )
     bill_number    = models.CharField(max_length=20, unique=True)
     bill_date      = models.DateField(auto_now_add=True)
-
+    consultation_fee = models.DecimalField(max_digits=10,decimal_places=2,default=0)
     subtotal       = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     gst_percent    = models.DecimalField(max_digits=5, decimal_places=2, default=18)
     gst_amount     = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -51,7 +51,7 @@ class Bill(models.Model):
         # GST + Total calculate
         from decimal import Decimal
         self.gst_amount = (self.subtotal * self.gst_percent) / Decimal('100')
-        self.total = self.subtotal + self.gst_amount - self.discount
+        self.total = self.consultation_fee + self.subtotal + self.gst_amount - self.discount
         super().save(*args, **kwargs)
 
     def __str__(self):

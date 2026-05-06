@@ -8,7 +8,7 @@ from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-
+from decimal import Decimal
 
 class ManageMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
@@ -514,18 +514,21 @@ class AddPurchaseView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
+
         vendors = Vendor.objects.all().order_by("name")
 
-        # ← Low stock se aaya hai to pre-select karo
         preselected_variant = None
         variant_id = request.GET.get("variant")
+
         if variant_id:
             try:
                 preselected_variant = MedicineVariant.objects.select_related(
                     "medicine"
                 ).get(pk=variant_id)
+
             except MedicineVariant.DoesNotExist:
                 pass
+
             else:
                 pending_purchase = (
                     Purchase.objects.filter(
@@ -535,13 +538,16 @@ class AddPurchaseView(LoginRequiredMixin, View):
                     .order_by("-id")
                     .first()
                 )
+
                 if pending_purchase:
                     messages.warning(
                         request,
                         f"{preselected_variant.medicine.name} already has a pending order.",
                     )
+
                     return redirect(
-                        "medicine:purchase_detail", pk=pending_purchase.pk
+                        "medicine:purchase_detail",
+                        pk=pending_purchase.pk,
                     )
 
         return render(
@@ -554,16 +560,19 @@ class AddPurchaseView(LoginRequiredMixin, View):
         )
 
     def post(self, request):
+
         vendor_id = request.POST.get("vendor")
         vendor = get_object_or_404(Vendor, pk=vendor_id)
 
         variant_ids = request.POST.getlist("variant_id[]")
         qty_strips_list = request.POST.getlist("quantity_strips[]")
         ups_list = request.POST.getlist("unit_per_strip[]")
-        cost_list = request.POST.getlist("cost_strip[]")
+
+        strip_price_list = request.POST.getlist("strip_price[]")
+        tax_list = request.POST.getlist("tax_percent[]")
+        discount_list = request.POST.getlist("discount_amount[]")
 
         # Validation
-
         if not any(variant_ids):
             messages.error(request, "Please add at least one medicine!")
             return redirect("medicine:add_purchase")
@@ -571,98 +580,300 @@ class AddPurchaseView(LoginRequiredMixin, View):
         selected_variant_ids = [v_id for v_id in variant_ids if v_id]
 
         if len(selected_variant_ids) != len(set(selected_variant_ids)):
-            messages.error(request, "Please add each medicine only once in a purchase.")
+            messages.error(
+                request,
+                "Please add each medicine only once in a purchase.",
+            )
             return redirect("medicine:add_purchase")
 
+        # Pending validation
         pending_item = (
             PurchaseItem.objects.select_related(
-                "purchase", "medicine_variant__medicine"
+                "purchase",
+                "medicine_variant__medicine",
             )
             .filter(
                 medicine_variant_id__in=selected_variant_ids,
                 purchase__status="ordered",
             )
-            .order_by("-purchase__created_at", "-purchase_id")
             .first()
         )
 
         if pending_item:
+
             medicine_name = pending_item.medicine_variant.medicine.name
+
             messages.error(
                 request,
                 f"{medicine_name} already has a pending purchase order.",
             )
+
             return redirect(
-                "medicine:purchase_detail", pk=pending_item.purchase_id
+                "medicine:purchase_detail",
+                pk=pending_item.purchase_id,
             )
 
-        total_amount = 0
+        # Purchase Create
+        purchase = Purchase.objects.create(
+            vendor=vendor,
+            total_amount=0,
+            status="ordered",
+        )
 
-        # Purchase create
-        purchase = Purchase.objects.create(vendor=vendor, total_amount=0)
+        grand_total = Decimal("0.00")
 
-        for v_id, qty_str, ups_str, cost_str in zip(
-            variant_ids, qty_strips_list, ups_list, cost_list
+        for (
+            v_id,
+            qty_str,
+            ups_str,
+            strip_price_str,
+            tax_str,
+            discount_str,
+        ) in zip(
+            variant_ids,
+            qty_strips_list,
+            ups_list,
+            strip_price_list,
+            tax_list,
+            discount_list,
         ):
+
             if not v_id:
                 continue
 
-            variant = get_object_or_404(MedicineVariant, pk=v_id)
-            qty_strips = int(qty_str) if qty_str else 0
-            ups = int(ups_str) if ups_str else 1
-            cost_strip = float(cost_str) if cost_str else 0
+            variant = get_object_or_404(
+                MedicineVariant,
+                pk=v_id,
+            )
 
-            # Puchase item save karo
+            # Convert values
+            qty_strips = int(qty_str or 0)
+            unit_per_strip = int(ups_str or 1)
+
+            strip_price = Decimal(strip_price_str or "0")
+            tax_percent = Decimal(tax_str or "0")
+            discount_amount = Decimal(discount_str or "0")
+
+            # Total units
+            total_units = qty_strips * unit_per_strip
+
+            # Price calculations
+            subtotal = Decimal(qty_strips) * strip_price
+
+            tax_amount = (
+                subtotal * tax_percent
+            ) / Decimal("100")
+
+            final_amount = (
+                subtotal + tax_amount - discount_amount
+            )
+
+            effective_unit_cost = (
+                final_amount / total_units
+                if total_units > 0
+                else Decimal("0")
+            )
+
+            # Save Purchase Item
             PurchaseItem.objects.create(
                 purchase=purchase,
                 medicine_variant=variant,
+
                 quantity_strips=qty_strips,
-                unit_per_strip=ups,
-                cost_strip=cost_strip,
+                unit_per_strip=unit_per_strip,
+
+                strip_price=strip_price,
+                tax_percent=tax_percent,
+                discount_amount=discount_amount,
+
+                total_units=total_units,
+                final_amount=final_amount,
+                effective_unit_cost=effective_unit_cost,
             )
 
-            # # Stock Update
-            # total_units = qty_strips * ups
-            # variant.stock += total_units
-            # variant.cost_price = cost_strip/ups if ups else cost_strip
-            # variant.unit_per_strip = ups
-            # variant.save()
+            grand_total += final_amount
 
-            total_amount += qty_strips * cost_strip
-
-        # Total update karo
-        purchase.total_amount = total_amount
+        purchase.total_amount = grand_total
         purchase.save()
 
-        messages.success(request, f"Purchase added! Total : {total_amount:.2f}")
-        return redirect("medicine:purchase_list")
-
-
-def receive_purchase(request, pk):
-    purchase = get_object_or_404(Purchase, pk=pk)
-
-    if purchase.status == "received":
-        messages.warning(request, "Already received")
-        return redirect("medicine:purchase_list")
-
-    for item in purchase.items.all():
-        variant = item.medicine_variant
-
-        total_units = item.quantity_strips * item.unit_per_strip
-        variant.stock += total_units
-        variant.cost_price = (
-            item.cost_strip / item.unit_per_strip
-            if item.unit_per_strip
-            else item.cost_strip
+        messages.success(
+            request,
+            f"Purchase order created successfully. Total ₹{grand_total}",
         )
-        variant.save()
 
-    purchase.status = "received"
-    purchase.save()
+        return redirect("medicine:purchase_list")
 
-    messages.success(request, "Stock updated successfully!")
-    return redirect("medicine:purchase_list")
+class ReceivePurchaseView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
 
+    def get(self, request, pk):
+
+        purchase = get_object_or_404(
+            Purchase.objects.select_related("vendor").prefetch_related(
+                "items__medicine_variant__medicine"
+            ),
+            pk=pk,
+        )
+
+        # Already received validation
+        if purchase.status == "received":
+            messages.warning(request, "Purchase already received.")
+            return redirect("medicine:purchase_detail", pk=pk)
+
+        context = {
+            "purchase": purchase,
+        }
+
+        return render(
+            request,
+            "medicine/receive_purchase.html",
+            context,
+        )
+
+    def post(self, request, pk):
+
+        purchase = get_object_or_404(
+            Purchase.objects.prefetch_related(
+                "items__medicine_variant"
+            ),
+            pk=pk,
+        )
+
+        # Prevent duplicate receive
+        if purchase.status == "received":
+            messages.warning(request, "Purchase already received.")
+            return redirect("medicine:purchase_detail", pk=pk)
+
+        item_ids = request.POST.getlist("item_id[]")
+
+        received_qty_list = request.POST.getlist(
+            "received_quantity_strips[]"
+        )
+
+        strip_price_list = request.POST.getlist(
+            "strip_price[]"
+        )
+
+        tax_list = request.POST.getlist(
+            "tax_percent[]"
+        )
+
+        discount_list = request.POST.getlist(
+            "discount_amount[]"
+        )
+
+        grand_total = Decimal("0.00")
+
+        for (
+            item_id,
+            received_qty_str,
+            strip_price_str,
+            tax_str,
+            discount_str,
+        ) in zip(
+            item_ids,
+            received_qty_list,
+            strip_price_list,
+            tax_list,
+            discount_list,
+        ):
+
+            purchase_item = get_object_or_404(
+                PurchaseItem,
+                pk=item_id,
+                purchase=purchase,
+            )
+
+            variant = purchase_item.medicine_variant
+
+            # Convert values
+            received_qty = int(received_qty_str or 0)
+
+            strip_price = Decimal(strip_price_str or "0")
+
+            tax_percent = Decimal(tax_str or "0")
+
+            discount_amount = Decimal(discount_str or "0")
+
+            # Total units
+            total_units = (
+                received_qty *
+                purchase_item.unit_per_strip
+            )
+
+            # Price calculations
+            subtotal = (
+                Decimal(received_qty) *
+                strip_price
+            )
+
+            tax_amount = (
+                subtotal * tax_percent
+            ) / Decimal("100")
+
+            final_amount = (
+                subtotal +
+                tax_amount -
+                discount_amount
+            )
+
+            effective_unit_cost = (
+                final_amount / total_units
+                if total_units > 0
+                else Decimal("0")
+            )
+
+            # Save receive details
+            purchase_item.received_quantity_strips = received_qty
+
+            purchase_item.strip_price = strip_price
+
+            purchase_item.tax_percent = tax_percent
+
+            purchase_item.discount_amount = discount_amount
+
+            purchase_item.total_units = total_units
+
+            purchase_item.final_amount = final_amount
+
+            purchase_item.effective_unit_cost = (
+                effective_unit_cost
+            )
+
+            purchase_item.is_received = True
+
+            purchase_item.save()
+
+            # Stock update
+            variant.stock += total_units
+
+            # Initial costing
+            variant.cost_price = effective_unit_cost
+
+            variant.unit_per_strip = (
+                purchase_item.unit_per_strip
+            )
+
+            variant.save()
+
+            grand_total += final_amount
+
+        # Purchase update
+        purchase.total_amount = grand_total
+
+        purchase.status = "received"
+
+        purchase.save()
+
+        messages.success(
+            request,
+            "Purchase received successfully."
+        )
+
+        return redirect(
+            "medicine:purchase_detail",
+            pk=purchase.pk,
+        )
 
 class PurchaseDetailView(LoginRequiredMixin, View):
     login_url = "doctor:login"

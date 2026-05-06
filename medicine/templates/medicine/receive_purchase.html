@@ -1,0 +1,119 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Receive Purchase - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="page-title mb-0">Purchase Order #{{ purchase.id }}</h2>
+                {% if purchase.status == "received" %}
+                    <span class="badge bg-success">Already Received</span>
+                {% elif purchase.status == "ordered" %}
+                    <span class="badge bg-warning text-dark">Ordered</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ purchase.status|default:"Draft"|capfirst }}</span>
+                {% endif %}
+            </div>
+            <p class="text-muted small mb-0">
+                {{ purchase.vendor.name }} - {{ purchase.date|date:"d M, Y" }}
+            </p>
+        </div>
+        <a href="{% url 'medicine:purchase_detail' purchase.id %}" class="patient-link-btn btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Back to Purchase Detail
+        </a>
+    </div>
+
+    <div class="patient-form-card">
+        <form method="POST" class="patient-form-grid">
+            {% csrf_token %}
+
+            <!-- Receive Purchase Items Table -->
+            <div class="table-section">
+                <h5 class="mb-3 fw-semibold">
+                    <i class="bi bi-box-seam me-2"></i>Receive Purchase Items
+                </h5>
+
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Medicine</th>
+                                <th>Power</th>
+                                <th>Ordered Qty</th>
+                                <th>Unit/Strip</th>
+                                <th>Received Qty</th>
+                                <th>Strip Price (₹)</th>
+                                <th>Tax %</th>
+                                <th>Discount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in purchase.items.all %}
+                            <tr>
+                                <td class="patient-name fw-semibold">
+                                    {{ item.medicine_variant.medicine.name }}
+                                    <input type="hidden" name="item_id[]" value="{{ item.id }}">
+                                </td>
+                                <td class="patient-info">
+                                    <span class="badge bg-secondary">{{ item.medicine_variant.power }}</span>
+                                </td>
+                                <td class="patient-info text-center fw-semibold">
+                                    {{ item.quantity_strips }}
+                                </td>
+                                <td class="patient-info text-center fw-semibold">
+                                    {{ item.unit_per_strip }}
+                                </td>
+                                <td>
+                                    <input type="number" name="received_quantity_strips[]"
+                                        class="patient-input" value="{{ item.quantity_strips }}"
+                                        min="0" {% if purchase.status == "received" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="number" name="strip_price[]"
+                                        class="patient-input" min="0" step="0.01"
+                                        {% if purchase.status == "received" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="number" name="tax_percent[]"
+                                        class="patient-input" value="0" min="0" step="0.01"
+                                        {% if purchase.status == "received" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="number" name="discount_amount[]"
+                                        class="patient-input" value="0" min="0" step="0.01"
+                                        {% if purchase.status == "received" %}disabled{% endif %}>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    No items in this purchase order
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="patient-form-actions">
+                <button type="submit" class="patient-submit-btn"
+                    {% if purchase.status == "received" %}disabled{% endif %}>
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Receive Purchase</span>
+                </button>
+                <a href="{% url 'medicine:purchase_detail' purchase.id %}"
+                    class="btn btn-outline-secondary">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</main>
+
+{% endblock %}

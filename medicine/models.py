@@ -150,4 +150,16 @@ class PurchaseItem(models.Model):
 
     quantity_strips = models.IntegerField()
     unit_per_strip = models.IntegerField()
-    cost_strip = models.FloatField()
+
+    #Price 
+    strip_price = models.DecimalField(max_digits =10, decimal_places = 2, default = 0)
+    tax_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    #Calculated prices (saved so you don't have to compute them at query time)
+
+    total_units = models.IntegerField(default=0)
+    final_amount = models.DecimalField(max_digits = 12,decimal_places = 2, default =0)
+    effective_unit_cost = models.DecimalField(max_digits=10,decimal_places = 2,default=0)
+
+    

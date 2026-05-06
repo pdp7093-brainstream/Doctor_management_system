@@ -84,7 +84,7 @@
                                 </span>
                             </div>
 
-                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto;
+                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto;
                                         gap:10px; align-items:end;">
                                 <div style="position:relative;">
                                     <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
@@ -93,6 +93,9 @@
                                         placeholder="Name, short name, or company..." autocomplete="off">
                                     <input type="hidden" name="variant_id[]" class="variant-id"
                                         value="{{ preselected_variant.pk }}">
+                                    <input type="hidden" name="strip_price[]" value="0">
+                                    <input type="hidden" name="tax_percent[]" value="0">
+                                    <input type="hidden" name="discount_amount[]" value="0">
                                     <div class="autocomplete-list"
                                         style="display:none; position:absolute; top:100%; left:0; right:0;
                                                background:white; border:1px solid #ddd; border-top:none;
@@ -113,12 +116,6 @@
                                         value="{{ preselected_variant.unit_per_strip|default:10 }}"
                                         min="1" required>
                                 </div>
-                                <div>
-                                    <label class="patient-label" style="font-size:0.78rem;">Cost/Strip (₹)</label>
-                                    <input type="number" name="cost_strip[]"
-                                        class="patient-input" placeholder="0.00"
-                                        min="0" step="0.01" required>
-                                </div>
                                 <div style="padding-bottom:2px;">
                                     <button type="button"
                                         class="btn btn-sm btn-outline-danger remove-item-btn"
@@ -134,13 +131,16 @@
                         <div class="purchase-item-row"
                             style="background:#f8fbff; border:1px solid #e2e8f0;
                                    border-radius:10px; padding:14px; margin-bottom:12px;">
-                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto;
+                            <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto;
                                         gap:10px; align-items:end;">
                                 <div style="position:relative;">
                                     <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
                                     <input type="text" class="patient-input medicine-search"
                                         placeholder="Name, short name, or company..." autocomplete="off">
                                     <input type="hidden" name="variant_id[]" class="variant-id">
+                                    <input type="hidden" name="strip_price[]" value="0">
+                                    <input type="hidden" name="tax_percent[]" value="0">
+                                    <input type="hidden" name="discount_amount[]" value="0">
                                     <div class="autocomplete-list"
                                         style="display:none; position:absolute; top:100%; left:0; right:0;
                                                background:white; border:1px solid #ddd; border-top:none;
@@ -159,12 +159,6 @@
                                     <input type="number" name="unit_per_strip[]"
                                         class="patient-input" placeholder="e.g. 10"
                                         min="1" required>
-                                </div>
-                                <div>
-                                    <label class="patient-label" style="font-size:0.78rem;">Cost/Strip (₹)</label>
-                                    <input type="number" name="cost_strip[]"
-                                        class="patient-input" placeholder="0.00"
-                                        min="0" step="0.01" required>
                                 </div>
                                 <div style="padding-bottom:2px;">
                                     <button type="button"
@@ -230,13 +224,16 @@
         row.className = 'purchase-item-row';
         row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
         row.innerHTML = `
-            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto;
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto;
                         gap:10px; align-items:end;">
                 <div style="position:relative;">
                     <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
                     <input type="text" class="patient-input medicine-search"
                         placeholder="Name, short name, or company..." autocomplete="off">
                     <input type="hidden" name="variant_id[]" class="variant-id">
+                    <input type="hidden" name="strip_price[]" value="0">
+                    <input type="hidden" name="tax_percent[]" value="0">
+                    <input type="hidden" name="discount_amount[]" value="0">
                     <div class="autocomplete-list"
                         style="display:none; position:absolute; top:100%; left:0; right:0;
                                background:white; border:1px solid #ddd; border-top:none;
@@ -253,11 +250,6 @@
                     <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
                     <input type="number" name="unit_per_strip[]"
                         class="patient-input" placeholder="e.g. 10" min="1" required>
-                </div>
-                <div>
-                    <label class="patient-label" style="font-size:0.78rem;">Cost/Strip (₹)</label>
-                    <input type="number" name="cost_strip[]"
-                        class="patient-input" placeholder="0.00" min="0" step="0.01" required>
                 </div>
                 <div style="padding-bottom:2px;">
                     <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"
@@ -367,8 +359,14 @@
 
         if (item) {
             const row = item.closest('.purchase-item-row');
+            const variantId = item.dataset.variantId;
+            const variantInput = row.querySelector('.variant-id');
+            
+            console.log("Selected Variant:", variantId);
+            console.log(variantInput);
+
             row.querySelector('.medicine-search').value = item.dataset.medicineName;
-            row.querySelector('.variant-id').value = item.dataset.variantId;
+            variantInput.value = variantId;
             hideAutocomplete(row);
             return;
         }

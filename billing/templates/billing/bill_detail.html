@@ -2,36 +2,38 @@
 {% block title %}Bill #{{ bill.bill_number }}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
-    <div class="container-fluid px-4 py-5">
+    <div class="container-fluid ">
 
         <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div
+            class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-end mb-4 border-bottom pb-3 gap-3">
             <div>
-                <h1 class="h3 text-dark fw-bold mb-1">
-                    Bill #{{ bill.bill_number }}
+                <h1 class="h3 text-dark fw-bold mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-receipt-cutoff text-primary"></i> Bill #{{ bill.bill_number }}
                 </h1>
-                <p class="text-muted small mb-0">
-                    {{ visit.patient.user.get_full_name }} —
-                    {{ visit.appointment.appointment_date }}
+                <p class="text-muted small mb-0 fw-medium">
+                    <i class="bi bi-person-circle me-1"></i> {{ visit.patient.user.get_full_name }} <span
+                        class="mx-2">•</span>
+                    <i class="bi bi-calendar3 me-1"></i> {{ visit.appointment.appointment_date|date:"d M, Y" }}
                 </p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'billing:print_bill' visit.id %}"
-                    target="_blank"
-                    class="btn btn-outline-primary rounded-2">
-                    <i class="bi bi-printer me-2"></i>Print / PDF
+                <a href="{% url 'billing:print_bill' visit.id %}" target="_blank"
+                    class="btn btn-outline-primary rounded-3 px-3 fw-semibold">
+                    <i class="bi bi-printer me-2"></i>Print
                 </a>
-                <a href="{% url 'billing:bill_list' %}"
-                    class="btn btn-outline-secondary rounded-2">
+                <a href="{% url 'billing:bill_list' %}" class="btn btn-outline-secondary rounded-3 px-3 fw-semibold">
                     <i class="bi bi-arrow-left me-2"></i>Back
                 </a>
             </div>
         </div>
 
         {% if messages %}
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3 border-0 border-start border-5 border-success"
+            role="alert">
             {% for message in messages %}
-                <i class="bi bi-check-circle me-2"></i>{{ message }}
+            <i class="bi bi-check-circle-fill text-success me-2 fs-5 align-middle"></i>
+            <span class="fw-medium">{{ message }}</span>
             {% endfor %}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
@@ -43,77 +45,76 @@
             <div class="row g-4">
 
                 <!-- Left Column -->
-                <div class="col-lg-8">
+                <div class="col-12 col-lg-8">
 
                     <!-- Patient & Visit Info -->
-                    <div class="card border-0 shadow-sm rounded-3 mb-4">
-                        <div class="card-header bg-light border-0 px-4 py-3">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">
-                                Patient & Visit Information
-                            </h5>
+                    <div class="card border border-light shadow-sm rounded-4 mb-4">
+                        <div
+                            class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2 rounded-top-4">
+                            <i class="bi bi-person-vcard fs-5 text-primary"></i>
+                            <h5 class="card-title mb-0 fw-bold text-dark">Patient & Visit Details</h5>
                         </div>
                         <div class="card-body p-4">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
-                                    <input type="text" class="form-control form-control-lg bg-light"
-                                        value="{{ visit.patient.user.get_full_name }}" readonly>
+                            <div class="row g-4">
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Patient
+                                        Name</div>
+                                    <div class="fs-6 fw-bold text-dark">{{ visit.patient.user.get_full_name }}</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold text-dark mb-2">Doctor Name</label>
-                                    <input type="text" class="form-control form-control-lg bg-light"
-                                        value="Dr. {{ visit.doctor.user.get_full_name }}" readonly>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Doctor
+                                        Name</div>
+                                    <div class="fs-6 fw-bold text-dark">Dr. {{ visit.doctor.user.get_full_name }}</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold text-dark mb-2">Visit Date</label>
-                                    <input type="text" class="form-control form-control-lg bg-light"
-                                        value="{{ visit.appointment.appointment_date }}" readonly>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Visit
+                                        Date</div>
+                                    <div class="fs-6 fw-bold text-dark">{{ visit.appointment.appointment_date|date:"d M, Y" }}</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold text-dark mb-2">Bill Date</label>
-                                    <input type="text" class="form-control form-control-lg bg-light"
-                                        value="{{ bill.bill_date }}" readonly>
+                                <div class="col-6 col-md-3">
+                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Bill
+                                        Date</div>
+                                    <div class="fs-6 fw-bold text-dark">{{ bill.bill_date|date:"d M, Y" }}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Medicines Table -->
-                    <div class="card border-0 shadow-sm rounded-3 mb-4">
-                        <div class="card-header bg-light border-0 px-4 py-3">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">
-                                Prescribed Medicines
-                            </h5>
+                    <div class="card border border-light shadow-sm rounded-4 mb-4 overflow-hidden">
+                        <div class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-capsule fs-5 text-primary"></i>
+                            <h5 class="card-title mb-0 fw-bold text-dark">Prescribed Medicines</h5>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="bg-light">
+                                <table class="table table-hover align-middle mb-0 border-0 text-nowrap">
+                                    <thead class="bg-light text-muted small text-uppercase">
                                         <tr>
-                                            <th class="px-4 py-3">#</th>
-                                            <th>Medicine</th>
-                                            <th>Power</th>
-                                            <th class="text-center">Qty</th>
-                                            <th class="text-end">Unit Price</th>
-                                            <th class="text-end pe-4">Total</th>
+                                            <th class="px-4 py-3 fw-semibold border-bottom-0">#</th>
+                                            <th class="py-3 fw-semibold border-bottom-0">Medicine</th>
+                                            <th class="py-3 fw-semibold border-bottom-0">Power</th>
+                                            <th class="text-center py-3 fw-semibold border-bottom-0">Qty</th>
+                                            <th class="text-end pe-4 py-3 fw-semibold border-bottom-0">Total</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="border-top-0">
                                         {% for item in bill.items.all %}
                                         <tr>
-                                            <td class="px-4">{{ forloop.counter }}</td>
-                                            <td class="fw-semibold">{{ item.medicine_name }}</td>
-                                            <td>
-                                                <span class="badge bg-secondary">{{ item.power }}</span>
+                                            <td class="px-4 py-3 text-muted fw-medium">{{ forloop.counter }}</td>
+                                            <td class="py-3 fw-bold text-dark">{{ item.medicine_name }}</td>
+                                            <td class="py-3">
+                                                <span
+                                                    class="badge bg-light text-secondary border px-2 py-1 shadow-sm">{{item.power }}</span>
                                             </td>
-                                            <td class="text-center">{{ item.quantity }}</td>
-                                            <td class="text-end">₹{{ item.unit_price }}</td>
-                                            <td class="text-end pe-4 fw-bold">₹{{ item.total_price }}</td>
+                                            <td class="py-3 text-center fw-bold">{{ item.quantity }}</td>
+                                            <td class="py-3 text-end pe-4 fw-bolder text-primary">₹{{item.total_price|floatformat:2 }}</td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="6" class="text-center py-4 text-muted">
-                                                No medicines in this bill
+                                            <td colspan="5" class="text-center py-5 text-muted">
+                                                <i class="bi bi-inbox fs-1 d-block mb-2 text-light"></i>
+                                                <span class="fw-medium">No medicines in this bill</span>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -124,75 +125,99 @@
                     </div>
 
                     <!-- Billing Details -->
-                    <div class="card border-0 shadow-sm rounded-3">
-                        <div class="card-header bg-light border-0 px-4 py-3">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">Billing Details</h5>
+                    <div class="card border border-light shadow-sm rounded-4 mb-4">
+                        <div class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2">
+                            <i class="bi bi-calculator fs-5 text-primary"></i>
+                            <h5 class="card-title mb-0 fw-bold text-dark">Billing Details</h5>
                         </div>
                         <div class="card-body p-4">
-                            <div class="row g-3">
+                            <!-- Consultation Fee -->
+                            <div class="col-12">
+                                <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
+                                    Consultation Fee
+                                </label>
+
+                                <div class="input-group shadow-sm rounded-3">
+                                    <span class="input-group-text bg-light text-muted border-end-0 fw-bold">
+                                        ₹
+                                    </span>
+
+                                    <input type="number" name="consultation_fee"
+                                        class="form-control border-start-0 bg-light fw-bold text-dark"
+                                        value="{{ bill.consultation_fee }}" min="0" step="0.01"
+                                        oninput="calculateTotal()">
+                                </div>
+                            </div>
+                            <div class="row g-4 mt-1">
 
                                 <!-- GST -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold text-dark mb-2">
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
                                         GST (%) <span class="text-danger">*</span>
                                     </label>
-                                    <div class="input-group">
+                                    <div class="input-group shadow-sm rounded-3">
                                         <input type="number" name="gst_percent"
-                                            class="form-control form-control-lg"
-                                            value="{{ bill.gst_percent }}"
-                                            min="0" max="100" step="0.01"
-                                            oninput="calculateTotal()"
-                                            required>
-                                        <span class="input-group-text">%</span>
+                                            class="form-control border-end-0 bg-light fw-bold text-primary"
+                                            value="{{ bill.gst_percent }}" min="0" max="100" step="0.01"
+                                            oninput="calculateTotal()" required>
+                                        <span
+                                            class="input-group-text bg-light text-muted border-start-0 fw-bold">%</span>
                                     </div>
                                 </div>
 
                                 <!-- Discount -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold text-dark mb-2">
-                                        Discount (₹)
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
+                                        Discount
                                     </label>
-                                    <div class="input-group">
-                                        <span class="input-group-text">₹</span>
+                                    <div class="input-group shadow-sm rounded-3">
+                                        <span class="input-group-text bg-light text-muted border-end-0 fw-bold">₹</span>
                                         <input type="number" name="discount"
-                                            class="form-control form-control-lg"
-                                            value="{{ bill.discount }}"
-                                            min="0" step="0.01"
-                                            oninput="calculateTotal()">
+                                            class="form-control border-start-0 bg-light fw-bold text-success"
+                                            value="{{ bill.discount }}" min="0" step="0.01" oninput="calculateTotal()">
                                     </div>
                                 </div>
 
                                 <!-- Payment Method -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold text-dark mb-2">
-                                        Payment Method
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
+                                        Method
                                     </label>
-                                    <select name="payment_method" class="form-select form-select-lg">
-                                        <option value="cash" {% if bill.payment_method == 'cash' %}selected{% endif %}>Cash</option>
-                                        <option value="card" {% if bill.payment_method == 'card' %}selected{% endif %}>Card</option>
-                                        <option value="upi"  {% if bill.payment_method == 'upi'  %}selected{% endif %}>UPI</option>
-                                        <option value="online" {% if bill.payment_method == 'online' %}selected{% endif %}>Online</option>
+                                    <select name="payment_method"
+                                        class="form-select shadow-sm rounded-3 bg-light text-dark fw-bold">
+                                        <option value="cash" {% if bill.payment_method == 'cash' %}selected{% endif %}>
+                                            Cash</option>
+                                        <option value="card" {% if bill.payment_method == 'card' %}selected{% endif %}>
+                                            Card</option>
+                                        <option value="upi" {% if bill.payment_method == 'upi' %}selected{% endif %}>UPI
+                                        </option>
+                                        <option value="online" {% if bill.payment_method == 'online' %}selected{% endif%}>Online</option>
                                     </select>
                                 </div>
 
                                 <!-- Payment Status -->
-                                <div class="col-md-4">
-                                    <label class="form-label fw-semibold text-dark mb-2">
-                                        Payment Status
+                                <div class="col-12 col-sm-6 col-lg-3">
+                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
+                                        Status
                                     </label>
-                                    <select name="payment_status" class="form-select form-select-lg"
+                                    <select name="payment_status"
+                                        class="form-select shadow-sm rounded-3 bg-light text-dark fw-bold"
                                         id="paymentStatusSelect" onchange="updateStatusBadge()">
-                                        <option value="unpaid"  {% if bill.payment_status == 'unpaid'  %}selected{% endif %}>Unpaid</option>
-                                        <option value="paid"    {% if bill.payment_status == 'paid'    %}selected{% endif %}>Paid</option>
-                                        <option value="partial" {% if bill.payment_status == 'partial' %}selected{% endif %}>Partial</option>
+                                        <option value="unpaid" {% if bill.payment_status == 'unpaid' %} selected{% endif %}>Unpaid</option>
+                                        <option value="paid" {% if bill.payment_status == 'paid' %} selected {% endif %}>Paid</option>
+                                        <option value="partial" {% if bill.payment_status == 'partial' %} selected {% endif %}>Partial</option>
                                     </select>
                                 </div>
 
                                 <!-- Notes -->
-                                <div class="col-12">
-                                    <label class="form-label fw-semibold text-dark mb-2">Notes</label>
-                                    <textarea name="notes" class="form-control" rows="2"
-                                        placeholder="Any additional notes...">{{ bill.notes }}</textarea>
+                                <div class="col-12 mt-4">
+                                    <label
+                                        class="form-label fw-bold text-secondary mb-2 small text-uppercase">Additional
+                                        Notes</label>
+                                    <textarea name="notes"
+                                        class="form-control bg-light border-light shadow-sm rounded-3 p-3 fw-medium"
+                                        rows="3"
+                                        placeholder="Type any additional remarks or notes here...">{{ bill.notes }}</textarea>
                                 </div>
 
                             </div>
@@ -202,65 +227,76 @@
                 </div>
 
                 <!-- Right Column — Summary -->
-                <div class="col-lg-4">
-                    <div class="card border-0 shadow-sm rounded-3 sticky-top" style="top:20px;">
-                        <div class="card-header bg-light border-0 px-4 py-3">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">Bill Summary</h5>
+                <div class="col-12 col-lg-4">
+                    <div class="card border border-light shadow-sm rounded-4 sticky-lg-top"
+                        style="top: 24px; z-index: 10;">
+                        <div
+                            class="card-header bg-primary text-white border-0 px-4 py-3 rounded-top-4 d-flex align-items-center gap-2">
+                            <i class="bi bi-wallet2 fs-5"></i>
+                            <h5 class="card-title mb-0 fw-bold">Payment Summary</h5>
                         </div>
                         <div class="card-body p-4">
 
-                            <!-- Summary Rows -->
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Subtotal</span>
-                                <span class="fw-semibold" id="summarySubtotal">
-                                    ₹{{ bill.subtotal }}
-                                </span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">
-                                    GST (<span id="summaryGstPercent">{{ bill.gst_percent }}</span>%)
-                                </span>
-                                <span class="fw-semibold" id="summaryGst">
-                                    ₹{{ bill.gst_amount }}
-                                </span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-3">
-                                <span class="text-muted">Discount</span>
-                                <span class="fw-semibold text-danger" id="summaryDiscount">
-                                    -₹{{ bill.discount }}
-                                </span>
-                            </div>
-
-                            <hr>
-
-                            <div class="d-flex justify-content-between mb-4">
-                                <span class="fw-bold fs-5">Total</span>
-                                <span class="fw-bold fs-5 text-primary" id="summaryTotal">
-                                    ₹{{ bill.total }}
-                                </span>
-                            </div>
-
                             <!-- Status Badge -->
-                            <div class="mb-4">
-                                <span id="statusBadge"
-                                    class="badge w-100 py-2 fs-6
+                            <div class="mb-4 text-center">
+                                <span id="statusBadge" class="badge w-100 py-3 fs-6 rounded-3 shadow-sm text-uppercase tracking-wider
                                     {% if bill.payment_status == 'paid' %}bg-success
                                     {% elif bill.payment_status == 'partial' %}bg-warning text-dark
                                     {% else %}bg-danger{% endif %}">
                                     {{ bill.get_payment_status_display }}
                                 </span>
                             </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-secondary fw-bold">
+                                    Consultation Fee
+                                </span>
+
+                                <span class="fw-bold text-dark fs-5"
+                                    id="summaryConsultation">
+                                    ₹{{ bill.consultation_fee|floatformat:2 }}
+                                </span>
+                            </div>
+                            <!-- Summary Rows -->
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-secondary fw-bold">Subtotal</span>
+                                <span class="fw-bold text-dark fs-5" id="summarySubtotal">₹{{ bill.subtotal }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="text-secondary fw-bold">
+                                    GST (<span id="summaryGstPercent">{{ bill.gst_percent }}</span>%)
+                                </span>
+                                <span class="fw-bold text-dark fs-5" id="summaryGst">₹{{ bill.gst_amount|floatformat:2}}</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <span class="text-secondary fw-bold">Discount</span>
+                                <span class="fw-bold text-success fs-5" id="summaryDiscount">-₹{{ bill.discount}}</span>
+                            </div>
+
+                            <hr class="text-muted opacity-25 my-4">
+
+                            <div
+                                class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 border">
+                                <span class="fw-bold fs-5 text-secondary text-uppercase tracking-wider">Total</span>
+                                <span class="fw-bolder fs-2 text-primary" id="summaryTotal">₹{{ bill.total }}</span>
+                            </div>
 
                             <!-- Buttons -->
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg rounded-2">
-                                    <i class="bi bi-check-circle me-2"></i>Save Bill
+                            <div class="d-flex flex-column gap-3">
+                                {% if bill.payment_status == 'unpaid' %}
+                                <button type="submit"
+                                    class="btn btn-primary btn-sm rounded-3 shadow-sm fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all">
+                                    <i class="bi bi-check-circle-fill fs-4"></i> Generate Bill
                                 </button>
-                                <a href="{% url 'billing:print_bill' visit.id %}"
-                                    target="_blank"
-                                    class="btn btn-outline-success btn-lg rounded-2">
-                                    <i class="bi bi-printer me-2"></i>Print Bill
+                                {% else %}
+                                <button type="button" class="btn btn-success btn-sm rounded-3 shadow-sm fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                                    <i class="bi bi-cash-stack fs-4"></i> Update Bill
+                                </button>
+                                
+                                <a href="{% url 'billing:print_bill' visit.id %}" target="_blank"
+                                    class="btn btn-outline-secondary btn-sm rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all">
+                                    <i class="bi bi-printer-fill fs-4"></i> Print Invoice
                                 </a>
+                                {% endif %}
                             </div>
 
                         </div>
@@ -272,37 +308,60 @@
     </div>
 </main>
 
+<style>
+    /* Minimal custom CSS to enhance existing Bootstrap classes */
+    .tracking-wide {
+        letter-spacing: 0.05em;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.1em;
+    }
+
+    .transition-all {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+</style>
+
 <script>
-    const subtotal = parseFloat("{{ bill.subtotal }}");
+    const subtotal = parseFloat("{{ bill.subtotal }}") || 0;
 
     function calculateTotal() {
-        const gst      = parseFloat(document.querySelector('[name=gst_percent]').value) || 0;
-        const discount = parseFloat(document.querySelector('[name=discount]').value) || 0;
+        const gstInput = document.querySelector('[name=gst_percent]').value;
+        const discountInput = document.querySelector('[name=discount]').value;
+
+        const gst = parseFloat(gstInput) || 0;
+        const discount = parseFloat(discountInput) || 0;
 
         const gstAmt = (subtotal * gst) / 100;
-        const total  = subtotal + gstAmt - discount;
+        const total = subtotal + gstAmt - discount;
 
         document.getElementById('summaryGstPercent').textContent = gst;
-        document.getElementById('summaryGst').textContent        = '₹' + gstAmt.toFixed(2);
-        document.getElementById('summaryDiscount').textContent   = '-₹' + discount.toFixed(2);
-        document.getElementById('summaryTotal').textContent      = '₹' + total.toFixed(2);
+        document.getElementById('summaryGst').textContent = '₹' + gstAmt.toFixed(2);
+        document.getElementById('summaryDiscount').textContent = '-₹' + discount.toFixed(2);
+        document.getElementById('summaryTotal').textContent = '₹' + total.toFixed(2);
     }
 
     function updateStatusBadge() {
         const status = document.getElementById('paymentStatusSelect').value;
-        const badge  = document.getElementById('statusBadge');
+        const badge = document.getElementById('statusBadge');
 
-        badge.className = 'badge w-100 py-2 fs-6 ';
-        if (status === 'paid') {
-            badge.className += 'bg-success';
-            badge.textContent = 'Paid';
-        } else if (status === 'partial') {
-            badge.className += 'bg-warning text-dark';
-            badge.textContent = 'Partial';
-        } else {
-            badge.className += 'bg-danger';
-            badge.textContent = 'Unpaid';
-        }
+        // Match the select box's display text nicely
+        const statusMap = {
+            'paid': { text: 'Paid', class: 'bg-success' },
+            'partial': { text: 'Partial', class: 'bg-warning text-dark' },
+            'unpaid': { text: 'Unpaid', class: 'bg-danger' }
+        };
+
+        const currentStatus = statusMap[status] || statusMap['unpaid'];
+
+        badge.className = `badge w-100 py-3 fs-6 rounded-3 shadow-sm text-uppercase tracking-wider ${currentStatus.class}`;
+        badge.textContent = currentStatus.text;
     }
 </script>
 {% endblock %}
