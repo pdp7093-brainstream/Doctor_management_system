@@ -2,52 +2,57 @@
 {% block title %}Add Appointment - Doctor Dashboard{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
-    <div class="container-fluid px-4 py-5">
+    <div class="container-fluid px-3 px-md-4 py-4 py-md-5">
+        
         <!-- Page Header -->
-        <div class="page-header mb-5">
+        <div class="mb-4 mb-md-5">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <h1 class="h3 fw-bold text-dark mb-2">Add New Appointment</h1>
-                    <p class="text-muted small mb-0">Schedule a new appointment with your patient</p>
+                    <!-- Small breadcrumb style text for professional look -->
+                    <nav aria-label="breadcrumb" class="mb-2">
+                        <ol class="breadcrumb mb-0 small">
+                            <li class="breadcrumb-item"><a href="{% url 'appointment:manage_appointments' %}" class="text-secondary text-decoration-none">Appointments</a></li>
+                            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Schedule Appointment</li>
+                        </ol>
+                    </nav>
+                    <h1 class="h3 h2-md fw-bold text-dark mb-0">Schedule Appointment</h1>
                 </div>
-                <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left-circle"></i> Back to Appointments
+                <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-secondary btn-sm rounded-3 px-3">
+                    <i class="bi bi-arrow-left me-1"></i> Back to List
                 </a>
             </div>
         </div>
 
         <!-- Form Card -->
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-9">
-                <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="col-xl-7 col-lg-8 col-md-9">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(0,0,0,0.05) !important;">
+                    
                     <!-- Card Header with Icon -->
-                    <div class="card-header bg-gradient p-4 border-0"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="card-header border-0 p-4 bg-primary" >
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-white rounded-3 p-3" style="width: fit-content;">
-                                <i class="bi bi-calendar-check text-primary" style="font-size: 1.5rem;"></i>
+                            <div class="bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-calendar-plus-fill text-white" style="font-size: 1.4rem;"></i>
                             </div>
-                            <div>
-                                <h5 class="text-dark mb-0 fw-bold">Appointment Details</h5>
-                                <small class="text-dark-50">Fill in all required fields</small>
+                            <div class="text-white">
+                                <h5 class="mb-0 fw-bold">Patient Appointment Form</h5>
+                                <small class="text-white-50" style="font-size: 0.85rem;">Fill in the details below to book a slot</small>
                             </div>
                         </div>
                     </div>
 
-                    <div class="card-body p-5">
+                    <div class="card-body p-4 p-md-5">
                         <form method="post" novalidate class="needs-validation">
                             {% csrf_token %}
 
                             <!-- Patient Selection Section -->
                             <div class="mb-4">
                                 <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="bi bi-person-circle text-primary" style="font-size: 1.3rem;"></i>
-                                    <label for="id_patient" class="form-label fw-bold text-dark mb-0">Select
-                                        Patient</label>
-                                    <span class="badge bg-danger ms-auto">Required</span>
+                                    <i class="bi bi-person-circle text-primary"></i>
+                                    <label for="id_patient" class="form-label fw-semibold text-dark mb-0">Select Patient</label>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto" style="font-size: 0.7rem;">Required</span>
                                 </div>
-                                <select class="form-select form-select-lg border-2 border-primary-subtle"
-                                    id="id_patient" name="patient" required>
+                                <select class="form-select form-control-lg rounded-3 border" id="id_patient" name="patient" required style="padding: 0.7rem 1rem;">
                                     <option value="">-- Choose a Patient --</option>
                                     {% if record %}
                                     {% for patient in record %}
@@ -55,73 +60,52 @@
                                     {% endfor %}
                                     {% endif %}
                                 </select>
-                                <small class="d-block text-muted mt-2">
-                                    <i class="bi bi-info-circle me-1"></i>Select the patient for this appointment
-                                </small>
                             </div>
 
-                            <!-- Appointment Date Section -->
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="bi bi-calendar3 text-primary" style="font-size: 1.3rem;"></i>
-                                    <label for="id_appointment_date"
-                                        class="form-label fw-bold text-dark mb-0">Appointment Date</label>
-                                    <span class="badge bg-danger ms-auto">Required</span>
+                            <!-- Appointment Date & Time Row -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-calendar3 text-primary"></i>
+                                        <label for="id_appointment_date" class="form-label fw-semibold text-dark mb-0">Date</label>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto" style="font-size: 0.7rem;">Required</span>
+                                    </div>
+                                    <input type="date" class="form-control form-control-lg rounded-3 border" id="id_appointment_date" name="appointment_date" required style="padding: 0.7rem 1rem;">
                                 </div>
-                                <input type="date" class="form-control form-control-lg border-2 border-primary-subtle"
-                                    id="id_appointment_date" name="appointment_date" required>
-                                <small class="d-block text-muted mt-2">
-                                    <i class="bi bi-info-circle me-1"></i>Select a future date for the appointment
-                                </small>
-                            </div>
-
-                            <!-- Time Slot Section -->
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="bi bi-clock-history text-primary" style="font-size: 1.3rem;"></i>
-                                    <label for="id_time_slot" class="form-label fw-bold text-dark mb-0">Time
-                                        Slot</label>
-                                    <span class="badge bg-danger ms-auto">Required</span>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-clock-history text-primary"></i>
+                                        <label for="id_time_slot" class="form-label fw-semibold text-dark mb-0">Time Slot</label>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto" style="font-size: 0.7rem;">Required</span>
+                                    </div>
+                                    <select id="id_time_slot" class="form-select form-control-lg rounded-3 border" name="time_slot" required style="padding: 0.7rem 1rem;">
+                                        <option value="">-- Select Time --</option>
+                                    </select>
                                 </div>
-                                <select id="id_time_slot"
-                                    class="form-select form-select-lg border-2 border-primary-subtle" name="time_slot"
-                                    required>
-                                    <option value="">-- Select Time --</option>
-                                </select>
-                                <small class="d-block text-muted mt-2">
-                                    <i class="bi bi-info-circle me-1"></i>Available time slots from 9:00 AM to 6:00 PM
-                                    (30-min intervals)
-                                </small>
                             </div>
 
                             <!-- Notes Section -->
-                            <div class="mb-5">
+                            <div class="mb-4">
                                 <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="bi bi-chat-left-text text-primary" style="font-size: 1.3rem;"></i>
-                                    <label for="id_notes" class="form-label fw-bold text-dark mb-0">Additional
-                                        Notes</label>
-                                    <span class="badge bg-secondary ms-auto">Optional</span>
+                                    <i class="bi bi-chat-left-text text-primary"></i>
+                                    <label for="id_notes" class="form-label fw-semibold text-dark mb-0">Additional Notes</label>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 ms-auto" style="font-size: 0.7rem;">Optional</span>
                                 </div>
-                                <textarea class="form-control border-2 border-primary-subtle" id="id_notes" name="notes"
-                                    rows="4"
-                                    placeholder="Add special notes, symptoms, medical history, or any other relevant information..."></textarea>
-                                <small class="d-block text-muted mt-2">
-                                    <i class="bi bi-info-circle me-1"></i>This helps you remember important details
-                                    about the appointment
-                                </small>
+                                <textarea class="form-control rounded-3 border" id="id_notes" name="notes" rows="4"
+                                    placeholder="Add special notes, symptoms, or medical history..." style="padding: 0.8rem 1rem;"></textarea>
                             </div>
 
                             <!-- Divider -->
-                            <hr class="my-4">
+                            <hr class="my-4 text-muted opacity-50">
 
                             <!-- Action Buttons -->
-                            <div class="d-flex gap-3 justify-content-end pt-2">
+                            <div class="d-flex flex-column-reverse flex-md-row gap-2 justify-content-md-end pt-1">
                                 <a href="{% url 'appointment:manage_appointments' %}"
-                                    class="btn btn-outline-secondary btn-lg px-5 rounded-3 fw-semibold">
-                                    <i class="bi bi-x-lg me-2"></i>Cancel
+                                    class="btn btn-outline-secondary rounded-3 px-4 fw-medium">
+                                    Cancel
                                 </a>
-                                <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 fw-semibold">
-                                    <i class="bi bi-check-lg me-2"></i>Schedule Appointment
+                                <button type="submit" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold shadow-sm">
+                                    <i class="bi bi-check-lg me-1"></i> Schedule Appointment
                                 </button>
                             </div>
                         </form>
