@@ -1,103 +1,210 @@
 {% extends "doctor/main.html" %}
 {% block title %}Doctor Dashboard{% endblock %}
 {% block content %}
-<!-- MAIN CONTENT -->
 <main class="main-content" id="mainContent">
-    <!-- Page Header -->
+
     <div class="page-header">
-        <h2 class="page-title">Welcome Back, Dr. Johnson</h2>
+        <h2 class="page-title">Welcome Back, Dr. {{ request.user.first_name }} {{ request.user.username }}</h2>
         <p class="page-subtitle">Here's what's happening with your practice today</p>
     </div>
 
-        <!-- Stat Cards -->
-        <div class="dashboard-stats">
-            <div class="dashboard-stat-item">
-                <div class="stat-card">
-                    <div class="stat-content">
-                        <div class="stat-number">{{ total }}</div>
-                        <div class="stat-label">Today's Total Appointments</div>
-                    </div>
-                    <div class="stat-icon primary">
-                        <i class="bi bi-calendar-check"></i>
-                    </div>
+    <!-- Stat Cards -->
+    <div class="dashboard-stats">
+        <div class="dashboard-stat-item">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number" id="totalAppointments">{{ total }}</div>
+                    <div class="stat-label">Today's Total Appointments</div>
                 </div>
-            </div>
-            
-            <div class="dashboard-stat-item">
-                <div class="stat-card success">
-                    <div class="stat-content">
-                        <div class="stat-number">{{ remaining_today }}</div>
-                        <div class="stat-label">Remaining Today Appointments</div>
-                    </div>
-                    <div class="stat-icon success">
-                        <i class="bi bi-clock"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="dashboard-stat-item">
-                <div class="stat-card warning">
-                    <div class="stat-content">
-                        <div class="stat-number">8</div>
-                        <div class="stat-label">Total Staff</div>
-                    </div>
-                    <div class="stat-icon warning">
-                        <i class="bi bi-people"></i>
-                    </div>
+                <div class="stat-icon primary">
+                    <i class="bi bi-calendar-check"></i>
                 </div>
             </div>
         </div>
-
-        <!-- Appointments Table -->
-        <div class="table-section">
-            <h3 class="table-title">
-                <i class="bi bi-calendar-event"></i>
-                Today's Appointments
-            </h3>   
-            <div class="table-responsive">
-                <table class="table table-custom">
-                    <thead>
-                        <tr>
-                            <th>Patient Name</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for appointment in today_appointments %}
-                        <tr>
-                            <td class="patient-name">{{ appointment.patient.user.get_full_name }}</td>
-                            <td class="appointment-time">{{ appointment.time_slot }}</td>
-                            <td>
-                                <span class="status-badge status-pending">{{ appointment.status }}</span>
-                            </td>
-                            <td>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <a href="{% url 'appointment:start_visit' appointment.id %}"
-                                    class="btn btn-primary btn-sm">Start Visit</a>
-
-                                <a href="#" class="btn btn-danger btn-sm">Cancel</a>
-                            </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-
-                        {% if not today_appointments %}
-                        <tr>
-                            <td colspan="4" class="text-center">No appointments today</td>
-                        </tr>
-                        {% endif %}
-                        
-                        
-                    </tbody>
-                </table>
+        <div class="dashboard-stat-item">
+            <div class="stat-card success">
+                <div class="stat-content">
+                    <div class="stat-number" id="remainingToday">{{ remaining_today }}</div>
+                    <div class="stat-label">Remaining Today</div>
+                </div>
+                <div class="stat-icon success">
+                    <i class="bi bi-clock"></i>
+                </div>
             </div>
         </div>
-
+        <div class="dashboard-stat-item">
+            <div class="stat-card warning">
+                <div class="stat-content">
+                    <div class="stat-number">{{ total_staff }}</div>
+                    <div class="stat-label">Total Staff</div>
+                </div>
+                <div class="stat-icon warning">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+        </div>
     </div>
 
-    
+    <!-- Today's Appointments Table -->
+    <div class="table-section">
+        <h3 class="table-title">
+            <i class="bi bi-calendar-event"></i> Today's Appointments
+        </h3>
+        <div style="overflow-x:auto; width:100%; display:block;">
+            <table class="table table-custom" style="min-width:750px; width:100%;">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Relation</th>
+                        <th>Booked By</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in today_appointments %}
+                    <tr>
+
+                        <!-- Patient -->
+                        <td class="patient-name">
+                            {% if appointment.family_member %}
+                                {{ appointment.family_member.name }}
+                            {% else %}
+                                {{ appointment.patient.user.first_name }}
+                                {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                            {% endif %}
+                        </td>
+
+                        <!-- Relation -->
+                        <td>
+                            {% if appointment.family_member %}
+                                <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(13,110,253,0.1);color:#0d6efd;">
+                                    {{ appointment.family_member.relation }}
+                                </span>
+                            {% else %}
+                                <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(25,135,84,0.1);color:#198754;">
+                                    Self
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <!-- Booked By -->
+                        <td style="color:#6c757d;font-size:13px;">
+                            {{ appointment.patient.user.first_name }}
+                            {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                        </td>
+
+                        <td class="appointment-time">{{ appointment.time_slot|time:"h:i A" }}</td>
+
+                        <!-- Status -->
+                        <td>
+                            <span class="status-badge appointment-status status-{{ appointment.status|lower }}">
+                                {{ appointment.status|capfirst }}
+                            </span>
+                        </td>
+
+                        <!-- Action -->
+                        <td>
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if appointment.status == 'pending' %}
+                                <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-primary btn-sm btn-start-visit">
+                                    <i class="bi bi-play-circle me-1"></i>Start Visit
+                                </a>
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm btn-cancel-appointment"
+                                    data-url="{% url 'doctor:cancel_appointment' appointment.id %}"
+                                >
+                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                </button>
+                                {% elif appointment.status == 'completed' %}
+                                <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-success btn-sm">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                                {% else %}
+                                <button type="button" class="btn btn-danger btn-sm" disabled>
+                                    Cancelled
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No appointments today</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 </main>
 
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    const csrftoken = getCookie('csrftoken');
+
+    document.querySelectorAll('.btn-cancel-appointment').forEach(button => {
+        button.addEventListener('click', async function () {
+            const confirmCancel = confirm('Are you sure you want to cancel this appointment?');
+            if (!confirmCancel) return;
+
+            const url = this.dataset.url;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({}),
+            });
+
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                alert(data.error || 'Unable to cancel appointment.');
+                return;
+            }
+
+            const row = this.closest('tr');
+            const statusBadge = row.querySelector('.appointment-status');
+            if (statusBadge) {
+                statusBadge.textContent = data.status;
+                statusBadge.className = 'status-badge appointment-status status-' + data.status_raw;
+            }
+
+            const startVisitBtn = row.querySelector('.btn-start-visit');
+            if (startVisitBtn) {
+                startVisitBtn.remove();
+            }
+
+            const totalEl = document.getElementById('totalAppointments');
+            const remainingEl = document.getElementById('remainingToday');
+            if (totalEl) totalEl.textContent = data.total;
+            if (remainingEl) remainingEl.textContent = data.remaining_today;
+
+            this.disabled = true;
+            this.classList.remove('btn-danger');
+            this.classList.add('btn-danger');
+            this.innerHTML = '<i class="bi bi-x-circle me-1"></i>Cancelled';
+        });
+    });
+</script>
 {% endblock %}

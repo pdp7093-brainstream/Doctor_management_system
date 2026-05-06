@@ -10,8 +10,11 @@ from .models import InnerMember
 from appointment.models import Appointment
 from django.utils import timezone
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
+from django.db.models import Q
 
 def staff_view(request):
     return render(request,'doctor/staff.html')
@@ -53,43 +56,62 @@ def logout_view(request):
 class DashboardView(View):
     def get(self, request):
         doctor = InnerMember.objects.get(user=request.user)
+        today  = timezone.localdate()
 
-        appointments = Appointment.objects.filter(doctor=doctor)
+        # doctor ke saath unassigned bhi dikhao
+        all_appointments = Appointment.objects.filter(
+            Q(doctor=doctor) | Q(doctor__isnull=True)
+        )
 
-        today = timezone.localdate()
-
-        # today appointments
-        today_appointments = appointments.filter(appointment_date=today)
-
-        # upcoming
-        upcoming_appointments = appointments.filter(
-            appointment_date__gt=today
-        ).order_by("appointment_date", "time_slot")
-
-        # Completed
-        completed = appointments.filter(
-            status="completed"
-        ).order_by("-appointment_date")
-
-        # 🔹 Pending (today but not started)
-        pending = today_appointments.filter(
-            status="pending"
-        ).order_by("time_slot")
+        today_appointments    = all_appointments.filter(appointment_date=today).order_by('time_slot')
+        upcoming_appointments = all_appointments.filter(appointment_date__gt=today).order_by('appointment_date', 'time_slot')
+        completed             = all_appointments.filter(status='completed').order_by('-appointment_date')
+        pending               = today_appointments.filter(status='pending').order_by('time_slot')
+        total_staff           = InnerMember.objects.filter(role='biller').count()
 
         context = {
-            "today_appointments": today_appointments,
-            "upcoming_appointments": upcoming_appointments,
-            "completed": completed,
-            "pending": pending,
-            "total": today_appointments.count(),
-            "remaining_today": today_appointments.filter(
-                status__in=["pending"]
-            ).count(),
-            
+            'today_appointments'  : today_appointments,
+            'upcoming_appointments': upcoming_appointments,
+            'completed'           : completed,
+            'pending'             : pending,
+            'total'               : today_appointments.count(),
+            'remaining_today'     : today_appointments.filter(status='pending').count(),
+            'total_staff'         : total_staff,
         }
+        return render(request, 'doctor/dashboard.html', context)
 
-        return render(request, "doctor/dashboard.html", context)
+@never_cache
+@login_required
+@require_POST
+def cancel_appointment(request, appointment_id):
+    doctor = InnerMember.objects.get(user=request.user)
+    appointment = get_object_or_404(Appointment, id=appointment_id)
 
+    if appointment.status == 'cancelled':
+        return JsonResponse({'success': False, 'error': 'Appointment is already cancelled.'}, status=400)
+
+    if appointment.status == 'completed':
+        return JsonResponse({'success': False, 'error': 'Completed appointments cannot be cancelled.'}, status=400)
+
+    if appointment.doctor is not None and appointment.doctor != doctor:
+        return JsonResponse({'success': False, 'error': 'You do not have permission to cancel this appointment.'}, status=403)
+
+    appointment.status = 'cancelled'
+    appointment.save()
+
+    today = timezone.localdate()
+    today_appointments = Appointment.objects.filter(
+        Q(doctor=doctor) | Q(doctor__isnull=True),
+        appointment_date=today
+    )
+
+    return JsonResponse({
+        'success': True,
+        'status': appointment.get_status_display(),
+        'status_raw': appointment.status,
+        'total': today_appointments.count(),
+        'remaining_today': today_appointments.filter(status='pending').count(),
+    })
 
 @never_cache
 @login_required
@@ -108,23 +130,79 @@ def add_patient(request):
 @login_required
 def billing(request):
      return render(request, 'doctor/billing.html')
-
-
-
+from itertools import chain
 @never_cache
 @role_required('doctor')
 def manage_patients(request):
-    patients = Patient.objects.all().order_by('user__first_name')
-    return render(request, 'doctor/manage_patients.html', {'patients': patients})
+    from accounts.models import FamilyMember
 
+    patients = Patient.objects.select_related('user').all()
+    family_members = FamilyMember.objects.select_related('patient__user').all()
+
+    combined = []
+
+    # Main Patients
+    for p in patients:
+        combined.append({
+            'id': p.id,
+            'name': f"{p.user.first_name} {p.user.last_name}",
+            'phone': p.phone,
+            'gender': p.gender,
+            'type': 'main'
+        })
+
+    # Family Members (as patients)
+    for f in family_members:
+        combined.append({
+            'id': f.id,
+            'name': f.name,
+            'phone': f.phone,
+            'gender': f.gender,
+            'type': 'family'
+        })
+
+    # Sorting (important UX)
+    combined = sorted(combined, key=lambda x: x['name'].lower())
+
+    return render(request, 'doctor/manage_patients.html', {
+        'patients': combined
+    }) 
+
+# @never_cache
+# @role_required('doctor')
+# def view_patient(request, patient_id):
+#     from accounts.models import FamilyMember
+#     patient        = get_object_or_404(Patient, pk=patient_id)
+#     family_members = FamilyMember.objects.filter(patient=patient)
+#     return render(request, 'doctor/view_patient.html', {
+#         'patient'       : patient,
+#         'family_members': family_members,
+#     })
 
 @never_cache
 @role_required('doctor')
-def view_patient(request, patient_id):
-    patient = get_object_or_404(Patient, pk=patient_id)
-    return render(request, 'doctor/view_patient.html', {'patient': patient})
+def view_patient_dynamic(request, type, id):
+    from accounts.models import FamilyMember
 
+    if type == 'main':
+        patient = get_object_or_404(Patient, id=id)
+        family_members = FamilyMember.objects.filter(patient=patient)
 
+        return render(request, 'doctor/view_patient.html', {
+            'patient': patient,
+            'family_members': family_members,
+            'is_family': False
+        })
+
+    else:
+        member = get_object_or_404(FamilyMember, id=id)
+
+        return render(request, 'doctor/view_patient.html', {
+            'member': member,
+            'parent': member.patient,
+            'family_members': member.patient.members.all(),
+            'is_family': True
+        })
 
 @never_cache
 @role_required('doctor')
@@ -174,54 +252,100 @@ def delete_patient(request, patient_id):
     return redirect('doctor:manage_patients')
 
 
+# doctor/views.py — add_patient view replace karo
+
 @never_cache
 @role_required('doctor')
 def add_patient(request):
+    from accounts.models import FamilyMember
+
+    all_patients = Patient.objects.all().select_related('user').order_by('user__first_name')
+
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        dob = request.POST.get('dob')
-        gender = request.POST.get('gender')
-        phone = request.POST.get('phone')
-        bld_grop = request.POST.get('bld_grop')
-        address = request.POST.get('address')
+        name      = request.POST.get('name', '').strip()
+        email     = request.POST.get('email', '').strip()
+        dob       = request.POST.get('dob')
+        gender    = request.POST.get('gender')
+        phone     = request.POST.get('phone', '').strip()
+        bld_grop  = request.POST.get('bld_grop')
+        address   = request.POST.get('address')
+        parent_id = request.POST.get('parent_patient')
+        relation  = request.POST.get('relation', '').strip()
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'A user with this email already exists.')
-            return render(request, 'doctor/add_patient.html')
+        if not name:
+            messages.error(request, 'Full name is required.')
+            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
-        # Split name into first and last name
-        name_parts = name.strip().split(' ', 1)
+        # ── Case 1: Parent selected → sirf FamilyMember banao ──────────
+        if parent_id and relation:
+            try:
+                parent_patient = Patient.objects.get(id=parent_id)
+
+                # Duplicate check
+                if FamilyMember.objects.filter(
+                    patient=parent_patient,
+                    name__iexact=name,
+                    relation__iexact=relation
+                ).exists():
+                    messages.error(request, f'"{name} ({relation})" already exists for this patient.')
+                    return render(request, 'doctor/add_patient.html', {'patients': all_patients})
+
+                FamilyMember.objects.create(
+                    patient  = parent_patient,
+                    name     = name,
+                    relation = relation,
+                    phone    = phone,          # optional — parent ka nahi, jo dala woh
+                    gender   = gender or None,
+                    dob      = dob or None,
+                    bld_grop = bld_grop or None,
+                )
+
+                messages.success(request, f'"{name}" added as family member of {parent_patient.user.first_name}.')
+                return redirect('doctor:manage_patients')
+
+            except Patient.DoesNotExist:
+                messages.error(request, 'Selected parent patient not found.')
+                return render(request, 'doctor/add_patient.html', {'patients': all_patients})
+
+        # ── Case 2: No parent → Main Patient banao (User + Patient) ────
+        if not phone:
+            messages.error(request, 'Phone number is required for a main patient.')
+            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
+
+        if User.objects.filter(username=phone).exists():
+            messages.error(request, 'A patient with this phone number already exists.')
+            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
+
+        name_parts = name.split(' ', 1)
         first_name = name_parts[0]
-        last_name = name_parts[1] if len(name_parts) > 1 else ''
+        last_name  = name_parts[1] if len(name_parts) > 1 else ''
 
         try:
             with transaction.atomic():
                 user = User.objects.create_user(
-                    username=email, 
-                    email=email, 
-                    first_name=first_name, 
-                    last_name=last_name, 
-                    
+                    username   = phone,        # phone as username
+                    password   = 'password@123',      # default password = phone
+                    email      = email or '',
+                    first_name = first_name,
+                    last_name  = last_name,
                 )
-
                 Patient.objects.create(
-                    user=user,
-                    phone=phone,
-                    address=address,
-                    dob=dob if dob else None,
-                    gender=gender,
-                    bld_grop=bld_grop,
+                    user     = user,
+                    phone    = phone,
+                    address  = address,
+                    dob      = dob or None,
+                    gender   = gender or None,
+                    bld_grop = bld_grop or None,
                 )
-            
-            messages.success(request, 'Patient added successfully.')
-            return redirect('doctor:manage_patients')
-            
-        except Exception as e:
-            messages.error(request, f'An error occurred: {str(e)}')
-            return render(request, 'doctor/add_patient.html')
 
-    return render(request, 'doctor/add_patient.html')
+            messages.success(request, f'Patient "{name}" added. Default password is password@123.')
+            return redirect('doctor:manage_patients')
+
+        except Exception as e:
+            messages.error(request, f'Error: {str(e)}')
+            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
+
+    return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
 # doctor/views.py mein yeh views add karo
 # Imports (jo pehle se nahi hain wo add karo):
@@ -394,3 +518,34 @@ def delete_staff(request, member_id):
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+
+from accounts.models import FamilyMember
+
+@never_cache
+@role_required('doctor')
+def edit_family(request, id):
+    member = get_object_or_404(FamilyMember, id=id)
+
+    if request.method == 'POST':
+        member.name = request.POST.get('name')
+        member.phone = request.POST.get('phone')
+        member.gender = request.POST.get('gender')
+        member.save()
+
+        messages.success(request, 'Family member updated.')
+        return redirect('doctor:manage_patients')
+
+    return render(request, 'doctor/edit_family.html', {'member': member})
+
+
+@never_cache
+@role_required('doctor')
+def delete_family(request, id):
+    member = get_object_or_404(FamilyMember, id=id)
+
+    if request.method == 'POST':
+        member.delete()
+        messages.success(request, 'Family member deleted.')
+
+    return redirect('doctor:manage_patients')

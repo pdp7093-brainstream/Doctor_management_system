@@ -335,8 +335,7 @@ class PrescriptionView(View):
 
             variant       = MedicineVariant.objects.get(id=v_id)
             dosage        = f"{m}-{a}-{n} ({meal})"
-            should_deduct = str(i) in deduct_list   # checkbox toggle
-
+            should_deduct = str(i) in deduct_list  
             if item_id_str:
                 try:
                     item_id_int = int(item_id_str)

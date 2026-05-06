@@ -7,58 +7,101 @@
         <div class="page-header patient-form-header">
             <div>
                 <h2 class="page-title mb-0">Add Patient</h2>
-                <p class="page-subtitle">Create a new patient profile with basic contact details.</p>
+                <p class="page-subtitle">Add a new main patient or a family member of an existing patient.</p>
             </div>
-
             <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn">
-                Manage Patients
+                <i class="bi bi-arrow-left"></i> Manage Patients
             </a>
         </div>
 
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
         <div class="patient-form-card">
-            <form method="POST" enctype="multipart/form-data" class="patient-form-grid">
+            <form method="POST" class="patient-form-grid">
                 {% csrf_token %}
 
+                <!-- ── Family Relation (top — determines form mode) ── -->
+                <div style="background:#f0f4ff;border-radius:10px;padding:16px;margin-bottom:20px;">
+                    <div style="font-size:13px;font-weight:700;color:#0d6efd;margin-bottom:12px;">
+                        <i class="bi bi-people"></i> Booking Type
+                    </div>
+                    <div class="patient-form-row">
+                        <div class="patient-field">
+                            <label class="patient-label">Parent Patient <small style="font-weight:400;color:#888;">(optional)</small></label>
+                            <select name="parent_patient" id="parentSelect" class="patient-input">
+                                <option value="">— None (Add as Main Patient) —</option>
+                                {% for p in patients %}
+                                <option value="{{ p.id }}">
+                                    {{ p.user.first_name }}{% if p.user.last_name %} {{ p.user.last_name }}{% endif %}
+                                    ({{ p.phone }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="patient-field" id="relationField" style="display:none;">
+                            <label class="patient-label">Relation *</label>
+                            <select name="relation" id="relationSelect" class="patient-input">
+                                <option value="">Select Relation</option>
+                                <option value="Wife">Wife</option>
+                                <option value="Husband">Husband</option>
+                                <option value="Son">Son</option>
+                                <option value="Daughter">Daughter</option>
+                                <option value="Father">Father</option>
+                                <option value="Mother">Mother</option>
+                                <option value="Brother">Brother</option>
+                                <option value="Sister">Sister</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Mode hint -->
+                    <div id="modeHint" style="margin-top:10px;font-size:13px;color:#6c757d;">
+                        <i class="bi bi-info-circle"></i>
+                        <span id="modeText">No parent selected — this person will be added as a <strong>main patient</strong> with their own login.</span>
+                    </div>
+                </div>
 
+                <!-- ── Personal Info ── -->
                 <div class="patient-form-row">
                     <div class="patient-field">
-                        <label class="patient-label" for="patient-name">Full Name</label>
-                        <input id="patient-name" type="text" name="name" class="patient-input"
-                            placeholder="Enter full name" required>
+                        <label class="patient-label">Full Name *</label>
+                        <input type="text" name="name" class="patient-input" placeholder="Enter full name" required>
+                    </div>
+
+                    <!-- Phone: required for main patient, optional for family member -->
+                    <div class="patient-field" id="phoneField">
+                        <label class="patient-label" id="phoneLabel">
+                            Phone * <small style="font-weight:400;color:#888;" id="phoneHint">(used as login username)</small>
+                        </label>
+                        <input type="tel" name="phone" id="phoneInput" class="patient-input"
+                               placeholder="e.g. 9876543210" maxlength="15">
                     </div>
 
                     <div class="patient-field">
-                        <label class="patient-label" for="patient-email">Email</label>
-                        <input id="patient-email" type="email" name="email" class="patient-input"
-                            placeholder="Enter email address" required>
+                        <label class="patient-label">Date of Birth</label>
+                        <input type="date" name="dob" class="patient-input">
                     </div>
 
                     <div class="patient-field">
-                        <label class="patient-label" for="patient-dob">Date of Birth</label>
-                        <input id="patient-dob" type="date" name="dob" class="patient-input">
-                    </div>
-
-                    <div class="patient-field">
-                        <label class="patient-label" for="patient-gender">Gender</label>
-                        <select id="patient-gender" name="gender" class="patient-input">
+                        <label class="patient-label">Gender</label>
+                        <select name="gender" class="patient-input">
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label" for="patient-phone">Phone</label>
-                        <input id="patient-phone" type="text" name="phone" class="patient-input"
-                            placeholder="Enter phone number">
-                    </div>
 
                     <div class="patient-field">
-                        <label class="patient-label" for="patient-blood-group">Blood Group</label>
-                        <select id="patient-blood-group" name="bld_grop" class="patient-input">
+                        <label class="patient-label">Blood Group</label>
+                        <select name="bld_grop" class="patient-input">
                             <option value="">Select Blood Group</option>
                             <option value="A+">A+</option>
                             <option value="A-">A-</option>
@@ -70,23 +113,75 @@
                             <option value="O-">O-</option>
                         </select>
                     </div>
+
+                    <!-- Email: only for main patient -->
+                    <div class="patient-field" id="emailField">
+                        <label class="patient-label">Email</label>
+                        <input type="email" name="email" class="patient-input" placeholder="optional">
+                    </div>
                 </div>
 
-                <div class="patient-field">
-                    <label class="patient-label" for="patient-address">Address</label>
-                    <textarea id="patient-address" name="address" class="patient-input patient-textarea" rows="4"
-                        placeholder="Enter complete address"></textarea>
+                <!-- Address: only for main patient -->
+                <div class="patient-field" id="addressField">
+                    <label class="patient-label">Address</label>
+                    <textarea name="address" class="patient-input patient-textarea" rows="3"
+                              placeholder="Enter complete address"></textarea>
                 </div>
 
-
-                <div class="patient-form-actions">
-                    <button type="submit" class="patient-submit-btn">
+                <div class="patient-form-actions" style="margin-top:20px;">
+                    <button type="submit" class="patient-submit-btn" id="submitBtn">
                         <i class="bi bi-check2-circle"></i>
-                        <span>Save Patient</span>
+                        <span id="submitText">Save Patient</span>
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </main>
+
+<script>
+const parentSelect   = document.getElementById('parentSelect');
+const relationField  = document.getElementById('relationField');
+const relationSelect = document.getElementById('relationSelect');
+const phoneInput     = document.getElementById('phoneInput');
+const phoneLabel     = document.getElementById('phoneLabel');
+const phoneHint      = document.getElementById('phoneHint');
+const emailField     = document.getElementById('emailField');
+const addressField   = document.getElementById('addressField');
+const modeText       = document.getElementById('modeText');
+const submitText     = document.getElementById('submitText');
+
+parentSelect.addEventListener('change', function () {
+    const isFamilyMember = !!this.value;
+
+    // Show/hide relation
+    relationField.style.display  = isFamilyMember ? 'block' : 'none';
+    relationSelect.required      = isFamilyMember;
+
+    // Phone — still show but not required for family member
+    phoneInput.required = !isFamilyMember;
+    if (isFamilyMember) {
+        phoneHint.textContent    = '(optional for family member)';
+        phoneLabel.childNodes[0].textContent = 'Phone ';
+    } else {
+        phoneHint.textContent    = '(used as login username)';
+        phoneLabel.childNodes[0].textContent = 'Phone * ';
+    }
+
+    // Hide email + address for family member
+    emailField.style.display   = isFamilyMember ? 'none' : 'block';
+    addressField.style.display = isFamilyMember ? 'none' : 'block';
+
+    // Mode hint + button text
+    if (isFamilyMember) {
+        const parentName = this.options[this.selectedIndex].text;
+        modeText.innerHTML = `<i class="bi bi-info-circle"></i> Parent selected — this person will be added as a <strong>family member</strong> of <strong>${parentName}</strong>. No separate login will be created.`;
+        submitText.textContent = 'Save Family Member';
+    } else {
+        modeText.innerHTML = `<i class="bi bi-info-circle"></i> No parent selected — this person will be added as a <strong>main patient</strong> with their own login.`;
+        submitText.textContent = 'Save Patient';
+    }
+});
+</script>
+
 {% endblock %}
