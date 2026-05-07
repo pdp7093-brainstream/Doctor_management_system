@@ -79,9 +79,9 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                <i class="bi bi-stethoscope"></i>
+                <img src="{{clinic.logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
             </div>
-            <h2 class="sidebar-title">MediCare</h2>
+            <h2 class="sidebar-title">{{clinic.clinic_name}}</h2>
         </div>
         <ul class="sidebar-menu">
             <!-- Doctor only -->
@@ -178,7 +178,7 @@
 
 
             <li class="mt-auto">
-                <a href="{% url 'doctor:settings' %}" class="{% if 'settings' in request.path %}active{% endif %}">
+                <a href="{% url 'clinic:settings' %}" class="{% if 'settings' in request.path %}active{% endif %}">
                     <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>
                 </a>

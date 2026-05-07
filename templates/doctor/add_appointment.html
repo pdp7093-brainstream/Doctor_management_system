@@ -3,7 +3,7 @@
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="container-fluid px-3 px-md-4 py-4 py-md-5">
-        
+
         <!-- Page Header -->
         <div class="mb-4 mb-md-5">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -11,13 +11,16 @@
                     <!-- Small breadcrumb style text for professional look -->
                     <nav aria-label="breadcrumb" class="mb-2">
                         <ol class="breadcrumb mb-0 small">
-                            <li class="breadcrumb-item"><a href="{% url 'appointment:manage_appointments' %}" class="text-secondary text-decoration-none">Appointments</a></li>
-                            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Schedule Appointment</li>
+                            <li class="breadcrumb-item"><a href="{% url 'appointment:manage_appointments' %}"
+                                    class="text-secondary text-decoration-none">Appointments</a></li>
+                            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Schedule
+                                Appointment</li>
                         </ol>
                     </nav>
                     <h1 class="h3 h2-md fw-bold text-dark mb-0">Schedule Appointment</h1>
                 </div>
-                <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-secondary btn-sm rounded-3 px-3">
+                <a href="{% url 'appointment:manage_appointments' %}"
+                    class="btn btn-outline-secondary btn-sm rounded-3 px-3">
                     <i class="bi bi-arrow-left me-1"></i> Back to List
                 </a>
             </div>
@@ -26,17 +29,20 @@
         <!-- Form Card -->
         <div class="row justify-content-center">
             <div class="col-xl-7 col-lg-8 col-md-9">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden" style="border: 1px solid rgba(0,0,0,0.05) !important;">
-                    
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden"
+                    style="border: 1px solid rgba(0,0,0,0.05) !important;">
+
                     <!-- Card Header with Icon -->
-                    <div class="card-header border-0 p-4 bg-primary" >
+                    <div class="card-header border-0 p-4 bg-primary">
                         <div class="d-flex align-items-center gap-3">
-                            <div class="bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <div class="bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center"
+                                style="width: 48px; height: 48px;">
                                 <i class="bi bi-calendar-plus-fill text-white" style="font-size: 1.4rem;"></i>
                             </div>
                             <div class="text-white">
                                 <h5 class="mb-0 fw-bold">Patient Appointment Form</h5>
-                                <small class="text-white-50" style="font-size: 0.85rem;">Fill in the details below to book a slot</small>
+                                <small class="text-white-50" style="font-size: 0.85rem;">Fill in the details below to
+                                    book a slot</small>
                             </div>
                         </div>
                     </div>
@@ -49,10 +55,13 @@
                             <div class="mb-4">
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <i class="bi bi-person-circle text-primary"></i>
-                                    <label for="id_patient" class="form-label fw-semibold text-dark mb-0">Select Patient</label>
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto" style="font-size: 0.7rem;">Required</span>
+                                    <label for="id_patient" class="form-label fw-semibold text-dark mb-0">Select
+                                        Patient</label>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto"
+                                        style="font-size: 0.7rem;">Required</span>
                                 </div>
-                                <select class="form-select form-control-lg rounded-3 border" id="id_patient" name="patient" required style="padding: 0.7rem 1rem;">
+                                <select class="form-select form-control-lg rounded-3 border" id="id_patient"
+                                    name="patient" required style="padding: 0.7rem 1rem;">
                                     <option value="">-- Choose a Patient --</option>
                                     {% if record %}
                                     {% for patient in record %}
@@ -67,18 +76,25 @@
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <i class="bi bi-calendar3 text-primary"></i>
-                                        <label for="id_appointment_date" class="form-label fw-semibold text-dark mb-0">Date</label>
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto" style="font-size: 0.7rem;">Required</span>
+                                        <label for="id_appointment_date"
+                                            class="form-label fw-semibold text-dark mb-0">Date</label>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto"
+                                            style="font-size: 0.7rem;">Required</span>
                                     </div>
-                                    <input type="date" class="form-control form-control-lg rounded-3 border" id="id_appointment_date" name="appointment_date" required style="padding: 0.7rem 1rem;">
+                                    <input type="date" class="form-control form-control-lg rounded-3 border"
+                                        id="id_appointment_date" name="appointment_date" required
+                                        style="padding: 0.7rem 1rem;">
                                 </div>
                                 <div class="col-md-6">
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <i class="bi bi-clock-history text-primary"></i>
-                                        <label for="id_time_slot" class="form-label fw-semibold text-dark mb-0">Time Slot</label>
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto" style="font-size: 0.7rem;">Required</span>
+                                        <label for="id_time_slot" class="form-label fw-semibold text-dark mb-0">Time
+                                            Slot</label>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto"
+                                            style="font-size: 0.7rem;">Required</span>
                                     </div>
-                                    <select id="id_time_slot" class="form-select form-control-lg rounded-3 border" name="time_slot" required style="padding: 0.7rem 1rem;">
+                                    <select id="id_time_slot" class="form-select form-control-lg rounded-3 border"
+                                        name="time_slot" required style="padding: 0.7rem 1rem;">
                                         <option value="">-- Select Time --</option>
                                     </select>
                                 </div>
@@ -88,11 +104,14 @@
                             <div class="mb-4">
                                 <div class="d-flex align-items-center gap-2 mb-2">
                                     <i class="bi bi-chat-left-text text-primary"></i>
-                                    <label for="id_notes" class="form-label fw-semibold text-dark mb-0">Additional Notes</label>
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 ms-auto" style="font-size: 0.7rem;">Optional</span>
+                                    <label for="id_notes" class="form-label fw-semibold text-dark mb-0">Additional
+                                        Notes</label>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 ms-auto"
+                                        style="font-size: 0.7rem;">Optional</span>
                                 </div>
                                 <textarea class="form-control rounded-3 border" id="id_notes" name="notes" rows="4"
-                                    placeholder="Add special notes, symptoms, or medical history..." style="padding: 0.8rem 1rem;"></textarea>
+                                    placeholder="Add special notes, symptoms, or medical history..."
+                                    style="padding: 0.8rem 1rem;"></textarea>
                             </div>
 
                             <!-- Divider -->
@@ -181,18 +200,10 @@
                     if (data.slots && data.slots.length > 0) {
                         data.slots.forEach(slot => {
 
-                            // 🔥 24h → 12h convert
-                            let [hour, minute] = slot.split(":");
-
-                            let h = parseInt(hour);
-                            let ampm = h >= 12 ? "PM" : "AM";
-                            let displayHour = h % 12 || 12;
-
-                            let displayTime = `${displayHour}:${minute} ${ampm}`;
-
                             let option = document.createElement("option");
-                            option.value = slot;           // backend ke liye (24h)
-                            option.textContent = displayTime; // UI ke liye (12h)
+
+                            option.value = slot;
+                            option.textContent = slot;
 
                             select.appendChild(option);
                         });

@@ -4,7 +4,11 @@
 
     <div class="container position-relative d-flex align-items-center justify-content-between">
       <a href="#" class="logo d-flex align-items-center">
-        <h1 class="sitename">Clinic</h1>
+        {% if clinic.logo %}
+          <img src="{{ clinic.logo.url }}" alt="Clinic Logo" style="width:5rem;height:5rem;border-radius:50%;object-fit:cover;">
+        {% else %}
+          <h1 class="sitename">{{clinic.clinic_name}}</h1>
+        {% endif %}
       </a>
 
       <nav id="navmenu" class="navmenu">

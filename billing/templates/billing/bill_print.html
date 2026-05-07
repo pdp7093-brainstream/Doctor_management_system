@@ -281,15 +281,13 @@
     <div class="invoice-header">
         <div class="clinic-brand">
             <div class="clinic-logo-name">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3ZM16 13H13V16C13 16.5523 12.5523 17 12 17C11.4477 17 11 16.5523 11 16V13H8C7.44772 13 7 12.5523 7 12C7 11.4477 7.44772 11 8 11H11V8C11 7.44772 11.4477 7 12 7C12.5523 7 13 7.44772 13 8V11H16C16.5523 11 17 11.4477 17 12C17 12.5523 16.5523 13 16 13Z" />
-                </svg>
-                MediCare Clinic
+                <img src="{{clinic.logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                {{clinic.clinic_name}}
             </div>
             <div class="clinic-address">
-                123 Health Avenue, Medical District<br>
-                Cityville, State 12345<br>
-                Phone: +1 234 567 8900
+                {{clinic.address}}
+                {{clinic.phone}}
+                {{clinic.email}}
             </div>
         </div>
         <div class="invoice-title-box">
@@ -353,7 +351,7 @@
                     <th width="45%">Description (Medicine / Service)</th>
                     <th width="15%">Power</th>
                     <th width="10%" class="text-center">Qty</th>
-                    <th width="12%" class="text-right">Unit Price</th>
+                    
                     <th width="13%" class="text-right">Total</th>
                 </tr>
             </thead>
@@ -364,7 +362,7 @@
                     <td class="item-name">{{ item.medicine_name }}</td>
                     <td>{{ item.power }}</td>
                     <td class="text-center">{{ item.quantity }}</td>
-                    <td class="text-right">₹{{ item.unit_price|floatformat:2 }}</td>
+                    
                     <td class="text-right"><strong>₹{{ item.total_price|floatformat:2 }}</strong></td>
                 </tr>
                 {% empty %}
@@ -426,7 +424,7 @@
 
     <!-- Footer -->
     <div class="footer">
-        <div class="footer-thankyou">Thank you for trusting MediCare Clinic</div>
+        <div class="footer-thankyou">Thank you for trusting {{clinic.clinic_name}}</div>
         <div>This is a computer-generated invoice and does not require a physical signature.</div>
         <div style="margin-top: 4px; color: #94a3b8;">For any queries, please contact our support desk.</div>
     </div>

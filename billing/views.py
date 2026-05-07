@@ -11,12 +11,14 @@ from .models import Bill, BillItem
 from appointment.models import Visit, PrescriptionItem
 
 
-
 def generate_bill_from_visit(visit):
     """
     Visit complete hone ke baad automatically bill banao
     Prescription items se BillItems create karo
     """
+    # Lazy import to avoid circular import (appointment → billing → clinic)
+    from clinic.models import ClinicSettings
+
     # Agar bill already hai to return karo
     if hasattr(visit, 'bill'):
         return visit.bill
@@ -31,10 +33,13 @@ def generate_bill_from_visit(visit):
 
     subtotal = Decimal('0')
 
+    clinic = ClinicSettings.get()
+    
     bill = Bill.objects.create(
         visit=visit,
         subtotal=0,
-        gst_percent=18,
+        gst_percent=clinic.default_gst,
+        consultation_fee=clinic.default_consultation_fee,
     )
 
     for item in items:
@@ -160,5 +165,5 @@ class PrintBillView(LoginRequiredMixin, View):
         return render(request, 'billing/bill_print.html', {
             'bill': bill,
             'visit': visit,
-            'settings': settings   # 👈 ye important hai
+            'settings': settings   
         })

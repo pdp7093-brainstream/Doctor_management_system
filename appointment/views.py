@@ -16,57 +16,196 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from datetime import datetime, time, timedelta
 from billing.views import generate_bill_from_visit
-
+from clinic.models import ClinicSettings
 # ─────────────────────────────────────────
 # Slot Generator
 # ─────────────────────────────────────────
 
-def generate_slots():
-    start    = time(9, 0)
-    end      = time(17, 0)
-    interval = 30
-    slots    = []
-    current  = datetime.combine(datetime.today(), start)
+def generate_slots(selected_date=None):
 
-    while current.time() < end:
-        slots.append(current.time())
+    clinic = ClinicSettings.get()
+
+    start_time    = clinic.start_time
+    end_time      = clinic.end_time
+    lunch_start   = clinic.lunch_start
+    lunch_end     = clinic.lunch_end
+    interval      = clinic.slot_duration
+
+    slots = []
+
+    current = datetime.combine(datetime.today(), start_time)
+    end_dt  = datetime.combine(datetime.today(), end_time)
+
+    while current < end_dt:
+
+        current_time = current.time()
+
+        # Skip lunch break slots
+        if lunch_start and lunch_end:
+            if lunch_start <= current_time < lunch_end:
+                current += timedelta(minutes=interval)
+                continue
+
+        slots.append(current_time)
+
         current += timedelta(minutes=interval)
 
     return slots
-
-
 def get_slots(request):
+
+
     date_str = request.GET.get('appointment_date')
 
     if not date_str:
-        return JsonResponse({'error': 'Date required'})
+        return JsonResponse({
+            'error': 'Date is required'
+        })
 
-    selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
-    all_slots     = generate_slots()
+    try:
+        selected_date = datetime.strptime(
+            date_str,
+            "%Y-%m-%d"
+        ).date()
 
-    booked = Appointment.objects.filter(
+    except ValueError:
+        return JsonResponse({
+            'error': 'Invalid date format'
+        })
+
+    # ─────────────────────────────────────
+    # Clinic Settings
+    # ─────────────────────────────────────
+    clinic = ClinicSettings.get()
+
+    # ─────────────────────────────────────
+    # Future Booking Validation
+    # ─────────────────────────────────────
+    today = timezone.localdate()
+
+    if selected_date < today:
+        return JsonResponse({
+            'slots': [],
+            'message': 'Past date booking is not allowed'
+        })
+
+    max_booking_date = today + timedelta(days=30)
+
+    if selected_date > max_booking_date:
+        return JsonResponse({
+            'slots': [],
+            'message': 'Booking allowed only for next 30 days'
+        })
+
+    # ─────────────────────────────────────
+    # Weekday Mapping
+    # ─────────────────────────────────────
+    day_map = {
+        0: 'mon',
+        1: 'tue',
+        2: 'wed',
+        3: 'thu',
+        4: 'fri',
+        5: 'sat',
+        6: 'sun',
+    }
+
+    selected_day = day_map[selected_date.weekday()]
+
+    # ─────────────────────────────────────
+    # Working Day Validation
+    # ─────────────────────────────────────
+    if not clinic.is_working_day(selected_day):
+        return JsonResponse({
+            'slots': [],
+            'message': 'Clinic is closed on this day'
+        })
+
+    # ─────────────────────────────────────
+    # Dynamic Slot Configuration
+    # ─────────────────────────────────────
+    start_time   = clinic.start_time
+    end_time     = clinic.end_time
+    lunch_start  = clinic.lunch_start
+    lunch_end    = clinic.lunch_end
+    interval     = clinic.slot_duration
+
+    slots = []
+
+    current = datetime.combine(
+        datetime.today(),
+        start_time
+    )
+
+    end_dt = datetime.combine(
+        datetime.today(),
+        end_time
+    )
+
+    while current < end_dt:
+
+        current_time = current.time()
+
+        # Skip lunch break slots
+        if lunch_start and lunch_end:
+
+            if lunch_start <= current_time < lunch_end:
+                current += timedelta(minutes=interval)
+                continue
+
+        slots.append(current_time)
+
+        current += timedelta(minutes=interval)
+
+    # ─────────────────────────────────────
+    # Fetch Already Booked Slots
+    # ─────────────────────────────────────
+    booked_slots = Appointment.objects.filter(
         appointment_date=selected_date
     ).values_list('time_slot', flat=True)
-    booked = [t.strftime("%H:%M") for t in booked]
 
-    now          = timezone.localtime()
-    current_time = now.time()
-    filtered     = []
+    booked_slots = [
+        t.strftime("%H:%M")
+        for t in booked_slots
+    ]
 
-    for slot in all_slots:
+    # ─────────────────────────────────────
+    # Remove Past + Booked Slots
+    # ─────────────────────────────────────
+    now = timezone.localtime()
+
+    filtered_slots = []
+
+    for slot in slots:
+
         slot_str = slot.strftime("%H:%M")
 
         # Remove past slots for today
-        if selected_date == now.date() and slot <= current_time:
+        if (
+            selected_date == now.date()
+            and slot <= now.time()
+        ):
             continue
 
         # Remove already booked slots
-        if slot_str in booked:
+        if slot_str in booked_slots:
             continue
 
-        filtered.append(slot_str)
+        # Convert to 12-hour format
+        display_time = datetime.strptime(
+            slot_str,
+            "%H:%M"
+        ).strftime("%I:%M %p")
 
-    return JsonResponse({'slots': filtered})
+        filtered_slots.append(display_time)
+
+    # ─────────────────────────────────────
+    # Final Response
+    # ─────────────────────────────────────
+    return JsonResponse({
+        'slots': filtered_slots
+    })
+
+
 
 
 # ─────────────────────────────────────────
@@ -153,10 +292,19 @@ class Add_appointment(View):
     def post(self, request):
         patient_id       = request.POST.get("patient")
         appointment_date = request.POST.get("appointment_date")
-        time_slot        = request.POST.get("time_slot")
+        time_slot_raw    = request.POST.get("time_slot", "").strip()
         notes            = request.POST.get("notes")
         doctor           = InnerMember.objects.get(user=request.user)
         patient          = Patient.objects.get(id=patient_id)
+
+        # Convert to 24h if sent as 12h (e.g. "06:00 PM")
+        try:
+            if "AM" in time_slot_raw.upper() or "PM" in time_slot_raw.upper():
+                time_slot = datetime.strptime(time_slot_raw, "%I:%M %p").time()
+            else:
+                time_slot = datetime.strptime(time_slot_raw, "%H:%M").time()
+        except ValueError:
+            time_slot = time_slot_raw  # fallback
 
         Appointment.objects.create(
             patient          = patient,
