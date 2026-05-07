@@ -135,59 +135,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const ROWS_PER_PAGE = 10;
-    const tbody = document.getElementById('tableBody');
-    const allRows = Array.from(tbody.querySelectorAll('tr:not(#emptyRow)'));
-    const pagination = document.getElementById('pagination');
-    const pageInfo = document.getElementById('pageInfo');
-    const paginationWrapper = document.getElementById('paginationWrapper');
-    let currentPage = 1;
-
-    function totalPages() { return Math.ceil(allRows.length / ROWS_PER_PAGE); }
-
-    function showPage(page) {
-        currentPage = page;
-        const start = (page - 1) * ROWS_PER_PAGE;
-        const end = start + ROWS_PER_PAGE;
-        allRows.forEach((row, i) => { row.style.display = (i >= start && i < end) ? '' : 'none'; });
-        pageInfo.textContent = `Showing ${start + 1}–${Math.min(end, allRows.length)} of ${allRows.length} appointments`;
-        renderPagination();
-    }
-
-    function renderPagination() {
-        pagination.innerHTML = '';
-        const total = totalPages();
-        const prev = document.createElement('li');
-        prev.className = 'page-item' + (currentPage === 1 ? ' disabled' : '');
-        prev.innerHTML = `<a class="page-link" href="#">&lsaquo;</a>`;
-        prev.addEventListener('click', e => { e.preventDefault(); if (currentPage > 1) showPage(currentPage - 1); });
-        pagination.appendChild(prev);
-        for (let i = 1; i <= total; i++) {
-            if (i === 1 || i === total || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                const li = document.createElement('li');
-                li.className = 'page-item' + (i === currentPage ? ' active' : '');
-                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-                li.addEventListener('click', e => { e.preventDefault(); showPage(i); });
-                pagination.appendChild(li);
-            } else if (i === currentPage - 2 || i === currentPage + 2) {
-                const li = document.createElement('li');
-                li.className = 'page-item disabled';
-                li.innerHTML = `<span class="page-link">…</span>`;
-                pagination.appendChild(li);
-            }
-        }
-        const next = document.createElement('li');
-        next.className = 'page-item' + (currentPage === total ? ' disabled' : '');
-        next.innerHTML = `<a class="page-link" href="#">&rsaquo;</a>`;
-        next.addEventListener('click', e => { e.preventDefault(); if (currentPage < total) showPage(currentPage + 1); });
-        pagination.appendChild(next);
-    }
-
-    if (allRows.length > ROWS_PER_PAGE) {
-        paginationWrapper.style.display = 'flex';
-        showPage(1);
-    }
-</script>
+<script src="{% static 'assets/js/dashboard.js' %}"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ from .models import Bill, BillItem
 from appointment.models import Visit, PrescriptionItem
 
 
+
 def generate_bill_from_visit(visit):
     """
     Visit complete hone ke baad automatically bill banao
@@ -131,15 +132,33 @@ class BillListView(LoginRequiredMixin, View):
         return render(request, 'billing/bill_list.html', {'bills': bills})
 
 
+from django.shortcuts import render, get_object_or_404
+from django.views import View
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
+
+from appointment.models import Visit
+from .models import Bill
+from doctor.models import ClinicSettings
+
+
 @method_decorator(never_cache, name='dispatch')
 class PrintBillView(LoginRequiredMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, visit_id):
+        # Visit + Bill fetch karo
         visit = get_object_or_404(Visit, id=visit_id)
         bill  = get_object_or_404(Bill, visit=visit)
+
+        # Clinic settings fetch karo (safe way)
+        settings = ClinicSettings.objects.filter(
+            doctor=visit.doctor
+        ).first()
 
         return render(request, 'billing/bill_print.html', {
             'bill': bill,
             'visit': visit,
+            'settings': settings   # 👈 ye important hai
         })

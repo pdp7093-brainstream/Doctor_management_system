@@ -433,3 +433,186 @@ textarea.form-control { min-height: 90px; resize: vertical; }
     .sidebar li { flex: none; }
     .main-content { margin-left: 0; padding: 20px 16px; }
 }
+
+
+
+/* appointment_detials.html css */
+
+ .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .info-grid.full { grid-template-columns:1fr; }
+        @media (max-width:600px) { .info-grid { grid-template-columns:1fr; } }
+        .info-box { background:#f7f9ff; border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+        .info-box .label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:3px; }
+        .info-box .value { font-size:0.95rem; font-weight:500; color:var(--text); }
+        .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }
+        .status-confirmed { background:#dcfce7; color:#16a34a; }
+        .status-cancelled { background:#fee2e2; color:#dc2626; }
+        .status-pending   { background:#fef3c7; color:#d97706; }
+        .status-completed { background:#e0f2fe; color:#0369a1; }
+        .visit-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; background:#e0f2fe; color:#0369a1; }
+        .detail-section { margin-bottom:28px; }
+        .detail-section:last-child { margin-bottom:0; }
+        .rx-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+        .rx-table thead th { background:var(--primary); color:#fff; padding:10px 12px; text-align:left; font-weight:600; }
+        .rx-table tbody td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .rx-table tbody tr:last-child td { border-bottom:none; }
+        .rx-table tbody tr:hover { background:#f7f9ff; }
+        .section-tag {
+            display:inline-block; font-size:0.7rem; font-weight:700; padding:2px 8px;
+            border-radius:20px; background:#e0f2fe; color:#0369a1;
+            margin-left:8px; vertical-align:middle; text-transform:uppercase;
+        }
+
+/* profile.html css/ */
+
+ /* ── Profile Info Table ── */
+        .profile-info-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+        .profile-info-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        .profile-info-table tbody tr:last-child td { border-bottom: none; }
+        .profile-info-table tbody tr:hover { background: #f7f9ff; }
+        .profile-info-table .info-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--muted);
+            width: 160px;
+        }
+        .profile-info-table .info-value {
+            font-weight: 500;
+            color: var(--text);
+        }
+        .info-empty { color: var(--muted); font-style: italic; font-size: 0.85rem; }
+
+        /* ── Profile Picture Section (always visible) ── */
+        .profile-top {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px 20px 20px;
+            border-bottom: 1px solid var(--border);
+        }
+        .profile-avatar {
+            width: 72px; height: 72px;
+            border-radius: 50%; object-fit: cover;
+            border: 3px solid var(--border);
+            flex-shrink: 0;
+        }
+        .profile-avatar-initials {
+            width: 72px; height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#6366f1,#818cf8);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.8rem; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .profile-top-info .name {
+            font-size: 1.05rem; font-weight: 700; color: var(--text);
+        }
+        .profile-top-info .email {
+            font-size: 0.85rem; color: var(--muted); margin-top: 2px;
+        }
+
+        /* ── Family Members Table ── */
+        .fm-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+        .fm-table thead th { background:var(--primary); color:#fff; padding:11px 14px; text-align:left; font-weight:600; }
+        .fm-table tbody td { padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .fm-table tbody tr:last-child td { border-bottom:none; }
+        .fm-table tbody tr:hover { background:#f7f9ff; }
+
+        .btn-icon {
+            width:30px; height:30px; border-radius:7px; border:none;
+            cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+            font-size:0.82rem; transition:opacity 0.2s;
+        }
+        .btn-icon:hover { opacity:0.8; }
+        .btn-edit-fm   { background:#e0f2fe; color:#0369a1; }
+        .btn-delete-fm { background:#fee2e2; color:#dc2626; }
+
+        /* ── Modal (shared style) ── */
+        .modal-overlay {
+            display:none; position:fixed; inset:0;
+            background:rgba(0,0,0,0.45); z-index:9999;
+            align-items:center; justify-content:center;
+        }
+        .modal-overlay.active { display:flex; }
+        .modal-box {
+            background:#fff; border-radius:14px; padding:28px;
+            width:100%; max-width:460px;
+            box-shadow:0 20px 50px rgba(0,0,0,0.15);
+            animation: slideUp 0.25s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        @keyframes slideUp {
+            from { transform:translateY(20px); opacity:0; }
+            to   { transform:translateY(0);    opacity:1; }
+        }
+        .modal-box h5 {
+            font-weight:700; font-size:1.05rem; margin-bottom:18px;
+            color:#1a2035; display:flex; align-items:center; gap:8px;
+        }
+        .modal-box h5 i { color:var(--primary); }
+        .modal-field { margin-bottom:13px; }
+        .modal-field label {
+            font-size:0.75rem; font-weight:700; color:#666;
+            display:block; margin-bottom:5px;
+            text-transform:uppercase; letter-spacing:0.04em;
+        }
+        .modal-field input, .modal-field select {
+            width:100%; padding:9px 12px; border:1.5px solid var(--border);
+            border-radius:8px; font-size:0.9rem; background:#f7f9ff;
+            transition:border-color 0.2s; font-family:inherit;
+        }
+        .modal-field input:focus, .modal-field select:focus {
+            border-color:var(--primary); outline:none; background:#fff;
+        }
+        .modal-section-label {
+            font-size:0.72rem; font-weight:700; text-transform:uppercase;
+            letter-spacing:0.06em; color:var(--primary);
+            margin: 16px 0 10px; padding-bottom:6px;
+            border-bottom:1.5px solid var(--border);
+        }
+        .modal-actions { display:flex; gap:10px; margin-top:18px; }
+        .modal-actions button {
+            flex:1; padding:10px; border-radius:8px;
+            font-weight:600; font-size:0.9rem; border:none;
+            cursor:pointer; transition:opacity 0.2s;
+        }
+        .btn-save-modal  { background:var(--primary); color:#fff; }
+        .btn-save-modal:hover { opacity:0.88; }
+        .btn-close-modal {
+            background:#f0f4ff; color:#555;
+            border:1.5px solid var(--border) !important;
+        }
+        .btn-close-modal:hover { background:#e2eaff; }
+        .modal-error { color:#dc2626; font-size:0.83rem; display:none; margin-top:6px; }
+
+        /* ── Photo upload in modal ── */
+        .modal-avatar-row {
+            display: flex; align-items: center; gap: 14px;
+            margin-bottom: 16px; padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .modal-avatar {
+            width: 60px; height: 60px; border-radius: 50%;
+            object-fit: cover; border: 2px solid var(--border);
+        }
+        .modal-avatar-initials {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: linear-gradient(135deg,#6366f1,#818cf8);
+            display: flex; align-items: center; justify-content: center;
+            color:#fff; font-size:1.4rem; font-weight:700;
+        }
+        .upload-label-sm {
+            display:inline-flex; align-items:center; gap:6px;
+            padding:7px 12px; background:var(--primary); color:#fff;
+            border-radius:8px; cursor:pointer; font-size:0.82rem; font-weight:600;
+        }
+        .upload-label-sm:hover { opacity:0.88; }
+
+        .empty-fm { text-align:center; padding:24px; color:var(--muted); font-size:0.88rem; }

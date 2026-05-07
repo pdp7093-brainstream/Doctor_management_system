@@ -50,6 +50,7 @@
                         <th>Date</th>
                         <th>Time</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -113,13 +114,15 @@
                                 {{ appointment.status|capfirst }}
                             </span>
                         </td>
-
-                        
-
+                        <td>
+                            <a href="{% url 'appointment:appointment_detail_modal' appointment.id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi"></i> View
+                            </a>
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">No appointments found.</td>
+                        <td colspan="8" class="text-center text-muted py-4">No appointments found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -185,6 +188,7 @@
             else if (newPag) document.getElementById('paginationContainer').appendChild(newPag);
 
             bindPaginationLinks();
+            bindViewButtons();
         })
         .catch(err => console.error('Fetch error:', err));
     }
@@ -196,6 +200,14 @@
                 fetchAppointments(parseInt(this.getAttribute('data-page')));
             });
         });
+    }
+
+    function loadAppointmentDetails(appointmentId) {
+        // No longer needed for modal
+    }
+
+    function bindViewButtons() {
+        // No longer needed for modal
     }
 
     function debounce(fn, delay = 350) {
@@ -214,6 +226,7 @@
     });
 
     bindPaginationLinks();
+    bindViewButtons();
 </script>
 
 {% endblock %}

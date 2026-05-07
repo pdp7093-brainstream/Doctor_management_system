@@ -1,6 +1,7 @@
 from medicine.models import *
 from .models import *
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.views import View
 from doctor.decorators import role_required
 from accounts.models import Patient
@@ -88,10 +89,11 @@ class Manage_appointments(View):
 
         if search:
             appointments = appointments.filter(
-                Q(full_name__icontains=search) |
-                Q(phone__icontains=search) |
                 Q(patient__user__first_name__icontains=search) |
-                Q(patient__user__last_name__icontains=search)
+                Q(patient__user__last_name__icontains=search) |
+                Q(patient__phone__icontains=search) |
+                Q(family_member__name__icontains=search) |
+                Q(family_member__phone__icontains=search)
             )
 
         if appointment_date:
@@ -114,6 +116,28 @@ class Manage_appointments(View):
         }
 
         return render(request, 'doctor/manage_appointments.html', context)
+
+
+@role_required('doctor')
+def appointment_detail_modal(request, id):
+    appointment = get_object_or_404(Appointment, id=id)
+    visit        = Visit.objects.filter(appointment=appointment).first()
+    prescription = None
+    prescription_items = []
+
+    if visit:
+        prescription = Prescription.objects.filter(visit=visit).first()
+        if prescription:
+            prescription_items = prescription.items.select_related(
+                'medicine_variant', 'medicine_variant__medicine'
+            ).all()
+
+    return render(request, 'doctor/appointment_detail.html', {
+        'appointment'       : appointment,
+        'visit'             : visit,
+        'prescription'      : prescription,
+        'prescription_items': prescription_items,
+    })
 
 
 # ─────────────────────────────────────────
@@ -227,7 +251,13 @@ class StartVisitView(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class PrescriptionView(View):
     def get(self, request, visit_id):
-        visit        = get_object_or_404(Visit, id=visit_id)
+        visit = get_object_or_404(Visit, id=visit_id)
+
+        # If the appointment has already been completed, ensure the visit is also treated as completed.
+        if visit.appointment.status == 'completed' and visit.visted_status != 'completed':
+            visit.visted_status = 'completed'
+            visit.save(update_fields=['visted_status'])
+
         prescription, _ = Prescription.objects.get_or_create(visit=visit)
         variants     = MedicineVariant.objects.filter(medicine__is_active=True)
         items        = prescription.items.select_related(
@@ -249,9 +279,10 @@ class PrescriptionView(View):
                 item.parsed_meal      = 'after_food'
 
         return render(request, 'doctor/prescription.html', {
-            'visit'   : visit,
-            'variants': variants,
-            'items'   : items,
+            'visit'          : visit,
+            'variants'       : variants,
+            'items'          : items,
+            'visit_completed': visit.visted_status == 'completed' or visit.appointment.status == 'completed',
         })
 
     def reduce_stock(self, prescription):
@@ -307,8 +338,11 @@ class PrescriptionView(View):
         visit.diagnosis = request.POST.get("diagnosis")
         visit.notes     = request.POST.get("notes")
 
-        is_completing       = "complete_visit" in request.POST
-        visit.visted_status = "completed" if is_completing else "in_progress"
+        is_completing = "complete_visit" in request.POST
+        if is_completing:
+            visit.visted_status = "completed"
+        elif visit.visted_status != "completed":
+            visit.visted_status = "in_progress"
         visit.save()
 
         prescription, _ = Prescription.objects.get_or_create(visit=visit)
@@ -376,8 +410,11 @@ class PrescriptionView(View):
             generate_bill_from_visit(visit)
         
     
-        appointment        = visit.appointment
-        appointment.status = "completed" if is_completing else "confirmed"
+        appointment = visit.appointment
+        if is_completing:
+            appointment.status = "completed"
+        elif appointment.status != "completed":
+            appointment.status = "confirmed"
         appointment.save()
 
         if is_completing:
