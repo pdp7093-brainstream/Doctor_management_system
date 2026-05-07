@@ -1,0 +1,241 @@
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h6 class="fw-semibold mb-3">Appointment Info</h6>
+        <div class="row g-2">
+            <div class="col-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Date</div>
+                    <div class="fw-semibold">{{ appointment.appointment_date }}</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Time</div>
+                    <div class="fw-semibold">{{ appointment.time_slot|time:"h:i A" }}</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Status</div>
+                    <div class="fw-semibold text-capitalize">{{ appointment.status }}</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Booked By</div>
+                    <div class="fw-semibold">
+                        {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if appointment.created_at %}
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Booked On</div>
+                    <div class="fw-semibold">{{ appointment.created_at|date:"d M Y, h:i A" }}</div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Notes</div>
+                    <div class="fw-semibold">{{ appointment.notes|default:"No notes provided." }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <h6 class="fw-semibold mb-3">Patient Info</h6>
+        <div class="row g-2">
+            {% if appointment.family_member %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Full Name</div>
+                    <div class="fw-semibold">{{ appointment.family_member.name }}</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Relation</div>
+                    <div class="fw-semibold">{{ appointment.family_member.relation }}</div>
+                </div>
+            </div>
+            {% if appointment.family_member.phone %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Phone</div>
+                    <div class="fw-semibold">{{ appointment.family_member.phone }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if appointment.family_member.gender %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Gender</div>
+                    <div class="fw-semibold text-capitalize">{{ appointment.family_member.gender }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if appointment.family_member.dob %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Date of Birth</div>
+                    <div class="fw-semibold">{{ appointment.family_member.dob|date:"d M Y" }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if appointment.family_member.bld_grop %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Blood Group</div>
+                    <div class="fw-semibold">{{ appointment.family_member.bld_grop }}</div>
+                </div>
+            </div>
+            {% endif %}
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Booked By</div>
+                    <div class="fw-semibold">
+                        {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                        <span class="text-muted small">(Account Holder)</span>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Full Name</div>
+                    <div class="fw-semibold">
+                        {{ appointment.patient.user.first_name }}{% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                    </div>
+                </div>
+            </div>
+            {% if appointment.patient.phone %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Phone</div>
+                    <div class="fw-semibold">{{ appointment.patient.phone }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if appointment.patient.gender %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Gender</div>
+                    <div class="fw-semibold text-capitalize">{{ appointment.patient.gender }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if appointment.patient.dob %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Date of Birth</div>
+                    <div class="fw-semibold">{{ appointment.patient.dob|date:"d M Y" }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if appointment.patient.bld_grop %}
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Blood Group</div>
+                    <div class="fw-semibold">{{ appointment.patient.bld_grop }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mb-4">
+        <h6 class="fw-semibold mb-3">Doctor Info</h6>
+        <div class="row g-2">
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Doctor</div>
+                    <div class="fw-semibold">
+                        {% if appointment.doctor and appointment.doctor.user %}
+                            Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}
+                        {% else %}
+                            Not assigned yet
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if visit %}
+    <div class="mb-4">
+        <h6 class="fw-semibold mb-3">Visit Details</h6>
+        <div class="row g-2">
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Visit Status</div>
+                    <div class="fw-semibold text-capitalize">{{ visit.visted_status }}</div>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Visit Created</div>
+                    <div class="fw-semibold">{{ visit.created_at|date:"d M Y" }}</div>
+                </div>
+            </div>
+            {% if visit.symptoms %}
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Symptoms</div>
+                    <div class="fw-semibold">{{ visit.symptoms }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if visit.diagnosis %}
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Diagnosis</div>
+                    <div class="fw-semibold">{{ visit.diagnosis }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if visit.notes %}
+            <div class="col-12">
+                <div class="border rounded-3 p-3 bg-light">
+                    <div class="text-muted small mb-1">Doctor Notes</div>
+                    <div class="fw-semibold">{{ visit.notes }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if prescription_items %}
+    <div class="mb-2">
+        <h6 class="fw-semibold mb-3">Prescription</h6>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Power</th>
+                        <th>Dosage</th>
+                        <th>Days</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prescription_items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{% if item.medicine_variant %}{{ item.medicine_variant.medicine.name }}{% else %}—{% endif %}</td>
+                        <td>{% if item.medicine_variant %}{{ item.medicine_variant.power }}{% else %}—{% endif %}</td>
+                        <td>{{ item.dosage }}</td>
+                        <td>{{ item.days }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>

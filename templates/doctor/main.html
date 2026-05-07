@@ -123,13 +123,6 @@
                     <span>Appointments</span>
                 </a>
             </li>
-
-            <li>
-                <a href="#">
-                    <i class="bi bi-heart-pulse-fill"></i>
-                    <span>Visits</span>
-                </a>
-            </li>
             <li>
                 <a href="#" class="menu-toggle {% if '/medicine' in request.path %}active{% endif %}">
                     <div class="menu-toggle-label">
@@ -182,6 +175,15 @@
                     <span>Billing</span>
                 </a>
             </li>
+
+
+            <li class="mt-auto">
+                <a href="{% url 'doctor:settings' %}" class="{% if 'settings' in request.path %}active{% endif %}">
+                    <i class="bi bi-gear-fill"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+
         </ul>
     </aside>
     

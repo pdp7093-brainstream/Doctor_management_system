@@ -27,4 +27,6 @@ urlpatterns = [
     path('staff/delete/<int:member_id>/',views.delete_staff,name='delete_staff'),
     path('staff/reset-password/<int:member_id>/', views.reset_staff_password, name='reset_staff_password'),
 
+    path('settings/', ClinicSettingsView.as_view(), name='settings'),
+
 ]

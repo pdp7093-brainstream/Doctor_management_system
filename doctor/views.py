@@ -15,6 +15,7 @@ from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
 from django.db.models import Q
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def staff_view(request):
     return render(request,'doctor/staff.html')
@@ -549,3 +550,44 @@ def delete_family(request, id):
         messages.success(request, 'Family member deleted.')
 
     return redirect('doctor:manage_patients')
+
+# ─────────────────────────────────────────
+# Settings view
+# ─────────────────────────────────────────
+
+from .models import ClinicSettings, InnerMember
+
+class ClinicSettingsView(LoginRequiredMixin, View):
+    def get(self, request):
+        doctor = InnerMember.objects.get(user=request.user)
+        settings, created = ClinicSettings.objects.get_or_create(doctor=doctor)
+
+        return render(request, 'doctor/setting.html', {
+            'settings': settings
+        })
+
+    def post(self, request):
+        doctor = InnerMember.objects.get(user=request.user)
+        settings, created = ClinicSettings.objects.get_or_create(doctor=doctor)
+
+        settings.clinic_name = request.POST.get('clinic_name')
+        settings.address = request.POST.get('address')
+        settings.phone = request.POST.get('phone')
+        settings.email = request.POST.get('email')
+        settings.gst_number = request.POST.get('gst_number')
+        settings.footer_note = request.POST.get('footer_note')
+
+        # Time fields
+        settings.opening_time = request.POST.get('opening_time') or None
+        settings.closing_time = request.POST.get('closing_time') or None
+        settings.lunch_start = request.POST.get('lunch_start') or None
+        settings.lunch_end = request.POST.get('lunch_end') or None
+
+        # Logo
+        if request.FILES.get('clinic_logo'):
+            settings.clinic_logo = request.FILES.get('clinic_logo')
+
+        settings.save()
+
+        messages.success(request, "Clinic settings updated!")
+        return redirect('doctor:settings')
