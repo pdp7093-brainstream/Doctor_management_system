@@ -65,7 +65,7 @@
               <li>
                 <hr style="margin: 5px 0; opacity: 0.1;">
               </li>
-              <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')">Logout</a>
+              <li><a href="{% url 'logout' %}" id="logoutBtn">Logout</a>
               </li>
             </ul>
           </li>
@@ -123,3 +123,65 @@
     left: auto;
   }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (logoutBtn) {
+
+      logoutBtn.addEventListener('click', function (e) {
+
+        e.preventDefault();
+
+        Swal.fire({
+          title: 'Logout Confirmation',
+          text: 'Are you sure you want to logout from your account?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Logout',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#1977cc',
+          cancelButtonColor: '#dc3545',
+          reverseButtons: true,
+          backdrop: `
+            rgba(0,0,0,0.45)
+          `,
+          customClass: {
+            popup: 'rounded-4 shadow-lg',
+            confirmButton: 'px-4 py-2',
+            cancelButton: 'px-4 py-2'
+          }
+
+        }).then((result) => {
+
+          if (result.isConfirmed) {
+
+            Swal.fire({
+              title: 'Logging Out...',
+              html: 'Please wait ',
+              timer: 1500,
+              allowOutsideClick: false,
+              showConfirmButton: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
+            setTimeout(() => {
+              window.location.href = logoutBtn.href;
+            }, 1500);
+
+          }
+
+        });
+
+      });
+
+    }
+
+  });
+</script>

@@ -416,7 +416,7 @@ class AddVendorView(LoginRequiredMixin, View):
             address=address,
         )
         messages.success(request, f'Vendor "{name}" added successfully!')
-        return redirect("medicine/vendor_list")
+        return redirect("medicine:vendor_list")
 
 
 class EditVendorView(LoginRequiredMixin, View):
@@ -446,6 +446,7 @@ class DeleteVendorView(LoginRequiredMixin, View):
         name = vendor.name
         vendor.delete()
         messages.success(request, f'Vendor "{name}" deleted!')
+        return redirect("medicine:vendor_list")
 
 
 # Purchase Views

@@ -13,20 +13,21 @@
         </a>
     </div>
 
-    <!-- Search Bar --> 
+    <!-- Search Bar -->
     <div class="search-container">
         <div class="input-group" style="max-width: 420px;">
             <span class="input-group-text bg-white border-end-0">
                 <i class="bi bi-search text-muted"></i>
             </span>
-            <input type="text" class="form-control border-start-0 search-input ps-0"
-                id="searchInput" placeholder="Search by medicine name, type or company...">
+            <input type="text" class="form-control border-start-0 search-input ps-0" id="searchInput"
+                placeholder="Search by medicine name, type or company...">
         </div>
     </div>
 
     <!-- Table Section -->
     <div class="table-section">
-        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+        <div id="tableContainer"
+            style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
             <table class="table table-custom" style="min-width: 820px; width: 100%;">
                 <thead>
                     <tr>
@@ -42,12 +43,14 @@
                 </thead>
                 <tbody id="tableBody">
                     {% for medicine in medicines %}
-                    <tr class="medicine-main-row" onclick="toggleVariants('variant-row-{{ medicine.pk }}')" style="cursor: pointer;" title="Click to view variants">
+                    <tr class="medicine-main-row" onclick="toggleVariants('variant-row-{{ medicine.pk }}')"
+                        style="cursor: pointer;" title="Click to view variants">
                         <td class="patient-info">{{ forloop.counter }}</td>
                         <td class="patient-name fw-semibold text-primary">{{ medicine.name }}</td>
                         <td class="patient-info">{{ medicine.short_name }}</td>
                         <td class="patient-info">
-                            <span class="badge bg-secondary text-white" style="font-size:0.78rem; padding: 4px 10px; border-radius: 20px;">
+                            <span class="badge bg-secondary text-white"
+                                style="font-size:0.78rem; padding: 4px 10px; border-radius: 20px;">
                                 {{ medicine.get_medicine_type_display }}
                             </span>
                         </td>
@@ -60,52 +63,67 @@
                         </td>
                         <td class="patient-info">
                             {% if medicine.is_active %}
-                                <span class="badge bg-success" style="font-size:0.78rem; padding:4px 10px; border-radius:20px;">Active</span>
+                            <span class="badge bg-success"
+                                style="font-size:0.78rem; padding:4px 10px; border-radius:20px;">Active</span>
                             {% else %}
-                                <span class="badge bg-danger" style="font-size:0.78rem; padding:4px 10px; border-radius:20px;">Inactive</span>
+                            <span class="badge bg-danger"
+                                style="font-size:0.78rem; padding:4px 10px; border-radius:20px;">Inactive</span>
                             {% endif %}
                         </td>
                         <td onclick="event.stopPropagation();">
                             <div class="action-buttons justify-content-center">
                                 <a href="{% url 'medicine:edit_medicine' medicine.pk %}"
                                     class="action-btn btn btn-warning" title="Edit">
-                                    <i class="bi bi-pencil"></i> 
+                                    <i class="bi bi-pencil"></i>
                                 </a>
-                                <form method="post"
-                                    action="{% url 'medicine:delete_medicine' medicine.pk %}"
-                                    style="display:inline;"
-                                    onsubmit="return confirm('Delete {{ medicine.name }} and all its variants?')">
+                                <form method="post" action="{% url 'medicine:delete_medicine' medicine.pk %}"
+                                    style="display:inline;" class="deleteMedicineForm">
+
                                     {% csrf_token %}
-                                    <button type="submit" class="action-btn btn btn-danger" title="Delete">
-                                        <i class="bi bi-trash"></i> 
+
+                                    <button type="button" class="action-btn btn btn-danger deleteMedicineBtn"
+                                        data-name="{{ medicine.name }}" title="Delete">
+
+                                        <i class="bi bi-trash"></i>
+
                                     </button>
+
                                 </form>
                             </div>
                         </td>
                     </tr>
                     <!-- Expanded Variant Details -->
-                    <tr id="variant-row-{{ medicine.pk }}" class="variant-row" style="display: none; background-color: #f8fbff;">
+                    <tr id="variant-row-{{ medicine.pk }}" class="variant-row"
+                        style="display: none; background-color: #f8fbff;">
                         <td colspan="8" class="p-0 border-0">
-                            <div class="p-3 border-bottom border-start border-primary border-4 ms-3 my-2 rounded-end" style="background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                                <h6 class="mb-3 text-primary" style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
+                            <div class="p-3 border-bottom border-start border-primary border-4 ms-3 my-2 rounded-end"
+                                style="background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                                <h6 class="mb-3 text-primary"
+                                    style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase;">
                                     <i class="bi bi-box-seam me-1"></i> Available Variants for {{ medicine.name }}
                                 </h6>
                                 <div class="d-flex flex-wrap gap-3 mt-2">
                                     {% for v in medicine.variants.all %}
-                                        <div class="d-flex align-items-center bg-white border rounded-pill shadow-sm overflow-hidden" style="border-color: #e2e8f0 !important; font-size: 0.85rem; transition: transform 0.2s ease;">
-                                            <div class="bg-primary text-white fw-bold px-3 py-2 d-flex align-items-center h-100">
-                                                <i class="bi bi-capsule me-2"></i>{{ v.power }}
-                                            </div>
-                                            <div class="px-3 py-2 d-flex align-items-center">
-                                                <span class="text-muted small me-2 fw-medium">Stock:</span> 
-                                                <span class="badge {% if v.stock <= v.low_stock_alert %}bg-danger{% else %}bg-success{% endif %} rounded-pill px-2 py-1" style="font-size: 0.8rem;">
-                                                    {% if v.stock <= v.low_stock_alert %}<i class="bi bi-exclamation-triangle-fill me-1"></i>{% endif %}
-                                                    {{ v.stock }}
-                                                </span>
-                                            </div>
+                                    <div class="d-flex align-items-center bg-white border rounded-pill shadow-sm overflow-hidden"
+                                        style="border-color: #e2e8f0 !important; font-size: 0.85rem; transition: transform 0.2s ease;">
+                                        <div
+                                            class="bg-primary text-white fw-bold px-3 py-2 d-flex align-items-center h-100">
+                                            <i class="bi bi-capsule me-2"></i>{{ v.power }}
                                         </div>
+                                        <div class="px-3 py-2 d-flex align-items-center">
+                                            <span class="text-muted small me-2 fw-medium">Stock:</span>
+                                            <span
+                                                class="badge {% if v.stock <= v.low_stock_alert %}bg-danger{% else %}bg-success{% endif %} rounded-pill px-2 py-1"
+                                                style="font-size: 0.8rem;">
+                                                {% if v.stock <= v.low_stock_alert %}<i
+                                                    class="bi bi-exclamation-triangle-fill me-1"></i>{% endif %}
+                                                    {{ v.stock }}
+                                            </span>
+                                        </div>
+                                    </div>
                                     {% empty %}
-                                        <span class="text-muted small"><i class="bi bi-info-circle me-1"></i> No variants configured.</span>
+                                    <span class="text-muted small"><i class="bi bi-info-circle me-1"></i> No variants
+                                        configured.</span>
                                     {% endfor %}
                                 </div>
                             </div>
@@ -127,24 +145,27 @@
         <nav aria-label="Medicine pagination" class="mt-4 mb-3 d-flex justify-content-center">
             <ul class="pagination pagination-sm shadow-sm">
                 {% if medicines.has_previous %}
-                    <li class="page-item"><a class="page-link text-primary" href="?page={{ medicines.previous_page_number }}">&laquo; Prev</a></li>
+                <li class="page-item"><a class="page-link text-primary"
+                        href="?page={{ medicines.previous_page_number }}">&laquo; Prev</a></li>
                 {% else %}
-                    <li class="page-item disabled"><span class="page-link">&laquo; Prev</span></li>
+                <li class="page-item disabled"><span class="page-link">&laquo; Prev</span></li>
                 {% endif %}
 
                 {% for num in medicines.paginator.page_range %}
-                    {% if medicines.number == num %}
-                        <li class="page-item active"><span class="page-link border-primary bg-primary text-white">{{ num }}</span></li>
-                    {% elif num > medicines.number|add:'-3' and num < medicines.number|add:'3' %}
-                        <li class="page-item"><a class="page-link text-primary" href="?page={{ num }}">{{ num }}</a></li>
+                {% if medicines.number == num %}
+                <li class="page-item active"><span class="page-link border-primary bg-primary text-white">{{ num
+                        }}</span></li>
+                {% elif num > medicines.number|add:'-3' and num < medicines.number|add:'3' %} <li class="page-item"><a
+                        class="page-link text-primary" href="?page={{ num }}">{{ num }}</a></li>
                     {% endif %}
-                {% endfor %}
+                    {% endfor %}
 
-                {% if medicines.has_next %}
-                    <li class="page-item"><a class="page-link text-primary" href="?page={{ medicines.next_page_number }}">Next &raquo;</a></li>
-                {% else %}
+                    {% if medicines.has_next %}
+                    <li class="page-item"><a class="page-link text-primary"
+                            href="?page={{ medicines.next_page_number }}">Next &raquo;</a></li>
+                    {% else %}
                     <li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>
-                {% endif %}
+                    {% endif %}
             </ul>
         </nav>
         {% endif %}
@@ -160,46 +181,135 @@
 
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+
     // Toggle Variant Accordion
     function toggleVariants(rowId) {
+
         const row = document.getElementById(rowId);
+
         if (row.style.display === 'none') {
+
             row.style.display = 'table-row';
-            // Optional: hide other open variants if you want an accordion effect
-            // document.querySelectorAll('.variant-row').forEach(r => { if(r.id !== rowId) r.style.display = 'none'; });
+
         } else {
+
             row.style.display = 'none';
+
         }
+
     }
 
-    // Live search
+
+    // Live Search
     const searchInput = document.getElementById('searchInput');
-    const tableBody   = document.getElementById('tableBody');
-    const emptyState  = document.getElementById('emptyState');
+    const tableBody = document.getElementById('tableBody');
+    const emptyState = document.getElementById('emptyState');
 
     searchInput.addEventListener('input', function () {
+
         const q = this.value.toLowerCase();
-        // Only target the main medicine rows
+
         const rows = tableBody.querySelectorAll('tr.medicine-main-row');
+
         let visible = 0;
-        
+
         rows.forEach(row => {
+
             const text = row.textContent.toLowerCase();
+
             const show = text.includes(q);
+
             row.style.display = show ? '' : 'none';
-            
-            // If hiding the main row, also hide its variant row if it's open
+
+            // Hide variants when hidden
             if (!show) {
+
                 const nextRow = row.nextElementSibling;
+
                 if (nextRow && nextRow.classList.contains('variant-row')) {
                     nextRow.style.display = 'none';
                 }
+
             }
-            
+
             if (show) visible++;
+
         });
+
         emptyState.style.display = visible === 0 ? 'block' : 'none';
+
     });
+
+
+    // SweetAlert Delete Medicine
+    document.querySelectorAll('.deleteMedicineBtn').forEach(button => {
+
+        button.addEventListener('click', function () {
+
+            const form = this.closest('form');
+            const medicineName = this.dataset.name;
+
+            Swal.fire({
+
+                title: 'Delete Medicine?',
+                html: `
+                    <div style="font-size:15px;">
+                        Are you sure you want to delete
+                        <br>
+                        <strong style="color:#dc3545;">${medicineName}</strong> ?
+                        <br><br>
+                        <small>This will also delete all variants.</small>
+                    </div>
+                `,
+
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+
+                backdrop: `
+                    rgba(0,0,0,0.45)
+                `,
+
+                customClass: {
+                    popup: 'rounded-4 shadow-lg',
+                    confirmButton: 'px-4 py-2',
+                    cancelButton: 'px-4 py-2'
+                }
+
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    Swal.fire({
+
+                        title: 'Deleting Medicine...',
+                        html: 'Please wait ❤️',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+
+                    });
+
+                    setTimeout(() => {
+                        form.submit();
+                    }, 1200);
+
+                }
+
+            });
+
+        });
+
+    });
+
 </script>
 {% endblock %}

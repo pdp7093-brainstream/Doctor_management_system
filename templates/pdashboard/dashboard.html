@@ -17,7 +17,7 @@
         <ul>
             <li class="active"><a href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
             <li><a href="{% url 'profile' %}"><i class="fas fa-user-cog"></i> Profile</a></li>
-            <li><a href="{% url 'logout' %}" onclick="return confirm('Are you sure you want to logout?')"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            <li><a href="{% url 'logout' %}" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
         </ul>
     </div>
 
@@ -133,8 +133,68 @@
         </div>
     </div>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'assets/js/dashboard.js' %}"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (logoutBtn) {
+
+      logoutBtn.addEventListener('click', function (e) {
+
+        e.preventDefault();
+
+        Swal.fire({
+          title: 'Logout Confirmation',
+          text: 'Are you sure you want to logout from your account?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Logout',
+          cancelButtonText: 'Cancel',
+          confirmButtonColor: '#1977cc',
+          cancelButtonColor: '#dc3545',
+          reverseButtons: true,
+          backdrop: `
+            rgba(0,0,0,0.45)
+          `,
+          customClass: {
+            popup: 'rounded-4 shadow-lg',
+            confirmButton: 'px-4 py-2',
+            cancelButton: 'px-4 py-2'
+          }
+
+        }).then((result) => {
+
+          if (result.isConfirmed) {
+
+            Swal.fire({
+              title: 'Logging Out...',
+              html: 'Please wait ',
+              timer: 1500,
+              allowOutsideClick: false,
+              showConfirmButton: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
+            setTimeout(() => {
+              window.location.href = logoutBtn.href;
+            }, 1500);
+
+          }
+
+        });
+
+      });
+
+    }
+
+  });
+</script>
 </body>
 </html>

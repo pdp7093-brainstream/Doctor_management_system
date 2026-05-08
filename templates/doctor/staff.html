@@ -56,7 +56,10 @@
         gap: 6px;
         transition: opacity 0.2s;
     }
-    .add-staff-btn:hover { opacity: 0.88; }
+
+    .add-staff-btn:hover {
+        opacity: 0.88;
+    }
 
     .staff-count {
         background: #eef2ff;
@@ -93,8 +96,13 @@
         vertical-align: middle;
     }
 
-    .table-custom tbody tr:last-child td { border-bottom: none; }
-    .table-custom tbody tr:hover { background: #f8fbff; }
+    .table-custom tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-custom tbody tr:hover {
+        background: #f8fbff;
+    }
 
     .staff-avatar {
         width: 40px;
@@ -110,8 +118,23 @@
         flex-shrink: 0;
     }
 
-    .badge-active   { background:#dcfce7; color:#16a34a; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
-    .badge-inactive { background:#fee2e2; color:#dc2626; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
+    .badge-active {
+        background: #dcfce7;
+        color: #16a34a;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .badge-inactive {
+        background: #fee2e2;
+        color: #dc2626;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
 
     .staff-actions {
         display: flex;
@@ -134,117 +157,184 @@
         white-space: nowrap;
     }
 
-    .btn-edit  { background:#fff; color:#0369a1; border:1px solid #bae6fd; }
-    .btn-pwd   { background:#fff; color:#92400e; border:1px solid #fde68a; }
-    .btn-del   { background:#fff; color:#dc2626; border:1px solid #fecaca; }
-    .btn-edit:hover { background:#e0f2fe; }
-    .btn-pwd:hover { background:#fef3c7; }
-    .btn-del:hover { background:#fee2e2; }
+    .btn-edit {
+        background: #fff;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+
+    .btn-pwd {
+        background: #fff;
+        color: #92400e;
+        border: 1px solid #fde68a;
+    }
+
+    .btn-del {
+        background: #fff;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+
+    .btn-edit:hover {
+        background: #e0f2fe;
+    }
+
+    .btn-pwd:hover {
+        background: #fef3c7;
+    }
+
+    .btn-del:hover {
+        background: #fee2e2;
+    }
 
     .empty-state {
-        text-align:center;
-        padding:42px 24px;
-        color:#64748b;
-        font-size:0.9rem;
+        text-align: center;
+        padding: 42px 24px;
+        color: #64748b;
+        font-size: 0.9rem;
     }
 
     .modal-overlay {
-        display:none;
-        position:fixed;
-        inset:0;
-        background:rgba(15,23,42,0.45);
-        z-index:9999;
-        align-items:center;
-        justify-content:center;
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
         padding: 16px;
     }
 
-    .modal-overlay.active { display:flex; }
+    .modal-overlay.active {
+        display: flex;
+    }
 
     .modal-box {
-        background:#fff;
-        border-radius:12px;
-        padding:24px;
-        width:100%;
-        max-width:460px;
-        box-shadow:0 18px 45px rgba(15,23,42,0.18);
-        max-height:90vh;
-        overflow-y:auto;
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        width: 100%;
+        max-width: 460px;
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.18);
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .modal-box h5 {
-        font-weight:700;
-        font-size:1rem;
-        margin-bottom:16px;
-        color:#1f2937;
-        display:flex;
-        align-items:center;
-        gap:8px;
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 16px;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    .modal-box h5 i { color:var(--primary-color); }
+    .modal-box h5 i {
+        color: var(--primary-color);
+    }
 
-    .mfield { margin-bottom:12px; }
+    .mfield {
+        margin-bottom: 12px;
+    }
 
     .mfield label {
-        font-size:0.76rem;
-        font-weight:700;
-        color:#475569;
-        display:block;
-        margin-bottom:5px;
+        font-size: 0.76rem;
+        font-weight: 700;
+        color: #475569;
+        display: block;
+        margin-bottom: 5px;
     }
 
-    .mfield input, .mfield select {
-        width:100%;
-        padding:10px 12px;
-        border:1px solid #dbe3ef;
-        border-radius:8px;
-        font-size:0.9rem;
-        background:#fff;
-        font-family:inherit;
-        transition:border-color 0.2s, box-shadow 0.2s;
+    .mfield input,
+    .mfield select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #dbe3ef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        background: #fff;
+        font-family: inherit;
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .mfield input:focus, .mfield select:focus {
-        border-color:var(--primary-color);
-        outline:none;
-        box-shadow:0 0 0 3px rgba(67, 76, 235, 0.08);
+    .mfield input:focus,
+    .mfield select:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(67, 76, 235, 0.08);
     }
 
     .msection {
-        font-size:0.78rem;
-        font-weight:700;
-        color:var(--primary-color);
-        margin:16px 0 10px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 16px 0 10px;
     }
 
-    .modal-actions { display:flex; gap:10px; margin-top:16px; }
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+    }
 
     .modal-actions button {
-        flex:1;
-        padding:10px;
-        border-radius:8px;
-        font-weight:600;
-        font-size:0.9rem;
-        border:none;
-        cursor:pointer;
-        transition:background 0.2s;
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
     }
 
-    .btn-save  { background:var(--primary-color); color:#fff; }
-    .btn-save:hover  { opacity:0.9; }
-    .btn-cancel { background:#f8fafc; color:#475569; border:1px solid #dbe3ef !important; }
-    .btn-cancel:hover { background:#eef2f7; }
-    .modal-err { color:#dc2626; font-size:0.82rem; display:none; margin-top:6px; }
+    .btn-save {
+        background: var(--primary-color);
+        color: #fff;
+    }
 
-    .pwd-wrapper { position:relative; }
-    .pwd-wrapper input { padding-right:38px; }
+    .btn-save:hover {
+        opacity: 0.9;
+    }
+
+    .btn-cancel {
+        background: #f8fafc;
+        color: #475569;
+        border: 1px solid #dbe3ef !important;
+    }
+
+    .btn-cancel:hover {
+        background: #eef2f7;
+    }
+
+    .modal-err {
+        color: #dc2626;
+        font-size: 0.82rem;
+        display: none;
+        margin-top: 6px;
+    }
+
+    .pwd-wrapper {
+        position: relative;
+    }
+
+    .pwd-wrapper input {
+        padding-right: 38px;
+    }
+
     .pwd-toggle {
-        position:absolute; right:10px; top:50%; transform:translateY(-50%);
-        cursor:pointer; color:#888; font-size:0.9rem;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #888;
+        font-size: 0.9rem;
     }
 
     @media (max-width: 768px) {
+
         .staff-page-head,
         .staff-header {
             align-items: flex-start;
@@ -263,393 +353,399 @@
 </style>
 
 <main class="main-content" id="mainContent">
-<div class="staff-page-head">
-    <div>
-        <h2 class="page-title mb-1">Staff Members</h2>
-        <p class="text-muted small mb-0">Manage biller accounts and access status.</p>
-    </div>
-    <button class="add-staff-btn" id="openAddStaff">
-        <i class="bi bi-plus-lg"></i> Add Staff
-    </button>
-</div>
-
-<div class="staff-card">
-    <div class="staff-header">
-        <div class="staff-title">
-            <i class="bi bi-person-lines-fill"></i> Billers
+    <div class="staff-page-head">
+        <div>
+            <h2 class="page-title mb-1">Staff Members</h2>
+            <p class="text-muted small mb-0">Manage biller accounts and access status.</p>
         </div>
-        <span class="staff-count">{{ billers|length }} member{{ billers|length|pluralize }}</span>
+        <button class="add-staff-btn" id="openAddStaff">
+            <i class="bi bi-plus-lg"></i> Add Staff
+        </button>
     </div>
 
-    <div class="table-responsive">
-        {% if billers %}
-        <table class="table-custom">
-            <thead>
-                <tr>
-                    <th>Staff</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Phone</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="staffTableBody">
-                {% for member in billers %}
-                <tr id="row-{{ member.id }}">
-                    <td>
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div class="staff-avatar">
-                                {{ member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper }}
+    <div class="staff-card">
+        <div class="staff-header">
+            <div class="staff-title">
+                <i class="bi bi-person-lines-fill"></i> Billers
+            </div>
+            <span class="staff-count">{{ billers|length }} member{{ billers|length|pluralize }}</span>
+        </div>
+
+        <div class="table-responsive">
+            {% if billers %}
+            <table class="table-custom">
+                <thead>
+                    <tr>
+                        <th>Staff</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="staffTableBody">
+                    {% for member in billers %}
+                    <tr id="row-{{ member.id }}">
+                        <td>
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div class="staff-avatar">
+                                    {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
+                                </div>
+                                <div>
+                                    <div style="font-weight:600;">{{member.user.get_full_name|default:member.user.username }}</div>
+                                    <div style="font-size:0.78rem;color:#888;">Biller</div>
+                                </div>
                             </div>
-                            <div>
-                                <div style="font-weight:600;">{{ member.user.get_full_name|default:member.user.username }}</div>
-                                <div style="font-size:0.78rem;color:#888;">Biller</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td>{{ member.user.username }}</td>
-                    <td>{{ member.user.email|default:"—" }}</td>
-                    <td>{{ member.phone|default:"—" }}</td>
-                    <td>
-                        {% if member.user.is_active %}
+                        </td>
+                        <td>{{ member.user.username }}</td>
+                        <td>{{ member.user.email|default:"—" }}</td>
+                        <td>{{ member.phone|default:"—" }}</td>
+                        <td>
+                            {% if member.user.is_active %}
                             <span class="badge-active">Active</span>
-                        {% else %}
+                            {% else %}
                             <span class="badge-inactive">Inactive</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="staff-actions">
-                        <!-- Edit -->
-                        <button class="btn-tbl btn-edit btn-edit-staff"
-                            data-id="{{ member.id }}"
-                            data-name="{{ member.user.get_full_name|default:member.user.username }}"
-                            data-email="{{ member.user.email }}"
-                            data-phone="{{ member.phone }}"
-                            data-active="{{ member.user.is_active|lower }}"
-                            title="Edit">
-                            <i class="bi bi-pencil"></i><span>Edit</span>
-                        </button>
-                        <!-- Reset Password -->
-                        <button class="btn-tbl btn-pwd btn-reset-pwd"
-                            data-id="{{ member.id }}"
-                            data-name="{{ member.user.get_full_name|default:member.user.username }}"
-                            title="Reset Password">
-                            <i class="bi bi-key"></i><span>Password</span>
-                        </button>
-                        <!-- Delete -->
-                        <button class="btn-tbl btn-del btn-delete-staff"
-                            data-id="{{ member.id }}"
-                            data-name="{{ member.user.get_full_name|default:member.user.username }}"
-                            title="Delete">
-                            <i class="bi bi-trash"></i><span>Delete</span>
-                        </button>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% else %}
-        <div class="empty-state">
-            <i class="bi bi-person-x" style="font-size:2rem;color:#cbd5e1;display:block;margin-bottom:8px;"></i>
-            No staff members found. Add one to get started.
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="staff-actions">
+                                <!-- Edit -->
+                                <button class="btn-tbl btn-edit btn-edit-staff" data-id="{{ member.id }}"
+                                    data-name="{{ member.user.get_full_name|default:member.user.username }}"
+                                    data-email="{{ member.user.email }}" data-phone="{{ member.phone }}"
+                                    data-active="{{ member.user.is_active|lower }}" title="Edit">
+                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                                </button>
+                                <!-- Reset Password -->
+                                <button class="btn-tbl btn-pwd btn-reset-pwd" data-id="{{ member.id }}"
+                                    data-name="{{ member.user.get_full_name|default:member.user.username }}"
+                                    title="Reset Password">
+                                    <i class="bi bi-key"></i><span>Password</span>
+                                </button>
+                                <!-- Delete -->
+                                <button class="btn-tbl btn-del btn-delete-staff" data-id="{{ member.id }}"
+                                    data-name="{{ member.user.get_full_name|default:member.user.username }}"
+                                    title="Delete">
+                                    <i class="bi bi-trash"></i><span>Delete</span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-person-x" style="font-size:2rem;color:#cbd5e1;display:block;margin-bottom:8px;"></i>
+                No staff members found. Add one to get started.
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
-</div>
 
 
-<!-- ══════════════════ ADD STAFF MODAL ══════════════════ -->
-<div class="modal-overlay" id="addStaffModal">
-    <div class="modal-box">
-        <h5><i class="bi bi-person-plus"></i> Add Staff Member</h5>
+    <!-- ══════════════════ ADD STAFF MODAL ══════════════════ -->
+    <div class="modal-overlay" id="addStaffModal">
+        <div class="modal-box">
+            <h5><i class="bi bi-person-plus"></i> Add Staff Member</h5>
 
-        <div class="msection">Personal Info</div>
-        <div class="mfield">
-            <label>Full Name *</label>
-            <input type="text" id="addName" placeholder="e.g. Rahul Sharma">
-        </div>
-        <div class="mfield">
-            <label>Phone</label>
-            <input type="tel" id="addPhone" placeholder="e.g. 9876543210" maxlength="15">
-        </div>
+            <div class="msection">Personal Info</div>
+            <div class="mfield">
+                <label>Full Name *</label>
+                <input type="text" id="addName" placeholder="e.g. Rahul Sharma">
+            </div>
+            <div class="mfield">
+                <label>Phone</label>
+                <input type="tel" id="addPhone" placeholder="e.g. 9876543210" maxlength="15">
+            </div>
 
-        <div class="msection">Account Info</div>
-        <div class="mfield">
-            <label>Username *</label>
-            <input type="text" id="addUsername" placeholder="login username">
-        </div>
-        <div class="mfield">
-            <label>Email</label>
-            <input type="email" id="addEmail" placeholder="optional">
-        </div>
-        <div class="mfield">
-            <label>Password *</label>
-            <div class="pwd-wrapper">
-                <input type="password" id="addPassword" placeholder="min 6 characters">
-                <i class="bi bi-eye pwd-toggle" onclick="togglePwd('addPassword', this)"></i>
+            <div class="msection">Account Info</div>
+            <div class="mfield">
+                <label>Username *</label>
+                <input type="text" id="addUsername" placeholder="login username">
+            </div>
+            <div class="mfield">
+                <label>Email</label>
+                <input type="email" id="addEmail" placeholder="optional">
+            </div>
+            <div class="mfield">
+                <label>Password *</label>
+                <div class="pwd-wrapper">
+                    <input type="password" id="addPassword" placeholder="min 6 characters">
+                    <i class="bi bi-eye pwd-toggle" onclick="togglePwd('addPassword', this)"></i>
+                </div>
+            </div>
+
+            <div class="modal-err" id="addErr"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="closeAddStaff">Cancel</button>
+                <button class="btn-save" id="saveAddStaff">Add Staff</button>
             </div>
         </div>
-
-        <div class="modal-err" id="addErr"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="closeAddStaff">Cancel</button>
-            <button class="btn-save"   id="saveAddStaff">Add Staff</button>
-        </div>
     </div>
-</div>
 
 
-<!-- ══════════════════ EDIT STAFF MODAL ══════════════════ -->
-<div class="modal-overlay" id="editStaffModal">
-    <div class="modal-box">
-        <h5><i class="bi bi-pencil-square"></i> Edit Staff Member</h5>
-        <input type="hidden" id="editStaffId">
+    <!-- ══════════════════ EDIT STAFF MODAL ══════════════════ -->
+    <div class="modal-overlay" id="editStaffModal">
+        <div class="modal-box">
+            <h5><i class="bi bi-pencil-square"></i> Edit Staff Member</h5>
+            <input type="hidden" id="editStaffId">
 
-        <div class="mfield">
-            <label>Full Name *</label>
-            <input type="text" id="editStaffName">
-        </div>
-        <div class="mfield">
-            <label>Email</label>
-            <input type="email" id="editStaffEmail">
-        </div>
-        <div class="mfield">
-            <label>Phone</label>
-            <input type="tel" id="editStaffPhone" maxlength="15">
-        </div>
-        <div class="mfield">
-            <label>Status</label>
-            <select id="editStaffActive">
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-            </select>
-        </div>
+            <div class="mfield">
+                <label>Full Name *</label>
+                <input type="text" id="editStaffName">
+            </div>
+            <div class="mfield">
+                <label>Email</label>
+                <input type="email" id="editStaffEmail">
+            </div>
+            <div class="mfield">
+                <label>Phone</label>
+                <input type="tel" id="editStaffPhone" maxlength="15">
+            </div>
+            <div class="mfield">
+                <label>Status</label>
+                <select id="editStaffActive">
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
 
-        <div class="modal-err" id="editErr"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="closeEditStaff">Cancel</button>
-            <button class="btn-save"   id="saveEditStaff">Save Changes</button>
-        </div>
-    </div>
-</div>
-
-
-<!-- ══════════════════ RESET PASSWORD MODAL ══════════════════ -->
-<div class="modal-overlay" id="resetPwdModal">
-    <div class="modal-box">
-        <h5><i class="bi bi-key"></i> Reset Password</h5>
-        <input type="hidden" id="resetPwdId">
-        <p style="font-size:0.88rem;color:#666;margin-bottom:14px;">
-            Resetting password for: <strong id="resetPwdName"></strong>
-        </p>
-
-        <div class="mfield">
-            <label>New Password *</label>
-            <div class="pwd-wrapper">
-                <input type="password" id="newPwd" placeholder="min 6 characters">
-                <i class="bi bi-eye pwd-toggle" onclick="togglePwd('newPwd', this)"></i>
+            <div class="modal-err" id="editErr"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="closeEditStaff">Cancel</button>
+                <button class="btn-save" id="saveEditStaff">Save Changes</button>
             </div>
         </div>
-        <div class="mfield">
-            <label>Confirm Password *</label>
-            <div class="pwd-wrapper">
-                <input type="password" id="confirmPwd" placeholder="re-enter password">
-                <i class="bi bi-eye pwd-toggle" onclick="togglePwd('confirmPwd', this)"></i>
+    </div>
+
+
+    <!-- ══════════════════ RESET PASSWORD MODAL ══════════════════ -->
+    <div class="modal-overlay" id="resetPwdModal">
+        <div class="modal-box">
+            <h5><i class="bi bi-key"></i> Reset Password</h5>
+            <input type="hidden" id="resetPwdId">
+            <p style="font-size:0.88rem;color:#666;margin-bottom:14px;">
+                Resetting password for: <strong id="resetPwdName"></strong>
+            </p>
+
+            <div class="mfield">
+                <label>New Password *</label>
+                <div class="pwd-wrapper">
+                    <input type="password" id="newPwd" placeholder="min 6 characters">
+                    <i class="bi bi-eye pwd-toggle" onclick="togglePwd('newPwd', this)"></i>
+                </div>
+            </div>
+            <div class="mfield">
+                <label>Confirm Password *</label>
+                <div class="pwd-wrapper">
+                    <input type="password" id="confirmPwd" placeholder="re-enter password">
+                    <i class="bi bi-eye pwd-toggle" onclick="togglePwd('confirmPwd', this)"></i>
+                </div>
+            </div>
+
+            <div class="modal-err" id="pwdErr"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="closeResetPwd">Cancel</button>
+                <button class="btn-save" id="saveResetPwd">Reset Password</button>
             </div>
         </div>
-
-        <div class="modal-err" id="pwdErr"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="closeResetPwd">Cancel</button>
-            <button class="btn-save"   id="saveResetPwd">Reset Password</button>
-        </div>
     </div>
-</div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const CSRF = '{{ csrf_token }}';
 
-<script>
-const CSRF = '{{ csrf_token }}';
-
-// ── Password toggle ──────────────────────────────────────
-function togglePwd(inputId, icon) {
-    const input = document.getElementById(inputId);
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.classList.replace('bi-eye', 'bi-eye-slash');
-    } else {
-        input.type = 'password';
-        icon.classList.replace('bi-eye-slash', 'bi-eye');
-    }
-}
-
-// ── Modal helpers ───────────────────────────────────────
-function openModal(id)  { document.getElementById(id).classList.add('active'); }
-function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
-// Close on overlay click
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', e => {
-        if (e.target === overlay) overlay.classList.remove('active');
-    });
-});
-
-function showErr(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent   = msg;
-    el.style.display = 'block';
-}
-function clearErr(id) { document.getElementById(id).style.display = 'none'; }
-
-
-// ── ADD STAFF ────────────────────────────────────────────
-document.getElementById('openAddStaff').addEventListener('click', () => {
-    ['addName','addPhone','addUsername','addEmail','addPassword'].forEach(id => document.getElementById(id).value = '');
-    clearErr('addErr');
-    openModal('addStaffModal');
-});
-document.getElementById('closeAddStaff').addEventListener('click', () => closeModal('addStaffModal'));
-
-document.getElementById('saveAddStaff').addEventListener('click', function () {
-    const name     = document.getElementById('addName').value.trim();
-    const phone    = document.getElementById('addPhone').value.trim();
-    const username = document.getElementById('addUsername').value.trim();
-    const email    = document.getElementById('addEmail').value.trim();
-    const password = document.getElementById('addPassword').value;
-
-    clearErr('addErr');
-    if (!name || !username || !password) { showErr('addErr', 'Name, username and password are required.'); return; }
-    if (password.length < 6)             { showErr('addErr', 'Password must be at least 6 characters.');  return; }
-
-    this.disabled = true; this.textContent = 'Adding...';
-
-    fetch("{% url 'doctor:add_staff' %}", {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-        body   : JSON.stringify({ name, phone, username, email, password }),
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) { location.reload(); }
-        else { showErr('addErr', data.error || 'Something went wrong.'); }
-    })
-    .catch(() => showErr('addErr', 'Network error. Please try again.'))
-    .finally(() => { this.disabled = false; this.textContent = 'Add Staff'; });
-});
-
-
-// ── EDIT STAFF ───────────────────────────────────────────
-document.querySelectorAll('.btn-edit-staff').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.getElementById('editStaffId').value    = this.dataset.id;
-        document.getElementById('editStaffName').value  = this.dataset.name;
-        document.getElementById('editStaffEmail').value = this.dataset.email;
-        document.getElementById('editStaffPhone').value = this.dataset.phone;
-        document.getElementById('editStaffActive').value = this.dataset.active;
-        clearErr('editErr');
-        openModal('editStaffModal');
-    });
-});
-document.getElementById('closeEditStaff').addEventListener('click', () => closeModal('editStaffModal'));
-
-document.getElementById('saveEditStaff').addEventListener('click', function () {
-    const id       = document.getElementById('editStaffId').value;
-    const name     = document.getElementById('editStaffName').value.trim();
-    const email    = document.getElementById('editStaffEmail').value.trim();
-    const phone    = document.getElementById('editStaffPhone').value.trim();
-    const is_active = document.getElementById('editStaffActive').value === 'true';
-
-    clearErr('editErr');
-    if (!name) { showErr('editErr', 'Name is required.'); return; }
-
-    this.disabled = true; this.textContent = 'Saving...';
-
-    fetch(`{% url 'doctor:edit_staff' 0 %}`.replace('/0/', `/${id}/`), {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-        body   : JSON.stringify({ name, email, phone, is_active }),
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) { location.reload(); }
-        else { showErr('editErr', data.error || 'Something went wrong.'); }
-    })
-    .catch(() => showErr('editErr', 'Network error. Please try again.'))
-    .finally(() => { this.disabled = false; this.textContent = 'Save Changes'; });
-});
-
-
-// ── RESET PASSWORD ───────────────────────────────────────
-document.querySelectorAll('.btn-reset-pwd').forEach(btn => {
-    btn.addEventListener('click', function () {
-        document.getElementById('resetPwdId').value  = this.dataset.id;
-        document.getElementById('resetPwdName').textContent = this.dataset.name;
-        document.getElementById('newPwd').value      = '';
-        document.getElementById('confirmPwd').value  = '';
-        clearErr('pwdErr');
-        openModal('resetPwdModal');
-    });
-});
-document.getElementById('closeResetPwd').addEventListener('click', () => closeModal('resetPwdModal'));
-
-document.getElementById('saveResetPwd').addEventListener('click', function () {
-    const id       = document.getElementById('resetPwdId').value;
-    const password = document.getElementById('newPwd').value;
-    const confirm  = document.getElementById('confirmPwd').value;
-
-    clearErr('pwdErr');
-    if (!password || password.length < 6) { showErr('pwdErr', 'Password must be at least 6 characters.'); return; }
-    if (password !== confirm)             { showErr('pwdErr', 'Passwords do not match.');                  return; }
-
-    this.disabled = true; this.textContent = 'Resetting...';
-
-    fetch(`{% url 'doctor:reset_staff_password' 0 %}`.replace('/0/', `/${id}/`), {
-        method : 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-        body   : JSON.stringify({ password }),
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            closeModal('resetPwdModal');
-            alert('Password reset successfully!');
-        } else {
-            showErr('pwdErr', data.error || 'Something went wrong.');
-        }
-    })
-    .catch(() => showErr('pwdErr', 'Network error. Please try again.'))
-    .finally(() => { this.disabled = false; this.textContent = 'Reset Password'; });
-});
-
-
-// ── DELETE STAFF ─────────────────────────────────────────
-document.querySelectorAll('.btn-delete-staff').forEach(btn => {
-    btn.addEventListener('click', function () {
-        const id   = this.dataset.id;
-        const name = this.dataset.name;
-
-        if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
-
-        fetch(`{% url 'doctor:delete_staff' 0 %}`.replace('/0/', `/${id}/`), {
-            method : 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById(`row-${id}`)?.remove();
-                // agar table empty ho jaye
-                const tbody = document.getElementById('staffTableBody');
-                if (tbody && tbody.querySelectorAll('tr').length === 0) location.reload();
+        // ── Password toggle ──────────────────────────────────────
+        function togglePwd(inputId, icon) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
             } else {
-                alert(data.error || 'Could not delete staff member.');
+                input.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
             }
-        })
-        .catch(() => alert('Network error. Please try again.'));
-    });
-});
-</script>
+        }
+
+        // ── Modal helpers ───────────────────────────────────────
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        // Close on overlay click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', e => {
+                if (e.target === overlay) overlay.classList.remove('active');
+            });
+        });
+
+        function showErr(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+        function clearErr(id) { document.getElementById(id).style.display = 'none'; }
+
+
+        // ── ADD STAFF ────────────────────────────────────────────
+        document.getElementById('openAddStaff').addEventListener('click', () => {
+            ['addName', 'addPhone', 'addUsername', 'addEmail', 'addPassword'].forEach(id => document.getElementById(id).value = '');
+            clearErr('addErr');
+            openModal('addStaffModal');
+        });
+        document.getElementById('closeAddStaff').addEventListener('click', () => closeModal('addStaffModal'));
+
+        document.getElementById('saveAddStaff').addEventListener('click', function () {
+            const name = document.getElementById('addName').value.trim();
+            const phone = document.getElementById('addPhone').value.trim();
+            const username = document.getElementById('addUsername').value.trim();
+            const email = document.getElementById('addEmail').value.trim();
+            const password = document.getElementById('addPassword').value;
+
+            clearErr('addErr');
+            if (!name || !username || !password) { showErr('addErr', 'Name, username and password are required.'); return; }
+            if (password.length < 6) { showErr('addErr', 'Password must be at least 6 characters.'); return; }
+
+            this.disabled = true; this.textContent = 'Adding...';
+
+            fetch("{% url 'doctor:add_staff' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ name, phone, username, email, password }),
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { location.reload(); }
+                    else { showErr('addErr', data.error || 'Something went wrong.'); }
+                })
+                .catch(() => showErr('addErr', 'Network error. Please try again.'))
+                .finally(() => { this.disabled = false; this.textContent = 'Add Staff'; });
+        });
+
+
+        // ── EDIT STAFF ───────────────────────────────────────────
+        document.querySelectorAll('.btn-edit-staff').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('editStaffId').value = this.dataset.id;
+                document.getElementById('editStaffName').value = this.dataset.name;
+                document.getElementById('editStaffEmail').value = this.dataset.email;
+                document.getElementById('editStaffPhone').value = this.dataset.phone;
+                document.getElementById('editStaffActive').value = this.dataset.active;
+                clearErr('editErr');
+                openModal('editStaffModal');
+            });
+        });
+        document.getElementById('closeEditStaff').addEventListener('click', () => closeModal('editStaffModal'));
+
+        document.getElementById('saveEditStaff').addEventListener('click', function () {
+            const id = document.getElementById('editStaffId').value;
+            const name = document.getElementById('editStaffName').value.trim();
+            const email = document.getElementById('editStaffEmail').value.trim();
+            const phone = document.getElementById('editStaffPhone').value.trim();
+            const is_active = document.getElementById('editStaffActive').value === 'true';
+
+            clearErr('editErr');
+            if (!name) { showErr('editErr', 'Name is required.'); return; }
+
+            this.disabled = true; this.textContent = 'Saving...';
+
+            fetch(`{% url 'doctor:edit_staff' 0 %}`.replace('/0/', `/${id}/`), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ name, email, phone, is_active }),
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) { location.reload(); }
+                    else { showErr('editErr', data.error || 'Something went wrong.'); }
+                })
+                .catch(() => showErr('editErr', 'Network error. Please try again.'))
+                .finally(() => { this.disabled = false; this.textContent = 'Save Changes'; });
+        });
+
+
+        // ── RESET PASSWORD ───────────────────────────────────────
+        document.querySelectorAll('.btn-reset-pwd').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.getElementById('resetPwdId').value = this.dataset.id;
+                document.getElementById('resetPwdName').textContent = this.dataset.name;
+                document.getElementById('newPwd').value = '';
+                document.getElementById('confirmPwd').value = '';
+                clearErr('pwdErr');
+                openModal('resetPwdModal');
+            });
+        });
+        document.getElementById('closeResetPwd').addEventListener('click', () => closeModal('resetPwdModal'));
+
+        document.getElementById('saveResetPwd').addEventListener('click', function () {
+            const id = document.getElementById('resetPwdId').value;
+            const password = document.getElementById('newPwd').value;
+            const confirm = document.getElementById('confirmPwd').value;
+
+            clearErr('pwdErr');
+            if (!password || password.length < 6) { showErr('pwdErr', 'Password must be at least 6 characters.'); return; }
+            if (password !== confirm) { showErr('pwdErr', 'Passwords do not match.'); return; }
+
+            this.disabled = true; this.textContent = 'Resetting...';
+
+            fetch(`{% url 'doctor:reset_staff_password' 0 %}`.replace('/0/', `/${id}/`), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ password }),
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        closeModal('resetPwdModal');
+                        alert('Password reset successfully!');
+                    } else {
+                        showErr('pwdErr', data.error || 'Something went wrong.');
+                    }
+                })
+                .catch(() => showErr('pwdErr', 'Network error. Please try again.'))
+                .finally(() => { this.disabled = false; this.textContent = 'Reset Password'; });
+        });
+
+
+        // ── DELETE STAFF ─────────────────────────────────────────
+        document.querySelectorAll('.btn-delete-staff').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+
+                const result = await Swal.fire({
+                    title: 'Delete Staff?',
+                    text: `Are you sure you want to delete "${name}"?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, Delete',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (!result.isConfirmed) return;
+
+                fetch(`{% url 'doctor:delete_staff' 0 %}`.replace('/0/', `/${id}/`), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById(`row-${id}`)?.remove();
+                            // agar table empty ho jaye
+                            const tbody = document.getElementById('staffTableBody');
+                            if (tbody && tbody.querySelectorAll('tr').length === 0) location.reload();
+                        } else {
+                            alert(data.error || 'Could not delete staff member.');
+                        }
+                    })
+                    .catch(() => alert('Network error. Please try again.'));
+            });
+        });
+    </script>
 </main>
 
 {% endblock %}

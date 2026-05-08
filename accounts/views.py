@@ -167,13 +167,15 @@ class SignupView(View):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
             phone = form.cleaned_data['phone']
             password = form.cleaned_data['password']
 
             user = User.objects.create_user(
                 username=phone,
                 password=password,
-                first_name=name
+                first_name=name,
+                email=email,
             )
 
             Patient.objects.create(
@@ -212,7 +214,7 @@ class LoginView(View):
 # --- LOGOUT VIEW (Optional but recommended) ---
 def logout_view(request):
     auth_logout(request)
-    return redirect('index')
+    return redirect('login')
 
 
 class ChangePasswordView(LoginRequiredMixin, View):
