@@ -9,6 +9,7 @@ from django.contrib import messages
 from decimal import Decimal
 from .models import Bill, BillItem
 from appointment.models import Visit, PrescriptionItem
+from doctor.models import ClinicSettings
 
 
 def generate_bill_from_visit(visit):
@@ -135,18 +136,6 @@ class BillListView(LoginRequiredMixin, View):
         ).order_by('-created_at')
 
         return render(request, 'billing/bill_list.html', {'bills': bills})
-
-
-from django.shortcuts import render, get_object_or_404
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import never_cache
-
-from appointment.models import Visit
-from .models import Bill
-from doctor.models import ClinicSettings
-
 
 @method_decorator(never_cache, name='dispatch')
 class PrintBillView(LoginRequiredMixin, View):
