@@ -20,7 +20,7 @@
     {% if messages %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {% for message in messages %}
-            <i class="bi bi-check-circle me-2"></i>{{ message }}
+        <i class="bi bi-check-circle me-2"></i>{{ message }}
         {% endfor %}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -32,14 +32,15 @@
             <span class="input-group-text bg-white border-end-0">
                 <i class="bi bi-search text-muted"></i>
             </span>
-            <input type="text" class="form-control border-start-0 search-input ps-0"
-                id="searchInput" placeholder="Search by vendor name, phone or email...">
+            <input type="text" class="form-control border-start-0 search-input ps-0" id="searchInput"
+                placeholder="Search by vendor name, phone or email...">
         </div>
     </div>
 
     <!-- Table Section -->
     <div class="table-section">
-        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+        <div id="tableContainer"
+            style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
             <table class="table table-custom" style="min-width: 900px; width: 100%;">
                 <thead>
                     <tr>
@@ -53,12 +54,15 @@
                 </thead>
                 <tbody id="tableBody">
                     {% for vendor in vendors %}
-                    <tr class="vendor-row" data-vendor-name="{{ vendor.name|lower }}" data-vendor-phone="{{ vendor.phone|default:''|lower }}" data-vendor-email="{{ vendor.email|default:''|lower }}">
+                    <tr class="vendor-row" data-vendor-name="{{ vendor.name|lower }}"
+                        data-vendor-phone="{{ vendor.phone|default:''|lower }}"
+                        data-vendor-email="{{ vendor.email|default:''|lower }}">
                         <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
-                        
+
                         <td class="patient-name">
                             <div class="d-flex align-items-center">
-                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
+                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                                    style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
                                     {{ vendor.name|first|upper }}
                                 </div>
                                 <span class="fw-semibold">{{ vendor.name }}</span>
@@ -67,31 +71,31 @@
 
                         <td class="patient-info">
                             {% if vendor.phone %}
-                                <a href="tel:{{ vendor.phone }}" class="text-decoration-none text-dark">
-                                    <i class="bi bi-telephone me-1" style="color: #0066cc;"></i>{{ vendor.phone }}
-                                </a>
+                            <a href="tel:{{ vendor.phone }}" class="text-decoration-none text-dark">
+                                <i class="bi bi-telephone me-1" style="color: #0066cc;"></i>{{ vendor.phone }}
+                            </a>
                             {% else %}
-                                <span class="text-muted">—</span>
+                            <span class="text-muted">—</span>
                             {% endif %}
                         </td>
 
                         <td class="patient-info">
                             {% if vendor.email %}
-                                <a href="mailto:{{ vendor.email }}" class="text-decoration-none text-dark">
-                                    <i class="bi bi-envelope me-1" style="color: #0066cc;"></i>{{ vendor.email }}
-                                </a>
+                            <a href="mailto:{{ vendor.email }}" class="text-decoration-none text-dark">
+                                <i class="bi bi-envelope me-1" style="color: #0066cc;"></i>{{ vendor.email }}
+                            </a>
                             {% else %}
-                                <span class="text-muted">—</span>
+                            <span class="text-muted">—</span>
                             {% endif %}
                         </td>
 
                         <td class="patient-info">
                             {% if vendor.address %}
-                                <div class="text-truncate" title="{{ vendor.address }}" style="max-width: 200px;">
-                                    <i class="bi bi-geo-alt me-1" style="color: #28a745;"></i>{{ vendor.address|truncatewords:6 }}
-                                </div>
+                            <div class="text-truncate" title="{{ vendor.address }}" style="max-width: 200px;">
+                                <i class="bi bi-geo-alt me-1" style="color: #28a745;"></i>{{ vendor.address|truncatewords:6 }}
+                            </div>
                             {% else %}
-                                <span class="text-muted">—</span>
+                            <span class="text-muted">—</span>
                             {% endif %}
                         </td>
 
@@ -101,12 +105,11 @@
                                     class="action-btn btn btn-warning btn-sm" title="Edit Vendor">
                                     <i class="bi bi-pencil"></i> Edit
                                 </a>
-                                <form method="post"
-                                    action="{% url 'medicine:delete_vendor' vendor.pk %}"
-                                    style="display:inline;"
-                                    onsubmit="return confirm('Are you sure you want to delete {{ vendor.name }}?')">
+                                <form method="post" action="{% url 'medicine:delete_vendor' vendor.pk %}"
+                                    style="display:inline;" onsubmit="return confirmDelete(event, '{{ vendor.name }}')">
                                     {% csrf_token %}
-                                    <button type="submit" class="action-btn btn btn-danger btn-sm" title="Delete Vendor">
+                                    <button type="submit" class="action-btn btn btn-danger btn-sm"
+                                        title="Delete Vendor">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
                                 </form>
@@ -140,7 +143,7 @@
     const searchInput = document.getElementById('searchInput');
     const vendorRows = document.querySelectorAll('.vendor-row');
 
-    searchInput.addEventListener('input', function() {
+    searchInput.addEventListener('input', function () {
         const searchValue = this.value.toLowerCase().trim();
 
         vendorRows.forEach(row => {
@@ -159,7 +162,7 @@
         const visibleRows = Array.from(vendorRows).filter(row => row.style.display !== 'none');
         const tbody = document.querySelector('#tableBody');
         let emptyState = tbody.querySelector('.empty-state');
-        
+
         if (visibleRows.length === 0 && !emptyState) {
             const emptyRow = document.createElement('tr');
             emptyRow.classList.add('empty-state-row');
@@ -178,5 +181,27 @@
         }
     });
 </script>
+<script>
+    async function confirmDelete(event, vendorName) {
+        event.preventDefault();
 
+        const result = await Swal.fire({
+            title: 'Delete Vendor?',
+            text: `Are you sure you want to delete ${vendorName}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            event.target.submit();
+        }
+
+        return false;
+    }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}

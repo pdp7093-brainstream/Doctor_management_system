@@ -73,10 +73,11 @@
 
                 <!-- Form Actions -->
                 <div class="patient-form-actions">
-                    <button type="submit" class="patient-submit-btn">
+                    <a href="{% url 'medicine:vendor_list' %}"><button type="submit" class="patient-submit-btn me-2">
                         <i class="bi bi-check2-circle"></i>
                         <span>Add Vendor</span>
-                    </button>
+                    </button></a>
+                    
                     <a href="{% url 'medicine:vendor_list' %}" class="btn btn-outline-secondary" style="border-radius: 8px; padding: 10px 20px; font-weight: 600;">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </a>

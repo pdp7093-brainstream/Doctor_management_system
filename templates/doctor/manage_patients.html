@@ -19,14 +19,10 @@
     <!-- ✅ Search Bar Improved -->
     <div class="search-container mb-3">
         <div class="search-box" style="position:relative;max-width:400px;">
-            <i class="bi bi-search" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);color:#999;"></i>
-            <input 
-                type="text" 
-                class="form-control ps-5" 
-                id="searchInput" 
-                placeholder="Search by name, phone..."
-                style="border-radius:30px;padding:10px 15px 10px 40px;"
-            >
+            <i class="bi bi-search"
+                style="position:absolute;top:50%;left:12px;transform:translateY(-50%);color:#999;"></i>
+            <input type="text" class="form-control ps-5" id="searchInput" placeholder="Search by name, phone..."
+                style="border-radius:30px;padding:10px 15px 10px 40px;">
         </div>
     </div>
 
@@ -48,7 +44,7 @@
                     <td>
                         {{ p.name }}
                         {% if p.type == 'family' %}
-                            <small class="text-muted">(Family)</small>
+                        <small class="text-muted">(Family)</small>
                         {% endif %}
                     </td>
 
@@ -57,20 +53,17 @@
 
                     <td>
                         <!--VIEW -->
-                        <a href="{% url 'doctor:view_patient' p.type p.id %}" 
-                           class="btn btn-sm btn-primary">
+                        <a href="{% url 'doctor:view_patient' p.type p.id %}" class="btn btn-sm btn-primary">
                             <i class="bi bi-eye"></i>
                         </a>
 
                         <!-- EDIT -->
                         {% if p.type == 'main' %}
-                        <a href="{% url 'doctor:edit_patient' p.id %}" 
-                           class="btn btn-sm btn-warning">
+                        <a href="{% url 'doctor:edit_patient' p.id %}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i>
                         </a>
                         {% else %}
-                        <a href="{% url 'doctor:edit_family' p.id %}" 
-                           class="btn btn-sm btn-warning">
+                        <a href="{% url 'doctor:edit_family' p.id %}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i>
                         </a>
                         {% endif %}
@@ -79,16 +72,14 @@
                         {% if p.type == 'main' %}
                         <form method="post" action="{% url 'doctor:delete_patient' p.id %}" style="display:inline;">
                             {% csrf_token %}
-                            <button class="btn btn-sm btn-danger"
-                                onclick="return confirm('Delete this patient?');">
+                            <button type="button" class="btn btn-sm btn-danger delete-btn" data-type="patient">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
                         {% else %}
                         <form method="post" action="{% url 'doctor:delete_family' p.id %}" style="display:inline;">
                             {% csrf_token %}
-                            <button class="btn btn-sm btn-danger"
-                                onclick="return confirm('Delete this family member?');">
+                            <button type="button" class="btn btn-sm btn-danger delete-btn" data-type="family member">
                                 <i class="bi bi-trash"></i>
                             </button>
                         </form>
@@ -109,13 +100,82 @@
 
 <!-- ✅ Search Script -->
 <script>
-document.getElementById('searchInput').addEventListener('input', function () {
-    const query = this.value.toLowerCase();
+    document.getElementById('searchInput').addEventListener('input', function () {
+        const query = this.value.toLowerCase();
 
-    document.querySelectorAll('#tableBody tr').forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
     });
-});
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+
+    // ✅ Search
+    document.getElementById('searchInput').addEventListener('input', function () {
+
+        const query = this.value.toLowerCase();
+
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
+        });
+
+    });
+
+
+    // ✅ SweetAlert Delete Confirmation
+    document.querySelectorAll('.delete-btn').forEach(button => {
+
+        button.addEventListener('click', function () {
+
+            const form = this.closest('form');
+            const type = this.dataset.type;
+
+            Swal.fire({
+                title: 'Delete Confirmation',
+                text: `Are you sure you want to delete this ${type}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#007aff',
+                cancelButtonColor: '#dc3545',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                backdrop: `
+                    rgba(0,0,0,0.45)
+                `,
+                customClass: {
+                    popup: 'rounded-4 shadow-lg',
+                    confirmButton: 'px-4 py-2',
+                    cancelButton: 'px-4 py-2'
+                }
+
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    Swal.fire({
+                        title: 'Deleting...',
+                        html: 'Please wait ',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    setTimeout(() => {
+                        form.submit();
+                    }, 1200);
+
+                }
+
+            });
+
+        });
+
+    });
+
+</script>
 {% endblock %}

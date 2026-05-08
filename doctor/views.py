@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User 
 from django.views.decorators.cache import never_cache
@@ -50,8 +50,8 @@ def login_view(request):
 
 # Logout 
 def logout_view(request):
-     logout(request)
-     return redirect('doctor:login')
+    auth_logout(request)
+    return render(request,'doctor/login.html')
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class DashboardView(View):

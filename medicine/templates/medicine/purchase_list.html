@@ -20,7 +20,7 @@
     {% if messages %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         {% for message in messages %}
-            <i class="bi bi-check-circle me-2"></i>{{ message }}
+        <i class="bi bi-check-circle me-2"></i>{{ message }}
         {% endfor %}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
@@ -49,8 +49,8 @@
         <div class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label class="form-label fw-semibold">Search</label>
-                <input type="text" id="purchaseSearch" class="form-control"
-                    placeholder="Vendor or medicine name..." value="{{ search }}">
+                <input type="text" id="purchaseSearch" class="form-control" placeholder="Vendor or medicine name..."
+                    value="{{ search }}">
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Date</label>
@@ -73,7 +73,8 @@
 
     <!-- Table Section -->
     <div class="table-section">
-        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+        <div id="tableContainer"
+            style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
             <table class="table table-custom" style="min-width: 950px; width: 100%;">
                 <thead>
                     <tr>
@@ -90,10 +91,11 @@
                     {% for purchase in purchases %}
                     <tr class="purchase-row">
                         <td class="patient-info fw-semibold">{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                        
+
                         <td class="patient-name">
                             <div class="d-flex align-items-center">
-                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
+                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                                    style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
                                     {{ purchase.vendor.name|first|upper }}
                                 </div>
                                 <span class="fw-semibold">{{ purchase.vendor.name }}</span>
@@ -111,13 +113,13 @@
                             </span>
                             <div class="text-muted small mt-1">
                                 {% for item in purchase.items.all %}
-                                    <div>
-                                        {{ item.medicine_variant.medicine.name }} -
-                                        {{ item.quantity_strips }} strip{{ item.quantity_strips|pluralize }} -
-                                        ₹{{ item.final_amount|floatformat:2 }}
-                                    </div>
+                                <div>
+                                    {{ item.medicine_variant.medicine.name }} -
+                                    {{ item.quantity_strips }} strip{{ item.quantity_strips|pluralize }} -
+                                    ₹{{ item.final_amount|floatformat:2 }}
+                                </div>
                                 {% empty %}
-                                    No items added
+                                No items added
                                 {% endfor %}
                             </div>
                         </td>
@@ -130,11 +132,11 @@
 
                         <td>
                             {% if purchase.status == "received" %}
-                                <span class="badge bg-success">Received</span>
+                            <span class="badge bg-success">Received</span>
                             {% elif purchase.status == "ordered" %}
-                                <span class="badge bg-warning text-dark">Ordered</span>
+                            <span class="badge bg-warning text-dark">Ordered</span>
                             {% else %}
-                                <span class="badge bg-secondary">{{ purchase.status|default:"Draft"|capfirst }}</span>
+                            <span class="badge bg-secondary">{{ purchase.status|default:"Draft"|capfirst }}</span>
                             {% endif %}
                         </td>
 
@@ -142,16 +144,18 @@
                             <div class="action-buttons justify-content-center">
                                 <a href="{% url 'medicine:purchase_detail' purchase.pk %}"
                                     class="action-btn btn btn-primary btn-sm" title="View Details">
-                                    <i class="bi bi-eye"></i> 
+                                    <i class="bi bi-eye"></i> View
                                 </a>
-                                <form method="post"
-                                    action="{% url 'medicine:delete_purchase' purchase.pk %}"
-                                    style="display:inline;"
-                                    onsubmit="return confirm('Delete this purchase order?')">
+                                <form method="post" action="{% url 'medicine:delete_purchase' purchase.pk %}"
+                                    style="display:inline;" class="deletePurchaseForm">
+
                                     {% csrf_token %}
-                                    <button type="submit" class="action-btn btn btn-danger btn-sm" title="Delete Purchase">
-                                        <i class="bi bi-trash"></i>
+
+                                    <button type="submit" class="action-btn btn btn-danger btn-sm"
+                                        title="Delete Purchase">
+                                        <i class="bi bi-trash"></i> Delete
                                     </button>
+
                                 </form>
                             </div>
                         </td>
@@ -275,7 +279,76 @@
         fetchPurchases(1);
     });
 
+    function bindDeleteButtons() {
+        document.querySelectorAll('.deletePurchaseForm').forEach(form => {
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Delete Purchase?',
+                    text: "This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Delete',
+                    cancelButtonText: 'Cancel',
+                    borderRadius: '12px'
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+
+                });
+            });
+
+        });
+    }
+
     bindPaginationLinks();
+    bindDeleteButtons();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function bindDeleteButtons() {
+
+        document.querySelectorAll('.deletePurchaseForm').forEach(form => {
+
+            form.addEventListener('submit', function (e) {
+
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Delete Purchase?',
+                    text: "This action cannot be undone.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, Delete',
+                    cancelButtonText: 'Cancel',
+                    borderRadius: '12px'
+                }).then((result) => {
+
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+
+                });
+
+            });
+
+        });
+
+    }
+
+    bindDeleteButtons();
 </script>
 
 {% endblock %}
