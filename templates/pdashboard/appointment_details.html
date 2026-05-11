@@ -45,13 +45,13 @@
                         {% elif appointment.status == 'completed' %}
                             <span class="status-badge status-completed">Completed</span>
                         {% else %}
-                            <span class="status-badge status-pending">Pending</span>
+                            <span    class="status-badge status-pending">Pending</span>
                         {% endif %}
                     </div>
                 </div>
                 <div class="info-box">
                     <div class="label">Booked On</div>
-                    <div class="value">{{ appointment.create_at|date:"d M Y, h:i A" }}</div>
+                    <div class="value">{{ appointment.appointment_date|date:"d M-Y" }}</div>
                 </div>
             </div>
             {% if appointment.notes %}
@@ -162,7 +162,7 @@
                     <div class="label">Doctor Name</div>
                     <div class="value">
                         {% if appointment.doctor and appointment.doctor.user %}
-                            Dr. {{ appointment.doctor.user.first_name }} {{ appointment.doctor.user.last_name }}
+                            Dr. {{ appointment.doctor.user.username }} {{ appointment.doctor.user.last_name }}
                         {% else %}
                             <span style="color:var(--muted);">Not assigned yet</span>
                         {% endif %}

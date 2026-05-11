@@ -175,10 +175,10 @@ parentSelect.addEventListener('change', function () {
     // Mode hint + button text
     if (isFamilyMember) {
         const parentName = this.options[this.selectedIndex].text;
-        modeText.innerHTML = `<i class="bi bi-info-circle"></i> Parent selected — this person will be added as a <strong>family member</strong> of <strong>${parentName}</strong>. No separate login will be created.`;
+        modeText.innerHTML = ` Parent selected — this person will be added as a <strong>family member</strong> of <strong>${parentName}</strong>. No separate login will be created.`;
         submitText.textContent = 'Save Family Member';
     } else {
-        modeText.innerHTML = `<i class="bi bi-info-circle"></i> No parent selected — this person will be added as a <strong>main patient</strong> with their own login.`;
+        modeText.innerHTML = ` No parent selected — this person will be added as a <strong>main patient</strong> with their own login.`;
         submitText.textContent = 'Save Patient';
     }
 });
