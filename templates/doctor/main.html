@@ -79,7 +79,12 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
+                {% if clinic.logo %}
                 <img src="{{clinic.logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                {% else %}
+                <img src="/static/images/default-logo.png" alt="Default Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+
+                {% endif %}
             </div>
             <h2 class="sidebar-title">{{clinic.clinic_name}}</h2>
         </div>

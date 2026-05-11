@@ -3,12 +3,10 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
-from django.http import HttpResponse
-from django.template.loader import render_to_string
 from django.contrib import messages
 from decimal import Decimal
 from .models import Bill, BillItem
-from appointment.models import Visit, PrescriptionItem
+from appointment.models import Visit
 from doctor.models import ClinicSettings
 
 

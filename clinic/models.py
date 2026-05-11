@@ -1,6 +1,5 @@
 from django.db import models
 
-
 class ClinicSettings(models.Model):
 
     SLOT_DURATION_CHOICES = [
