@@ -53,7 +53,7 @@ def logout_view(request):
     auth_logout(request)
     return render(request,'doctor/login.html')
 
-@method_decorator(login_required(login_url='login'), name='dispatch')
+@method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class DashboardView(View):
     def get(self, request):
         doctor = InnerMember.objects.get(user=request.user)
