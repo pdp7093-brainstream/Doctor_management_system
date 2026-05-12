@@ -3,7 +3,7 @@
   <div class="branding d-flex align-items-center">
 
     <div class="container position-relative d-flex align-items-center justify-content-between">
-      <a href="#" class="logo d-flex align-items-center">
+      <a href="{% url 'index' %}" class="logo d-flex align-items-center">
         {% if clinic.logo %}
           <img src="{{ clinic.logo.url }}" alt="Clinic Logo" style="width:5rem;height:5rem;border-radius:50%;object-fit:cover;">
         {% else %}

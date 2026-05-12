@@ -1,4 +1,4 @@
-  {% load static %}
+{% load static %}
   <!DOCTYPE html>
   <html lang="en">
 
@@ -496,14 +496,15 @@
                 btn.innerText = slot;
                 btn.dataset.time = slot;
 
-                btn.onclick = function () {
+                btn.onclick = function (e) {
+                  e.preventDefault();
                   document.querySelectorAll('.time-btn').forEach(b => {
                     b.classList.remove('btn-primary');
                     b.classList.add('btn-outline-primary');
                   });
                   btn.classList.remove('btn-outline-primary');
                   btn.classList.add('btn-primary');
-                  hiddenTime.value = displayTime;
+                  hiddenTime.value = slot;  // FIX: Use 'slot' instead of undefined 'displayTime'
                 };
 
                 col.appendChild(btn);

@@ -30,7 +30,6 @@
 
         .auth-header {
             background: #4183ff;
-            /* Purple color from image */
             color: white;
             padding: 40px 20px;
             text-align: center;
@@ -63,6 +62,11 @@
             margin-bottom: 15px;
         }
 
+        .form-control:focus {
+            border-color: #4183ff;
+            box-shadow: 0 0 0 3px rgba(65, 131, 255, 0.1);
+        }
+
         .btn-login {
             background: #0f62fb;
             color: white;
@@ -78,16 +82,6 @@
         .btn-login:hover {
             background: #1b90e3;
             color: rgb(196, 207, 215);
-        }
-
-        .forgot-link {
-            display: block;
-            text-align: right;
-            font-size: 0.8rem;
-            color: #4183ff;
-            text-decoration: none;
-            font-weight: 600;
-            margin-bottom: 20px;
         }
 
         .auth-footer {
@@ -116,41 +110,85 @@
             text-decoration: underline;
             color: #1b90e3;
         }
+
+        .error-message {
+            background: #fee;
+            border-left: 4px solid #c33;
+            color: #c33;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .helper-text {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 4px;
+            display: block;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="auth-card">
-        <!-- Purple Header Section -->
+        <!-- Header Section -->
         <div class="auth-header">
             <h2>Welcome Back</h2>
             <p>Login to your clinic account</p>
         </div>
 
         <div class="auth-body">
+            <!-- Error Message -->
             {% if error %}
-            <div class="alert alert-danger py-2 text-center" style="font-size: 0.8rem;">
-                {{ error }}
+            <div class="error-message">
+                <strong>Login Failed:</strong> {{ error }}
             </div>
             {% endif %}
 
-            <form method="POST" action="{% url 'login' %}">
+            <form method="POST" action="{% url 'login' %}" novalidate>
                 {% csrf_token %}
 
-                <div class="mb-1">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" name="phone" class="form-control" placeholder="+91 0987654321" required>
+                <!-- Phone Number Field -->
+                <div class="mb-3">
+                    <label class="form-label" for="phone">Phone Number</label>
+                    <input 
+                        type="tel" 
+                        id="phone"
+                        name="phone" 
+                        class="form-control" 
+                        placeholder="9876543210"
+                        pattern="[0-9\s\-\+\(\)]+"
+                        title="Enter a valid phone number (10-15 digits)"
+                        required
+                        autocomplete="tel"
+                    >
+                    <span class="helper-text">
+                        Format: 9876543210 or +919876543210 or (98) 7654-3210
+                    </span>
                 </div>
 
-                <div class="mb-1">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+                <!-- Password Field -->
+                <div class="mb-3">
+                    <label class="form-label" for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        name="password" 
+                        class="form-control" 
+                        placeholder="Enter your password"
+                        required
+                        autocomplete="current-password"
+                    >
                 </div>
 
-                <!-- <a href="{% url 'resetpass' %}" class="forgot-link">Forgot Password?</a> -->
+                <!-- Login Button -->
+                <button type="submit" class="btn btn-login shadow-sm">
+                    Login
+                </button>
 
-                <button type="submit" class="btn btn-login shadow-sm">Login</button>
+                <!-- Sign Up Link -->
                 <p class="text-center mt-3 mb-0" style="font-size: 0.9rem;">
                     Not registered?
                     <a href="{% url 'signup' %}" class="signup-link">Sign Up</a>
@@ -158,7 +196,7 @@
             </form>
         </div>
 
-        <!-- Footer Section (Contact Admin) -->
+        <!-- Footer Section -->
         <div class="auth-footer">
             If you are Doctor, <a href="{% url 'doctor:login' %}">Login</a> here
         </div>
