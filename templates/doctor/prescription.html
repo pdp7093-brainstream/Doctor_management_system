@@ -325,16 +325,6 @@
                                     <input type="number" id="modal_days" value="7" min="1" class="form-control fw-bold">
                                 </div>
                             </div>
-
-                            <!--  Toggle in Modal — naye items ke liye default ON -->
-                            <div class="col-12">
-                                <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 border">
-                                    <label class="toggle-switch mb-0">
-                                        <input type="checkbox" id="modal_should_deduct" checked>
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -520,7 +510,6 @@
             document.getElementById('modal_afternoon').value = 0;
             document.getElementById('modal_night').value = 0;
             document.getElementById('modal_days').value = 7;
-            document.getElementById('modal_should_deduct').checked = true; // ✅ default ON
         }
 
         // ---- Search ----
@@ -584,9 +573,6 @@
         }
 
         // ✅ Row index tracker — existing items se start hoga
-        // Jab page load hota hai, existing items already rendered hain with forloop.counter0
-        // Naye rows ke liye hum existing count ke baad se index assign karte hain
-
         function getNextIndex() {
             // Sabse bade index value ko find karo existing checkboxes se
             let max = -1;
@@ -610,8 +596,8 @@
                 ? 'bg-info-subtle text-info'
                 : 'bg-warning-subtle text-warning';
 
-            // ✅ Toggle value from modal
-            const shouldDeduct = document.getElementById('modal_should_deduct').checked;
+            // ✅ FIX: Default to true since toggle is removed
+            const shouldDeduct = true;
             const rowIndex = getNextIndex();
 
             const row = `

@@ -63,7 +63,6 @@
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>Patient</th>
-                                <th>Doctor</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -84,16 +83,6 @@
                                     {% else %}
                                         {{ appointment.patient.user.first_name }}
                                         {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
-                                    {% endif %}
-                                </td>
-
-                                <!-- Doctor -->
-                                <td>
-                                    {% if appointment.doctor and appointment.doctor.user %}
-                                        Dr. {{ appointment.doctor.user.first_name }}
-                                        {% if appointment.doctor.user.last_name %} {{ appointment.doctor.user.last_name }}{% endif %}
-                                    {% else %}
-                                        <span style="color:var(--muted);font-size:0.85rem;">Not assigned</span>
                                     {% endif %}
                                 </td>
 
