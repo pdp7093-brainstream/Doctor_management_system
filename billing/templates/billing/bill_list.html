@@ -4,16 +4,98 @@
 
 <main class="main-content" id="mainContent">
 
-    <div class="page-header d-flex justify-content-between align-items-center">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h2 class="page-title mb-1">Billing</h2>
-            <p class="text-muted small mb-0">All patient bills</p>
+            <h2 class="page-title mb-1">
+                <i class="bi bi-receipt-cutoff text-primary me-2"></i>Billing
+            </h2>
+            <p class="text-muted small mb-0">Manage all patient bills & invoices</p>
         </div>
     </div>
 
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div class="text-primary fw-bold" style="font-size:1.8rem;">
+                    {{ bills.paginator.count }}
+                </div>
+                <div class="text-muted small">Total Bills</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div class="text-success fw-bold" style="font-size:1.8rem;">
+                    {{ bills.paginator.count }}
+                </div>
+                <div class="text-muted small">This Month</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div class="text-danger fw-bold" style="font-size:1.8rem;" id="unpaidCount">
+                    {{unpaid_count}}
+                </div>
+                <div class="text-muted small">Unpaid</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div class="text-warning fw-bold" style="font-size:1.8rem;" id="partialCount">
+                    {{partial_count}}
+                </div>
+                <div class="text-muted small">Partial</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="table-section mb-4">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-search me-1 text-primary"></i>Search
+                </label>
+                <input type="text" id="search" class="form-control"
+                    placeholder="Patient name or bill number..."
+                    value="{{ search }}">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-calendar3 me-1 text-primary"></i>Date
+                </label>
+                <input type="date" id="billDate" class="form-control"
+                    value="{{ bill_date }}">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">
+                    <i class="bi bi-funnel me-1 text-primary"></i>Status
+                </label>
+                <select id="paymentStatus" class="form-select">
+                    <option value="all"     {% if payment_status == 'all'     %}selected{% endif %}>All Status</option>
+                    <option value="unpaid"  {% if payment_status == 'unpaid'  %}selected{% endif %}>Unpaid</option>
+                    <option value="paid"    {% if payment_status == 'paid'    %}selected{% endif %}>Paid</option>
+                    <option value="partial" {% if payment_status == 'partial' %}selected{% endif %}>Partial</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button id="clearBtn" class="btn btn-outline-secondary w-100">
+                    <i class="bi bi-x-circle me-1"></i>Clear
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Table -->
     <div class="table-section">
-        <div style="overflow-x:auto;">
-            <table class="table table-custom">
+        <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            <table class="table table-custom" style="min-width:800px;">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -23,59 +105,203 @@
                         <th>Total</th>
                         <th>Method</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th class="text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tableBody">
                     {% for bill in bills %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td class="fw-semibold">{{ bill.bill_number }}</td>
-                        <td class="patient-name">
-                            {{ bill.visit.patient.user.get_full_name }}
+                        <td class="text-muted fw-semibold">
+                            {{ forloop.counter }}
                         </td>
-                        <td class="patient-info">{{ bill.bill_date }}</td>
-                        <td class="fw-bold" style="color:#198754;">
-                            ₹{{ bill.total }}
+                        <td>
+                            <span class="badge bg-light text-dark border fw-bold px-3 py-2">
+                                <i class="bi bi-hash text-primary"></i>{{ bill.bill_number }}
+                            </span>
+                        </td>
+                        <td class="patient-name">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
+                                    style="width:34px; height:34px; font-size:0.85rem; flex-shrink:0;">
+                                    {{ bill.visit.patient.user.get_full_name|first|upper }}
+                                </div>
+                                <span class="fw-semibold">
+                                    {{ bill.visit.patient.user.get_full_name }}
+                                </span>
+                            </div>
                         </td>
                         <td class="patient-info">
+                            <i class="bi bi-calendar3 me-1 text-muted"></i>
+                            {{ bill.bill_date|date:"d M, Y" }}
+                        </td>
+                        <td>
+                            <span class="fw-bold text-success" style="font-size:1rem;">
+                                ₹{{ bill.total|floatformat:2 }}
+                            </span>
+                        </td>
+                        <td class="patient-info">
+                            {% if bill.payment_method == 'cash' %}
+                                <i class="bi bi-cash me-1 text-success"></i>
+                            {% elif bill.payment_method == 'card' %}
+                                <i class="bi bi-credit-card me-1 text-primary"></i>
+                            {% elif bill.payment_method == 'upi' %}
+                                <i class="bi bi-phone me-1 text-info"></i>
+                            {% else %}
+                                <i class="bi bi-globe me-1 text-warning"></i>
+                            {% endif %}
                             {{ bill.get_payment_method_display }}
                         </td>
                         <td>
-                            <span class="badge
-                                {% if bill.payment_status == 'paid' %}bg-success
-                                {% elif bill.payment_status == 'partial' %}bg-warning text-dark
-                                {% else %}bg-danger{% endif %}">
-                                {{ bill.get_payment_status_display }}
-                            </span>
+                            {% if bill.payment_status == 'paid' %}
+                                <span class="badge bg-success rounded-pill px-3">
+                                    <i class="bi bi-check-circle me-1"></i>Paid
+                                </span>
+                            {% elif bill.payment_status == 'partial' %}
+                                <span class="badge bg-warning text-dark rounded-pill px-3">
+                                    <i class="bi bi-clock me-1"></i>Partial
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger rounded-pill px-3">
+                                    <i class="bi bi-x-circle me-1"></i>Unpaid
+                                </span>
+                            {% endif %}
                         </td>
                         <td>
-                            <div class="action-buttons">
+                            <div class="action-buttons justify-content-center">
                                 <a href="{% url 'billing:bill_detail' bill.visit.id %}"
-                                    class="action-btn btn btn-primary btn-sm">
-                                    <i class="bi bi-eye"></i> View
+                                    class="action-btn btn btn-primary btn-sm"
+                                    title="View Bill">
+                                    <i class="bi bi-eye"></i>
                                 </a>
                                 <a href="{% url 'billing:print_bill' bill.visit.id %}"
                                     target="_blank"
-                                    class="action-btn btn btn-success btn-sm">
-                                    <i class="bi bi-printer"></i> Print
+                                    class="action-btn btn btn-success btn-sm"
+                                    title="Print Bill">
+                                    <i class="bi bi-printer"></i>
                                 </a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="8" class="text-center text-muted py-5">
-                            <i class="bi bi-receipt d-block mb-2"
-                                style="font-size:2rem; opacity:0.3;"></i>
-                            No bills yet
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="bi bi-receipt d-block mb-3"
+                                style="font-size:3rem; opacity:0.2;"></i>
+                            <p class="mb-0 fw-semibold">No bills found</p>
+                            <small>Try adjusting your filters</small>
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer">
+            <div id="paginationWrapper"
+                class="d-flex justify-content-center mt-3">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link"
+                            data-page="{{ page_obj.previous_page_number }}"
+                            href="#">
+                            <i class="bi bi-chevron-left"></i> Prev
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="page-item active">
+                        <span class="page-link">
+                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                        </span>
+                    </li>
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link pagination-link"
+                            data-page="{{ page_obj.next_page_number }}"
+                            href="#">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
     </div>
 
 </main>
+
+<script>
+    const searchInput  = document.getElementById('search');
+    const dateInput    = document.getElementById('billDate');
+    const statusInput  = document.getElementById('paymentStatus');
+    const clearBtn     = document.getElementById('clearBtn');
+
+    let debounceTimer;
+
+    function fetchBills(page = 1) {
+        const params = new URLSearchParams({
+            search:         searchInput.value,
+            bill_date:      dateInput.value,
+            payment_status: statusInput.value,
+            page:           page,
+        });
+
+        fetch(`/billing/?${params.toString()}`, {
+            headers: { 'x-requested-with': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc    = parser.parseFromString(html, 'text/html');
+
+            const newTbody = doc.querySelector('#tableBody');
+            const oldTbody = document.querySelector('#tableBody');
+            if (newTbody && oldTbody) oldTbody.replaceWith(newTbody);
+
+            const newPagination = doc.querySelector('#paginationWrapper');
+            const oldPagination = document.querySelector('#paginationWrapper');
+            if (newPagination && oldPagination) {
+                oldPagination.replaceWith(newPagination);
+            } else if (newPagination) {
+                document.getElementById('paginationContainer')
+                    .appendChild(newPagination);
+            }
+
+            bindPaginationLinks();
+        })
+        .catch(err => console.error('Fetch error:', err));
+    }
+
+    function bindPaginationLinks() {
+        document.querySelectorAll('.pagination-link').forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                fetchBills(parseInt(this.getAttribute('data-page')));
+            });
+        });
+    }
+
+    function debounce(fn, delay = 350) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fn, delay);
+    }
+
+    searchInput.addEventListener('input',  () => debounce(() => fetchBills(1)));
+    dateInput.addEventListener('change',   () => fetchBills(1));
+    statusInput.addEventListener('change', () => fetchBills(1));
+
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        dateInput.value   = '';
+        statusInput.value = 'all';
+        fetchBills(1);
+    });
+
+    bindPaginationLinks();
+</script>
+
 {% endblock %}

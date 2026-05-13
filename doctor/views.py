@@ -39,7 +39,7 @@ def login_view(request):
             if role == 'doctor':
                 return redirect('doctor:dashboard')
             else:
-                return redirect('doctor:billing')
+                return redirect('billing:bill_list')
 
         else:
             return render(request, 'doctor/login.html', {'error': 'Invalid credentials'})
@@ -350,60 +350,87 @@ def staff_view(request):
 @never_cache
 @role_required('doctor')
 def add_staff(request):
+
     if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Invalid method'})
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid method'
+        }, status=405)
 
     try:
-        data      = json.loads(request.body)
-        name      = data.get('name', '').strip()
-        username  = data.get('username', '').strip()
-        phone     = data.get('phone', '').strip()
-        email     = data.get('email', '').strip()
-        password  = data.get('password', '').strip()
+        data = json.loads(request.body)
 
+        name     = data.get('name', '').strip()
+        username = data.get('username', '').strip()
+        phone    = data.get('phone', '').strip()
+        email    = data.get('email', '').strip()
+        password = data.get('password', '').strip()
+
+        # Validation
         if not name or not username or not password:
-            return JsonResponse({'success': False, 'error': 'Name, username and password are required.'})
+            return JsonResponse({
+                'success': False,
+                'error': 'Name, username and password are required.'
+            }, status=400)
 
         if User.objects.filter(username=username).exists():
-            return JsonResponse({'success': False, 'error': 'Username already taken.'})
+            return JsonResponse({
+                'success': False,
+                'error': 'Username already taken.'
+            }, status=400)
 
         if email and User.objects.filter(email=email).exists():
-            return JsonResponse({'success': False, 'error': 'Email already in use.'})
+            return JsonResponse({
+                'success': False,
+                'error': 'Email already in use.'
+            }, status=400)
 
-        # Split name
-        parts      = name.split(' ', 1)
+        # Split Name
+        parts = name.split(' ', 1)
+
         first_name = parts[0]
         last_name  = parts[1] if len(parts) > 1 else ''
 
-        user = User.objects.create_user(
-            username   = username,
-            password   = password,        # Django auto-hashes via create_user
-            email      = email,
-            first_name = first_name,
-            last_name  = last_name,
-        )
+        # Atomic Transaction
+        with transaction.atomic():
 
-        member = InnerMember.objects.create(
-            user  = user,
-            role  = 'biller',
-            phone = phone,
-        )
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+            )
+
+            member = InnerMember.objects.create(
+                user=user,
+                role='biller',
+                phone=phone,
+            )
 
         return JsonResponse({
             'success': True,
             'staff': {
-                'id'      : member.id,
-                'name'    : user.get_full_name() or username,
+                'id': member.id,
+                'name': user.get_full_name() or username,
                 'username': user.username,
-                'email'   : user.email,
-                'phone'   : member.phone,
-                'active'  : user.is_active,
+                'email': user.email,
+                'phone': member.phone,
+                'active': user.is_active,
             }
         })
 
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON data.'
+        }, status=400)
 
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
 # ─────────────────────────────────────────
 # Edit Staff

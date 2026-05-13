@@ -8,9 +8,9 @@ from decimal import Decimal
 from .models import Bill, BillItem
 from appointment.models import Visit
 from doctor.models import ClinicSettings
+from doctor.mixins import BillingAccessMixin
 
-
-def generate_bill_from_visit(visit):
+def generate_bill_from_visit(BillingAccessMixin,visit):
     """
     Visit complete hone ke baad automatically bill banao
     Prescription items se BillItems create karo
@@ -80,7 +80,7 @@ def generate_bill_from_visit(visit):
 
 
 @method_decorator(never_cache, name='dispatch')
-class BillDetailView(LoginRequiredMixin, View):
+class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, visit_id):
@@ -119,23 +119,65 @@ class BillDetailView(LoginRequiredMixin, View):
 
 
 @method_decorator(never_cache, name='dispatch')
-class BillListView(LoginRequiredMixin, View):
+class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request):
-        from doctor.models import InnerMember
-        doctor = InnerMember.objects.get(user=request.user)
+        search         = request.GET.get('search', '')
+        bill_date      = request.GET.get('bill_date', '')
+        payment_status = request.GET.get('payment_status', 'all')
 
-        bills = Bill.objects.filter(
-            visit__doctor=doctor
-        ).select_related(
+        bills = Bill.objects.select_related(
             'visit__patient__user'
         ).order_by('-created_at')
 
-        return render(request, 'billing/bill_list.html', {'bills': bills})
+        # Search — patient name ya bill number
+        if search:
+            from django.db.models import Q
+            bills = bills.filter(
+                Q(bill_number__icontains=search) |
+                Q(visit__patient__user__first_name__icontains=search) |
+                Q(visit__patient__user__last_name__icontains=search)
+            )
+
+        # Date filter
+        if bill_date:
+            bills = bills.filter(bill_date=bill_date)
+
+        # Status filter
+        if payment_status and payment_status != 'all':
+            bills = bills.filter(payment_status=payment_status)
+
+        # Pagination — 20 per page
+        from django.core.paginator import Paginator
+        paginator   = Paginator(bills, 20)
+        page_number = request.GET.get('page', 1)
+        page_obj    = paginator.get_page(page_number)
+
+        unpaid_count = bills.filter(payment_status='unpaid').count()
+        partial_count = bills.filter(payment_status='partial').count()
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(request, 'billing/bill_list.html', {
+                'bills':          page_obj,
+                'page_obj':       page_obj,
+                'search':         search,
+                'bill_date':      bill_date,
+                'payment_status': payment_status,
+            })
+
+        return render(request, 'billing/bill_list.html', {
+            'bills':          page_obj,
+            'page_obj':       page_obj,
+            'search':         search,
+            'bill_date':      bill_date,
+            'payment_status': payment_status,
+            'unpaid_count':   unpaid_count,
+            'partial_count':  partial_count,
+        })
 
 @method_decorator(never_cache, name='dispatch')
-class PrintBillView(LoginRequiredMixin, View):
+class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
     login_url = 'doctor:login'
 
     def get(self, request, visit_id):
