@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib.auth import authenticate, login, logout as auth_logout
@@ -16,10 +17,7 @@ from accounts.models import Patient
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
-
-def staff_view(request):
-    return render(request,'doctor/staff.html')
-
+from accounts.models import FamilyMember
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -114,28 +112,17 @@ def cancel_appointment(request, appointment_id):
         'remaining_today': today_appointments.filter(status='pending').count(),
     })
 
-@never_cache
-@login_required
-def manage_patients(request):
-     return render(request, 'doctor/manage_patients.html')
-
-
-@never_cache    
-@login_required
-def add_patient(request):
-     return render(request, 'doctor/add_patient.html')
-
-
 
 @never_cache
 @login_required
 def billing(request):
      return render(request, 'doctor/billing.html')
-from itertools import chain
+
+
 @never_cache
 @role_required('doctor')
 def manage_patients(request):
-    from accounts.models import FamilyMember
+
 
     patients = Patient.objects.select_related('user').all()
     family_members = FamilyMember.objects.select_related('patient__user').all()
@@ -169,21 +156,11 @@ def manage_patients(request):
         'patients': combined
     }) 
 
-# @never_cache
-# @role_required('doctor')
-# def view_patient(request, patient_id):
-#     from accounts.models import FamilyMember
-#     patient        = get_object_or_404(Patient, pk=patient_id)
-#     family_members = FamilyMember.objects.filter(patient=patient)
-#     return render(request, 'doctor/view_patient.html', {
-#         'patient'       : patient,
-#         'family_members': family_members,
-#     })
 
 @never_cache
 @role_required('doctor')
 def view_patient_dynamic(request, type, id):
-    from accounts.models import FamilyMember
+
 
     if type == 'main':
         patient = get_object_or_404(Patient, id=id)
@@ -258,8 +235,6 @@ def delete_patient(request, patient_id):
 @never_cache
 @role_required('doctor')
 def add_patient(request):
-    from accounts.models import FamilyMember
-
     all_patients = Patient.objects.all().select_related('user').order_by('user__first_name')
 
     if request.method == 'POST':
@@ -348,15 +323,6 @@ def add_patient(request):
 
     return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
-# doctor/views.py mein yeh views add karo
-# Imports (jo pehle se nahi hain wo add karo):
-# from django.contrib.auth.hashers import make_password
-# from django.http import JsonResponse
-# import json
-
-import json
-from django.contrib.auth.hashers import make_password
-from django.http import JsonResponse
 
 
 # ─────────────────────────────────────────
@@ -521,7 +487,7 @@ def delete_staff(request, member_id):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
-from accounts.models import FamilyMember
+
 
 @never_cache
 @role_required('doctor')
