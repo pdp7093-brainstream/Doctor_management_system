@@ -1,5 +1,19 @@
 // profile.html js code
-const csrfToken = '{{ csrf_token }}';
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+const csrfToken = getCookie('csrftoken');
 
 // ── Edit Profile Modal ──────────────────────────────────
 const editProfileModal = document.getElementById('editProfileModal');
@@ -74,9 +88,14 @@ document.getElementById('saveEditMember').addEventListener('click', function () 
     this.disabled    = true;
     this.textContent = 'Saving...';
 
-    fetch(`{% url 'update_family_member' 0 %}`.replace('/0/', `/${id}/`), {
+    fetch(`/update-family-member/${id}/`, {
         method : 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        credentials: 'same-origin',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
         body   : JSON.stringify({ name, relation, gender, dob, bld_grop, phone }),
     })
     .then(r => r.json())
@@ -97,28 +116,82 @@ document.getElementById('saveEditMember').addEventListener('click', function () 
     });
 });
 
-
 // ── Delete Family Member ────────────────────────────────
 document.querySelectorAll('.btn-delete-fm').forEach(btn => {
+
     btn.addEventListener('click', function () {
-        const id   = this.dataset.id;
+
+        const id = this.dataset.id;
         const name = this.dataset.name;
-        if (!confirm(`Are you sure you want to remove "${name}" from your family members?`)) return;
 
-        fetch(`{% url 'delete_family_member' 0 %}`.replace('/0/', `/${id}/`), {
-            method : 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) { location.reload(); }
-            else { alert(data.error || 'Could not delete member.'); }
-        })
-        .catch(() => alert('Network error. Please try again.'));
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Remove "${name}" from family members?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, Delete',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                fetch(`/delete-family-member/${id}/`, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                .then(r => r.json())
+                .then(data => {
+
+                    if (data.success) {
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: `"${name}" removed successfully.`,
+                            timer: 1800,
+                            showConfirmButton: false
+                        });
+
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1800);
+
+                    } else {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Could not delete member.'
+                        });
+
+                    }
+
+                })
+                .catch(() => {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Please try again.'
+                    });
+
+                });
+
+            }
+
+        });
+
     });
+
 });
-
-
 // dashboardd.html js code
 
 const ROWS_PER_PAGE = 10;

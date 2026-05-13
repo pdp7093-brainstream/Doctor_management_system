@@ -23,7 +23,7 @@ class RegistrationForm(forms.Form):
         max_length=15, 
         widget=forms.TextInput(attrs={
             'class': 'form-control', 
-            'placeholder': '9876543210 or +919876543210',
+            'placeholder': '9876543210',
             'required': 'required',
             'type': 'tel'
         })
@@ -291,7 +291,7 @@ class ProfileUpdateForm(forms.Form):
         if not re.match(r'^\d{10,15}$', cleaned_phone):
             raise ValidationError(
                 "Enter a valid phone number (10-15 digits). "
-                "Format: 9876543210 or +919876543210"
+                "Format: 9876543210"
             )
         
         return cleaned_phone

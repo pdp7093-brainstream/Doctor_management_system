@@ -493,24 +493,42 @@ def delete_staff(request, member_id):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
 
-
-
-
 @never_cache
 @role_required('doctor')
 def edit_family(request, id):
     member = get_object_or_404(FamilyMember, id=id)
 
     if request.method == 'POST':
-        member.name = request.POST.get('name')
-        member.phone = request.POST.get('phone')
-        member.gender = request.POST.get('gender')
+        name     = request.POST.get('name', '').strip()
+        phone    = request.POST.get('phone', '').strip()
+        relation = request.POST.get('relation', '').strip()
+        gender   = request.POST.get('gender', '')
+        dob      = request.POST.get('dob')
+        bld_grop = request.POST.get('bld_grop')
+
+        # Validate required fields
+        if not name:
+            messages.error(request, 'Name is required.')
+            return render(request, 'doctor/edit_family.html', {'member': member})
+
+        # Check for duplicate phone (exclude self)
+        if phone and FamilyMember.objects.filter(phone=phone).exclude(pk=member.pk).exists():
+            messages.error(request, 'This phone number is already registered.')
+            return render(request, 'doctor/edit_family.html', {'member': member})
+
+        # Update member
+        member.name     = name
+        member.phone    = phone if phone else None
+        member.relation = relation
+        member.gender   = gender if gender else None
+        member.dob      = dob if dob else None
+        member.bld_grop = bld_grop if bld_grop else None
         member.save()
 
+        messages.success(request, 'Family member updated successfully!')
         return redirect('doctor:manage_patients')
 
     return render(request, 'doctor/edit_family.html', {'member': member})
-
 
 @never_cache
 @role_required('doctor')

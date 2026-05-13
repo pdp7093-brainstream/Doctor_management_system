@@ -158,7 +158,7 @@ class SignupView(View):
             password = form.cleaned_data['password']
 
             try:
-                # ✅ Create User with EMAIL as username (NOT phone)
+                #  Create User with EMAIL as username (NOT phone)
                 user = User.objects.create_user(
                     username=email,  # ← Username = Email (not phone)
                     password=password,
@@ -166,9 +166,9 @@ class SignupView(View):
                     email=email,
                 )
 
-                # ✅ Create/Get Patient and store PHONE in patient table
+                #  Create/Get Patient and store PHONE in patient table
                 patient, created = Patient.objects.get_or_create(user=user)
-                patient.phone = phone  # ← Phone stored here (Patient table)
+                patient.phone = phone  #  Phone stored here (Patient table)
                 patient.save()
 
                 # Auto-login after signup
@@ -189,57 +189,57 @@ class SignupView(View):
 
 
 class LoginView(View):
+
+    template_name = 'authentication/login.html'
+
     def get(self, request):
-        return render(request, 'authentication/login.html')
+        return render(request, self.template_name)
 
     def post(self, request):
+
+        # Fast input fetch
         phone = request.POST.get('phone', '').strip()
-        password = request.POST.get('password', '')
+        password = request.POST.get('password', '').strip()
 
+        # Validation
         if not phone or not password:
-            return render(
-                request, 
-                'authentication/login.html', 
-                {'error': 'Phone and password are required.'}
-            )
+            return render(request, self.template_name, {
+                'error': 'Phone and password are required.'
+            })
 
-        # ✅ Find user by phone from Patient table, then authenticate
+        # Clean phone once
+        cleaned_phone = re.sub(r'\D', '', phone)
+
         try:
-            import re
-            # Clean phone
-            cleaned_phone = re.sub(r'[\s\-\+\(\)]', '', phone)
-            
-            # Find patient by phone
-            patient = Patient.objects.get(phone=cleaned_phone)
-            user = patient.user
-            
-            # Now authenticate with username (email)
-            user = authenticate(request, username=user.username, password=password)
-            
-            if user is not None:
-                auth_login(request, user)
-               
-                return redirect('dashboard')
-            else:
-                return render(
-                    request, 
-                    'authentication/login.html', 
-                    {'error': 'Invalid phone number or password.'}
-                )
-        
-        except Patient.DoesNotExist:
-            return render(
-                request, 
-                'authentication/login.html', 
-                {'error': 'Invalid phone number or password.'}
-            )
-        except Exception as e:
-            return render(
-                request, 
-                'authentication/login.html', 
-                {'error': f'Login error: {str(e)}'}
+            # SINGLE OPTIMIZED QUERY
+            patient = (
+                Patient.objects
+                .select_related('user')
+                .only('phone', 'user__username', 'user__password')
+                .get(phone=cleaned_phone)
             )
 
+        except Patient.DoesNotExist:
+            return render(request, self.template_name, {
+                'error': 'Invalid phone number or password.'
+            })
+
+        # Authenticate
+        user = authenticate(
+            request,
+            username=patient.user.username,
+            password=password
+        )
+
+        if user is None:
+            return render(request, self.template_name, {
+                'error': 'Invalid phone number or password.'
+            })
+
+        # Login
+        auth_login(request, user)
+
+        return redirect('dashboard')
 
 def logout_view(request):
     """Logout user"""
@@ -357,7 +357,7 @@ class ChangePasswordView(LoginRequiredMixin, View):
         return render(request, 'authentication/change_password.html', {'form': form})
 
     def post(self, request):
-        form = ChangePasswordForm(request.POST)
+        form = ChangePasswordForm(request.POST)     
         if form.is_valid():
             user = request.user
             old_password = form.cleaned_data['old_password']
@@ -369,7 +369,7 @@ class ChangePasswordView(LoginRequiredMixin, View):
                 user.save()
                 # Maintain session after password change
                 update_session_auth_hash(request, user)
-                return redirect('profile')
+                return redirect('login')
             else:
                 messages.error(request, 'The old password you entered is incorrect.')
 
