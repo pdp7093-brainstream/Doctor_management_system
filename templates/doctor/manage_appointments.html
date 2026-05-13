@@ -4,45 +4,57 @@
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <h2 class="page-title mb-0">Manage Appointments</h2>
-        <a href="{% url 'appointment:add_appointment' %}" class="btn btn-primary">
-            <i class="bi bi-plus-lg"></i> Add Appointment
+    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+        <div>
+            <h2 class="page-title mb-1">Manage Appointments</h2>
+            <p class="page-subtitle text-muted mb-0">Search, filter, and manage all upcoming patient visits from a clean, premium dashboard.</p>
+        </div>
+        <a href="{% url 'appointment:add_appointment' %}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
+            <i class="bi bi-plus-lg me-2"></i> Add Appointment
         </a>
     </div>
 
     <!-- Filters -->
-    <div class="table-section mb-4">
+    <div class="table-section mb-4 card card-soft border-0 shadow-sm p-4">
         <div class="row g-3 align-items-end">
             <div class="col-md-4">
                 <label class="form-label fw-semibold">Search Patient</label>
-                <input type="text" id="search" class="form-control" placeholder="Name or phone..." value="{{ search }}">
+                <div class="input-with-icon">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="search" class="form-control form-control-lg" placeholder="Name or phone..." value="{{ search }}">
+                </div>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Date</label>
-                <input type="date" id="appointmentDate" class="form-control" value="{{ appointment_date }}">
+                <div class="input-with-icon">
+                    <i class="bi bi-calendar-date"></i>
+                    <input type="date" id="appointmentDate" class="form-control form-control-lg" value="{{ appointment_date }}">
+                </div>
             </div>
             <div class="col-md-3">
                 <label class="form-label fw-semibold">Status</label>
-                <select id="appointmentStatus" class="form-select">
-                    <option value="all"       {% if status == "all" %}selected{% endif %}>All</option>
-                    <option value="pending"   {% if status == "pending" %}selected{% endif %}>Pending</option>
-                    <option value="confirmed" {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
-                    <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
-                    <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
-                </select>
+                <div class="input-with-icon select-icon">
+                    <i class="bi bi-filter"></i>
+                    <select id="appointmentStatus" class="form-select form-select-lg">
+                        <option value="all"       {% if status == "all" %}selected{% endif %}>All</option>
+                        <option value="pending"   {% if status == "pending" %}selected{% endif %}>Pending</option>
+                        <option value="confirmed" {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
+                        <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
+                        <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
             </div>
-            <div class="col-md-2">
-                <button id="clearBtn" class="btn btn-outline-secondary w-100">Clear</button>
+            <div class="col-md-2 d-grid">
+                <button id="clearBtn" class="btn btn-outline-secondary btn-lg rounded-pill">Clear</button>
             </div>
         </div>
     </div>
 
     <!-- Table -->
     <div class="table-section">
-        <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; width:100%; display:block;">
-            <table class="table table-custom" style="min-width:820px; width:100%;">
-                <thead>
+        <div class="table-responsive rounded-4 overflow-hidden shadow-sm" style="background:#ffffff;">
+            <table class="table table-custom align-middle mb-0" style="min-width:820px; width:100%;">
+                <thead class="table-light border-bottom">
                     <tr>
                         <th>Patient</th>
                         <th>Relation</th>
@@ -131,29 +143,219 @@
 
         <!-- Pagination -->
         <div id="paginationContainer">
-            <div id="paginationWrapper" class="d-flex justify-content-center mt-3">
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link pagination-link" data-page="{{ page_obj.previous_page_number }}" href="#">Prev</a>
-                    </li>
-                    {% endif %}
+            {% if page_obj.paginator.count > 10 %}
+            <div id="paginationWrapper" class="d-flex flex-column align-items-center mt-4">
+                <div class="w-100 pagination-summary mb-3">
+                    <div>
+                        <strong>{{ page_obj.start_index }} - {{ page_obj.end_index }}</strong>
+                        <span class="text-muted">of {{ page_obj.paginator.count }} appointments</span>
+                    </div>
+                    <div class="text-muted">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                    </div>
+                </div>
+                <nav aria-label="Appointment pagination" class="w-100">
+                    <ul class="pagination pagination-pill justify-content-center flex-wrap gap-1">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                            <a class="page-link pagination-link" data-page="{{ page_obj.previous_page_number }}" href="#">Prev</a>
+                        </li>
 
-                    <li class="page-item active">
-                        <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-                    </li>
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.paginator.num_pages <= 7 or num <= 2 or num > page_obj.paginator.num_pages|add:'-2' %}
+                                <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                                    {% if num == page_obj.number %}
+                                        <span class="page-link">{{ num }}</span>
+                                    {% else %}
+                                        <a class="page-link pagination-link" data-page="{{ num }}" href="#">{{ num }}</a>
+                                    {% endif %}
+                                </li>
+                            {% elif num >= page_obj.number|add:'-1' and num <= page_obj.number|add:'1' %}
+                                <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                                    {% if num == page_obj.number %}
+                                        <span class="page-link">{{ num }}</span>
+                                    {% else %}
+                                        <a class="page-link pagination-link" data-page="{{ num }}" href="#">{{ num }}</a>
+                                    {% endif %}
+                                </li>
+                            {% elif num == 3 and page_obj.number > 4 %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% elif num == page_obj.paginator.num_pages|add:'-2' and page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
 
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link pagination-link" data-page="{{ page_obj.next_page_number }}" href="#">Next</a>
-                    </li>
-                    {% endif %}
-                </ul>
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                            <a class="page-link pagination-link" data-page="{{ page_obj.next_page_number }}" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
+            {% endif %}
         </div>
     </div>
 
 </main>
+
+<style>
+    .page-header {
+        padding: 1.3rem 0 0.8rem;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+    }
+
+    .page-title {
+        font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+        font-size: 0.98rem;
+        max-width: 620px;
+    }
+
+    .card-soft {
+        background: #f8f9ff;
+        border-radius: 24px;
+    }
+
+    .input-with-icon {
+        position: relative;
+    }
+
+    .input-with-icon i {
+        position: absolute;
+        top: 50%;
+        left: 16px;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 1rem;
+        pointer-events: none;
+    }
+
+    .input-with-icon input,
+    .input-with-icon select {
+        padding-left: 44px;
+        border-radius: 16px;
+        box-shadow: inset 0 1px 8px rgba(15, 23, 42, 0.06);
+        border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .input-with-icon select {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        padding-right: 1.5rem;
+    }
+
+    .input-with-icon.select-icon::after {
+        content: '\f0d7';
+        font-family: 'Bootstrap Icons';
+        font-size: 0.95rem;
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        pointer-events: none;
+    }
+
+    .table-custom thead th {
+        border: none;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        color: #495057;
+        background: #f8f9ff;
+        padding: 1rem 1rem;
+    }
+
+    .table-custom tbody tr {
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .table-custom tbody tr:hover {
+        background: rgba(99, 102, 241, 0.08);
+        transform: translateX(1px);
+    }
+
+    .table-custom td,
+    .table-custom th {
+        vertical-align: middle;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+        padding: 1rem 1rem;
+    }
+
+    .page-title + .page-subtitle {
+        margin-top: 0.35rem;
+    }
+
+    .btn-primary {
+        box-shadow: 0 16px 32px rgba(59, 130, 246, 0.18);
+    }
+
+    .btn-outline-secondary {
+        border-radius: 999px;
+        font-weight: 600;
+        padding: 0.85rem 1.1rem;
+    }
+
+    .table-responsive {
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+    .pagination-pill .page-link {
+        border-radius: 999px;
+        padding: 0.75rem 1rem;
+        min-width: 48px;
+        color: #334155;
+        background: #ffffff;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+
+    .pagination-pill .page-item.active .page-link {
+        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+        border-color: transparent;
+        color: #ffffff;
+        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.25);
+    }
+
+    .pagination-pill .page-item.disabled .page-link {
+        opacity: 0.55;
+        pointer-events: none;
+        background: #f8fafc;
+    }
+
+    .pagination-pill .page-link:hover {
+        background: #eef2ff;
+    }
+
+    .pagination-summary {
+        background: rgba(99, 102, 241, 0.08);
+        border: 1px solid rgba(99, 102, 241, 0.18);
+        border-radius: 18px;
+        padding: 0.95rem 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 1rem;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    @media (max-width: 767px) {
+        .pagination-summary {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .input-with-icon input,
+        .input-with-icon select {
+            padding-left: 40px;
+        }
+    }
+</style>
 
 <script>
     const searchInput  = document.getElementById('search');
