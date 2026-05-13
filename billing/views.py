@@ -115,7 +115,6 @@ class BillDetailView(LoginRequiredMixin, View):
         bill.subtotal       = bill.subtotal  # same rakho
         bill.save()  # GST + total auto calculate hoga
 
-        messages.success(request, 'Bill updated successfully!')
         return redirect('billing:bill_detail', visit_id=visit_id)
 
 

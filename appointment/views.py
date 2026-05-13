@@ -347,7 +347,7 @@ class Book_appointment(View):
             appointment_date=appointment_date,
             time_slot=time_24
         ).exists():
-            messages.error(request, "This time slot is already booked. Please choose another.")
+           
             return redirect('appointment:appointment')
  
         # Family member resolve
@@ -367,7 +367,6 @@ class Book_appointment(View):
             notes            = notes,
         )
  
-        messages.success(request, "Appointment booked successfully!")
         return redirect('appointment:appointment')
 
 
