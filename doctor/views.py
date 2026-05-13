@@ -16,6 +16,7 @@ from accounts.models import Patient
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
+import json
 
 def staff_view(request):
     return render(request,'doctor/staff.html')
@@ -105,7 +106,7 @@ def cancel_appointment(request, appointment_id):
         Q(doctor=doctor) | Q(doctor__isnull=True),
         appointment_date=today
     )
-
+    
     return JsonResponse({
         'success': True,
         'status': appointment.get_status_display(),
@@ -126,11 +127,11 @@ def add_patient(request):
      return render(request, 'doctor/add_patient.html')
 
 
-
 @never_cache
 @login_required
 def billing(request):
      return render(request, 'doctor/billing.html')
+
 from itertools import chain
 @never_cache
 @role_required('doctor')
@@ -204,42 +205,56 @@ def view_patient_dynamic(request, type, id):
             'family_members': member.patient.members.all(),
             'is_family': True
         })
-
+    
 @never_cache
 @role_required('doctor')
 def edit_patient(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
 
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        dob = request.POST.get('dob')
-        gender = request.POST.get('gender')
-        phone = request.POST.get('phone')
-        bld_grop = request.POST.get('bld_grop')
-        address = request.POST.get('address')
 
+        name      = request.POST.get('name', '').strip()
+        email     = request.POST.get('email', '').strip()
+        dob       = request.POST.get('dob')
+        gender    = request.POST.get('gender')
+        phone     = request.POST.get('phone', '').strip()
+        bld_grop  = request.POST.get('bld_grop')
+        address   = request.POST.get('address')
+
+        # EMAIL DUPLICATE CHECK
         if email and User.objects.filter(email=email).exclude(pk=patient.user.pk).exists():
-            messages.error(request, 'Another user with this email already exists.')
-            return render(request, 'doctor/edit_patient.html', {'patient': patient})
 
+            return render(request, 'doctor/edit_patient.html', {
+                'patient': patient
+            })
+
+        #  PHONE DUPLICATE CHECK
+        if phone and Patient.objects.filter(phone=phone).exclude(pk=patient.pk).exists():
+
+            return render(request, 'doctor/edit_patient.html', {
+                'patient': patient
+            })
+
+        #  UPDATE USER
         patient.user.first_name = name or patient.user.first_name
-        patient.user.email = email or patient.user.email
-        patient.user.username = email or patient.user.username
+        patient.user.email      = email or patient.user.email
+        patient.user.username   = email or patient.user.username
         patient.user.save()
 
-        patient.phone = phone
-        patient.address = address
-        patient.dob = dob if dob else None
-        patient.gender = gender
-        patient.bld_grop = bld_grop
+        # UPDATE PATIENT
+        patient.phone     = phone
+        patient.address   = address
+        patient.dob       = dob if dob else None
+        patient.gender    = gender
+        patient.bld_grop  = bld_grop
         patient.save()
 
-        messages.success(request, 'Patient updated successfully.')
+
         return redirect('doctor:manage_patients')
 
-    return render(request, 'doctor/edit_patient.html', {'patient': patient})
-
+    return render(request, 'doctor/edit_patient.html', {
+        'patient': patient
+    })
 
 @never_cache
 @role_required('doctor')
@@ -248,10 +263,8 @@ def delete_patient(request, patient_id):
 
     if request.method == 'POST':
         patient.user.delete()
-        messages.success(request, 'Patient deleted successfully.')
 
     return redirect('doctor:manage_patients')
-
 
 # doctor/views.py — add_patient view replace karo
 
@@ -274,7 +287,7 @@ def add_patient(request):
         relation  = request.POST.get('relation', '').strip()
 
         if not name:
-            messages.error(request, 'Full name is required.')
+
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         # ── Case 1: Parent selected → sirf FamilyMember banao ──────────
@@ -288,7 +301,6 @@ def add_patient(request):
                     name__iexact=name,
                     relation__iexact=relation
                 ).exists():
-                    messages.error(request, f'"{name} ({relation})" already exists for this patient.')
                     return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
                 FamilyMember.objects.create(
@@ -301,20 +313,19 @@ def add_patient(request):
                     bld_grop = bld_grop or None,
                 )
 
-                messages.success(request, f'"{name}" added as family member of {parent_patient.user.first_name}.')
                 return redirect('doctor:manage_patients')
 
             except Patient.DoesNotExist:
-                messages.error(request, 'Selected parent patient not found.')
+               
                 return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         # ── Case 2: No parent → Main Patient banao (User + Patient) ────
         if not phone:
-            messages.error(request, 'Phone number is required for a main patient.')
+           
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         if User.objects.filter(username=phone).exists():
-            messages.error(request, 'A patient with this phone number already exists.')
+
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         name_parts = name.split(' ', 1)
@@ -339,24 +350,13 @@ def add_patient(request):
                     bld_grop = bld_grop or None,
                 )
 
-            messages.success(request, f'Patient "{name}" added. Default password is password@123.')
             return redirect('doctor:manage_patients')
 
         except Exception as e:
-            messages.error(request, f'Error: {str(e)}')
+          
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
     return render(request, 'doctor/add_patient.html', {'patients': all_patients})
-
-# doctor/views.py mein yeh views add karo
-# Imports (jo pehle se nahi hain wo add karo):
-# from django.contrib.auth.hashers import make_password
-# from django.http import JsonResponse
-# import json
-
-import json
-from django.contrib.auth.hashers import make_password
-from django.http import JsonResponse
 
 
 # ─────────────────────────────────────────
@@ -534,7 +534,6 @@ def edit_family(request, id):
         member.gender = request.POST.get('gender')
         member.save()
 
-        messages.success(request, 'Family member updated.')
         return redirect('doctor:manage_patients')
 
     return render(request, 'doctor/edit_family.html', {'member': member})
@@ -547,8 +546,6 @@ def delete_family(request, id):
 
     if request.method == 'POST':
         member.delete()
-        messages.success(request, 'Family member deleted.')
-
     return redirect('doctor:manage_patients')
 
 # ─────────────────────────────────────────
@@ -589,5 +586,4 @@ class ClinicSettingsView(LoginRequiredMixin, View):
 
         settings.save()
 
-        messages.success(request, "Clinic settings updated!")
         return redirect('doctor:settings')

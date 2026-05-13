@@ -175,10 +175,10 @@ class SignupView(View):
                 user = authenticate(request, username=email, password=password)
                 if user is not None:
                     auth_login(request, user)
-                    messages.success(request, f'Welcome {name}! Your account has been created.')
+                    
                     return redirect('login')
                 else:
-                    messages.success(request, 'Account created! Please login.')
+                   
                     return redirect('login')
 
             except Exception as e:
@@ -218,7 +218,7 @@ class LoginView(View):
             
             if user is not None:
                 auth_login(request, user)
-                messages.success(request, 'Welcome back!')
+               
                 return redirect('dashboard')
             else:
                 return render(
@@ -244,7 +244,6 @@ class LoginView(View):
 def logout_view(request):
     """Logout user"""
     auth_logout(request)
-    messages.success(request, 'You have been logged out successfully.')
     return redirect('login')
 
 
@@ -344,7 +343,6 @@ def profile_settings(request):
         
         patient.save()
 
-        messages.success(request, 'Profile updated successfully!')
         return redirect('profile')
 
     return render(request, 'pdashboard/profile.html')
@@ -371,7 +369,6 @@ class ChangePasswordView(LoginRequiredMixin, View):
                 user.save()
                 # Maintain session after password change
                 update_session_auth_hash(request, user)
-                messages.success(request, 'Your password was successfully updated!')
                 return redirect('profile')
             else:
                 messages.error(request, 'The old password you entered is incorrect.')

@@ -65,5 +65,4 @@ class ClinicSettingsView(LoginRequiredMixin, View):
         clinic.bill_footer_note         = request.POST.get('bill_footer_note', '').strip()
 
         clinic.save()
-        messages.success(request, 'Clinic settings updated successfully!')
         return redirect('clinic:settings')

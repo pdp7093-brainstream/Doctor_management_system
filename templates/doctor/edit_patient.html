@@ -18,7 +18,7 @@
         {% if messages %}
         <div class="alert alert-danger" role="alert">
             {% for message in messages %}
-                {{ message }}
+            {{ message }}
             {% endfor %}
         </div>
         {% endif %}
@@ -30,17 +30,20 @@
                 <div class="patient-form-row">
                     <div class="patient-field">
                         <label class="patient-label" for="patient-name">Full Name</label>
-                        <input id="patient-name" type="text" name="name" class="patient-input" value="{{ patient.user.first_name }}" required>
+                        <input id="patient-name" type="text" name="name" class="patient-input"
+                            value="{{ patient.user.first_name }}" required>
                     </div>
 
                     <div class="patient-field">
                         <label class="patient-label" for="patient-email">Email</label>
-                        <input id="patient-email" type="email" name="email" class="patient-input" value="{{ patient.user.email }}" required>
+                        <input id="patient-email" type="email" name="email" class="patient-input"
+                            value="{{ patient.user.email }}" required>
                     </div>
 
                     <div class="patient-field">
                         <label class="patient-label" for="patient-dob">Date of Birth</label>
-                        <input id="patient-dob" type="date" name="dob" class="patient-input" value="{{ patient.dob|date:'Y-m-d' }}">
+                        <input id="patient-dob" type="date" name="dob" class="patient-input"
+                            value="{{ patient.dob|date:'Y-m-d' }}">
                     </div>
 
                     <div class="patient-field">
@@ -57,7 +60,8 @@
                 <div class="patient-form-row">
                     <div class="patient-field">
                         <label class="patient-label" for="patient-phone">Phone</label>
-                        <input id="patient-phone" type="text" name="phone" class="patient-input" value="{{ patient.phone }}" placeholder="Enter phone number">
+                        <input id="patient-phone" type="text" name="phone" class="patient-input"
+                            value="{{ patient.phone }}" placeholder="Enter phone number">
                     </div>
 
                     <div class="patient-field">
@@ -78,7 +82,8 @@
 
                 <div class="patient-field">
                     <label class="patient-label" for="patient-address">Address</label>
-                    <textarea id="patient-address" name="address" class="patient-input patient-textarea" rows="4" placeholder="Enter complete address">{{ patient.address }}</textarea>
+                    <textarea id="patient-address" name="address" class="patient-input patient-textarea" rows="4"
+                        placeholder="Enter complete address">{{ patient.address }}</textarea>
                 </div>
 
                 <div class="patient-form-actions">
@@ -91,4 +96,22 @@
         </div>
     </div>
 </main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+{% for message in messages %}
+<script>
+
+    Swal.fire({
+        icon: '{% if message.tags == "success" %}success{% else %}error{% endif %}',
+        title: '{% if message.tags == "success" %}Success{% else %}Error{% endif %}',
+        text: '{{ message|escapejs }}',
+        confirmButtonColor: '#007aff',
+        confirmButtonText: 'OK'
+    });
+
+</script>
+{% endfor %}
+{% endif %}
 {% endblock %}
