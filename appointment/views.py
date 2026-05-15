@@ -358,7 +358,7 @@ class Add_appointment(View):
             notes            = notes,
         )
 
-        messages.success(request, "Appointment scheduled successfully")
+       
         return redirect('appointment:manage_appointments')
 
 
@@ -475,11 +475,6 @@ class Book_appointment(View):
             time_slot=time_24,
 
             notes=notes,
-        )
-
-        messages.success(
-            request,
-            "Appointment booked successfully"
         )
 
         return redirect('appointment:appointment')

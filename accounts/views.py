@@ -306,7 +306,7 @@ def profile_settings(request):
             cleaned_phone = re.sub(r'[\s\-\+\(\)]', '', phone)
             if not re.match(r'^\d{10,15}$', cleaned_phone):
                 errors.append('Invalid phone number format.')
-            # ✅ Check uniqueness in Patient table (exclude current user's patient)
+            #  Check uniqueness in Patient table (exclude current user's patient)
             elif Patient.objects.filter(phone=cleaned_phone).exclude(user=user).exists():
                 errors.append('This phone number is already registered!')
             phone = cleaned_phone
@@ -321,7 +321,7 @@ def profile_settings(request):
                 messages.error(request, error)
             return redirect('profile-setting')
 
-        # ✅ Update User (email as username)
+        #  Update User (email as username)
         user.first_name = first_name
         if email and user.email != email:
             # Also update username if email changes
@@ -330,7 +330,7 @@ def profile_settings(request):
             user.email = email
         user.save()
 
-        # ✅ Update Patient - store phone here
+        #  Update Patient - store phone here
         patient.phone = phone  # Phone goes to Patient table only
         patient.address = address
         patient.dob = dob
