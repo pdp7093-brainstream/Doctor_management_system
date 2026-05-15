@@ -557,7 +557,6 @@ def edit_family(request, id):
         member.bld_grop = bld_grop if bld_grop else None
         member.save()
 
-        messages.success(request, 'Family member updated successfully!')
         return redirect('doctor:manage_patients')
 
     return render(request, 'doctor/edit_family.html', {'member': member})

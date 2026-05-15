@@ -208,13 +208,16 @@
                 Doctor Dashboard
             </h1>
         </div>
+        
         <div class="navbar-right">
+            {% if request.user.innermember.role == 'doctor' %}
             <div class="user-info">
                 <div class="user-avatar">DR</div>
                 <span class="user-name">{{ request.user.first_name }}</span>
             </div>
             
-            <!-- Bell Notification -->
+            <!-- Bell Notification - Only for Doctor -->
+            
             <div class="position-relative me-3" style="display:inline-block;">
                 <button id="bellBtn" onclick="toggleBellDropdown()" style="background:none; border:none; cursor:pointer; position:relative; padding:6px;">
                     <i class="bi bi-bell-fill" style="font-size:1.3rem;"></i>
@@ -237,6 +240,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
             
             <a href="{% url 'logout' %}" id="logoutBtn"><button class="logout-btn" >
                 <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
