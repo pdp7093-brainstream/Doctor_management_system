@@ -303,7 +303,11 @@
             <h6>Patient Information</h6>
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">{{ visit.patient.user.get_full_name }}</span>
+                <span class="info-value">{% if visit.appointment.family_member %}
+                                                                {{ visit.appointment.family_member.name }}
+                                                             {% else %}
+                                                                {{ visit.appointment.patient.user.get_full_name }}
+                                                             {% endif %}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Contact</span>

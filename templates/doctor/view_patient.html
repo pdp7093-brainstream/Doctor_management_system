@@ -3,87 +3,175 @@
 {% block title %}View Patient{% endblock %}
 {% block content %}
 
-<main class="main-content">
+<main class="main-content" id="mainContent">
 
-    <div class="page-header">
-        <h2>Patient Profile</h2>
-        <a href="{% url 'doctor:manage_patients' %}" class="btn btn-secondary">Back</a>
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="page-title mb-1">Patient Profile</h2>
+            <p class="text-muted small mb-0">Full details and family members of this patient.</p>
+        </div>
+        <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn">
+            <i class="bi bi-arrow-left me-1"></i> Back to Patients
+        </a>
     </div>
 
-    <!-- 🔥 Relation Highlight -->
+    <!-- Family member context banner -->
     {% if is_family %}
-    <div style="background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:15px;">
-        <strong>{{ member.name }}</strong> is 
-        <strong>{{ member.relation }}</strong> of 
-        <strong>{{ parent.user.first_name }}</strong>
+    <div class="d-flex align-items-center gap-2 mb-4 px-3 py-2 rounded-3"
+         style="background:#eff6ff; border:1px solid #bfdbfe; font-size:0.9rem; color:#1d4ed8;">
+        <i class="bi bi-people-fill"></i>
+        <span>
+            <strong>{{ member.name }}</strong> is the
+            <strong>{{ member.relation }}</strong> of
+            <strong>{{ parent.user.first_name }}</strong>
+        </span>
     </div>
     {% endif %}
 
-    <!-- Patient Info -->
-    <div class="card p-3 mb-4">
-
-        <h4>
+    <!-- Profile Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                <i class="bi bi-person-fill"></i>
+                {% if is_family %}Family Member Details{% else %}Patient Details{% endif %}
+            </div>
             {% if is_family %}
-                {{ member.name }}
+            <span class="badge bg-primary bg-opacity-10 text-primary" style="font-weight:600;">Family Member</span>
             {% else %}
-                {{ patient.user.first_name }} {{ patient.user.last_name }}
+            <span class="badge bg-success bg-opacity-10 text-success" style="font-weight:600;">Main Patient</span>
             {% endif %}
-        </h4>
+        </div>
 
-        <p><strong>Phone:</strong> 
-            {% if is_family %}
-                {{ member.phone|default:"-" }}
-            {% else %}
-                {{ patient.phone|default:"-" }}
-            {% endif %}
-        </p>
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="user-avatar" style="width:56px; height:56px; font-size:1.3rem; flex-shrink:0;">
+                    {% if is_family %}
+                        {{ member.name|slice:":1"|upper }}
+                    {% else %}
+                        {{ patient.user.first_name|slice:":1"|upper }}
+                    {% endif %}
+                </div>
+                <div>
+                    <div style="font-weight:700; font-size:1.1rem; color:var(--dark-text);">
+                        {% if is_family %}
+                            {{ member.name }}
+                        {% else %}
+                            {{ patient.user.first_name }} {{ patient.user.last_name }}
+                        {% endif %}
+                    </div>
+                    <div style="font-size:0.82rem; color:#888;">
+                        {% if is_family %}
+                            {{ member.relation }} &bull; Family Member
+                        {% else %}
+                            Main Patient
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
-        <p><strong>Gender:</strong> 
-            {% if is_family %}
-                {{ member.gender|default:"-" }}
-            {% else %}
-                {{ patient.gender|default:"-" }}
-            {% endif %}
-        </p>
-
-        <p><strong>DOB:</strong> 
-            {% if is_family %}
-                {{ member.dob|date:"d M Y"|default:"-" }}
-            {% else %}
-                {{ patient.dob|date:"d M Y"|default:"-" }}
-            {% endif %}
-        </p>
-
-        {% if not is_family %}
-        <p><strong>Email:</strong> {{ patient.user.email|default:"-" }}</p>
-        <p><strong>Address:</strong> {{ patient.address|default:"-" }}</p>
-        {% endif %}
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Phone</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {% if is_family %}{{ member.phone|default:"—" }}{% else %}{{ patient.phone|default:"—" }}{% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Gender</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {% if is_family %}{{ member.gender|default:"—"|capfirst }}{% else %}{{ patient.gender|default:"—"|capfirst }}{% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Date of Birth</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {% if is_family %}{{ member.dob|date:"d M Y"|default:"—" }}{% else %}{{ patient.dob|date:"d M Y"|default:"—" }}{% endif %}
+                    </div>
+                </div>
+                {% if is_family %}
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Blood Group</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {{ member.bld_grop|default:"—" }}
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Blood Group</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {{ patient.bld_grop|default:"—" }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Email</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {{ patient.user.email|default:"—" }}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Address</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
+                        {{ patient.address|default:"—" }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
 
-    <!-- 🔥 Family Members -->
-    <div class="card p-3">
-        <h5>Family Members ({{ family_members|length }})</h5>
+    <!-- Family Members Card (only for main patients) -->
+    {% if not is_family %}
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                <i class="bi bi-people-fill"></i> Family Members
+            </div>
+            <span class="badge bg-light text-primary">{{ family_members|length }} member{{ family_members|length|pluralize }}</span>
+        </div>
 
-        {% if family_members %}
-        <table class="table">
-            <tr>
-                <th>Name</th>
-                <th>Relation</th>
-                <th>Phone</th>
-            </tr>
-
-            {% for m in family_members %}
-            <tr>
-                <td>{{ m.name }}</td>
-                <td>{{ m.relation }}</td>
-                <td>{{ m.phone|default:"-" }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% else %}
-        <p>No family members</p>
-        {% endif %}
+        <div class="card-body p-0">
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+                {% if family_members %}
+                <table class="table table-hover mb-0" style="min-width:480px; width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Relation</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in family_members %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="user-avatar" style="width:32px; height:32px; font-size:0.75rem; flex-shrink:0;">
+                                        {{ m.name|slice:":1"|upper }}
+                                    </div>
+                                    <span style="font-weight:600; font-size:0.9rem;">{{ m.name }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary bg-opacity-10 text-primary" style="font-weight:600; font-size:0.78rem;">
+                                    {{ m.relation }}
+                                </span>
+                            </td>
+                            <td style="font-size:0.9rem; color:#6c757d;">{{ m.phone|default:"—" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-people" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                    No family members added yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
     </div>
+    {% endif %}
 
 </main>
 

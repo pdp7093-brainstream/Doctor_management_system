@@ -90,11 +90,39 @@
                         </td>
 
                         <!-- Booked By -->
-                        <td style="color:#6c757d;font-size:13px;">
-                            {{ appointment.patient.user.first_name }}
-                            {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
-                        </td>
+                      <td style="color:#6c757d;font-size:13px;">
 
+                            {% if appointment.booked_by %}
+
+                                {% if appointment.booked_by.innermember %}
+
+                                    {% if appointment.booked_by.innermember.role == 'doctor' %}
+                                        Dr. {{ appointment.booked_by.get_full_name|default:appointment.booked_by.username }}
+
+                                    {% elif appointment.booked_by.innermember.role == 'biller' %}
+                                        {{ appointment.booked_by.get_full_name|default:appointment.booked_by.username }} (Biller)
+
+                                    {% else %}
+                                        {{ appointment.booked_by.get_full_name|default:appointment.booked_by.username }}
+                                    {% endif %}
+
+                                {% else %}
+
+                                    {{ appointment.booked_by.get_full_name|default:appointment.booked_by.username }}
+
+                                {% endif %}
+
+                            {% else %}
+
+                                {% if appointment.doctor %}
+                                    Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}
+                                {% else %}
+                                    —
+                                {% endif %}
+
+                            {% endif %}
+
+                        </td>
                         <td class="appointment-time">{{ appointment.time_slot|time:"h:i A" }}</td>
 
                         <!-- Status -->

@@ -1,222 +1,374 @@
 {% extends "doctor/main.html" %}
-{% block title %}Add Appointment - Doctor Dashboard{% endblock %}
+{% block title %}Add Appointment{% endblock %}
 {% block content %}
+
 <main class="main-content" id="mainContent">
-    <div class="container-fluid px-3 px-md-4 py-4 py-md-5">
+    <div class="patient-form-shell">
 
         <!-- Page Header -->
-        <div class="mb-4 mb-md-5">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                <div>
-                    <!-- Small breadcrumb style text for professional look -->
-                    <nav aria-label="breadcrumb" class="mb-2">
-                        <ol class="breadcrumb mb-0 small">
-                            <li class="breadcrumb-item"><a href="{% url 'appointment:manage_appointments' %}"
-                                    class="text-secondary text-decoration-none">Appointments</a></li>
-                            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Schedule
-                                Appointment</li>
-                        </ol>
-                    </nav>
-                    <h1 class="h3 h2-md fw-bold text-dark mb-0">Schedule Appointment</h1>
-                </div>
-                <a href="{% url 'appointment:manage_appointments' %}"
-                    class="btn btn-outline-secondary btn-sm rounded-3 px-3">
-                    <i class="bi bi-arrow-left me-1"></i> Back to List
-                </a>
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <h2 class="page-title mb-1">Schedule Appointment</h2>
+                <p class="text-muted small mb-0">Search patient and fill in the details below to book a slot.</p>
             </div>
+            <a href="{% url 'appointment:manage_appointments' %}" class="patient-link-btn">
+                <i class="bi bi-arrow-left me-1"></i> Back to List
+            </a>
         </div>
 
         <!-- Form Card -->
-        <div class="row justify-content-center">
-            <div class="col-xl-7 col-lg-8 col-md-9">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden"
-                    style="border: 1px solid rgba(0,0,0,0.05) !important;">
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                <i class="bi bi-calendar-plus-fill"></i> Patient Appointment Form
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate class="needs-validation row g-3">
+                    {% csrf_token %}
 
-                    <!-- Card Header with Icon -->
-                    <div class="card-header border-0 p-4 bg-primary">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-white bg-opacity-25 rounded-3 d-flex align-items-center justify-content-center"
-                                style="width: 48px; height: 48px;">
-                                <i class="bi bi-calendar-plus-fill text-white" style="font-size: 1.4rem;"></i>
-                            </div>
-                            <div class="text-white">
-                                <h5 class="mb-0 fw-bold">Patient Appointment Form</h5>
-                                <small class="text-white-50" style="font-size: 0.85rem;">Fill in the details below to
-                                    book a slot</small>
-                            </div>
+                    <!-- Section label -->
+                    <div class="col-12">
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
+                            <i class="bi bi-person-circle"></i> Patient Details
                         </div>
                     </div>
 
-                    <div class="card-body p-4 p-md-5">
-                        <form method="post" novalidate class="needs-validation">
-                            {% csrf_token %}
-
-                            <!-- Patient Selection Section -->
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="bi bi-person-circle text-primary"></i>
-                                    <label for="id_patient" class="form-label fw-semibold text-dark mb-0">Select
-                                        Patient</label>
-                                    <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto"
-                                        style="font-size: 0.7rem;">Required</span>
-                                </div>
-                                <select class="form-select form-control-lg rounded-3 border" id="id_patient"
-                                    name="patient" required style="padding: 0.7rem 1rem;">
-                                    <option value="">-- Choose a Patient --</option>
-                                    {% if record %}
-                                    {% for patient in record %}
-                                    <option value="{{ patient.id }}">{{ patient.user.get_full_name }}</option>
-                                    {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div>
-
-                            <!-- Appointment Date & Time Row -->
-                            <div class="row g-4 mb-4">
-                                <div class="col-md-6">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <i class="bi bi-calendar3 text-primary"></i>
-                                        <label for="id_appointment_date"
-                                            class="form-label fw-semibold text-dark mb-0">Date</label>
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto"
-                                            style="font-size: 0.7rem;">Required</span>
-                                    </div>
-                                    <input type="date" class="form-control form-control-lg rounded-3 border"
-                                        id="id_appointment_date" name="appointment_date" required
-                                        style="padding: 0.7rem 1rem;">
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <i class="bi bi-clock-history text-primary"></i>
-                                        <label for="id_time_slot" class="form-label fw-semibold text-dark mb-0">Time
-                                            Slot</label>
-                                        <span class="badge bg-danger bg-opacity-10 text-danger border-0 ms-auto"
-                                            style="font-size: 0.7rem;">Required</span>
-                                    </div>
-                                    <select id="id_time_slot" class="form-select form-control-lg rounded-3 border"
-                                        name="time_slot" required style="padding: 0.7rem 1rem;">
-                                        <option value="">-- Select Time --</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <!-- Notes Section -->
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center gap-2 mb-2">
-                                    <i class="bi bi-chat-left-text text-primary"></i>
-                                    <label for="id_notes" class="form-label fw-semibold text-dark mb-0">Additional
-                                        Notes</label>
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border-0 ms-auto"
-                                        style="font-size: 0.7rem;">Optional</span>
-                                </div>
-                                <textarea class="form-control rounded-3 border" id="id_notes" name="notes" rows="4"
-                                    placeholder="Add special notes, symptoms, or medical history..."
-                                    style="padding: 0.8rem 1rem;"></textarea>
-                            </div>
-
-                            <!-- Divider -->
-                            <hr class="my-4 text-muted opacity-50">
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex flex-column-reverse flex-md-row gap-2 justify-content-md-end pt-1">
-                                <a href="{% url 'appointment:manage_appointments' %}"
-                                    class="btn btn-outline-secondary rounded-3 px-4 fw-medium">
-                                    Cancel
-                                </a>
-                                <button type="submit" class="btn btn-primary rounded-3 px-4 py-2 fw-semibold shadow-sm">
-                                    <i class="bi bi-check-lg me-1"></i> Schedule Appointment
+                    <!-- Patient Search Input -->
+                    <div class="col-12">
+                        <label for="patientSearch" class="form-label" style="font-size:0.85rem; font-weight:600;">
+                            Search Patient <span class="text-danger">*</span>
+                        </label>
+                        <div class="position-relative">
+                            <div class="input-group">
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="patientSearch" 
+                                    placeholder="Type patient name, phone, or email..." 
+                                    autocomplete="off"
+                                >
+                                <button 
+                                    class="btn btn-outline-secondary" 
+                                    type="button" 
+                                    id="clearBtn"
+                                    style="display:none;"
+                                    title="Clear selection"
+                                >
+                                    <i class="bi bi-x-lg"></i>
                                 </button>
                             </div>
-                        </form>
+                            <input 
+                                type="hidden" 
+                                id="patient_selection" 
+                                name="patient_selection" 
+                                required
+                            >
+                            <!-- Search Results Dropdown -->
+                            <div class="search-results" id="searchResults" style="display:none; position:absolute; top:100%; left:0; right:0; background:white; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; max-height:300px; overflow-y:auto; z-index:1000;">
+                            </div>
+                        </div>
+                        <div class="invalid-feedback">Please select a patient.</div>
+                        
+                        <!-- Selected Patient Display -->
+                        <div id="selectedPatientDisplay" style="margin-top:10px; padding:12px 15px; background:#e3f2fd; border:1px solid #90caf9; border-radius:6px; display:none; align-items:center; gap:10px;">
+                            <div style="flex:1;">
+                                <strong style="color:#1565c0;">✓ Selected:</strong> 
+                                <span id="selectedPatientName" style="color:#333; font-weight:500;"></span>
+                            </div>
+                            <button 
+                                type="button" 
+                                id="clearSelectionBtn" 
+                                class="btn btn-sm btn-outline-danger"
+                                style="margin:0;"
+                                title="Change patient selection"
+                            >
+                                <i class="bi bi-x"></i> 
+                            </button>
+                        </div>
+
+                        <!-- Error Message -->
+                        <div id="searchError" style="margin-top:8px; padding:10px; background:#ffebee; color:#c62828; border-radius:6px; display:none; font-size:0.9rem;">
+                        </div>
                     </div>
-                </div>
+
+                    <!-- Section label -->
+                    <div class="col-12 mt-3">
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
+                            <i class="bi bi-calendar3"></i> Date &amp; Time
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="col-md-6">
+                        <label for="id_appointment_date" class="form-label" style="font-size:0.85rem; font-weight:600;">
+                            Appointment Date <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" class="form-control" id="id_appointment_date"
+                               name="appointment_date" required>
+                        <div class="invalid-feedback">Please select a date.</div>
+                    </div>
+
+                    <!-- Time Slot -->
+                    <div class="col-md-6">
+                        <label for="id_time_slot" class="form-label" style="font-size:0.85rem; font-weight:600;">
+                            Time Slot <span class="text-danger">*</span>
+                        </label>
+                        <select id="id_time_slot" class="form-select" name="time_slot" required>
+                            <option value="">-- Select Time --</option>
+                        </select>
+                        <div class="invalid-feedback">Please select a time slot.</div>
+                    </div>
+
+                    <!-- Section label -->
+                    <div class="col-12 mt-3">
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
+                            <i class="bi bi-chat-left-text"></i> Notes
+                        </div>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="col-12">
+                        <label for="id_notes" class="form-label" style="font-size:0.85rem; font-weight:600;">
+                            Additional Notes <small class="fw-normal text-muted">(optional)</small>
+                        </label>
+                        <textarea class="form-control" id="id_notes" name="notes" rows="4"
+                                  placeholder="Add special notes, symptoms, or medical history..."></textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                        <a href="{% url 'appointment:manage_appointments' %}" class="patient-link-btn">
+                            Cancel
+                        </a>
+                        <button type="submit" class="action-btn" id="submitBtn" disabled>
+                            <i class="bi bi-check2-circle me-1"></i> Schedule Appointment
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
+
     </div>
-
-    <!-- Enhanced JavaScript -->
-    <script>
-        // Generate time slots
-
-        // Date validation - prevent past dates
-        function setMinDate() {
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-
-            const dateInput = document.getElementById('id_appointment_date');
-            dateInput.setAttribute('min', `${yyyy}-${mm}-${dd}`);
-        }
-
-        // Form validation with Bootstrap
-        function setupFormValidation() {
-            const form = document.querySelector('form');
-            if (form) {
-                form.addEventListener('submit', function (e) {
-                    if (!form.checkValidity()) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-                    form.classList.add('was-validated');
-                });
-
-                // Add visual feedback to form controls
-                const inputs = form.querySelectorAll('.form-control, .form-select');
-                inputs.forEach(input => {
-                    input.addEventListener('focus', function () {
-                        this.classList.add('border-primary');
-                    });
-                    input.addEventListener('blur', function () {
-                        if (!this.value) {
-                            this.classList.remove('border-primary');
-                        }
-                    });
-                });
-            }
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function () {
-
-            setMinDate();
-            setupFormValidation();
-        });
-    </script>
-    <script>
-        document.getElementById('id_appointment_date').addEventListener('change', function () {
-            let date = this.value;
-
-            console.log("Selected Date:", date);
-
-            fetch(`/appointment/get-slots/?appointment_date=${date}`)
-                .then(res => res.json())
-                .then(data => {
-                    console.log("API Response:", data);
-
-                    let select = document.getElementById("id_time_slot");
-                    select.innerHTML = '<option value="">-- Select Time --</option>';
-
-                    if (data.slots && data.slots.length > 0) {
-                        data.slots.forEach(slot => {
-
-                            let option = document.createElement("option");
-
-                            option.value = slot;
-                            option.textContent = slot;
-
-                            select.appendChild(option);
-                        });
-                    } else {
-                        let option = document.createElement("option");
-                        option.textContent = "No slots available";
-                        select.appendChild(option);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                });
-        });
-    </script>
 </main>
+
+<style>
+    .search-results {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-result-item {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .search-result-item:hover {
+        background: #f7f9ff;
+    }
+
+    .search-result-item:last-child {
+        border-bottom: none;
+    }
+
+    .search-result-label {
+        font-size: 0.7rem;
+        color: #888;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .search-result-name {
+        font-weight: 600;
+        color: #333;
+        margin: 3px 0;
+        font-size: 0.95rem;
+    }
+
+    .search-result-phone {
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    #clearBtn {
+        border-left: none !important;
+    }
+
+    #patientSearch:focus + #clearBtn,
+    #patientSearch:not(:placeholder-shown) + #clearBtn {
+        display: block !important;
+    }
+</style>
+
+<script>
+    // Set minimum date to today
+    function setMinDate() {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm   = String(today.getMonth() + 1).padStart(2, '0');
+        const dd   = String(today.getDate()).padStart(2, '0');
+        document.getElementById('id_appointment_date').setAttribute('min', `${yyyy}-${mm}-${dd}`);
+    }
+
+    // Bootstrap form validation
+    function setupFormValidation() {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function (e) {
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            });
+        }
+    }
+
+    // Patient Search Functionality
+    const patientSearch = document.getElementById('patientSearch');
+    const searchResults = document.getElementById('searchResults');
+    const patientSelection = document.getElementById('patient_selection');
+    const selectedPatientDisplay = document.getElementById('selectedPatientDisplay');
+    const selectedPatientName = document.getElementById('selectedPatientName');
+    const clearBtn = document.getElementById('clearBtn');
+    const clearSelectionBtn = document.getElementById('clearSelectionBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const searchError = document.getElementById('searchError');
+
+    let searchTimeout;
+
+    patientSearch.addEventListener('input', async function() {
+        const query = this.value.trim();
+        clearTimeout(searchTimeout);
+        searchError.style.display = 'none';
+
+        // Show clear button if has input
+        if (query.length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+
+        if (query.length < 2) {
+            searchResults.style.display = 'none';
+            return;
+        }
+
+        // Debounce search
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`/appointment/search-patients/?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    searchError.textContent = data.error;
+                    searchError.style.display = 'block';
+                    searchResults.style.display = 'none';
+                    return;
+                }
+
+                if (data.results && data.results.length > 0) {
+                    searchResults.innerHTML = data.results.map(result => `
+                        <div class="search-result-item" data-id="${result.id}">
+                            <div class="search-result-label">${result.type}</div>
+                            <div class="search-result-name">${result.name}</div>
+                            <div class="search-result-phone">📱 ${result.phone}</div>
+                        </div>
+                    `).join('');
+
+                    searchResults.style.display = 'block';
+
+                    // Add click listeners
+                    document.querySelectorAll('.search-result-item').forEach(item => {
+                        item.addEventListener('click', function() {
+                            const id = this.dataset.id;
+                            const name = this.querySelector('.search-result-name').textContent;
+                            const type = this.querySelector('.search-result-label').textContent;
+
+                            patientSelection.value = id;
+                            patientSearch.value = `${name} (${type})`;
+                            selectedPatientName.textContent = `${name} (${type})`;
+                            selectedPatientDisplay.style.display = 'flex';
+                            searchResults.style.display = 'none';
+                            submitBtn.disabled = false;
+                            clearBtn.style.display = 'none';
+                        });
+                    });
+                } else {
+                    searchResults.innerHTML = '<div class="search-result-item" style="text-align:center; color:#999; padding:20px;">No results found</div>';
+                    searchResults.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                searchError.textContent = 'Error searching patients. Please try again.';
+                searchError.style.display = 'block';
+                searchResults.style.display = 'none';
+            }
+        }, 500); // Debounce 500ms
+    });
+
+    // Clear button - just clear search field
+    clearBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        patientSearch.value = '';
+        clearBtn.style.display = 'none';
+        searchResults.style.display = 'none';
+    });
+
+    // Clear selection button - reset everything
+    clearSelectionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        patientSelection.value = '';
+        patientSearch.value = '';
+        selectedPatientDisplay.style.display = 'none';
+        submitBtn.disabled = true;
+        clearBtn.style.display = 'none';
+        searchResults.style.display = 'none';
+        searchError.style.display = 'none';
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#patientSearch') && !e.target.closest('#searchResults')) {
+            searchResults.style.display = 'none';
+        }
+    });
+
+    // Fetch available time slots on date change
+    document.getElementById('id_appointment_date').addEventListener('change', function () {
+        const date   = this.value;
+        const select = document.getElementById('id_time_slot');
+        select.innerHTML = '<option value="">-- Loading slots... --</option>';
+
+        fetch(`/appointment/get-slots/?appointment_date=${date}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.slots && data.slots.length > 0) {
+                    select.innerHTML = '<option value="">-- Select Time --</option>';
+                    data.slots.forEach(slot => {
+                        const option = document.createElement('option');
+                        option.value       = slot;
+                        option.textContent = slot;
+                        select.appendChild(option);
+                    });
+                } else {
+                    select.innerHTML = '<option value="">No slots available</option>';
+                }
+            })
+            .catch(err => {
+                console.error('Error fetching slots:', err);
+                select.innerHTML = '<option value="">Error loading slots</option>';
+            });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setMinDate();
+        setupFormValidation();
+    });
+</script>
+
 {% endblock %}

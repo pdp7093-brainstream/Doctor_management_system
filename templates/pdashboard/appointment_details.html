@@ -163,7 +163,7 @@
                     <div class="label">Doctor Name</div>
                     <div class="value">
                         {% if appointment.doctor and appointment.doctor.user %}
-                            Dr. {{ appointment.doctor.user.username }} {{ appointment.doctor.user.last_name }}
+                            Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}
                         {% else %}
                             <span style="color:var(--muted);">Not assigned yet</span>
                         {% endif %}

@@ -5,13 +5,15 @@
 
 <main class="main-content" id="mainContent">
     <div class="patient-form-shell">
-        <div class="page-header patient-form-header">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h2 class="page-title mb-0">Add Patient</h2>
-                <p class="page-subtitle">Add a new main patient or a family member of an existing patient.</p>
+                <h2 class="page-title mb-1">Add Patient</h2>
+                <p class="text-muted small mb-0">Add a new main patient or a family member of an existing patient.</p>
             </div>
             <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn">
-                <i class="bi"></i> Manage Patients
+                <i class="bi bi-people-fill me-1"></i> Manage Patients
             </a>
         </div>
 
@@ -24,75 +26,83 @@
         {% endfor %}
         {% endif %}
 
-        <div class="patient-form-card">
-            <form method="POST" class="patient-form-grid">
-                {% csrf_token %}
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" class="row g-3">
+                    {% csrf_token %}
 
-                <!-- ── Family Relation (top — determines form mode) ── -->
-                <div style="background:#f0f4ff;border-radius:10px;padding:16px;margin-bottom:20px;">
-                    <div style="font-size:13px;font-weight:700;color:#0d6efd;margin-bottom:12px;">
-                        <i class="bi bi-people"></i> Booking Type
-                    </div>
-                    <div class="patient-form-row">
-                        <div class="patient-field">
-                            <label class="patient-label">Parent Patient <small style="font-weight:400;color:#888;">(optional)</small></label>
-                            <select name="parent_patient" id="parentSelect" class="patient-input">
-                                <option value="">— None (Add as Main Patient) —</option>
-                                {% for p in patients %}
-                                <option value="{{ p.id }}">
-                                    {{ p.user.first_name }}{% if p.user.last_name %} {{ p.user.last_name }}{% endif %}
-                                    ({{ p.phone }})
-                                </option>
-                                {% endfor %}
-                            </select>
+                    <!-- Booking Type -->
+                    <div class="col-12">
+                        <div class="rounded-3 p-3" style="background:#f0f4ff;">
+                            <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color); margin-bottom:12px;">
+                                <i class="bi bi-people"></i> Booking Type
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">
+                                        Parent Patient <small class="fw-normal text-muted">(optional)</small>
+                                    </label>
+                                    <select name="parent_patient" id="parentSelect" class="form-select">
+                                        <option value="">— None (Add as Main Patient) —</option>
+                                        {% for p in patients %}
+                                        <option value="{{ p.id }}">
+                                            {{ p.user.first_name }}{% if p.user.last_name %} {{ p.user.last_name }}{% endif %}
+                                            ({{ p.phone }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6" id="relationField" style="display:none;">
+                                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">Relation *</label>
+                                    <select name="relation" id="relationSelect" class="form-select">
+                                        <option value="">Select Relation</option>
+                                        <option value="Wife">Wife</option>
+                                        <option value="Husband">Husband</option>
+                                        <option value="Son">Son</option>
+                                        <option value="Daughter">Daughter</option>
+                                        <option value="Father">Father</option>
+                                        <option value="Mother">Mother</option>
+                                        <option value="Brother">Brother</option>
+                                        <option value="Sister">Sister</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="modeHint" class="mt-2" style="font-size:0.82rem; color:#6c757d;">
+                                <i class="bi bi-info-circle"></i>
+                                <span id="modeText">No parent selected — this person will be added as a <strong>main patient</strong> with their own login.</span>
+                            </div>
                         </div>
-                        <div class="patient-field" id="relationField" style="display:none;">
-                            <label class="patient-label">Relation *</label>
-                            <select name="relation" id="relationSelect" class="patient-input">
-                                <option value="">Select Relation</option>
-                                <option value="Wife">Wife</option>
-                                <option value="Husband">Husband</option>
-                                <option value="Son">Son</option>
-                                <option value="Daughter">Daughter</option>
-                                <option value="Father">Father</option>
-                                <option value="Mother">Mother</option>
-                                <option value="Brother">Brother</option>
-                                <option value="Sister">Sister</option>
-                                <option value="Other">Other</option>
-                            </select>
+                    </div>
+
+                    <!-- Section label -->
+                    <div class="col-12 mt-1">
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
+                            <i class="bi bi-person"></i> Personal Info
                         </div>
                     </div>
-                    <!-- Mode hint -->
-                    <div id="modeHint" style="margin-top:10px;font-size:13px;color:#6c757d;">
-                        <i class="bi bi-info-circle"></i>
-                        <span id="modeText">No parent selected — this person will be added as a <strong>main patient</strong> with their own login.</span>
-                    </div>
-                </div>
 
-                <!-- ── Personal Info ── -->
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label">Full Name *</label>
-                        <input type="text" name="name" class="patient-input" placeholder="Enter full name" required>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Full Name *</label>
+                        <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
                     </div>
 
-                    <!-- Phone: required for main patient, optional for family member -->
-                    <div class="patient-field" id="phoneField">
-                        <label class="patient-label" id="phoneLabel">
-                            Phone * <small style="font-weight:400;color:#888;" id="phoneHint">(used as login username)</small>
+                    <div class="col-md-6" id="phoneField">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" id="phoneLabel">
+                            Phone * <small class="fw-normal text-muted" id="phoneHint">(used as login username)</small>
                         </label>
-                        <input type="tel" name="phone" id="phoneInput" class="patient-input"
+                        <input type="tel" name="phone" id="phoneInput" class="form-control"
                                placeholder="e.g. 9876543210" maxlength="15">
                     </div>
 
-                    <div class="patient-field">
-                        <label class="patient-label">Date of Birth</label>
-                        <input type="date" name="dob" class="patient-input">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Date of Birth</label>
+                        <input type="date" name="dob" class="form-control">
                     </div>
 
-                    <div class="patient-field">
-                        <label class="patient-label">Gender</label>
-                        <select name="gender" class="patient-input">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Gender</label>
+                        <select name="gender" class="form-select">
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
@@ -100,9 +110,9 @@
                         </select>
                     </div>
 
-                    <div class="patient-field">
-                        <label class="patient-label">Blood Group</label>
-                        <select name="bld_grop" class="patient-input">
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Blood Group</label>
+                        <select name="bld_grop" class="form-select">
                             <option value="">Select Blood Group</option>
                             <option value="A+">A+</option>
                             <option value="A-">A-</option>
@@ -115,28 +125,27 @@
                         </select>
                     </div>
 
-                    <!-- Email: only for main patient -->
-                    <div class="patient-field" id="emailField">
-                        <label class="patient-label">Email</label>
-                        <input type="email" name="email" class="patient-input" placeholder="optional">
+                    <div class="col-md-6" id="emailField">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Email</label>
+                        <input type="email" name="email" class="form-control" placeholder="optional">
                     </div>
-                </div>
 
-                <!-- Address: only for main patient -->
-                <div class="patient-field" id="addressField">
-                    <label class="patient-label">Address</label>
-                    <textarea name="address" class="patient-input patient-textarea" rows="3"
-                              placeholder="Enter complete address"></textarea>
-                </div>
+                    <div class="col-12" id="addressField">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Address</label>
+                        <textarea name="address" class="form-control" rows="3"
+                                  placeholder="Enter complete address"></textarea>
+                    </div>
 
-                <div class="patient-form-actions" style="margin-top:20px;">
-                    <button type="submit" class="patient-submit-btn" id="submitBtn">
-                        <i class="bi bi-check2-circle"></i>
-                        <span id="submitText">Save Patient</span>
-                    </button>
-                </div>
-            </form>
+                    <div class="col-12 d-flex justify-content-end mt-2">
+                        <button type="submit" class="action-btn" id="submitBtn">
+                            <i class="bi bi-check2-circle me-1"></i>
+                            <span id="submitText">Save Patient</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
+
     </div>
 </main>
 
@@ -155,25 +164,21 @@ const submitText     = document.getElementById('submitText');
 parentSelect.addEventListener('change', function () {
     const isFamilyMember = !!this.value;
 
-    // Show/hide relation
     relationField.style.display  = isFamilyMember ? 'block' : 'none';
     relationSelect.required      = isFamilyMember;
 
-    // Phone — still show but not required for family member
     phoneInput.required = !isFamilyMember;
     if (isFamilyMember) {
-        phoneHint.textContent    = '(optional for family member)';
+        phoneHint.textContent           = '(optional for family member)';
         phoneLabel.childNodes[0].textContent = 'Phone ';
     } else {
-        phoneHint.textContent    = '(used as login username)';
+        phoneHint.textContent           = '(used as login username)';
         phoneLabel.childNodes[0].textContent = 'Phone * ';
     }
 
-    // Hide email + address for family member
     emailField.style.display   = isFamilyMember ? 'none' : 'block';
     addressField.style.display = isFamilyMember ? 'none' : 'block';
 
-    // Mode hint + button text
     if (isFamilyMember) {
         const parentName = this.options[this.selectedIndex].text;
         modeText.innerHTML = ` Parent selected — this person will be added as a <strong>family member</strong> of <strong>${parentName}</strong>. No separate login will be created.`;

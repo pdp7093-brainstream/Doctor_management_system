@@ -9,13 +9,12 @@ from .models import Bill, BillItem
 from appointment.models import Visit
 from doctor.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
-
-def generate_bill_from_visit(BillingAccessMixin,visit):
+def generate_bill_from_visit(visit):
     """
     Visit complete hone ke baad automatically bill banao
     Prescription items se BillItems create karo
     """
-    # Lazy import to avoid circular import (appointment → billing → clinic)
+
     from clinic.models import ClinicSettings
 
     # Agar bill already hai to return karo
@@ -23,6 +22,7 @@ def generate_bill_from_visit(BillingAccessMixin,visit):
         return visit.bill
 
     prescription = getattr(visit, 'prescription', None)
+
     if not prescription:
         return None
 
@@ -33,7 +33,7 @@ def generate_bill_from_visit(BillingAccessMixin,visit):
     subtotal = Decimal('0')
 
     clinic = ClinicSettings.get()
-    
+
     bill = Bill.objects.create(
         visit=visit,
         subtotal=0,
@@ -42,37 +42,41 @@ def generate_bill_from_visit(BillingAccessMixin,visit):
     )
 
     for item in items:
-        variant   = item.medicine_variant
+
+        variant = item.medicine_variant
+
         if not variant:
             continue
 
-        # Qty calculate karo dosage se
         try:
             parts = item.dosage.split(' (')
             m_a_n = parts[0].split('-')
+
             m = int(m_a_n[0])
             a = int(m_a_n[1])
             n = int(m_a_n[2])
+
         except Exception:
             m = a = n = 0
 
-        qty        = (m + a + n) * item.days
+        qty = (m + a + n) * item.days
+
         unit_price = variant.selling_price
-        total      = qty * unit_price
+
+        total = qty * unit_price
 
         BillItem.objects.create(
-            bill             = bill,
-            medicine_variant = variant,
-            medicine_name    = variant.medicine.name,
-            power            = variant.power,
-            quantity         = qty,
-            unit_price       = unit_price,
-            total_price      = total,
+            bill=bill,
+            medicine_variant=variant,
+            medicine_name=variant.medicine.name,
+            power=variant.power,
+            quantity=qty,
+            unit_price=unit_price,
+            total_price=total,
         )
 
         subtotal += total
 
-    # Bill update karo
     bill.subtotal = subtotal
     bill.save()
 

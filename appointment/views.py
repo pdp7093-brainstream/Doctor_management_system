@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.views import View
 from doctor.decorators import role_required
-from accounts.models import Patient
+from accounts.models import Patient, FamilyMember  # ← MAKE SURE THIS IS HERE
 from doctor.models import InnerMember
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
@@ -17,14 +17,86 @@ from django.core.paginator import Paginator
 from datetime import datetime, time, timedelta
 from billing.views import generate_bill_from_visit
 from clinic.models import ClinicSettings
+import json
+import re
+
+
+# ─────────────────────────────────────────
+# Search Patients + Family Members - FIXED
+# ─────────────────────────────────────────
+
+@role_required('doctor')
+def search_patients(request):
+    """Search for patients (main user or family member) - WORKING VERSION"""
+    query = request.GET.get('q', '').strip()
+
+    print(f"🔍 Searching for: '{query}'")
+
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+
+    try:
+        results = []
+
+        # ✅ Search main patients
+        print("  → Searching patients...")
+        patients = Patient.objects.filter(
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(phone__icontains=query)
+        ).select_related('user').values(
+            'id', 'user__first_name', 'user__last_name', 'phone', 'user__email'
+        )[:10]
+
+        print(f"  ✓ Found {patients.count()} patients")
+
+        for p in patients:
+            full_name = f"{p['user__first_name']} {p['user__last_name']}".strip() or p['user__email']
+            results.append({
+                'id': f"patient_{p['id']}",
+                'name': full_name,
+                'type': 'Main Patient',
+                'phone': p['phone'] or 'N/A',
+                'display': f"{full_name} (Main Patient) - {p['phone'] or 'No Phone'}"
+            })
+
+        # ✅ Search family members
+        print("  → Searching family members...")
+        family_members = FamilyMember.objects.filter(
+            Q(name__icontains=query) |
+            Q(phone__icontains=query)
+        ).select_related('patient__user').values(
+            'id', 'name', 'relation', 'phone'
+        )[:10]
+
+        print(f"  ✓ Found {family_members.count()} family members")
+
+        for fm in family_members:
+            results.append({
+                'id': f"family_{fm['id']}",
+                'name': fm['name'],
+                'type': f"Family Member ({fm['relation']})",
+                'phone': fm['phone'] or 'N/A',
+                'display': f"{fm['name']} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
+            })
+
+        print(f"✅ Total results: {len(results)}")
+        return JsonResponse({'results': results})
+
+    except Exception as e:
+        print(f"❌ Error in search_patients: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': f'Search error: {str(e)}'}, status=500)
+
+
 # ─────────────────────────────────────────
 # Slot Generator
 # ─────────────────────────────────────────
 
 def generate_slots(selected_date=None):
-
     clinic = ClinicSettings.get()
-
     start_time    = clinic.start_time
     end_time      = clinic.end_time
     lunch_start   = clinic.lunch_start
@@ -32,54 +104,33 @@ def generate_slots(selected_date=None):
     interval      = clinic.slot_duration
 
     slots = []
-
     current = datetime.combine(datetime.today(), start_time)
     end_dt  = datetime.combine(datetime.today(), end_time)
 
     while current < end_dt:
-
         current_time = current.time()
-
-        # Skip lunch break slots
         if lunch_start and lunch_end:
             if lunch_start <= current_time < lunch_end:
                 current += timedelta(minutes=interval)
                 continue
-
         slots.append(current_time)
-
         current += timedelta(minutes=interval)
 
     return slots
+
+
 def get_slots(request):
-
-
     date_str = request.GET.get('appointment_date')
 
     if not date_str:
-        return JsonResponse({
-            'error': 'Date is required'
-        })
+        return JsonResponse({'error': 'Date is required'})
 
     try:
-        selected_date = datetime.strptime(
-            date_str,
-            "%Y-%m-%d"
-        ).date()
-
+        selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
-        return JsonResponse({
-            'error': 'Invalid date format'
-        })
+        return JsonResponse({'error': 'Invalid date format'})
 
-    # ─────────────────────────────────────
-    # Clinic Settings
-    # ─────────────────────────────────────
     clinic = ClinicSettings.get()
-
-    # ─────────────────────────────────────
-    # Future Booking Validation
-    # ─────────────────────────────────────
     today = timezone.localdate()
 
     if selected_date < today:
@@ -89,40 +140,25 @@ def get_slots(request):
         })
 
     max_booking_date = today + timedelta(days=30)
-
     if selected_date > max_booking_date:
         return JsonResponse({
             'slots': [],
             'message': 'Booking allowed only for next 30 days'
         })
 
-    # ─────────────────────────────────────
-    # Weekday Mapping
-    # ─────────────────────────────────────
     day_map = {
-        0: 'mon',
-        1: 'tue',
-        2: 'wed',
-        3: 'thu',
-        4: 'fri',
-        5: 'sat',
-        6: 'sun',
+        0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu',
+        4: 'fri', 5: 'sat', 6: 'sun',
     }
 
     selected_day = day_map[selected_date.weekday()]
 
-    # ─────────────────────────────────────
-    # Working Day Validation
-    # ─────────────────────────────────────
     if not clinic.is_working_day(selected_day):
         return JsonResponse({
             'slots': [],
             'message': 'Clinic is closed on this day'
         })
 
-    # ─────────────────────────────────────
-    # Dynamic Slot Configuration
-    # ─────────────────────────────────────
     start_time   = clinic.start_time
     end_time     = clinic.end_time
     lunch_start  = clinic.lunch_start
@@ -130,82 +166,43 @@ def get_slots(request):
     interval     = clinic.slot_duration
 
     slots = []
-
-    current = datetime.combine(
-        datetime.today(),
-        start_time
-    )
-
-    end_dt = datetime.combine(
-        datetime.today(),
-        end_time
-    )
+    current = datetime.combine(datetime.today(), start_time)
+    end_dt = datetime.combine(datetime.today(), end_time)
 
     while current < end_dt:
-
         current_time = current.time()
-
-        # Skip lunch break slots
         if lunch_start and lunch_end:
-
             if lunch_start <= current_time < lunch_end:
                 current += timedelta(minutes=interval)
                 continue
-
         slots.append(current_time)
-
         current += timedelta(minutes=interval)
 
-    # ─────────────────────────────────────
-    # Fetch Already Booked Slots
-    # ─────────────────────────────────────
     booked_slots = Appointment.objects.filter(
         appointment_date=selected_date
     ).values_list('time_slot', flat=True)
 
-    booked_slots = [
-        t.strftime("%H:%M")
-        for t in booked_slots
-    ]
+    booked_slots = [t.strftime("%H:%M") for t in booked_slots]
 
-    # ─────────────────────────────────────
-    # Remove Past + Booked Slots
-    # ─────────────────────────────────────
     now = timezone.localtime()
-
     filtered_slots = []
 
     for slot in slots:
-
         slot_str = slot.strftime("%H:%M")
 
-        # Remove past slots for today
-        if (
-            selected_date == now.date()
-            and slot <= now.time()
-        ):
+        if (selected_date == now.date() and slot <= now.time()):
             continue
 
-        # Remove already booked slots
         if slot_str in booked_slots:
             continue
 
-        # Convert to 12-hour format
         display_time = datetime.strptime(
-            slot_str,
-            "%H:%M"
+            slot_str, "%H:%M"
         ).strftime("%I:%M %p")
 
         filtered_slots.append(display_time)
 
-    # ─────────────────────────────────────
-    # Final Response
-    # ─────────────────────────────────────
-    return JsonResponse({
-        'slots': filtered_slots
-    })
-
-
+    return JsonResponse({'slots': filtered_slots})
 
 
 # ─────────────────────────────────────────
@@ -221,10 +218,7 @@ class Manage_appointments(View):
         appointment_date = request.GET.get('appointment_date', '')
         status           = request.GET.get('status', 'all')
 
-        # Show doctor's appointments + unassigned ones
-        appointments = Appointment.objects.filter(
-            Q(doctor=doctor) | Q(doctor__isnull=True)
-        )
+        appointments = Appointment.objects.all()
 
         if search:
             appointments = appointments.filter(
@@ -280,39 +274,70 @@ def appointment_detail_modal(request, id):
 
 
 # ─────────────────────────────────────────
-# Add Appointment (Doctor)
+# Add Appointment (Doctor) - UPDATED
 # ─────────────────────────────────────────
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Add_appointment(View):
     def get(self, request):
-        record = Patient.objects.all()
-        return render(request, "doctor/add_appointment.html", {"record": record})
+        return render(request, "doctor/add_appointment.html")
 
     def post(self, request):
-        patient_id       = request.POST.get("patient")
+        patient_selection = request.POST.get("patient_selection")
         appointment_date = request.POST.get("appointment_date")
         time_slot_raw    = request.POST.get("time_slot", "").strip()
         notes            = request.POST.get("notes")
         doctor           = InnerMember.objects.get(user=request.user)
-        patient          = Patient.objects.get(id=patient_id)
 
-        # Convert to 24h if sent as 12h (e.g. "06:00 PM")
+        # Parse patient_selection
+        if not patient_selection or '_' not in patient_selection:
+            messages.error(request, "Please select a valid patient")
+            return redirect('appointment:add_appointment')
+
+        selection_type, selection_id = patient_selection.split('_', 1)
+
+        patient = None
+        family_member = None
+
+        if selection_type == 'patient':
+            try:
+                patient = Patient.objects.get(id=selection_id)
+            except Patient.DoesNotExist:
+                messages.error(request, "Patient not found")
+                return redirect('appointment:add_appointment')
+
+        elif selection_type == 'family':
+            try:
+                family_member = FamilyMember.objects.get(id=selection_id)
+                patient = family_member.patient
+            except FamilyMember.DoesNotExist:
+                messages.error(request, "Family member not found")
+                return redirect('appointment:add_appointment')
+        else:
+            messages.error(request, "Invalid selection")
+            return redirect('appointment:add_appointment')
+
+        # Convert time to 24h format
         try:
             if "AM" in time_slot_raw.upper() or "PM" in time_slot_raw.upper():
                 time_slot = datetime.strptime(time_slot_raw, "%I:%M %p").time()
             else:
                 time_slot = datetime.strptime(time_slot_raw, "%H:%M").time()
         except ValueError:
-            time_slot = time_slot_raw  # fallback
+            messages.error(request, "Invalid time format")
+            return redirect('appointment:add_appointment')
 
+        # Create appointment
         Appointment.objects.create(
             patient          = patient,
+            family_member    = family_member,
             doctor           = doctor,
             appointment_date = appointment_date,
             time_slot        = time_slot,
             notes            = notes,
         )
+
+        messages.success(request, "Appointment scheduled successfully")
         return redirect('appointment:manage_appointments')
 
 
@@ -322,55 +347,122 @@ class Add_appointment(View):
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class Book_appointment(View):
+
     def get(self, request):
-        from accounts.models import FamilyMember
-        family_members = FamilyMember.objects.filter(patient=request.user.patient)
-        return render(request, "appointment.html", {'family_members': family_members})
- 
+
+        family_members = FamilyMember.objects.filter(
+            patient=request.user.patient
+        )
+
+        return render(request, "appointment.html", {
+            'family_members': family_members
+        })
+
     def post(self, request):
-        from accounts.models import FamilyMember
- 
+
         name             = request.POST.get('name', '').strip()
         appointment_date = request.POST.get("date")
-        time_slot        = request.POST.get("time_slot")
+        time_slot        = request.POST.get("time_slot", "").strip()
         notes            = request.POST.get("message")
         family_member_id = request.POST.get("family_member_id")
- 
-        # Convert 12hr → 24hr
-        time_24 = datetime.strptime(time_slot, "%I:%M %p").time()
- 
+
+        # =========================
+        # TIME CONVERSION FIX
+        # =========================
+
+        try:
+
+            # 12-hour format
+            if "AM" in time_slot.upper() or "PM" in time_slot.upper():
+
+                parsed_time = datetime.strptime(
+                    time_slot,
+                    "%I:%M %p"
+                )
+
+            else:
+
+                # 24-hour format
+                parsed_time = datetime.strptime(
+                    time_slot,
+                    "%H:%M"
+                )
+
+            time_24 = parsed_time.time()
+
+        except ValueError:
+
+            messages.error(
+                request,
+                "Invalid time format"
+            )
+
+            return redirect('appointment:appointment')
+
         patient = Patient.objects.get(user=request.user)
-        doctor  = InnerMember.objects.first()
- 
+
+        # Doctor fetch
+        doctor = InnerMember.objects.filter(
+            role='doctor'
+        ).first()
+
         # Double booking prevention
         if Appointment.objects.filter(
             appointment_date=appointment_date,
             time_slot=time_24
         ).exists():
-           
+
+            messages.error(
+                request,
+                "This slot is already booked"
+            )
+
             return redirect('appointment:appointment')
- 
+
         # Family member resolve
         family_member = None
+
         if family_member_id:
+
             try:
-                family_member = FamilyMember.objects.get(id=family_member_id, patient=patient)
+
+                family_member = FamilyMember.objects.get(
+                    id=family_member_id,
+                    patient=patient
+                )
+
             except FamilyMember.DoesNotExist:
-                pass
- 
+
+                family_member = None
+
+        # =========================
+        # CREATE APPOINTMENT
+        # =========================
+
         Appointment.objects.create(
-            patient          = patient,
-            family_member    = family_member,
-            doctor           = doctor,
-            appointment_date = appointment_date,
-            time_slot        = time_24,
-            notes            = notes,
+
+            patient=patient,
+            family_member=family_member,
+            doctor=doctor,
+
+            # WHO BOOKED
+            booked_by=request.user,
+
+            appointment_date=appointment_date,
+
+            # IMPORTANT
+            time_slot=time_24,
+
+            notes=notes,
         )
- 
+
+        messages.success(
+            request,
+            "Appointment booked successfully"
+        )
+
         return redirect('appointment:appointment')
-
-
-# ─────────────────────────────────────────
+    # ─────────────────────────────────────────
 # Start Visit (Doctor)
 # ─────────────────────────────────────────
 
@@ -400,7 +492,6 @@ class PrescriptionView(View):
     def get(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
         
-        # --- Date Comparison Logic ---
         today = timezone.now().date()
         is_today = visit.appointment.appointment_date == today
 
@@ -431,12 +522,10 @@ class PrescriptionView(View):
             'variants': variants,
             'items': items,
             'visit_completed': visit.visted_status == 'completed' or visit.appointment.status == 'completed',
-            'is_today': is_today,  # Template ke liye
+            'is_today': is_today,
         })
 
-    # ... reduce_stock method same rahega ...
     def reduce_stock(self, prescription):
-        # (Aapka purana logic yahan rahega)
         errors = []
         pending_items = prescription.items.select_related('medicine_variant__medicine').filter(should_deduct=True)
         for item in pending_items:
@@ -445,12 +534,15 @@ class PrescriptionView(View):
                 parts = item.dosage.split(' (')
                 m_a_n = parts[0].split('-')
                 morning, afternoon, night = int(m_a_n[0]), int(m_a_n[1]), int(m_a_n[2])
-            except: morning = afternoon = night = 0
+            except:
+                morning = afternoon = night = 0
             total_qty = (morning + afternoon + night) * item.days
             if total_qty <= 0:
                 item.should_deduct, item.was_deducted = False, True
-                item.save(); continue
-            if variant.stock >= total_qty: variant.stock -= total_qty
+                item.save()
+                continue
+            if variant.stock >= total_qty:
+                variant.stock -= total_qty
             else:
                 errors.append(f"{variant.medicine.name}: Req {total_qty}, Avail {variant.stock}")
                 variant.stock = 0
@@ -474,7 +566,6 @@ class PrescriptionView(View):
 
         prescription, _ = Prescription.objects.get_or_create(visit=visit)
 
-        # ... (Prescription Item saving logic same rahega) ...
         variant_ids = request.POST.getlist("variant_id[]")
         item_ids = request.POST.getlist("item_id[]")
         morning_list = request.POST.getlist("morning")
@@ -488,7 +579,8 @@ class PrescriptionView(View):
         submitted_item_ids = []
 
         for i, (item_id_str, v_id, m, a, n, meal, days) in enumerate(zip(item_ids, variant_ids, morning_list, afternoon_list, night_list, meal_list, days_list)):
-            if not v_id: continue
+            if not v_id:
+                continue
             variant = MedicineVariant.objects.get(id=v_id)
             dosage = f"{m}-{a}-{n} ({meal})"
             should_deduct = str(i) in deduct_list
@@ -499,19 +591,21 @@ class PrescriptionView(View):
                     item = PrescriptionItem.objects.get(id=item_id_int, prescription=prescription)
                     item.medicine_variant, item.dosage, item.days, item.should_deduct = variant, dosage, int(days), should_deduct
                     item.save()
-                except: pass
+                except:
+                    pass
             else:
                 new_item = PrescriptionItem.objects.create(prescription=prescription, medicine_variant=variant, dosage=dosage, days=int(days), should_deduct=should_deduct)
                 submitted_item_ids.append(new_item.id)
 
         items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
-        if items_to_delete: PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
+        if items_to_delete:
+            PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
 
         if is_completing:
             stock_errors = self.reduce_stock(prescription)
             if stock_errors:
-                for err in stock_errors: messages.warning(request, f"Low stock: {err}")
-            # generate_bill_from_visit(visit) # Iska import check kar lena
+                for err in stock_errors:
+                    messages.warning(request, f"Low stock: {err}")
 
         appointment = visit.appointment
         if is_completing:
@@ -520,15 +614,14 @@ class PrescriptionView(View):
             appointment.status = "confirmed"
         appointment.save()
 
-        # --- Redirect Logic based on Date ---
         if is_completing:
             return redirect('billing:bill_detail', visit_id=visit.id)
         
-        # Check if it was a today's appointment
         if appointment.appointment_date == timezone.now().date():
-            return redirect("doctor:dashboard") # Aaj ka dashboard
+            return redirect("doctor:dashboard")
         else:
-            return redirect("appointment:manage_appointments") # History ya manage page
+            return redirect("appointment:manage_appointments")
+
 
 # ─────────────────────────────────────────
 # Appointment Detail (Patient)

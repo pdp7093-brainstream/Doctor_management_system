@@ -97,7 +97,6 @@ DATABASES = {
     }
 
 }
-
 ALLOWED_HOSTS = ['*']
 # Ya phir sab allow karne ke liye: ALLOWED_HOSTS = ['*']
 

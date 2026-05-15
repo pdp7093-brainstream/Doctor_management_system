@@ -19,7 +19,7 @@
             <i class="bi bi-clock-history me-2"></i>View History
         </a>
     {% endif %}
-</div>
+    </div>
 
         <!-- Main Form -->
         <form method="post" id="visitForm">
@@ -36,14 +36,16 @@
                         <div class="card-body p-4">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
-                                    <input type="text" class="form-control form-control-lg bg-light"
-                                        value="{% if visit %}{{ visit.patient.user.get_full_name }}{% endif %}"
-                                        readonly>
+                                <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
+                            <input type="text" 
+                                class="form-control bg-secondary-subtle" 
+                                style="text-align: left !important;"
+                                value="{% if visit.appointment.family_member %}{{ visit.appointment.family_member.name }}{% else %}{{ visit.appointment.patient.user.get_full_name }}{% endif %}"
+                                readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
-                                    <input type="text" class="form-control form-control-lg bg-light"
+                                    <input type="text" class="form-control form-control-lg bg-secondary-subtle"
                                         value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}"
                                         readonly>
                                 </div>
@@ -341,146 +343,363 @@
     </div>
 
     <!-- ===== STYLES ===== -->
-    <style>
-        /* ---- Toggle Switch ---- */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 48px;
-            height: 26px;
-            cursor: pointer;
-            margin-bottom: 0;
+    
+<style>
+    /* ===== PAGE ===== */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        flex-wrap: wrap;
+    }
+
+    .page-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--dark-text);
+        margin-bottom: 4px;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        font-size: 0.92rem;
+        margin: 0;
+    }
+
+    /* ===== CARD ===== */
+    .visit-card {
+        background: var(--white);
+        border-radius: 16px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .visit-card-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .visit-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        color: var(--dark-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .visit-card-title i {
+        color: var(--primary-color);
+    }
+
+    .visit-card-body {
+        padding: 22px;
+    }
+
+    /* ===== FORM ===== */
+    .form-label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 8px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        min-height: 48px;
+        border: 1px solid #dbe2ea;
+        box-shadow: none !important;
+        font-size: 0.92rem;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08) !important;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    /* ===== BUTTONS ===== */
+    .visit-btn {
+        border: none;
+        border-radius: 12px;
+        padding: 11px 18px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: 0.2s ease;
+        text-decoration: none;
+    }
+
+    .visit-btn-primary {
+        background: var(--primary-color);
+        color: #fff;
+    }
+
+    .visit-btn-primary:hover {
+        background: #2563eb;
+        color: #fff;
+    }
+
+    .visit-btn-success {
+        background: #16a34a;
+        color: #fff;
+    }
+
+    .visit-btn-success:hover {
+        background: #15803d;
+        color: #fff;
+    }
+
+    .visit-btn-outline {
+        background: #fff;
+        border: 1px solid #dbe2ea;
+        color: #475569;
+    }
+
+    .visit-btn-outline:hover {
+        background: #f8fafc;
+        color: #111827;
+    }
+
+    /* ===== SUMMARY ===== */
+    .summary-box {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 18px;
+        background: #f8fafc;
+    }
+
+    .summary-box h6 {
+        font-size: 0.92rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .summary-badge {
+        background: rgba(59, 130, 246, 0.12);
+        color: var(--primary-color);
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    /* ===== TABLE ===== */
+    .table-wrap {
+        overflow-x: auto;
+        width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .visit-table {
+        width: 100%;
+        min-width: 950px;
+        margin-bottom: 0;
+    }
+
+    .visit-table thead th {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        color: #475569;
+        font-size: 0.84rem;
+        font-weight: 700;
+        padding: 16px;
+        white-space: nowrap;
+    }
+
+    .visit-table tbody td {
+        padding: 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .visit-table tbody tr:hover {
+        background: #f8fbff;
+    }
+
+    /* ===== BADGES ===== */
+    .custom-badge {
+        padding: 6px 12px;
+        border-radius: 50px;
+        font-size: 0.76rem;
+        font-weight: 700;
+    }
+
+    .badge-after {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .badge-before {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    /* ===== TOGGLE ===== */
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 26px;
+    }
+
+    .toggle-input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        inset: 0;
+        background: #dbe2ea;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .toggle-slider::before {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        left: 3px;
+        top: 3px;
+        border-radius: 50%;
+        background: #fff;
+        transition: 0.2s ease;
+    }
+
+    .toggle-input:checked + .toggle-slider {
+        background: #16a34a;
+    }
+
+    .toggle-input:checked + .toggle-slider::before {
+        transform: translateX(22px);
+    }
+
+    /* ===== EMPTY ===== */
+    .empty-box {
+        text-align: center;
+        padding: 60px 20px;
+        color: #94a3b8;
+    }
+
+    .empty-box i {
+        font-size: 3rem;
+        opacity: 0.25;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-content {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 22px 24px 0;
+    }
+
+    .modal-body {
+        padding: 22px 24px;
+    }
+
+    .modal-footer {
+        padding: 0 24px 24px;
+    }
+
+    /* ===== SEARCH RESULT ===== */
+    .med-result-item {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 12px;
+        background: #fff;
+        transition: 0.2s ease;
+    }
+
+    .med-result-item:hover {
+        border-color: #bfdbfe;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08);
+    }
+
+    .variant-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .v-chip {
+        padding: 7px 14px;
+        background: #f8fafc;
+        border: 1px solid #dbe2ea;
+        border-radius: 50px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .v-chip:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .v-chip.selected {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: #fff;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 1.4rem;
         }
 
-        .toggle-switch .toggle-input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-            position: absolute;
+        .visit-card-header,
+        .visit-card-body {
+            padding: 18px;
         }
 
-        .toggle-slider {
-            position: absolute;
-            inset: 0;
-            background-color: #dee2e6;
-            border-radius: 26px;
-            transition: background-color 0.25s ease;
+        .page-header {
+            flex-direction: column;
+            align-items: stretch;
         }
 
-        .toggle-slider::before {
-            content: "";
-            position: absolute;
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: #fff;
-            border-radius: 50%;
-            transition: transform 0.25s ease;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+        .visit-btn {
+            width: 100%;
         }
-
-        .toggle-input:checked+.toggle-slider {
-            background-color: #198754;
-        }
-
-        .toggle-input:checked+.toggle-slider::before {
-            transform: translateX(22px);
-        }
-
-        /* Legend demo dots */
-        .toggle-demo {
-            display: inline-block;
-            width: 32px;
-            height: 16px;
-            border-radius: 16px;
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .toggle-demo.on {
-            background: #198754;
-        }
-
-        .toggle-demo.off {
-            background: #dee2e6;
-        }
-
-        /* Medicine search styles */
-        .med-result-item {
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 12px;
-            background: #fff;
-            transition: all 0.3s;
-        }
-
-        .med-result-item:hover {
-            border-color: #0d6efd;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .variant-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .v-chip {
-            padding: 6px 14px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 50px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-        }
-
-        .v-chip:hover {
-            background: #e9ecef;
-            border-color: #0d6efd;
-            color: #0d6efd;
-        }
-
-        .v-chip.selected {
-            background: #0d6efd;
-            color: #fff;
-            border-color: #0d6efd;
-        }
-
-        .v-chip.out-of-stock {
-            opacity: 0.5;
-            border-style: dashed;
-            cursor: not-allowed;
-        }
-
-        .stock-dot {
-            height: 6px;
-            width: 6px;
-            background-color: #28a745;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        .out-of-stock .stock-dot {
-            background-color: #dc3545;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #eee;
-            border-radius: 10px;
-        }
-    </style>
+    }
+</style>
 
     <!-- ===== SCRIPTS ===== -->
     <script>
@@ -655,12 +874,66 @@
             updateCounts();
         }
 
+        const rowsPerPage = 5;
+        let currentPage = 1;
+
+        function getMedicineRows() {
+            return Array.from(document.querySelectorAll('#medicineList > tr'));
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('paginationControls');
+            const items = getMedicineRows();
+            if (!container) return;
+            if (items.length <= rowsPerPage) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const prevDisabled = currentPage === 1 ? ' disabled' : '';
+            const nextDisabled = currentPage === totalPages ? ' disabled' : '';
+
+            const pages = Array.from({ length: totalPages }, (_, index) => {
+                const page = index + 1;
+                const active = page === currentPage ? ' active' : '';
+                return `<li class="page-item${active}"><button type="button" class="page-link" onclick="changePage(${page})">${page}</button></li>`;
+            }).join('');
+
+            container.innerHTML = `
+                <li class="page-item${prevDisabled}"><button type="button" class="page-link" onclick="changePage(${currentPage - 1})">Previous</button></li>
+                ${pages}
+                <li class="page-item${nextDisabled}"><button type="button" class="page-link" onclick="changePage(${currentPage + 1})">Next</button></li>
+            `;
+        }
+
+        function showPage(page) {
+            const rows = getMedicineRows();
+            const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
+            currentPage = Math.min(Math.max(page, 1), totalPages);
+
+            rows.forEach((row, index) => {
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = currentPage * rowsPerPage;
+                row.style.display = index >= start && index < end ? '' : 'none';
+            });
+
+            document.getElementById('emptyMessage').style.display = rows.length ? 'none' : 'block';
+            document.getElementById('paginationInfo').textContent = rows.length;
+            document.getElementById('paginationPlural').textContent = rows.length === 1 ? '' : 's';
+            renderPagination(totalPages);
+        }
+
+        function changePage(page) {
+            showPage(page);
+        }
+
         function updateCounts() {
             const totalRows = document.getElementById('medicineList').children.length;
             const deductCount = document.querySelectorAll('input[name="should_deduct[]"]:checked').length;
             document.getElementById('medicineCount').textContent = totalRows;
             const deductEl = document.getElementById('deductCount');
             if (deductEl) deductEl.textContent = deductCount;
+            showPage(currentPage);
         }
     </script>
 </main>

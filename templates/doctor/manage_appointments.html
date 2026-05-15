@@ -1,191 +1,228 @@
 {% extends "doctor/main.html" %}
 {% block title %}Manage Appointments{% endblock %}
 {% block content %}
+
+<style>
+    /* View button — matches staff.html btn-edit-staff style */
+    .btn-view-appt {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-view-appt:hover {
+        background-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+
+    /* Icon inside input */
+    .input-icon-wrap {
+        position: relative;
+    }
+
+    .input-icon-wrap .bi {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 0.88rem;
+        pointer-events: none;
+        z-index: 4;
+    }
+
+    .input-icon-wrap .form-control,
+    .input-icon-wrap .form-select {
+        padding-left: 30px;
+    }
+
+    @media (max-width: 768px) {
+        .btn-view-appt span {
+            display: none;
+        }
+    }
+</style>
+
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
         <div>
             <h2 class="page-title mb-1">Manage Appointments</h2>
-            <p class="page-subtitle text-muted mb-0">Search, filter, and manage all upcoming patient visits from a clean, premium dashboard.</p>
+            <p class="text-muted small mb-0">Search, filter, and manage all patient visits.</p>
         </div>
-        <a href="{% url 'appointment:add_appointment' %}" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm">
-            <i class="bi bi-plus-lg me-2"></i> Add Appointment
+        <a href="{% url 'appointment:add_appointment' %}" class="action-btn">
+            <i class="bi bi-plus-lg"></i> Add Appointment
         </a>
     </div>
 
-    <!-- Filters -->
-    <div class="table-section mb-4 card card-soft border-0 shadow-sm p-4">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Search Patient</label>
-                <div class="input-with-icon">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="search" class="form-control form-control-lg" placeholder="Name or phone..." value="{{ search }}">
+    <!-- Filters Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
+            <i class="bi bi-funnel-fill"></i> Filters
+        </div>
+        <div class="card-body">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">Search Patient</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" id="search" class="form-control" placeholder="Name or phone..." value="{{ search }}">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Date</label>
-                <div class="input-with-icon">
-                    <i class="bi bi-calendar-date"></i>
-                    <input type="date" id="appointmentDate" class="form-control form-control-lg" value="{{ appointment_date }}">
+                <div class="col-md-3">
+                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">Date</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-calendar-date"></i>
+                        <input type="date" id="appointmentDate" class="form-control" value="{{ appointment_date }}">
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Status</label>
-                <div class="input-with-icon select-icon">
-                    <i class="bi bi-filter"></i>
-                    <select id="appointmentStatus" class="form-select form-select-lg">
-                        <option value="all"       {% if status == "all" %}selected{% endif %}>All</option>
-                        <option value="pending"   {% if status == "pending" %}selected{% endif %}>Pending</option>
-                        <option value="confirmed" {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
-                        <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
-                        <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
-                    </select>
+                <div class="col-md-3">
+                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">Status</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-filter"></i>
+                        <select id="appointmentStatus" class="form-select">
+                            <option value="all"       {% if status == "all" %}selected{% endif %}>All</option>
+                            <option value="pending"   {% if status == "pending" %}selected{% endif %}>Pending</option>
+                            <option value="confirmed" {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
+                            <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
+                            <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-2 d-grid">
-                <button id="clearBtn" class="btn btn-outline-secondary btn-lg rounded-pill">Clear</button>
+                <div class="col-md-2 d-grid">
+                    <button id="clearBtn" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Clear
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-section">
-        <div class="table-responsive rounded-4 overflow-hidden shadow-sm" style="background:#ffffff;">
-            <table class="table table-custom align-middle mb-0" style="min-width:820px; width:100%;">
-                <thead class="table-light border-bottom">
-                    <tr>
-                        <th>Patient</th>
-                        <th>Relation</th>
-                        <th>Booked By</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    {% for appointment in appointments %}
-                    <tr>
+    <!-- Appointments Table Card -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
+                <i class="bi bi-calendar-check-fill"></i> Appointments
+            </div>
+            {% if page_obj %}
+            <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
+            {% endif %}
+        </div>
 
-                        <!-- Patient Name -->
-                        <td class="patient-name">
-                            {% if appointment.family_member %}
-                                {{ appointment.family_member.name }}
-                            {% else %}
+        <div class="card-body p-0">
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+                <table class="table table-hover mb-0" style="min-width:820px; width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Relation</th>
+                            <th>Booked By</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        {% for appointment in appointments %}
+                        <tr>
+
+                            <!-- Patient Name -->
+                            <td>
+                                <span style="font-weight:600; color:var(--dark-text);">
+                                    {% if appointment.family_member %}
+                                        {{ appointment.family_member.name }}
+                                    {% else %}
+                                        {{ appointment.patient.user.first_name }}
+                                        {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                    {% endif %}
+                                </span>
+                            </td>
+
+                            <!-- Relation -->
+                            <td>
+                                {% if appointment.family_member %}
+                                    <span class="badge bg-primary bg-opacity-10 text-primary" style="font-weight:600; font-size:0.78rem;">
+                                        {{ appointment.family_member.relation }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success bg-opacity-10 text-success" style="font-weight:600; font-size:0.78rem;">
+                                        Self
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <!-- Booked By -->
+                            <td style="color:#6c757d; font-size:13px;">
                                 {{ appointment.patient.user.first_name }}
                                 {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
-                            {% endif %}
-                        </td>
+                            </td>
 
-                        <!-- Relation -->
-                        <td>
-                            {% if appointment.family_member %}
-                                <span style="
-                                    display:inline-block;
-                                    padding:3px 10px;
-                                    border-radius:20px;
-                                    font-size:12px;
-                                    font-weight:600;
-                                    background:rgba(13,110,253,0.1);
-                                    color:#0d6efd;">
-                                    {{ appointment.family_member.relation }}
-                                </span>
-                            {% else %}
-                                <span style="
-                                    display:inline-block;
-                                    padding:3px 10px;
-                                    border-radius:20px;
-                                    font-size:12px;
-                                    font-weight:600;
-                                    background:rgba(25,135,84,0.1);
-                                    color:#198754;">
-                                    Self
-                                </span>
-                            {% endif %}
-                        </td>
+                            <td style="font-size:0.9rem;">{{ appointment.appointment_date }}</td>
+                            <td style="font-size:0.9rem;">{{ appointment.time_slot|time:"h:i A" }}</td>
 
-                        <!-- Booked By (always account holder) -->
-                        <td style="color:#6c757d; font-size:13px;">
-                            {{ appointment.patient.user.first_name }}
-                            {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
-                        </td>
+                            <!-- Status Badge -->
+                            <td>
+                                {% if appointment.status == 'pending' %}
+                                    <span class="badge bg-warning bg-opacity-25 text-warning" style="font-weight:600;">Pending</span>
+                                {% elif appointment.status == 'confirmed' %}
+                                    <span class="badge bg-info bg-opacity-25 text-info" style="font-weight:600;">Confirmed</span>
+                                {% elif appointment.status == 'cancelled' %}
+                                    <span class="badge bg-danger bg-opacity-25 text-danger" style="font-weight:600;">Cancelled</span>
+                                {% elif appointment.status == 'completed' %}
+                                    <span class="badge bg-success bg-opacity-25 text-success" style="font-weight:600;">Completed</span>
+                                {% endif %}
+                            </td>
 
-                        <td>{{ appointment.appointment_date }}</td>
-                        <td>{{ appointment.time_slot|time:"h:i A" }}</td>
+                            <!-- Action -->
+                            <td>
+                                <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-view-appt">
+                                    <i class="bi bi-eye"></i><span> View</span>
+                                </a>
+                            </td>
 
-                        <!-- Status Badge -->
-                        <td>
-                            <span class="badge
-                                {% if appointment.status == 'pending' %}bg-warning text-dark
-                                {% elif appointment.status == 'confirmed' %}bg-info text-dark
-                                {% elif appointment.status == 'cancelled' %}bg-danger
-                                {% elif appointment.status == 'completed' %}bg-primary
-                                {% endif %}">
-                                {{ appointment.status|capfirst }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">
-                                <i class="bi"></i> View
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="8" class="text-center text-muted py-4">No appointments found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bi bi-calendar-x" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                                No appointments found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Pagination -->
         <div id="paginationContainer">
             {% if page_obj.paginator.count > 10 %}
-            <div id="paginationWrapper" class="d-flex flex-column align-items-center mt-4">
-                <div class="w-100 pagination-summary mb-3">
-                    <div>
-                        <strong>{{ page_obj.start_index }} - {{ page_obj.end_index }}</strong>
-                        <span class="text-muted">of {{ page_obj.paginator.count }} appointments</span>
-                    </div>
-                    <div class="text-muted">
+            <div id="paginationWrapper" class="card-footer bg-white d-flex flex-column align-items-center py-3">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1" style="font-size:0.875rem;">
+                    <span>
+                        <strong>{{ page_obj.start_index }} – {{ page_obj.end_index }}</strong>
+                        <span class="text-muted"> of {{ page_obj.paginator.count }} appointments</span>
+                    </span>
+                    <span class="text-muted">
                         Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
-                    </div>
+                    </span>
                 </div>
                 <nav aria-label="Appointment pagination" class="w-100">
-                    <ul class="pagination pagination-pill justify-content-center flex-wrap gap-1">
+                    <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1 mb-0">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-                            <a class="page-link pagination-link" data-page="{{ page_obj.previous_page_number }}" href="#">Prev</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}"{% endif %} href="#">Prev</a>
                         </li>
 
-                        {% for num in page_obj.paginator.page_range %}
-                            {% if page_obj.paginator.num_pages <= 7 or num <= 2 or num > page_obj.paginator.num_pages|add:'-2' %}
-                                <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-                                    {% if num == page_obj.number %}
-                                        <span class="page-link">{{ num }}</span>
-                                    {% else %}
-                                        <a class="page-link pagination-link" data-page="{{ num }}" href="#">{{ num }}</a>
-                                    {% endif %}
-                                </li>
-                            {% elif num >= page_obj.number|add:'-1' and num <= page_obj.number|add:'1' %}
-                                <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-                                    {% if num == page_obj.number %}
-                                        <span class="page-link">{{ num }}</span>
-                                    {% else %}
-                                        <a class="page-link pagination-link" data-page="{{ num }}" href="#">{{ num }}</a>
-                                    {% endif %}
-                                </li>
-                            {% elif num == 3 and page_obj.number > 4 %}
-                                <li class="page-item disabled"><span class="page-link">…</span></li>
-                            {% elif num == page_obj.paginator.num_pages|add:'-2' and page_obj.number < page_obj.paginator.num_pages|add:'-3' %}
-                                <li class="page-item disabled"><span class="page-link">…</span></li>
-                            {% endif %}
-                        {% endfor %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                        </li>
 
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-                            <a class="page-link pagination-link" data-page="{{ page_obj.next_page_number }}" href="#">Next</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}"{% endif %} href="#">Next</a>
                         </li>
                     </ul>
                 </nav>
@@ -195,167 +232,6 @@
     </div>
 
 </main>
-
-<style>
-    .page-header {
-        padding: 1.3rem 0 0.8rem;
-        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
-    }
-
-    .page-title {
-        font-size: clamp(1.8rem, 2.2vw, 2.4rem);
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-
-    .page-subtitle {
-        font-size: 0.98rem;
-        max-width: 620px;
-    }
-
-    .card-soft {
-        background: #f8f9ff;
-        border-radius: 24px;
-    }
-
-    .input-with-icon {
-        position: relative;
-    }
-
-    .input-with-icon i {
-        position: absolute;
-        top: 50%;
-        left: 16px;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 1rem;
-        pointer-events: none;
-    }
-
-    .input-with-icon input,
-    .input-with-icon select {
-        padding-left: 44px;
-        border-radius: 16px;
-        box-shadow: inset 0 1px 8px rgba(15, 23, 42, 0.06);
-        border: 1px solid rgba(148, 163, 184, 0.35);
-    }
-
-    .input-with-icon select {
-        appearance: none;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        padding-right: 1.5rem;
-    }
-
-    .input-with-icon.select-icon::after {
-        content: '\f0d7';
-        font-family: 'Bootstrap Icons';
-        font-size: 0.95rem;
-        position: absolute;
-        right: 16px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        pointer-events: none;
-    }
-
-    .table-custom thead th {
-        border: none;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        color: #495057;
-        background: #f8f9ff;
-        padding: 1rem 1rem;
-    }
-
-    .table-custom tbody tr {
-        transition: background 0.2s ease, transform 0.2s ease;
-    }
-
-    .table-custom tbody tr:hover {
-        background: rgba(99, 102, 241, 0.08);
-        transform: translateX(1px);
-    }
-
-    .table-custom td,
-    .table-custom th {
-        vertical-align: middle;
-        border-top: 1px solid rgba(148, 163, 184, 0.18);
-        padding: 1rem 1rem;
-    }
-
-    .page-title + .page-subtitle {
-        margin-top: 0.35rem;
-    }
-
-    .btn-primary {
-        box-shadow: 0 16px 32px rgba(59, 130, 246, 0.18);
-    }
-
-    .btn-outline-secondary {
-        border-radius: 999px;
-        font-weight: 600;
-        padding: 0.85rem 1.1rem;
-    }
-
-    .table-responsive {
-        border-radius: 24px;
-        overflow: hidden;
-    }
-
-    .pagination-pill .page-link {
-        border-radius: 999px;
-        padding: 0.75rem 1rem;
-        min-width: 48px;
-        color: #334155;
-        background: #ffffff;
-        border: 1px solid rgba(148, 163, 184, 0.35);
-        transition: all 0.2s ease;
-        font-weight: 600;
-    }
-
-    .pagination-pill .page-item.active .page-link {
-        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
-        border-color: transparent;
-        color: #ffffff;
-        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.25);
-    }
-
-    .pagination-pill .page-item.disabled .page-link {
-        opacity: 0.55;
-        pointer-events: none;
-        background: #f8fafc;
-    }
-
-    .pagination-pill .page-link:hover {
-        background: #eef2ff;
-    }
-
-    .pagination-summary {
-        background: rgba(99, 102, 241, 0.08);
-        border: 1px solid rgba(99, 102, 241, 0.18);
-        border-radius: 18px;
-        padding: 0.95rem 1.1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 100%;
-        gap: 1rem;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-    }
-
-    @media (max-width: 767px) {
-        .pagination-summary {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .input-with-icon input,
-        .input-with-icon select {
-            padding-left: 40px;
-        }
-    }
-</style>
 
 <script>
     const searchInput  = document.getElementById('search');
@@ -390,7 +266,6 @@
             else if (newPag) document.getElementById('paginationContainer').appendChild(newPag);
 
             bindPaginationLinks();
-            bindViewButtons();
         })
         .catch(err => console.error('Fetch error:', err));
     }
@@ -402,14 +277,6 @@
                 fetchAppointments(parseInt(this.getAttribute('data-page')));
             });
         });
-    }
-
-    function loadAppointmentDetails(appointmentId) {
-        // No longer needed for modal
-    }
-
-    function bindViewButtons() {
-        // No longer needed for modal
     }
 
     function debounce(fn, delay = 350) {
@@ -428,7 +295,6 @@
     });
 
     bindPaginationLinks();
-    bindViewButtons();
 </script>
 
 {% endblock %}

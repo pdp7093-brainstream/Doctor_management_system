@@ -18,6 +18,7 @@ from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.models import FamilyMember
+
 def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -57,16 +58,22 @@ class DashboardView(View):
         doctor = InnerMember.objects.get(user=request.user)
         today  = timezone.localdate()
 
-        # doctor ke saath unassigned bhi dikhao
-        all_appointments = Appointment.objects.filter(
-            Q(doctor=doctor) | Q(doctor__isnull=True)
-        )
+        # Show all appointments for today so doctor can handle any booked slot.
+        # This includes appointments booked by patients and unassigned doctor slots.
+        today_appointments = Appointment.objects.filter(
+            appointment_date=today
+        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('time_slot')
 
-        today_appointments    = all_appointments.filter(appointment_date=today).order_by('time_slot')
-        upcoming_appointments = all_appointments.filter(appointment_date__gt=today).order_by('appointment_date', 'time_slot')
-        completed             = all_appointments.filter(status='completed').order_by('-appointment_date')
-        pending               = today_appointments.filter(status='pending').order_by('time_slot')
-        total_staff           = InnerMember.objects.filter(role='biller').count()
+        upcoming_appointments = Appointment.objects.filter(
+            appointment_date__gt=today
+        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('appointment_date', 'time_slot')
+
+        completed = Appointment.objects.filter(
+            status='completed'
+        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('-appointment_date')
+
+        pending = today_appointments.filter(status='pending')
+        total_staff = InnerMember.objects.filter(role='biller').count()
 
         context = {
             'today_appointments'  : today_appointments,
@@ -100,7 +107,6 @@ def cancel_appointment(request, appointment_id):
 
     today = timezone.localdate()
     today_appointments = Appointment.objects.filter(
-        Q(doctor=doctor) | Q(doctor__isnull=True),
         appointment_date=today
     )
     
@@ -121,7 +127,6 @@ def billing(request):
 @never_cache
 @role_required('doctor')
 def manage_patients(request):
-
 
     patients = Patient.objects.select_related('user').all()
     family_members = FamilyMember.objects.select_related('patient__user').all()

@@ -98,6 +98,14 @@
                     <span>Dashboard</span>
                 </a>
             </li>
+
+            <li>
+                <a href="{% url 'appointment:manage_appointments' %}" class="{% if '/manage_appointments' in request.path %}active{% endif %}">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Appointments</span>
+                </a>
+            </li>
+
             <li>
                 <a href="#" class="menu-toggle">
                     <div class="menu-toggle-label">
@@ -121,13 +129,7 @@
                     </li>
                 </ul>
             </li>
-
-            <li>
-                <a href="{% url 'appointment:manage_appointments' %}" class="{% if '/manage_appointments' in request.path %}active{% endif %}">
-                    <i class="bi bi-calendar-check-fill"></i>
-                    <span>Appointments</span>
-                </a>
-            </li>
+            
             <li>
                 <a href="#" class="menu-toggle {% if '/medicine' in request.path %}active{% endif %}">
                     <div class="menu-toggle-label">

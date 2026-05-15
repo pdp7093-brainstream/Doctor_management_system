@@ -126,7 +126,11 @@
                                     {{ bill.visit.patient.user.get_full_name|first|upper }}
                                 </div>
                                 <span class="fw-semibold">
-                                    {{ bill.visit.patient.user.get_full_name }}
+                                    {% if bill.visit.appointment.family_member %}
+                                        {{ bill.visit.appointment.family_member.name }}
+                                    {% else %}
+                                        {{ bill.visit.appointment.patient.user.get_full_name }}
+                                    {% endif %}
                                 </span>
                             </div>
                         </td>
@@ -197,6 +201,7 @@
         </div>
 
         <!-- Pagination -->
+        {% if page_obj.paginator.count > 10 %}
         <div id="paginationContainer">
             <div id="paginationWrapper"
                 class="d-flex justify-content-center mt-3">
@@ -229,6 +234,7 @@
                 </ul>
             </div>
         </div>
+        {% endif %}
 
     </div>
 

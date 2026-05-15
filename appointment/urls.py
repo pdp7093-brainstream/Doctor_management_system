@@ -6,6 +6,7 @@ app_name = 'appointment'
 urlpatterns = [
     path('',Book_appointment.as_view(),name='appointment'),
     path('get-slots/',views.get_slots,name='get_slots'),
+    path('search-patients/', views.search_patients, name='search_patients'),
     path('manage_appointments/', Manage_appointments.as_view(), name='manage_appointments'),
     path('add-appointment/', Add_appointment.as_view(), name='add_appointment'),   
 
@@ -14,4 +15,5 @@ urlpatterns = [
     path('prescription/<int:visit_id>/',PrescriptionView.as_view(),name='prescription'),
     path('detail-modal/<int:id>/', views.appointment_detail_modal, name='appointment_detail_modal'),
     path('appointment/<int:id>/', views.appointment_detail, name='appointment_detail'),
+
 ]

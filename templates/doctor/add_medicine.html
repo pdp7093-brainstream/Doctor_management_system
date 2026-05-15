@@ -1,117 +1,147 @@
 {% extends "doctor/main.html" %}
 {% load static %}
-{% block title %}Add Medicine - Doctor Dashboard{% endblock %}
+{% block title %}Add Medicine{% endblock %}
 {% block content %}
+
 <main class="main-content" id="mainContent">
     <div class="patient-form-shell">
-        <div class="page-header patient-form-header">
+
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
             <div>
-                <h2 class="page-title mb-0">Add Medicine</h2>
-                <p class="page-subtitle">Add a new medicine to the store inventory.</p>
+                <h2 class="page-title mb-1">Add Medicine</h2>
+                <p class="text-muted small mb-0">Add a new medicine to the store inventory.</p>
             </div>
             <a href="{% url 'medicine:manage_medicine' %}" class="patient-link-btn">
-                Medicine Store
+                <i class="bi bi-arrow-left me-1"></i> Medicine Store
             </a>
         </div>
 
-        <div class="patient-form-card">
-            <form method="POST" action="{% url 'medicine:add_medicine' %}" class="patient-form-grid">
-                {% csrf_token %}
+        <!-- Form Card -->
+        <div class="card">
+            <div class="card-header d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                <i class="bi bi-capsule-pill"></i> Medicine Information
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{% url 'medicine:add_medicine' %}" class="row g-3">
+                    {% csrf_token %}
 
-                <!-- Row 1: Medicine Name + Short Name -->
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-name">Medicine Name</label>
-                        <input id="medicine-name" type="text" name="name" class="patient-input"
-                            placeholder="e.g., Paracetamol" required>
+                    <!-- Section: Basic Info -->
+                    <div class="col-12">
+                        <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
+                            <i class="bi bi-info-circle"></i> Basic Info
+                        </div>
                     </div>
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-short-name">Short Name</label>
-                        <input id="medicine-short-name" type="text" name="short_name" class="patient-input"
-                            placeholder="e.g., PCM" required>
-                    </div>
-                </div>
 
-                <!-- Row 2: Medicine Type + Company -->
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-type">Medicine Type</label>
-                        <select id="medicine-type" name="medicine_type" class="patient-input" required>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="medicine-name">
+                            Medicine Name <span class="text-danger">*</span>
+                        </label>
+                        <input id="medicine-name" type="text" name="name" class="form-control"
+                               placeholder="e.g., Paracetamol" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="medicine-short-name">
+                            Short Name <span class="text-danger">*</span>
+                        </label>
+                        <input id="medicine-short-name" type="text" name="short_name" class="form-control"
+                               placeholder="e.g., PCM" required>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="medicine-type">
+                            Medicine Type <span class="text-danger">*</span>
+                        </label>
+                        <select id="medicine-type" name="medicine_type" class="form-select" required>
                             <option value="" disabled selected>Select type...</option>
                             {% for value, label in medicine_types %}
-                                <option value="{{ value }}">{{ label }}</option>
+                            <option value="{{ value }}">{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-company">Company</label>
-                        <input id="medicine-company" type="text" name="company" class="patient-input"
-                            placeholder="e.g., Sun Pharma">
-                    </div>
-                </div>
 
-                <!-- Description -->
-                <div class="patient-field">
-                    <label class="patient-label" for="medicine-desc">Description</label>
-                    <textarea id="medicine-desc" name="description" class="patient-input"
-                        rows="2" placeholder="Optional notes about this medicine..."></textarea>
-                </div>
-
-                <!-- Is Active -->
-                <div class="patient-field" style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" id="medicine-active" name="is_active" checked
-                        style="width:18px; height:18px; cursor:pointer;">
-                    <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">Active (available in store)</label>
-                </div>
-
-                <!-- ── Variants Section ── -->
-                <div style="margin-top: 8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <label class="patient-label mb-0">Variants <span style="font-weight:400; font-size:0.82rem; color:#888;">(Power / Price / Stock)</span></label>
-                        <button type="button" id="addVariantBtn" class="btn btn-sm btn-outline-primary"
-                            style="border-radius:8px; font-size:0.82rem;">
-                            <i class="bi bi-plus-circle"></i> Add Variant
-                        </button>
+                    <div class="col-md-6">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="medicine-company">
+                            Company
+                        </label>
+                        <input id="medicine-company" type="text" name="company" class="form-control"
+                               placeholder="e.g., Sun Pharma">
                     </div>
 
-                    <div id="variantsContainer">
-                        <!-- Default first variant row -->
-                        <div class="variant-row" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;">
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                                <input type="text" name="power[]" class="patient-input" placeholder="e.g., 500mg" required>
+                    <div class="col-12">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="medicine-desc">
+                            Description
+                        </label>
+                        <textarea id="medicine-desc" name="description" class="form-control"
+                                  rows="2" placeholder="Optional notes about this medicine..."></textarea>
+                    </div>
+
+                    <!-- Active toggle -->
+                    <div class="col-12">
+                        <div class="form-check" style="margin-top:2px;">
+                            <input class="form-check-input" type="checkbox" id="medicine-active" name="is_active" checked>
+                            <label class="form-check-label" for="medicine-active" style="font-size:0.88rem; font-weight:600; cursor:pointer;">
+                                Active <span class="fw-normal text-muted">(available in store)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Section: Variants -->
+                    <div class="col-12 mt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
+                                <i class="bi bi-box-seam"></i> Variants
+                                <span class="fw-normal text-muted" style="font-size:0.78rem; color:#888 !important;">(Power / Price / Stock)</span>
                             </div>
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Price (₹)</label>
-                                <input type="number" name="price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
-                            </div>
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Stock</label>
-                                <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0" required>
-                            </div>
-                            <div>
-                                <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                                <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
-                            </div>
-                            <div style="padding-bottom:2px;">
-                                <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn"
-                                    style="border-radius:8px;" disabled>
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                            <button type="button" id="addVariantBtn"
+                                    class="btn btn-sm"
+                                    style="background:#e0f2fe; color:#0369a1; border:1px solid #bae6fd; font-size:0.82rem; border-radius:8px;">
+                                <i class="bi bi-plus-circle me-1"></i> Add Variant
+                            </button>
+                        </div>
+
+                        <div id="variantsContainer">
+                            <!-- Default first variant row -->
+                            <div class="variant-row rounded-3 p-3 mb-3" style="background:#f8fbff; border:1px solid #e2e8f0;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:12px; align-items:end;">
+                                    <div>
+                                        <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Power / Strength</label>
+                                        <input type="text" name="power[]" class="form-control form-control-sm" placeholder="e.g., 500mg" required>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Price (₹)</label>
+                                        <input type="number" name="price[]" class="form-control form-control-sm" placeholder="0.00" min="0" step="0.01" required>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Stock</label>
+                                        <input type="number" name="stock[]" class="form-control form-control-sm" placeholder="0" min="0" required>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Low Alert</label>
+                                        <input type="number" name="low_stock_alert[]" class="form-control form-control-sm" value="10" min="0">
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn btn-sm remove-variant-btn"
+                                                style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; border-radius:8px;" disabled>
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Actions -->
-                <div class="patient-form-actions">
-                    <button type="submit" class="patient-submit-btn">
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Save Medicine</span>
-                    </button>
-                </div>
-            </form>
+                    <!-- Actions -->
+                    <div class="col-12 d-flex justify-content-end mt-2">
+                        <button type="submit" class="action-btn">
+                            <i class="bi bi-check2-circle me-1"></i> Save Medicine
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
+
     </div>
 </main>
 
@@ -121,43 +151,50 @@
 
     function updateRemoveBtns() {
         const rows = variantsContainer.querySelectorAll('.variant-row');
-        rows.forEach((row, idx) => {
-            const btn = row.querySelector('.remove-variant-btn');
-            btn.disabled = rows.length === 1;
+        rows.forEach(row => {
+            row.querySelector('.remove-variant-btn').disabled = rows.length === 1;
         });
     }
 
+    function variantRowHTML() {
+        return `
+        <div class="variant-row rounded-3 p-3 mb-3" style="background:#f8fbff; border:1px solid #e2e8f0;">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:12px; align-items:end;">
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Power / Strength</label>
+                    <input type="text" name="power[]" class="form-control form-control-sm" placeholder="e.g., 250mg" required>
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Price (₹)</label>
+                    <input type="number" name="price[]" class="form-control form-control-sm" placeholder="0.00" min="0" step="0.01" required>
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Stock</label>
+                    <input type="number" name="stock[]" class="form-control form-control-sm" placeholder="0" min="0" required>
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#475569; display:block; margin-bottom:4px;">Low Alert</label>
+                    <input type="number" name="low_stock_alert[]" class="form-control form-control-sm" value="10" min="0">
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm remove-variant-btn"
+                            style="background:#fee2e2; color:#dc2626; border:1px solid #fecaca; border-radius:8px;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }
+
     addVariantBtn.addEventListener('click', function () {
-        const row = document.createElement('div');
-        row.className = 'variant-row';
-        row.style.cssText = 'display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px;';
-        row.innerHTML = `
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                <input type="text" name="power[]" class="patient-input" placeholder="e.g., 250mg" required>
-            </div>
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Price (₹)</label>
-                <input type="number" name="price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
-            </div>
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Stock</label>
-                <input type="number" name="stock[]" class="patient-input" placeholder="0" min="0" required>
-            </div>
-            <div>
-                <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
-            </div>
-            <div style="padding-bottom:2px;">
-                <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn" style="border-radius:8px;">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>`;
-        variantsContainer.appendChild(row);
+        const tmp = document.createElement('div');
+        tmp.innerHTML = variantRowHTML();
+        const row = tmp.firstElementChild;
         row.querySelector('.remove-variant-btn').addEventListener('click', function () {
             row.remove();
             updateRemoveBtns();
         });
+        variantsContainer.appendChild(row);
         updateRemoveBtns();
     });
 
@@ -167,4 +204,5 @@
         updateRemoveBtns();
     });
 </script>
+
 {% endblock %}

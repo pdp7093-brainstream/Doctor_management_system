@@ -3,6 +3,12 @@ from doctor.models import InnerMember,Medicine
 from accounts.models import *
 
 # Create your models here.
+from django.db import models
+from django.contrib.auth.models import User
+
+from accounts.models import Patient, FamilyMember
+from doctor.models import InnerMember
+
 class Appointment(models.Model):
 
     status_choices = [
@@ -13,19 +19,41 @@ class Appointment(models.Model):
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
-    family_member = models.ForeignKey(FamilyMember, on_delete=models.CASCADE, null=True, blank=True)
-    doctor = models.ForeignKey(InnerMember, on_delete=models.CASCADE, null=True)
+
+    family_member = models.ForeignKey(
+        FamilyMember,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+
+    doctor = models.ForeignKey(
+        InnerMember,
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    booked_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='booked_appointments'
+    )
 
     appointment_date = models.DateField()
     time_slot = models.TimeField()
 
-    status = models.CharField(max_length=20, choices=status_choices, default='pending')
+    status = models.CharField(
+        max_length=20,
+        choices=status_choices,
+        default='pending'
+    )
+
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return f"{self.patient.user.username} - {self.appointment_date} at {self.time_slot}"
-
-
+        return f"{self.patient.user.username} - {self.appointment_date}"
 
 # Visit Model 
 class Visit(models.Model):
