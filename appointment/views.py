@@ -204,6 +204,27 @@ def get_slots(request):
 
     return JsonResponse({'slots': filtered_slots})
 
+# Cancel Appointment (User Side)
+@login_required
+def cancel_appointment(request, appointment_id):
+
+    appointment = get_object_or_404(
+        Appointment,
+        id=appointment_id,
+        patient__user=request.user
+    )
+
+    # Only pending appointment can be cancelled
+    if appointment.status == 'pending':
+        appointment.status = 'cancelled'
+        appointment.save()
+        messages.success(request, 'Appointment cancelled successfully.')
+
+    else:
+        messages.error(request, 'This appointment cannot be cancelled.')
+
+    return redirect('dashboard')
+
 
 # ─────────────────────────────────────────
 # Manage Appointments (Doctor)
