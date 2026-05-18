@@ -18,7 +18,10 @@ from datetime import datetime, time, timedelta
 from billing.views import generate_bill_from_visit
 from clinic.models import ClinicSettings
 import json
+import logging
 import re
+
+logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────
@@ -30,8 +33,6 @@ def search_patients(request):
     """Search for patients (main user or family member) - WORKING VERSION"""
     query = request.GET.get('q', '').strip()
 
-    print(f"🔍 Searching for: '{query}'")
-
     if not query or len(query) < 2:
         return JsonResponse({'results': []})
 
@@ -39,7 +40,6 @@ def search_patients(request):
         results = []
 
         # ✅ Search main patients
-        print("  → Searching patients...")
         patients = Patient.objects.filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
@@ -48,8 +48,6 @@ def search_patients(request):
         ).select_related('user').values(
             'id', 'user__first_name', 'user__last_name', 'phone', 'user__email'
         )[:10]
-
-        print(f"  ✓ Found {patients.count()} patients")
 
         for p in patients:
             full_name = f"{p['user__first_name']} {p['user__last_name']}".strip() or p['user__email']
@@ -62,15 +60,12 @@ def search_patients(request):
             })
 
         # ✅ Search family members
-        print("  → Searching family members...")
         family_members = FamilyMember.objects.filter(
             Q(name__icontains=query) |
             Q(phone__icontains=query)
         ).select_related('patient__user').values(
             'id', 'name', 'relation', 'phone'
         )[:10]
-
-        print(f"  ✓ Found {family_members.count()} family members")
 
         for fm in family_members:
             results.append({
@@ -81,14 +76,11 @@ def search_patients(request):
                 'display': f"{fm['name']} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
             })
 
-        print(f"✅ Total results: {len(results)}")
         return JsonResponse({'results': results})
 
-    except Exception as e:
-        print(f"❌ Error in search_patients: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({'error': f'Search error: {str(e)}'}, status=500)
+    except Exception:
+        logger.exception("Patient search failed for query=%r", query)
+        return JsonResponse({'error': 'Unable to search patients right now.'}, status=500)
 
 
 # ─────────────────────────────────────────
