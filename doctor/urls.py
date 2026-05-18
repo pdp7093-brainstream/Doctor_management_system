@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 from .views import *
 from medicine.views import *
@@ -27,6 +28,6 @@ urlpatterns = [
     path('staff/delete/<int:member_id>/',views.delete_staff,name='delete_staff'),
     path('staff/reset-password/<int:member_id>/', views.reset_staff_password, name='reset_staff_password'),
 
-    path('settings/', ClinicSettingsView.as_view(), name='settings'),
+    path('settings/', RedirectView.as_view(pattern_name='clinic:settings', permanent=False), name='settings'),
 
 ]

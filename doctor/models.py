@@ -40,24 +40,3 @@ class Medicine(models.Model):
     def __str__(self):
         return self.name
 
-class ClinicSettings(models.Model):
-    doctor = models.OneToOneField('InnerMember', on_delete=models.CASCADE)
-
-    clinic_name = models.CharField(max_length=255)
-    clinic_logo = models.ImageField(upload_to='clinic_logo/', null=True, blank=True)
-
-    address = models.TextField()
-    phone = models.CharField(max_length=20, blank=True)
-    email = models.EmailField(blank=True)
-
-    gst_number = models.CharField(max_length=50, blank=True)
-
-    opening_time = models.TimeField(null=True, blank=True)
-    closing_time = models.TimeField(null=True, blank=True)
-    lunch_start = models.TimeField(null=True, blank=True)
-    lunch_end = models.TimeField(null=True, blank=True)
-
-    footer_note = models.TextField(blank=True)
-
-    def __str__(self):
-        return self.clinic_name

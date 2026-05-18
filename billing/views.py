@@ -7,15 +7,13 @@ from django.contrib import messages
 from decimal import Decimal
 from .models import Bill, BillItem
 from appointment.models import Visit
-from doctor.models import ClinicSettings
+from clinic.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
 def generate_bill_from_visit(visit):
     """
     Visit complete hone ke baad automatically bill banao
     Prescription items se BillItems create karo
     """
-
-    from clinic.models import ClinicSettings
 
     # Agar bill already hai to return karo
     if hasattr(visit, 'bill'):
@@ -189,13 +187,12 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
         visit = get_object_or_404(Visit, id=visit_id)
         bill  = get_object_or_404(Bill, visit=visit)
 
-        # Clinic settings fetch karo (safe way)
-        settings = ClinicSettings.objects.filter(
-            doctor=visit.doctor
-        ).first()
+        # Clinic settings is a singleton managed by the clinic app.
+        settings = ClinicSettings.get()
 
         return render(request, 'billing/bill_print.html', {
             'bill': bill,
             'visit': visit,
-            'settings': settings   
+            'clinic': settings,
+            'settings': settings,
         })

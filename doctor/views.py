@@ -15,8 +15,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
-from django.db.models import Q
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Q
 from accounts.models import FamilyMember
 
 def login_view(request):
@@ -55,7 +54,6 @@ def logout_view(request):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class DashboardView(View):
     def get(self, request):
-        doctor = InnerMember.objects.get(user=request.user)
         today  = timezone.localdate()
 
         # Show all appointments for today so doctor can handle any booked slot.
@@ -64,24 +62,18 @@ class DashboardView(View):
             appointment_date=today
         ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('time_slot')
 
-        upcoming_appointments = Appointment.objects.filter(
-            appointment_date__gt=today
-        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('appointment_date', 'time_slot')
-
-        completed = Appointment.objects.filter(
-            status='completed'
-        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('-appointment_date')
-
-        pending = today_appointments.filter(status='pending')
+        today_counts = Appointment.objects.filter(
+            appointment_date=today
+        ).aggregate(
+            total=Count('id'),
+            remaining_today=Count('id', filter=Q(status='pending')),
+        )
         total_staff = InnerMember.objects.filter(role='biller').count()
 
         context = {
             'today_appointments'  : today_appointments,
-            'upcoming_appointments': upcoming_appointments,
-            'completed'           : completed,
-            'pending'             : pending,
-            'total'               : today_appointments.count(),
-            'remaining_today'     : today_appointments.filter(status='pending').count(),
+            'total'               : today_counts['total'],
+            'remaining_today'     : today_counts['remaining_today'],
             'total_staff'         : total_staff,
         }
         return render(request, 'doctor/dashboard.html', context)
@@ -91,7 +83,10 @@ class DashboardView(View):
 @require_POST
 def cancel_appointment(request, appointment_id):
     doctor = InnerMember.objects.get(user=request.user)
-    appointment = get_object_or_404(Appointment, id=appointment_id)
+    appointment = get_object_or_404(
+        Appointment.objects.select_related('doctor'),
+        id=appointment_id
+    )
 
     if appointment.status == 'cancelled':
         return JsonResponse({'success': False, 'error': 'Appointment is already cancelled.'}, status=400)
@@ -106,16 +101,19 @@ def cancel_appointment(request, appointment_id):
     appointment.save()
 
     today = timezone.localdate()
-    today_appointments = Appointment.objects.filter(
+    today_counts = Appointment.objects.filter(
         appointment_date=today
+    ).aggregate(
+        total=Count('id'),
+        remaining_today=Count('id', filter=Q(status='pending')),
     )
     
     return JsonResponse({
         'success': True,
         'status': appointment.get_status_display(),
         'status_raw': appointment.status,
-        'total': today_appointments.count(),
-        'remaining_today': today_appointments.filter(status='pending').count(),
+        'total': today_counts['total'],
+        'remaining_today': today_counts['remaining_today'],
     })
 
 
@@ -569,43 +567,3 @@ def delete_family(request, id):
     if request.method == 'POST':
         member.delete()
     return redirect('doctor:manage_patients')
-
-# ─────────────────────────────────────────
-# Settings view
-# ─────────────────────────────────────────
-
-from .models import ClinicSettings, InnerMember
-
-class ClinicSettingsView(LoginRequiredMixin, View):
-    def get(self, request):
-        doctor = InnerMember.objects.get(user=request.user)
-        settings, created = ClinicSettings.objects.get_or_create(doctor=doctor)
-
-        return render(request, 'doctor/setting.html', {
-            'settings': settings
-        })
-
-    def post(self, request):
-        doctor = InnerMember.objects.get(user=request.user)
-        settings, created = ClinicSettings.objects.get_or_create(doctor=doctor)
-
-        settings.clinic_name = request.POST.get('clinic_name')
-        settings.address = request.POST.get('address')
-        settings.phone = request.POST.get('phone')
-        settings.email = request.POST.get('email')
-        settings.gst_number = request.POST.get('gst_number')
-        settings.footer_note = request.POST.get('footer_note')
-
-        # Time fields
-        settings.opening_time = request.POST.get('opening_time') or None
-        settings.closing_time = request.POST.get('closing_time') or None
-        settings.lunch_start = request.POST.get('lunch_start') or None
-        settings.lunch_end = request.POST.get('lunch_end') or None
-
-        # Logo
-        if request.FILES.get('clinic_logo'):
-            settings.clinic_logo = request.FILES.get('clinic_logo')
-
-        settings.save()
-
-        return redirect('doctor:settings')

@@ -178,11 +178,9 @@ def get_slots(request):
         slots.append(current_time)
         current += timedelta(minutes=interval)
 
-    booked_slots = Appointment.objects.filter(
+    booked_slots = set(Appointment.objects.filter(
         appointment_date=selected_date
-    ).values_list('time_slot', flat=True)
-
-    booked_slots = [t.strftime("%H:%M") for t in booked_slots]
+    ).values_list('time_slot', flat=True))
 
     now = timezone.localtime()
     filtered_slots = []
@@ -193,7 +191,7 @@ def get_slots(request):
         if (selected_date == now.date() and slot <= now.time()):
             continue
 
-        if slot_str in booked_slots:
+        if slot in booked_slots:
             continue
 
         display_time = datetime.strptime(
@@ -218,8 +216,7 @@ def cancel_appointment(request, appointment_id):
     if appointment.status == 'pending':
         appointment.status = 'cancelled'
         appointment.save()
-        messages.success(request, 'Appointment cancelled successfully.')
-
+        
     else:
         messages.error(request, 'This appointment cannot be cancelled.')
 
@@ -233,13 +230,16 @@ def cancel_appointment(request, appointment_id):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
-        doctor = InnerMember.objects.get(user=request.user)
-
         search           = request.GET.get('search', '')
         appointment_date = request.GET.get('appointment_date', '')
         status           = request.GET.get('status', 'all')
 
-        appointments = Appointment.objects.all()
+        appointments = Appointment.objects.select_related(
+            'patient__user',
+            'family_member',
+            'doctor__user',
+            'booked_by',
+        )
 
         if search:
             appointments = appointments.filter(
@@ -274,8 +274,22 @@ class Manage_appointments(View):
 
 @role_required('doctor')
 def appointment_detail_modal(request, id):
-    appointment = get_object_or_404(Appointment, id=id)
-    visit        = Visit.objects.filter(appointment=appointment).first()
+    appointment = get_object_or_404(
+        Appointment.objects.select_related(
+            'patient__user',
+            'family_member',
+            'doctor__user',
+            'booked_by',
+        ),
+        id=id
+    )
+    visit = Visit.objects.select_related(
+        'patient__user',
+        'doctor__user',
+        'appointment',
+        'appointment__patient__user',
+        'appointment__family_member',
+    ).filter(appointment=appointment).first()
     prescription = None
     prescription_items = []
 
@@ -485,7 +499,10 @@ class Book_appointment(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
     def get(self, request, appointment_id):
-        appointment = get_object_or_404(Appointment, id=appointment_id)
+        appointment = get_object_or_404(
+            Appointment.objects.select_related('patient', 'doctor'),
+            id=appointment_id
+        )
 
         visit, created = Visit.objects.get_or_create(
             appointment=appointment,
@@ -506,7 +523,16 @@ class StartVisitView(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class PrescriptionView(View):
     def get(self, request, visit_id):
-        visit = get_object_or_404(Visit, id=visit_id)
+        visit = get_object_or_404(
+            Visit.objects.select_related(
+                'patient__user',
+                'doctor__user',
+                'appointment',
+                'appointment__patient__user',
+                'appointment__family_member',
+            ),
+            id=visit_id
+        )
         
         today = timezone.now().date()
         is_today = visit.appointment.appointment_date == today
@@ -568,7 +594,14 @@ class PrescriptionView(View):
         return errors
 
     def post(self, request, visit_id):
-        visit = get_object_or_404(Visit, id=visit_id)
+        visit = get_object_or_404(
+            Visit.objects.select_related(
+                'appointment',
+                'appointment__patient__user',
+                'appointment__family_member',
+            ),
+            id=visit_id
+        )
         visit.symptoms = request.POST.get("symptoms")
         visit.diagnosis = request.POST.get("diagnosis")
         visit.notes = request.POST.get("notes")
@@ -645,9 +678,24 @@ class PrescriptionView(View):
 
 @login_required(login_url='login')
 def appointment_detail(request, id):
-    appointment = get_object_or_404(Appointment, id=id, patient=request.user.patient)
+    appointment = get_object_or_404(
+        Appointment.objects.select_related(
+            'patient__user',
+            'family_member',
+            'doctor__user',
+            'booked_by',
+        ),
+        id=id,
+        patient=request.user.patient
+    )
 
-    visit             = Visit.objects.filter(appointment=appointment).first()
+    visit = Visit.objects.select_related(
+        'patient__user',
+        'doctor__user',
+        'appointment',
+        'appointment__patient__user',
+        'appointment__family_member',
+    ).filter(appointment=appointment).first()
     prescription      = None
     prescription_items = []
 

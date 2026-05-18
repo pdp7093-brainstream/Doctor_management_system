@@ -10,6 +10,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from appointment.models import Appointment
+from django.db.models import Count, Q
 
 def home(request):
     return render(request, 'index.html')
@@ -256,16 +257,23 @@ def dashboard(request):
     """Patient dashboard"""
     appointments = Appointment.objects.filter(
         patient__user=request.user
-    ).select_related('patient__user', 'doctor__user').order_by('-appointment_date', '-time_slot')
+    ).select_related(
+        'patient__user',
+        'family_member',
+        'doctor__user',
+        'booked_by',
+    ).order_by('-appointment_date', '-time_slot')
     
-    total_visits = appointments.count()
-    pending_appointments = appointments.filter(status='pending').count()
+    appointment_counts = appointments.aggregate(
+        total_visits=Count('id'),
+        pending_appointments=Count('id', filter=Q(status='pending')),
+    )
     total_spent = 0
 
     context = {
         'appointments': appointments,
-        'total_visits': total_visits,
-        'pending_appointments': pending_appointments,
+        'total_visits': appointment_counts['total_visits'],
+        'pending_appointments': appointment_counts['pending_appointments'],
         'total_spent': total_spent,
     }
     return render(request, 'pdashboard/dashboard.html', context)

@@ -52,6 +52,14 @@ class Appointment(models.Model):
 
     notes = models.TextField(blank=True, null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['appointment_date', 'time_slot'], name='appt_date_time_idx'),
+            models.Index(fields=['appointment_date', 'status'], name='appt_date_status_idx'),
+            models.Index(fields=['status'], name='appt_status_idx'),
+            models.Index(fields=['doctor', 'appointment_date'], name='appt_doctor_date_idx'),
+        ]
+
     def __str__(self):
         return f"{self.patient.user.username} - {self.appointment_date}"
 
@@ -109,4 +117,3 @@ class PrescriptionItem(models.Model):
     def __str__(self):
         return f"Prescription Item for {self.prescription.visit.patient.user.username} on {self.prescription.visit.appointment.appointment_date}"
     
-
