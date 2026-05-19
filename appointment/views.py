@@ -18,10 +18,7 @@ from datetime import datetime, time, timedelta
 from billing.views import generate_bill_from_visit
 from clinic.models import ClinicSettings
 import json
-import logging
 import re
-
-logger = logging.getLogger(__name__)
 
 
 # ─────────────────────────────────────────
@@ -33,13 +30,16 @@ def search_patients(request):
     """Search for patients (main user or family member) - WORKING VERSION"""
     query = request.GET.get('q', '').strip()
 
+    print(f"🔍 Searching for: '{query}'")
+
     if not query or len(query) < 2:
         return JsonResponse({'results': []})
 
     try:
         results = []
 
-        # ✅ Search main patients
+        # Search main patients
+        print("  → Searching patients...")
         patients = Patient.objects.filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
@@ -48,6 +48,8 @@ def search_patients(request):
         ).select_related('user').values(
             'id', 'user__first_name', 'user__last_name', 'phone', 'user__email'
         )[:10]
+
+        print(f" ✓ Found {patients.count()} patients")
 
         for p in patients:
             full_name = f"{p['user__first_name']} {p['user__last_name']}".strip() or p['user__email']
@@ -59,13 +61,16 @@ def search_patients(request):
                 'display': f"{full_name} (Main Patient) - {p['phone'] or 'No Phone'}"
             })
 
-        # ✅ Search family members
+        #  Search family members
+        print("  → Searching family members...")
         family_members = FamilyMember.objects.filter(
             Q(name__icontains=query) |
             Q(phone__icontains=query)
         ).select_related('patient__user').values(
             'id', 'name', 'relation', 'phone'
         )[:10]
+
+        print(f"  ✓ Found {family_members.count()} family members")
 
         for fm in family_members:
             results.append({
@@ -76,11 +81,14 @@ def search_patients(request):
                 'display': f"{fm['name']} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
             })
 
+        print(f"Total results: {len(results)}")
         return JsonResponse({'results': results})
 
-    except Exception:
-        logger.exception("Patient search failed for query=%r", query)
-        return JsonResponse({'error': 'Unable to search patients right now.'}, status=500)
+    except Exception as e:
+        print(f" Error in search_patients: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'error': f'Search error: {str(e)}'}, status=500)
 
 
 # ─────────────────────────────────────────
@@ -170,9 +178,11 @@ def get_slots(request):
         slots.append(current_time)
         current += timedelta(minutes=interval)
 
-    booked_slots = set(Appointment.objects.filter(
+    booked_slots = Appointment.booked_slots().filter(
         appointment_date=selected_date
-    ).values_list('time_slot', flat=True))
+    ).values_list('time_slot', flat=True)
+
+    booked_slots = [t.strftime("%H:%M") for t in booked_slots]
 
     now = timezone.localtime()
     filtered_slots = []
@@ -183,7 +193,7 @@ def get_slots(request):
         if (selected_date == now.date() and slot <= now.time()):
             continue
 
-        if slot in booked_slots:
+        if slot_str in booked_slots:
             continue
 
         display_time = datetime.strptime(
@@ -208,7 +218,16 @@ def cancel_appointment(request, appointment_id):
     if appointment.status == 'pending':
         appointment.status = 'cancelled'
         appointment.save()
-        
+        if request.method == 'POST':
+            return JsonResponse({
+                'success': True,
+                'status': appointment.get_status_display(),
+                'status_raw': appointment.status,
+                'appointment_date': appointment.appointment_date.isoformat(),
+                'time_slot': appointment.time_slot.strftime("%I:%M %p"),
+            })
+        messages.success(request, 'Appointment cancelled successfully.')
+
     else:
         if request.method == 'POST':
             return JsonResponse({
@@ -227,16 +246,13 @@ def cancel_appointment(request, appointment_id):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
+        doctor = InnerMember.objects.get(user=request.user)
+
         search           = request.GET.get('search', '')
         appointment_date = request.GET.get('appointment_date', '')
         status           = request.GET.get('status', 'all')
 
-        appointments = Appointment.objects.select_related(
-            'patient__user',
-            'family_member',
-            'doctor__user',
-            'booked_by',
-        )
+        appointments = Appointment.objects.all()
 
         if search:
             appointments = appointments.filter(
@@ -271,22 +287,8 @@ class Manage_appointments(View):
 
 @role_required('doctor')
 def appointment_detail_modal(request, id):
-    appointment = get_object_or_404(
-        Appointment.objects.select_related(
-            'patient__user',
-            'family_member',
-            'doctor__user',
-            'booked_by',
-        ),
-        id=id
-    )
-    visit = Visit.objects.select_related(
-        'patient__user',
-        'doctor__user',
-        'appointment',
-        'appointment__patient__user',
-        'appointment__family_member',
-    ).filter(appointment=appointment).first()
+    appointment = get_object_or_404(Appointment, id=id)
+    visit        = Visit.objects.filter(appointment=appointment).first()
     prescription = None
     prescription_items = []
 
@@ -510,10 +512,7 @@ class Book_appointment(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
     def get(self, request, appointment_id):
-        appointment = get_object_or_404(
-            Appointment.objects.select_related('patient', 'doctor'),
-            id=appointment_id
-        )
+        appointment = get_object_or_404(Appointment, id=appointment_id)
 
         visit, created = Visit.objects.get_or_create(
             appointment=appointment,
@@ -534,16 +533,7 @@ class StartVisitView(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class PrescriptionView(View):
     def get(self, request, visit_id):
-        visit = get_object_or_404(
-            Visit.objects.select_related(
-                'patient__user',
-                'doctor__user',
-                'appointment',
-                'appointment__patient__user',
-                'appointment__family_member',
-            ),
-            id=visit_id
-        )
+        visit = get_object_or_404(Visit, id=visit_id)
         
         today = timezone.now().date()
         is_today = visit.appointment.appointment_date == today
@@ -605,14 +595,7 @@ class PrescriptionView(View):
         return errors
 
     def post(self, request, visit_id):
-        visit = get_object_or_404(
-            Visit.objects.select_related(
-                'appointment',
-                'appointment__patient__user',
-                'appointment__family_member',
-            ),
-            id=visit_id
-        )
+        visit = get_object_or_404(Visit, id=visit_id)
         visit.symptoms = request.POST.get("symptoms")
         visit.diagnosis = request.POST.get("diagnosis")
         visit.notes = request.POST.get("notes")
@@ -689,24 +672,9 @@ class PrescriptionView(View):
 
 @login_required(login_url='login')
 def appointment_detail(request, id):
-    appointment = get_object_or_404(
-        Appointment.objects.select_related(
-            'patient__user',
-            'family_member',
-            'doctor__user',
-            'booked_by',
-        ),
-        id=id,
-        patient=request.user.patient
-    )
+    appointment = get_object_or_404(Appointment, id=id, patient=request.user.patient)
 
-    visit = Visit.objects.select_related(
-        'patient__user',
-        'doctor__user',
-        'appointment',
-        'appointment__patient__user',
-        'appointment__family_member',
-    ).filter(appointment=appointment).first()
+    visit             = Visit.objects.filter(appointment=appointment).first()
     prescription      = None
     prescription_items = []
 
