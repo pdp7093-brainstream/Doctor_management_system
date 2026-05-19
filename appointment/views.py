@@ -38,7 +38,7 @@ def search_patients(request):
     try:
         results = []
 
-        # ✅ Search main patients
+        # Search main patients
         print("  → Searching patients...")
         patients = Patient.objects.filter(
             Q(user__first_name__icontains=query) |
@@ -49,7 +49,7 @@ def search_patients(request):
             'id', 'user__first_name', 'user__last_name', 'phone', 'user__email'
         )[:10]
 
-        print(f"  ✓ Found {patients.count()} patients")
+        print(f" ✓ Found {patients.count()} patients")
 
         for p in patients:
             full_name = f"{p['user__first_name']} {p['user__last_name']}".strip() or p['user__email']
@@ -61,7 +61,7 @@ def search_patients(request):
                 'display': f"{full_name} (Main Patient) - {p['phone'] or 'No Phone'}"
             })
 
-        # ✅ Search family members
+        #  Search family members
         print("  → Searching family members...")
         family_members = FamilyMember.objects.filter(
             Q(name__icontains=query) |
@@ -81,11 +81,11 @@ def search_patients(request):
                 'display': f"{fm['name']} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
             })
 
-        print(f"✅ Total results: {len(results)}")
+        print(f"Total results: {len(results)}")
         return JsonResponse({'results': results})
 
     except Exception as e:
-        print(f"❌ Error in search_patients: {str(e)}")
+        print(f" Error in search_patients: {str(e)}")
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': f'Search error: {str(e)}'}, status=500)
@@ -178,7 +178,7 @@ def get_slots(request):
         slots.append(current_time)
         current += timedelta(minutes=interval)
 
-    booked_slots = Appointment.objects.filter(
+    booked_slots = Appointment.booked_slots().filter(
         appointment_date=selected_date
     ).values_list('time_slot', flat=True)
 
@@ -218,9 +218,22 @@ def cancel_appointment(request, appointment_id):
     if appointment.status == 'pending':
         appointment.status = 'cancelled'
         appointment.save()
+        if request.method == 'POST':
+            return JsonResponse({
+                'success': True,
+                'status': appointment.get_status_display(),
+                'status_raw': appointment.status,
+                'appointment_date': appointment.appointment_date.isoformat(),
+                'time_slot': appointment.time_slot.strftime("%I:%M %p"),
+            })
         messages.success(request, 'Appointment cancelled successfully.')
 
     else:
+        if request.method == 'POST':
+            return JsonResponse({
+                'success': False,
+                'error': 'This appointment cannot be cancelled.'
+            }, status=400)
         messages.error(request, 'This appointment cannot be cancelled.')
 
     return redirect('dashboard')
@@ -348,14 +361,28 @@ class Add_appointment(View):
             messages.error(request, "Invalid time format")
             return redirect('appointment:add_appointment')
 
+        try:
+            appointment_date_obj = datetime.strptime(appointment_date, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Invalid appointment date")
+            return redirect('appointment:add_appointment')
+
+        if Appointment.booked_slots().filter(
+            appointment_date=appointment_date_obj,
+            time_slot=time_slot
+        ).exists():
+            messages.error(request, "This slot is already booked")
+            return redirect('appointment:add_appointment')
+
         # Create appointment
         Appointment.objects.create(
             patient          = patient,
             family_member    = family_member,
             doctor           = doctor,
-            appointment_date = appointment_date,
+            appointment_date = appointment_date_obj,
             time_slot        = time_slot,
             notes            = notes,
+            booked_by        = request.user,
         )
 
        
@@ -428,7 +455,7 @@ class Book_appointment(View):
         ).first()
 
         # Double booking prevention
-        if Appointment.objects.filter(
+        if Appointment.booked_slots().filter(
             appointment_date=appointment_date,
             time_slot=time_24
         ).exists():

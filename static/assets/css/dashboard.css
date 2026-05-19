@@ -184,6 +184,32 @@ body {
 
 .table tbody tr:hover { background: #f7f9ff; }
 
+#appointmentsTable {
+    table-layout: fixed;
+}
+
+#appointmentsTable th:last-child,
+#appointmentsTable td:last-child {
+    width: 190px;
+    white-space: nowrap;
+}
+
+#appointmentsTable tbody td.d-flex {
+    display: table-cell !important;
+}
+
+#appointmentsTable tbody td.d-flex .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+#appointmentsTable tbody td.d-flex .btn:last-child {
+    margin-right: 0;
+}
+
 /* ── Badges ───────────────────────────── */
 .badge {
     padding: 4px 10px;

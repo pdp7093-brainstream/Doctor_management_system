@@ -53,6 +53,7 @@
             <h2 class="page-title mb-1">Manage Appointments</h2>
             <p class="text-muted small mb-0">Search, filter, and manage all patient visits.</p>
         </div>
+        
         <a href="{% url 'appointment:add_appointment' %}" class="action-btn">
             <i class="bi bi-plus-lg"></i> Add Appointment
         </a>
@@ -93,8 +94,8 @@
                     </div>
                 </div>
                 <div class="col-md-2 d-grid">
-                    <button id="clearBtn" class="btn btn-outline-secondary">
-                        <i class="bi bi-x-circle me-1"></i>Clear
+                    <button id="clearBtn" class="btn btn-outline-primary">
+                        <i class="bi me-1"></i>Clear
                     </button>
                 </div>
             </div>
@@ -179,7 +180,7 @@
 
                             <!-- Action -->
                             <td>
-                                <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-view-appt">
+                                <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">
                                     <i class="bi bi-eye"></i><span> View</span>
                                 </a>
                             </td>

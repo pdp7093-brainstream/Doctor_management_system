@@ -472,11 +472,12 @@
 
         dateInput.addEventListener('change', function () {
           const date = this.value;
+          hiddenTime.value = '';
           if (!date) { wrapper.style.display = 'none'; return; }
 
           wrapper.style.display = 'block';
 
-          fetch(`/appointment/get-slots/?appointment_date=${date}`)
+          fetch(`/appointment/get-slots/?appointment_date=${date}`, { cache: 'no-store' })
             .then(res => res.json())
             .then(data => {
               container.innerHTML = '';

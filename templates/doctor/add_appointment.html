@@ -344,7 +344,7 @@
         const select = document.getElementById('id_time_slot');
         select.innerHTML = '<option value="">-- Loading slots... --</option>';
 
-        fetch(`/appointment/get-slots/?appointment_date=${date}`)
+        fetch(`/appointment/get-slots/?appointment_date=${date}`, { cache: 'no-store' })
             .then(res => res.json())
             .then(data => {
                 if (data.slots && data.slots.length > 0) {

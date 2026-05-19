@@ -1,6 +1,30 @@
 {% extends "doctor/main.html" %}
 {% block title %}Doctor Dashboard{% endblock %}
 {% block content %}
+<style>
+    .table-section .table-custom {
+        min-width: 900px !important;
+    }
+
+    .table-section .table-custom th:last-child,
+    .table-section .table-custom td:last-child {
+        width: 230px;
+        min-width: 230px;
+        white-space: nowrap;
+    }
+
+    .table-section .table-custom td:last-child .d-flex {
+        flex-wrap: nowrap !important;
+        align-items: center;
+    }
+
+    .table-section .table-custom td:last-child .btn {
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+    }
+</style>
+
 <main class="main-content" id="mainContent">
 
     <div class="page-header">

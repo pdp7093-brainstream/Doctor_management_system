@@ -10,6 +10,7 @@ from accounts.models import Patient, FamilyMember
 from doctor.models import InnerMember
 
 class Appointment(models.Model):
+    BOOKED_STATUSES = ('pending', 'confirmed', 'completed')
 
     status_choices = [
         ('pending', 'Pending'),
@@ -54,6 +55,10 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.patient.user.username} - {self.appointment_date}"
+
+    @classmethod
+    def booked_slots(cls):
+        return cls.objects.filter(status__in=cls.BOOKED_STATUSES)
 
 # Visit Model 
 class Visit(models.Model):
@@ -109,4 +114,3 @@ class PrescriptionItem(models.Model):
     def __str__(self):
         return f"Prescription Item for {self.prescription.visit.patient.user.username} on {self.prescription.visit.appointment.appointment_date}"
     
-
