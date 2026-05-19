@@ -9,6 +9,7 @@ from .models import Bill, BillItem
 from appointment.models import Visit
 from clinic.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
+
 def generate_bill_from_visit(visit):
     """
     Visit complete hone ke baad automatically bill banao

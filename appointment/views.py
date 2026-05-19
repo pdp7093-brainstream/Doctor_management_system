@@ -210,6 +210,11 @@ def cancel_appointment(request, appointment_id):
         appointment.save()
         
     else:
+        if request.method == 'POST':
+            return JsonResponse({
+                'success': False,
+                'error': 'This appointment cannot be cancelled.'
+            }, status=400)
         messages.error(request, 'This appointment cannot be cancelled.')
 
     return redirect('dashboard')
@@ -354,14 +359,28 @@ class Add_appointment(View):
             messages.error(request, "Invalid time format")
             return redirect('appointment:add_appointment')
 
+        try:
+            appointment_date_obj = datetime.strptime(appointment_date, "%Y-%m-%d").date()
+        except ValueError:
+            messages.error(request, "Invalid appointment date")
+            return redirect('appointment:add_appointment')
+
+        if Appointment.booked_slots().filter(
+            appointment_date=appointment_date_obj,
+            time_slot=time_slot
+        ).exists():
+            messages.error(request, "This slot is already booked")
+            return redirect('appointment:add_appointment')
+
         # Create appointment
         Appointment.objects.create(
             patient          = patient,
             family_member    = family_member,
             doctor           = doctor,
-            appointment_date = appointment_date,
+            appointment_date = appointment_date_obj,
             time_slot        = time_slot,
             notes            = notes,
+            booked_by        = request.user,
         )
 
        
@@ -434,7 +453,7 @@ class Book_appointment(View):
         ).first()
 
         # Double booking prevention
-        if Appointment.objects.filter(
+        if Appointment.booked_slots().filter(
             appointment_date=appointment_date,
             time_slot=time_24
         ).exists():

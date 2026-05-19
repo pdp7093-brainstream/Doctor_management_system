@@ -64,7 +64,7 @@
                                 <th>Time</th>
                                 <th>Patient</th>
                                 <th>Status</th>
-                                <th colspan="2">Action</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">
@@ -100,22 +100,20 @@
                                 </td>
 
                                 <td class="d-flex gap-2">
-
                                     <!-- View Button -->
                                     <a href="{% url 'appointment:appointment_detail' appointment.id %}" 
                                     class="btn btn-primary btn-sm">
                                         <i class="fas fa-eye"></i> View
                                     </a>
-                                </td>
-                                <td class="d-flex gap-2">
+
                                     <!-- Cancel Button -->
                                     {% if appointment.status == 'pending' %}
                                     <a href="{% url 'appointment:cancel_appointment' appointment.id %}" 
-                                    class="btn btn-danger btn-sm cancel-btn">
+                                    class="btn btn-danger btn-sm cancel-btn"
+                                    data-appointment-id="{{ appointment.id }}">
                                         <i class="fas fa-times"></i> Cancel
                                     </a>
                                     {% endif %}
-
                                 </td>
                             </tr>
                             {% empty %}
@@ -195,6 +193,110 @@
       });
 
     }
+
+    // Handle appointment cancellation (Dynamic AJAX)
+    const cancelBtns = document.querySelectorAll('.cancel-btn');
+
+    cancelBtns.forEach(btn => {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+
+        const appointmentId = this.getAttribute('data-appointment-id');
+        const appointmentRow = this.closest('tr');
+
+        Swal.fire({
+          title: 'Cancel Appointment',
+          text: 'Are you sure you want to cancel this appointment? This action cannot be undone.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, Cancel Appointment',
+          cancelButtonText: 'Keep Appointment',
+          confirmButtonColor: '#dc3545',
+          cancelButtonColor: '#6c757d',
+          reverseButtons: true,
+          backdrop: `
+            rgba(0,0,0,0.45)
+          `,
+          customClass: {
+            popup: 'rounded-4 shadow-lg',
+            confirmButton: 'px-4 py-2',
+            cancelButton: 'px-4 py-2'
+          }
+
+        }).then((result) => {
+
+          if (result.isConfirmed) {
+
+            Swal.fire({
+              title: 'Cancelling...',
+              html: 'Please wait',
+              timer: 1500,
+              allowOutsideClick: false,
+              showConfirmButton: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+
+            // Dynamic cancellation via AJAX
+            setTimeout(() => {
+              fetch(`/appointment/cancel-appointment/${appointmentId}/`, {
+                method: 'POST',
+                headers: {
+                  'X-CSRFToken': '{{ csrf_token }}',
+                  'Content-Type': 'application/json'
+                }
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Update status badge to Cancelled
+                  const statusBadge = appointmentRow.querySelector('[class*="badge"]');
+                  if (statusBadge) {
+                    statusBadge.className = 'badge bg-danger';
+                    statusBadge.textContent = 'Cancelled';
+                  }
+
+                  // Hide cancel button
+                  const cancelBtn = appointmentRow.querySelector('.cancel-btn');
+                  if (cancelBtn) {
+                    cancelBtn.remove();
+                  }
+
+                  // Show success message
+                  Swal.fire({
+                    title: 'Cancelled!',
+                    text: 'Your appointment has been cancelled successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#1977cc'
+                  });
+                } else {
+                  Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to cancel appointment.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                  });
+                }
+              })
+              .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                  title: 'Error!',
+                  text: 'An error occurred. Please try again.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
+              });
+            }, 1500);
+
+          }
+
+        });
+
+      });
+    });
 
   });
 </script>
