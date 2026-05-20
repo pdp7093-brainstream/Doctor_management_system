@@ -116,6 +116,11 @@ class PrescriptionItem(models.Model):
     days = models.IntegerField()
     should_deduct    = models.BooleanField(default=True) 
     was_deducted = models.BooleanField(default=False)
+    
+    # Billing tracking - यह track करता है कि item किस bill में शामिल हुआ
+    billed_on = models.DateTimeField(null=True, blank=True)  # जब bill बना
+    bill_id = models.IntegerField(null=True, blank=True)  # कौन सा bill
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -18,10 +18,21 @@ class Bill(models.Model):
         ('partial', 'Partial'),
     ]
 
-    visit          = models.OneToOneField(
-        Visit, on_delete=models.CASCADE, related_name='bill'
+    visit          = models.ForeignKey(
+        Visit, on_delete=models.CASCADE, related_name='bills'
     )
     bill_number    = models.CharField(max_length=20, unique=True)
+    
+    # Addon bill tracking
+    is_addon = models.BooleanField(default=False)  # True = यह addon/amendment bill है
+    parent_bill = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='addons'
+    )  # Original bill का reference
+    
     bill_date      = models.DateField(auto_now_add=True)
     consultation_fee = models.DecimalField(max_digits=10,decimal_places=2,default=0)
     subtotal       = models.DecimalField(max_digits=10, decimal_places=2, default=0)

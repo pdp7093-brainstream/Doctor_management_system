@@ -569,8 +569,19 @@ class PrescriptionView(View):
         })
 
     def reduce_stock(self, prescription):
+        """
+        Stock को सिर्फ उन items के लिए reduce करो जो:
+        1. should_deduct = True हों
+        2. was_deducted = False हों (अभी तक deduct नहीं हुई)
+        3. billed_on = NULL हों (नई items)
+        """
+        from datetime import datetime
         errors = []
-        pending_items = prescription.items.select_related('medicine_variant__medicine').filter(should_deduct=True)
+        pending_items = prescription.items.select_related('medicine_variant__medicine').filter(
+            should_deduct=True,
+            was_deducted=False
+        )
+        
         for item in pending_items:
             variant = item.medicine_variant
             try:
@@ -579,19 +590,24 @@ class PrescriptionView(View):
                 morning, afternoon, night = int(m_a_n[0]), int(m_a_n[1]), int(m_a_n[2])
             except:
                 morning = afternoon = night = 0
+            
             total_qty = (morning + afternoon + night) * item.days
+            
             if total_qty <= 0:
                 item.should_deduct, item.was_deducted = False, True
                 item.save()
                 continue
+            
             if variant.stock >= total_qty:
                 variant.stock -= total_qty
             else:
                 errors.append(f"{variant.medicine.name}: Req {total_qty}, Avail {variant.stock}")
                 variant.stock = 0
+            
             variant.save()
             item.should_deduct, item.was_deducted = False, True
             item.save()
+        
         return errors
 
     def post(self, request, visit_id):
@@ -649,6 +665,25 @@ class PrescriptionView(View):
             if stock_errors:
                 for err in stock_errors:
                     messages.warning(request, f"Low stock: {err}")
+            
+            # Bill को generate करो automatically
+            try:
+                generate_bill_from_visit(visit)
+                messages.success(request, "Bill generated successfully!")
+            except Exception as e:
+                print("BILL GENERATION ERROR:", str(e))
+                messages.warning(request, f"Bill generation error: {str(e)}")
+        else:
+            # अगर सिर्फ update है (complete नहीं), तब भी addon bill generate करो अगर नई items हैं
+            new_bill_generated = False
+            try:
+                new_bill = generate_bill_from_visit(visit)
+                if new_bill and new_bill.is_addon:
+                    new_bill_generated = True
+                    messages.info(request, f"Addon bill created for new medicines!")
+            except Exception as e:
+                print("ADDON BILL ERROR:", str(e))
+                pass  # Silently fail for updates
 
         appointment = visit.appointment
         if is_completing:
@@ -657,7 +692,7 @@ class PrescriptionView(View):
             appointment.status = "confirmed"
         appointment.save()
 
-        if is_completing:
+        if is_completing or new_bill_generated:
             return redirect('billing:bill_detail', visit_id=visit.id)
         
         if appointment.appointment_date == timezone.now().date():
