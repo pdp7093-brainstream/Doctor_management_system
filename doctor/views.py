@@ -128,9 +128,9 @@ def billing(request):
 def manage_patients(request):
     search = request.GET.get('search', '').strip()
 
-    # Exclude patients whose user account belongs to a doctor
-    patients = Patient.objects.select_related('user').exclude(user__innermember__role='doctor')
-    family_members = FamilyMember.objects.select_related('patient__user').exclude(patient__user__innermember__role='doctor')
+    # Exclude patients whose user account belongs to any staff (doctor, biller, etc.)
+    patients = Patient.objects.select_related('user').exclude(user__innermember__isnull=False)
+    family_members = FamilyMember.objects.select_related('patient__user').exclude(patient__user__innermember__isnull=False)
 
     combined = []
 
