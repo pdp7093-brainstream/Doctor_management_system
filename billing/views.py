@@ -83,7 +83,6 @@ def generate_bill_from_visit(visit):
 
     return bill
 
-
 @method_decorator(never_cache, name='dispatch')
 class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
     login_url = 'doctor:login'
