@@ -150,9 +150,9 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         if payment_status and payment_status != 'all':
             bills = bills.filter(payment_status=payment_status)
 
-        # Pagination — 20 per page
+        # Pagination — 10 per page
         from django.core.paginator import Paginator
-        paginator   = Paginator(bills, 20)
+        paginator   = Paginator(bills, 10)
         page_number = request.GET.get('page', 1)
         page_obj    = paginator.get_page(page_number)
 

@@ -3,7 +3,7 @@ from doctor.models import InnerMember,Medicine
 from accounts.models import *
 
 # Create your models here.
-from django.db import models
+
 from django.contrib.auth.models import User
 
 from accounts.models import Patient, FamilyMember

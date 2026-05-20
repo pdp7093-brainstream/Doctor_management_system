@@ -203,35 +203,29 @@
         <!-- Pagination -->
         {% if page_obj.paginator.count > 10 %}
         <div id="paginationContainer">
-            <div id="paginationWrapper"
-                class="d-flex justify-content-center mt-3">
-                <ul class="pagination">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link pagination-link"
-                            data-page="{{ page_obj.previous_page_number }}"
-                            href="#">
-                            <i class="bi bi-chevron-left"></i> Prev
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    <li class="page-item active">
-                        <span class="page-link">
-                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-                        </span>
-                    </li>
-
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link pagination-link"
-                            data-page="{{ page_obj.next_page_number }}"
-                            href="#">
-                            Next <i class="bi bi-chevron-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
+            <div id="paginationWrapper" class="card-footer bg-white d-flex flex-column align-items-center py-3">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1" style="font-size:0.875rem;">
+                    <span>
+                        <strong>{{ page_obj.start_index }} – {{ page_obj.end_index }}</strong>
+                        <span class="text-muted"> of {{ page_obj.paginator.count }} bills</span>
+                    </span>
+                    <span class="text-muted">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                    </span>
+                </div>
+                <nav aria-label="Bill pagination" class="w-100">
+                    <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1 mb-0">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}"{% endif %} href="#">Prev</a>
+                        </li>
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}"{% endif %} href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
         {% endif %}
