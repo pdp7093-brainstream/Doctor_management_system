@@ -10,38 +10,94 @@ from appointment.models import Visit
 from clinic.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
 
+def get_bill_summary(visit):
+    """
+    Visit के सभी bills का summary - original + addon bills
+    Returns payment tracking information
+    """
+    # Original bill
+    original_bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+    addon_bills = Bill.objects.filter(visit=visit, is_addon=True)
+    
+    summary = {
+        'original_bill': original_bill,
+        'addon_bills': list(addon_bills),
+        'original_total': original_bill.total if original_bill else Decimal('0'),
+        'addon_total': sum(b.total for b in addon_bills),
+        'grand_total': Decimal('0'),
+        'original_paid': original_bill.total if (original_bill and original_bill.payment_status == 'paid') else Decimal('0'),
+        'addon_paid': sum(b.total for b in addon_bills if b.payment_status == 'paid'),
+        'total_paid': Decimal('0'),
+        'pending_amount': Decimal('0'),
+    }
+    
+    summary['grand_total'] = summary['original_total'] + summary['addon_total']
+    summary['total_paid'] = summary['original_paid'] + summary['addon_paid']
+    summary['pending_amount'] = summary['grand_total'] - summary['total_paid']
+    
+    return summary
+
 def generate_bill_from_visit(visit):
     """
-    Visit complete hone ke baad automatically bill banao
-    Prescription items se BillItems create karo
+    Visit complete होने पर automatically bill बनाओ
+    Prescription items से BillItems create करो
+    
+    Addon bills भी create करेगा अगर नई medicines add हों
     """
-
-    # Agar bill already hai to return karo
-    if hasattr(visit, 'bill'):
-        return visit.bill
-
+    from django.utils import timezone
+    
     prescription = getattr(visit, 'prescription', None)
 
     if not prescription:
         return None
 
-    items = prescription.items.select_related(
+    # सभी items जो अभी तक billed नहीं हुई हैं
+    new_items = prescription.items.select_related(
         'medicine_variant__medicine'
-    )
+    ).filter(billed_on__isnull=True)
 
+    # Check करो - क्या पहले से कोई bill है
+    existing_bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+    
+    clinic = ClinicSettings.get()
     subtotal = Decimal('0')
 
-    clinic = ClinicSettings.get()
+    if not new_items.exists():
+        if not existing_bill:
+            # Original bill बनाओ (सिर्फ consultation fee)
+            bill = Bill.objects.create(
+                visit=visit,
+                subtotal=0,
+                gst_percent=clinic.default_gst,
+                consultation_fee=clinic.default_consultation_fee,
+                is_addon=False
+            )
+            return bill
+        else:
+            return visit.bills.order_by('-created_at').first()
 
-    bill = Bill.objects.create(
-        visit=visit,
-        subtotal=0,
-        gst_percent=clinic.default_gst,
-        consultation_fee=clinic.default_consultation_fee,
-    )
+    if existing_bill:
+        # Addon bill बनाओ
+        bill = Bill.objects.create(
+            visit=visit,
+            subtotal=0,
+            gst_percent=clinic.default_gst,
+            consultation_fee=0,  # Addon में consultation fee नहीं
+            is_addon=True,
+            parent_bill=existing_bill,
+            notes="Prescription amendment/addon"
+        )
+    else:
+        # Original bill बनाओ
+        bill = Bill.objects.create(
+            visit=visit,
+            subtotal=0,
+            gst_percent=clinic.default_gst,
+            consultation_fee=clinic.default_consultation_fee,
+            is_addon=False
+        )
 
-    for item in items:
-
+    for item in new_items:
         variant = item.medicine_variant
 
         if not variant:
@@ -50,18 +106,15 @@ def generate_bill_from_visit(visit):
         try:
             parts = item.dosage.split(' (')
             m_a_n = parts[0].split('-')
-
             m = int(m_a_n[0])
             a = int(m_a_n[1])
             n = int(m_a_n[2])
-
         except Exception:
             m = a = n = 0
 
         qty = (m + a + n) * item.days
 
         unit_price = variant.selling_price
-
         total = qty * unit_price
 
         BillItem.objects.create(
@@ -75,6 +128,11 @@ def generate_bill_from_visit(visit):
         )
 
         subtotal += total
+        
+        # Item को mark करो - यह bill में add हो गई
+        item.billed_on = timezone.now()
+        item.bill_id = bill.id
+        item.save()
 
     bill.subtotal = subtotal
     bill.save()
@@ -88,24 +146,38 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
     def get(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
 
-        # Bill nahi hai to banao
-        if not hasattr(visit, 'bill'):
-            bill = generate_bill_from_visit(visit)
+        # Bill generate करो (ताकि कोई pending items हों तो उनका bill बन जाए)
+        latest_bill = generate_bill_from_visit(visit)
+
+        bill_id = request.GET.get('bill_id')
+        if bill_id:
+            bill = get_object_or_404(Bill, id=bill_id, visit=visit)
         else:
-            bill = visit.bill
+            bill = latest_bill
 
         if not bill:
-            messages.error(request, 'No prescription found for this visit!')
-            return redirect('appointment:manage_appointments')
+            # अगर कोई बिल नहीं है तो original bill check करो
+            bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+            if not bill:
+                messages.error(request, 'No prescription found for this visit!')
+                return redirect('appointment:manage_appointments')
+
+        # Bill summary - सभी bills के साथ
+        bill_summary = get_bill_summary(visit)
 
         return render(request, 'billing/bill_detail.html', {
             'bill': bill,
             'visit': visit,
+            'bill_summary': bill_summary,
         })
 
     def post(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
-        bill  = get_object_or_404(Bill, visit=visit)
+        bill_id = request.POST.get('bill_id')
+        if bill_id:
+            bill = get_object_or_404(Bill, id=bill_id, visit=visit)
+        else:
+            bill = Bill.objects.filter(visit=visit, is_addon=False).first()
 
         # Update fields
         bill.gst_percent    = Decimal(request.POST.get('gst_percent', 18))
@@ -150,9 +222,9 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         if payment_status and payment_status != 'all':
             bills = bills.filter(payment_status=payment_status)
 
-        # Pagination — 20 per page
+        # Pagination — 10 per page
         from django.core.paginator import Paginator
-        paginator   = Paginator(bills, 20)
+        paginator   = Paginator(bills, 10)
         page_number = request.GET.get('page', 1)
         page_obj    = paginator.get_page(page_number)
 
@@ -185,7 +257,11 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
     def get(self, request, visit_id):
         # Visit + Bill fetch karo
         visit = get_object_or_404(Visit, id=visit_id)
-        bill  = get_object_or_404(Bill, visit=visit)
+        bill_id = request.GET.get('bill_id')
+        if bill_id:
+            bill = get_object_or_404(Bill, id=bill_id, visit=visit)
+        else:
+            bill = Bill.objects.filter(visit=visit, is_addon=False).first()
 
         # Clinic settings is a singleton managed by the clinic app.
         settings = ClinicSettings.get()

@@ -172,7 +172,7 @@
                         </td>
                         <td>
                             <div class="action-buttons justify-content-center">
-                                <a href="{% url 'billing:bill_detail' bill.visit.id %}"
+                                <a href="{% url 'billing:bill_detail' bill.visit.id %}?bill_id={{ bill.id }}"
                                     class="action-btn btn btn-primary btn-sm"
                                     title="View Bill">
                                     <i class="bi bi-eye"></i>
@@ -201,7 +201,7 @@
         </div>
 
         <!-- Pagination -->
-        {% if page_obj.paginator.count > 10 %}
+        {% if page_obj.paginator.num_pages > 1 %}
         <div id="paginationContainer">
             <div id="paginationWrapper"
                 class="d-flex justify-content-center mt-3">

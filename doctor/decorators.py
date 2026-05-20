@@ -18,8 +18,12 @@ def role_required(required_role):
                 return redirect('doctor:login')
 
             if member.role != required_role:
-                messages.error(request, "Unauthorized access")
-                return redirect('doctor:login')
+                
+                if member.role == 'biller':
+                    
+                    return redirect('billing:bill_list')
+            
+                return redirect('doctor:dashboard')
 
             return view_func(request, *args, **kwargs)
 

@@ -112,7 +112,7 @@
                                     <a href="{% url 'doctor:view_patient' p.type p.id %}" class="btn btn-sm btn-view-patient" title="View">
                                         <i class="bi bi-eye"></i><span class="d-none d-md-inline"> View</span>
                                     </a>
-
+                            
                                     <!-- Edit -->
                                     {% if p.type == 'main' %}
                                     <a href="{% url 'doctor:edit_patient' p.id %}" class="btn btn-sm btn-edit-patient" title="Edit">
