@@ -215,23 +215,67 @@
 
     document.querySelectorAll('.btn-cancel-appointment').forEach(button => {
         button.addEventListener('click', async function () {
-            const confirmCancel = confirm('Are you sure you want to cancel this appointment?');
-            if (!confirmCancel) return;
-
-            const url = this.dataset.url;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken,
-                    'X-Requested-With': 'XMLHttpRequest',
-                },
-                body: JSON.stringify({}),
+            const confirmCancel = await Swal.fire({
+                title: 'Cancel Appointment',
+                text: 'Are you sure you want to cancel this appointment?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Cancel',
+                cancelButtonText: 'Keep Appointment',
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-4 shadow-lg',
+                    confirmButton: 'px-4 py-2',
+                    cancelButton: 'px-4 py-2'
+                }
             });
 
-            const data = await response.json();
+            if (!confirmCancel.isConfirmed) return;
+
+            const url = this.dataset.url;
+
+            Swal.fire({
+                title: 'Cancelling...',
+                html: 'Please wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            let response;
+            let data;
+
+            try {
+                response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                data = await response.json();
+            } catch (error) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Unable to cancel appointment. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
+                return;
+            }
+
             if (!response.ok || !data.success) {
-                alert(data.error || 'Unable to cancel appointment.');
+                Swal.fire({
+                    title: 'Error!',
+                    text: data.error || 'Unable to cancel appointment.',
+                    icon: 'error',
+                    confirmButtonColor: '#0d6efd'
+                });
                 return;
             }
 
@@ -256,6 +300,13 @@
             this.classList.remove('btn-danger');
             this.classList.add('btn-danger');
             this.innerHTML = '<i class="bi bi-x-circle me-1"></i>Cancelled';
+
+            Swal.fire({
+                title: 'Cancelled!',
+                text: 'Appointment has been cancelled successfully.',
+                icon: 'success',
+                confirmButtonColor: '#0d6efd'
+            });
         });
     });
 </script>
