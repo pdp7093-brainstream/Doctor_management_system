@@ -41,6 +41,28 @@
         background-color: #fecaca;
         color: #dc2626;
     }
+
+    .patients-search-wrap {
+        position: relative;
+        max-width: 280px;
+        width: 100%;
+    }
+
+    .patients-search-wrap .bi-search {
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        transform: translateY(-50%);
+        color: #999;
+        font-size: 0.88rem;
+        pointer-events: none;
+    }
+
+    .patients-table th:last-child,
+    .patients-table td:last-child {
+        width: 1%;
+        white-space: nowrap;
+    }
 </style>
 
 <main class="main-content" id="mainContent">
@@ -58,29 +80,28 @@
 
     <!-- Patients Table Card -->
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center gap-3">
+        <div class="card-header d-flex align-items-center gap-3 flex-wrap">
             <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
                 <i class="bi bi-people-fill"></i> Patients
+                {% if page_obj %}
+                <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
+                {% endif %}
             </div>
-            {% if page_obj %}
-            <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
-            {% endif %}
-            <!-- Inline Search -->
-            <div style="position:relative; max-width:280px; width:100%;">
-                <i class="bi bi-search"
-                   style="position:absolute; top:50%; left:10px; transform:translateY(-50%); color:#999; font-size:0.88rem; pointer-events:none;"></i>
+            <div class="patients-search-wrap ms-md-auto">
+                <i class="bi bi-search"></i>
                 <input type="text" id="searchInput" class="form-control form-control-sm"
-                       placeholder="Search by name, phone..."
-                       value="{{ search }}"
-                       style="padding-left:30px; border-radius:20px;">
+                    placeholder="Search by name, phone..."
+                    value="{{ search }}"
+                    style="padding-left:30px; border-radius:20px;">
             </div>
         </div>
 
         <div class="card-body p-0">
             <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
-                <table class="table table-hover mb-0" style="min-width:600px; width:100%;">
+                <table class="table table-hover mb-0 patients-table" style="min-width:680px; width:100%;">
                     <thead>
                         <tr>
+                            <th style="width:60px;">#</th>
                             <th>Name</th>
                             <th>Gender</th>
                             <th>Phone</th>
@@ -91,6 +112,7 @@
                     <tbody id="tableBody">
                         {% for p in patients %}
                         <tr>
+                            <td class="text-muted fw-semibold">{{ forloop.counter }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="user-avatar" style="width:36px; height:36px; font-size:0.82rem; flex-shrink:0;">
@@ -150,7 +172,7 @@
 
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="text-center text-muted py-5">
+                            <td colspan="5" class="text-center text-muted py-5">
                                 <i class="bi bi-person-x" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
                                 No patients found. Add one to get started.
                             </td>
