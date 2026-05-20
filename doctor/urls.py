@@ -8,7 +8,7 @@ app_name = 'doctor'
 
 urlpatterns = [
     path('login/',views.login_view,name='login'),  
-    path('logout/',views.logout_view,name='logout'),
+    path('logout/',views.logout_view,name='doctor_logout'),
     path('dashboard/',DashboardView.as_view(),name='dashboard'),
     path('manage-patients/',views.manage_patients,name='manage_patients'),
 

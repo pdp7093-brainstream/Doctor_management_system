@@ -30,7 +30,7 @@ def search_patients(request):
     """Search for patients (main user or family member) - WORKING VERSION"""
     query = request.GET.get('q', '').strip()
 
-    print(f"🔍 Searching for: '{query}'")
+    print(f" Searching for: '{query}'")
 
     if not query or len(query) < 2:
         return JsonResponse({'results': []})

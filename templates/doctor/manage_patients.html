@@ -62,12 +62,16 @@
             <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
                 <i class="bi bi-people-fill"></i> Patients
             </div>
+            {% if page_obj %}
+            <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
+            {% endif %}
             <!-- Inline Search -->
             <div style="position:relative; max-width:280px; width:100%;">
                 <i class="bi bi-search"
                    style="position:absolute; top:50%; left:10px; transform:translateY(-50%); color:#999; font-size:0.88rem; pointer-events:none;"></i>
                 <input type="text" id="searchInput" class="form-control form-control-sm"
                        placeholder="Search by name, phone..."
+                       value="{{ search }}"
                        style="padding-left:30px; border-radius:20px;">
             </div>
         </div>
@@ -156,22 +160,46 @@
                 </table>
             </div>
         </div>
+
+        <div id="paginationContainer">
+            {% if page_obj.paginator.count > 10 %}
+            <div id="paginationWrapper" class="card-footer bg-white d-flex flex-column align-items-center py-3">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1" style="font-size:0.875rem;">
+                    <span>
+                        <strong>{{ page_obj.start_index }} – {{ page_obj.end_index }}</strong>
+                        <span class="text-muted"> of {{ page_obj.paginator.count }} patients</span>
+                    </span>
+                    <span class="text-muted">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                    </span>
+                </div>
+                <nav aria-label="Patients pagination" class="w-100">
+                    <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1 mb-0">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}"{% endif %} href="#">Prev</a>
+                        </li>
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                        </li>
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}"{% endif %} href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
 </main>
 
 <script>
-    // Search
-    document.getElementById('searchInput').addEventListener('input', function () {
-        const query = this.value.toLowerCase();
-        document.querySelectorAll('#tableBody tr').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
-        });
-    });
+    const searchInput = document.getElementById('searchInput');
+    let debounceTimer;
 
-    // SweetAlert Delete Confirmation
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function () {
+    function bindDeleteButtons() {
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.onclick = function () {
             const form = this.closest('form');
             const type = this.dataset.type;
 
@@ -203,8 +231,58 @@
                     setTimeout(() => { form.submit(); }, 1200);
                 }
             });
+            };
         });
-    });
+    }
+
+    function fetchPatients(page = 1) {
+        const params = new URLSearchParams({
+            search: searchInput.value,
+            page: page,
+        });
+
+        fetch(`{% url 'doctor:manage_patients' %}?${params.toString()}`, {
+            headers: { 'x-requested-with': 'XMLHttpRequest' }
+        })
+        .then(res => res.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newTbody = doc.querySelector('#tableBody');
+            const oldTbody = document.querySelector('#tableBody');
+            if (newTbody && oldTbody) oldTbody.replaceWith(newTbody);
+
+            const newPagination = doc.querySelector('#paginationWrapper');
+            const oldPagination = document.querySelector('#paginationWrapper');
+            if (newPagination && oldPagination) oldPagination.replaceWith(newPagination);
+            else if (newPagination) document.getElementById('paginationContainer').appendChild(newPagination);
+            else if (oldPagination) oldPagination.remove();
+
+            bindPaginationLinks();
+            bindDeleteButtons();
+        })
+        .catch(err => console.error('Fetch error:', err));
+    }
+
+    function bindPaginationLinks() {
+        document.querySelectorAll('.pagination-link').forEach(link => {
+            link.onclick = function (e) {
+                e.preventDefault();
+                fetchPatients(parseInt(this.getAttribute('data-page')));
+            };
+        });
+    }
+
+    function debounce(fn, delay = 350) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(fn, delay);
+    }
+
+    searchInput.addEventListener('input', () => debounce(() => fetchPatients(1)));
+
+    bindPaginationLinks();
+    bindDeleteButtons();
 </script>
 
 {% endblock %}

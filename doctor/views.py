@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
 from django.db.models import Count, Q
+from django.core.paginator import Paginator
 from accounts.models import FamilyMember
 
 def login_view(request):
@@ -125,6 +126,7 @@ def billing(request):
 @never_cache
 @role_required('doctor')
 def manage_patients(request):
+    search = request.GET.get('search', '').strip()
 
     # Exclude patients whose user account belongs to a doctor
     patients = Patient.objects.select_related('user').exclude(user__innermember__role='doctor')
@@ -155,8 +157,21 @@ def manage_patients(request):
     # Sorting (important UX)
     combined = sorted(combined, key=lambda x: x['name'].lower())
 
+    if search:
+        search_lower = search.lower()
+        combined = [
+            patient for patient in combined
+            if search_lower in patient['name'].lower()
+            or search_lower in (patient.get('phone') or '').lower()
+        ]
+
+    paginator = Paginator(combined, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     return render(request, 'doctor/manage_patients.html', {
-        'patients': combined
+        'patients': page_obj,
+        'page_obj': page_obj,
+        'search': search,
     }) 
 
 
