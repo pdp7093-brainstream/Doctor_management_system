@@ -192,6 +192,35 @@
                     <span>Staff</span>
                 </a>
             </li>
+             <!-- Export $ Archieve  -->
+            <li>
+                <a href="#" class="menu-toggle {% if '/expenses' in request.path %}active expanded parent-active{% endif %}">
+                    <div class="menu-toggle-label">
+                        <i class="bi bi-archive-fill"></i>
+                        <span>Reports & Archive</span>
+                    </div>
+                    <i class="arrow-icon"></i>
+                </a>
+
+                <ul class="submenu {% if '/reports_archive' in request.path %}active{% endif %}">
+
+                    <li>
+                        <a href="{% url 'reports_archive:export_data' %}" class="{% if request.path == '/reports_archive/' %}active{% endif %}">
+                            <i class="bi bi-bar-chart-fill"></i>
+                            <span>Export Data</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'reports_archive:archive_records' %}" class="{% if '/reports_archive/archive' in request.path %}active{% endif %}">
+                            <i class="bi bi-file-earmark-zip"></i>
+                            <span>Archive Records</span>
+                        </a>
+                    </li>
+                   
+
+                </ul>
+            </li>
             {% endif %}
 
             <!-- Expenses  -->

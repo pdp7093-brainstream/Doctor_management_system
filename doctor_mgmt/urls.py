@@ -28,7 +28,7 @@ urlpatterns = [
     path('billing/', include(('billing.urls', 'billing'), namespace='billing')),
     path('clinic/', include(('clinic.urls', 'clinic'), namespace='clinic')),
     path('expenses/', include(('expenses.urls', 'expenses'), namespace='expenses')),
-
+    path('reports/', include('reports_archive.urls', namespace='reports_archive')),
 ]
 
 # Serve media files during development
