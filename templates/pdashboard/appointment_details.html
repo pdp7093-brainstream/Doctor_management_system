@@ -54,6 +54,15 @@
                     <div class="label">Booked On</div>
                     <div class="value">{{ appointment.appointment_date|date:"d M-Y" }}</div>
                 </div>
+            
+                {% if appointment.status == 'cancelled' %}
+                <div class="info-grid full mt-3">
+                    <div class="info-box">
+                        <div class="label">Reason</div>
+                        <div class="value">{{ appointment.cancellation_reason }}</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
             {% if appointment.notes %}
             <div class="info-grid full mt-3">

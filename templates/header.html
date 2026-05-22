@@ -53,7 +53,7 @@
 
           {% if user.is_authenticated %}
           <li class="dropdown profile-nav">
-            <a href="#">
+            <a href="#" class="profile-nav-trigger" aria-expanded="false">
               <div class="profile-avatar">
                 {% if user.patient.profile_picture and user.patient.profile_picture.name != 'profile_pictures/default-avatar.png' %}
                     <img src="{{ user.patient.profile_picture.url }}" alt="Profile" class="profile-avatar-img">
@@ -126,12 +126,70 @@
     right: 0;
     left: auto;
   }
+
+  .navmenu .profile-nav > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .navmenu .profile-nav > a .toggle-dropdown {
+    width: auto;
+    height: auto;
+    margin-left: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  @media (max-width: 1199px) {
+    .navmenu .profile-nav > a {
+      justify-content: flex-start;
+      white-space: normal;
+    }
+
+    .navmenu .profile-nav > a .profile-avatar {
+      width: 36px;
+      height: 36px;
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+
+    .navmenu .profile-nav > a .toggle-dropdown {
+      margin-left: auto;
+      color: var(--nav-dropdown-color);
+    }
+
+    .mobile-nav-active .navmenu .profile-nav > a .toggle-dropdown {
+      color: var(--nav-dropdown-hover-color);
+    }
+
+    .navmenu .profile-nav.dropdown-active > ul {
+      display: block;
+    }
+  }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    const profileTrigger = document.querySelector('.profile-nav .profile-nav-trigger');
+    const profileNavItem = document.querySelector('.profile-nav');
+
+    if (profileTrigger && profileNavItem) {
+      profileTrigger.addEventListener('click', function (e) {
+        if (window.innerWidth > 1199) return;
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        const isOpen = profileNavItem.classList.toggle('dropdown-active');
+        profileTrigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      }, true);
+    }
 
     const logoutBtn = document.getElementById('logoutBtn');
 

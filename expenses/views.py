@@ -17,8 +17,6 @@ def pending_expenses(request):
 
     # Only doctor can access pending approvals
     if request.user.innermember.role != 'doctor':
-
-        messages.error(request, 'Access denied.')
         return redirect('expenses:expense_list')
 
     if request.method == 'POST':
@@ -31,11 +29,11 @@ def pending_expenses(request):
                 expense.status = 'approved'
                 expense.approved_at = timezone.now()
                 expense.save()
-                messages.success(request, f'Expense "{expense.title}" approved successfully.')
+                
             elif action == 'reject':
                 expense.status = 'rejected'
                 expense.save()
-                messages.success(request, f'Expense "{expense.title}" rejected.')
+               
         except Expense.DoesNotExist:
             messages.error(request, 'Expense not found or already processed.')
             
@@ -57,7 +55,6 @@ class CategoryListView(LoginRequiredMixin, ExpenseAccessMixin, View):
         # Only doctor can access categories
         if request.user.innermember.role != 'doctor':
 
-            messages.error(request, 'Access denied.')
             return redirect('expenses:expense_list')
 
         return super().dispatch(request, *args, **kwargs)
@@ -80,7 +77,6 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
         # Only doctor can add category
         if request.user.innermember.role != 'doctor':
 
-            messages.error(request, 'Access denied.')
             return redirect('expenses:expense_list')
 
         return super().dispatch(request, *args, **kwargs)
@@ -97,16 +93,11 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
             ExpenseCategory.objects.create(name=name)
 
-            messages.success(request,'Category added successfully.')
-
             return redirect('expenses:category_list')
 
         except Exception as e:
 
             print("Category Create Error:", e)
-
-            messages.error(request,'Something went wrong.')
-
             return redirect('expenses:add_category')
 
 @method_decorator(never_cache, name='dispatch')
@@ -172,7 +163,6 @@ class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
         except Exception as e:
 
             print("Expense Create Error:", e)
-            messages.error(request,'Something went wrong while adding expense.')
 
             return redirect('expenses:add_expense')
 
