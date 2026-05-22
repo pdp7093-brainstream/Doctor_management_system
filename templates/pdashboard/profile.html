@@ -9,7 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
-
 </head>
 
 <body>
@@ -167,6 +166,71 @@
                         <i class="fas fa-users"
                             style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
                         No family members added yet. Add one while booking an appointment.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- ── Lab Documents Card ── -->
+            <div class="card mb-4" style="max-width:820px;margin-left:0;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-file-medical"></i> Lab Documents</h4>
+                    <span style="font-size:0.82rem;color:var(--muted);">
+                        {{ lab_documents|length }} file{% if lab_documents|length != 1 %}s{% endif %}
+                    </span>
+                </div>
+                <div class="card-body p-0">
+                    {% if lab_documents %}
+                    <div class="table-responsive">
+                        <table class="fm-table">
+                            <thead>
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Patient</th>
+                                    <th>Visit Date</th>
+                                    <th>Doctor</th>
+                                    <th>Uploaded</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for document in lab_documents %}
+                                <tr>
+                                    <td><strong>{{ document.original_name }}</strong></td>
+                                    <td>
+                                        {% if document.visit.appointment.family_member %}
+                                            {{ document.visit.appointment.family_member.name }}
+                                            <span style="font-size:0.75rem;color:var(--muted);display:block;">
+                                                {{ document.visit.appointment.family_member.relation }}
+                                            </span>
+                                        {% else %}
+                                            {{ document.visit.patient.user.get_full_name|default:document.visit.patient.user.username }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ document.visit.appointment.appointment_date|date:"d M Y" }}</td>
+                                    <td>
+                                        {% if document.visit.doctor and document.visit.doctor.user %}
+                                            Dr. {{ document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username }}
+                                        {% else %}
+                                            —
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <a href="{{ document.file.url }}" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-fm">
+                        <i class="fas fa-file-medical"
+                            style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
+                        No lab documents uploaded yet.
                     </div>
                     {% endif %}
                 </div>

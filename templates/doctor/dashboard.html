@@ -215,9 +215,21 @@
 
     document.querySelectorAll('.btn-cancel-appointment').forEach(button => {
         button.addEventListener('click', async function () {
-            const confirmCancel = await Swal.fire({
+            const reasonPrompt = await Swal.fire({
                 title: 'Cancel Appointment',
-                text: 'Are you sure you want to cancel this appointment?',
+                text: 'Please enter the reason for cancellation.',
+                input: 'text',
+                inputLabel: 'Cancellation Reason',
+                inputPlaceholder: 'Write reason here...',
+                inputAttributes: {
+                    maxlength: 255,
+                },
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return 'Cancellation reason is required.';
+                    }
+                    return null;
+                },
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Yes, Cancel',
@@ -232,9 +244,10 @@
                 }
             });
 
-            if (!confirmCancel.isConfirmed) return;
+            if (!reasonPrompt.isConfirmed) return;
 
             const url = this.dataset.url;
+            const cancellationReason = reasonPrompt.value.trim();
 
             Swal.fire({
                 title: 'Cancelling...',
@@ -255,7 +268,9 @@
                         'X-CSRFToken': csrftoken,
                         'X-Requested-With': 'XMLHttpRequest',
                     },
-                    body: JSON.stringify({}),
+                    body: JSON.stringify({
+                        cancellation_reason: cancellationReason,
+                    }),
                 });
 
                 data = await response.json();

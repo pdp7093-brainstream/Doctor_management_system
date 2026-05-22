@@ -153,6 +153,95 @@ body {
 
 .card-body { padding: 20px; }
 
+/* ── Appointment Filters ───────────────── */
+.appointment-filter-form {
+    background: #f8fbff;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.filter-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.filter-subtitle {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.filter-live-status {
+    background: #e0f2fe;
+    color: #0369a1;
+    border-radius: 999px;
+    padding: 5px 11px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.filter-live-status.is-loading {
+    background: #fef3c7;
+    color: var(--warning);
+}
+
+.appointment-filter-form .form-label {
+    color: #475569;
+    margin-bottom: 5px;
+}
+
+.appointment-filter-form .form-control,
+.appointment-filter-form .form-select {
+    min-height: 42px;
+    border-color: var(--border);
+    border-radius: 10px;
+    font-size: 0.86rem;
+}
+
+.appointment-filter-form .form-control:focus,
+.appointment-filter-form .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+}
+
+.filter-search-box {
+    position: relative;
+}
+
+.filter-search-box i {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    font-size: 0.86rem;
+    pointer-events: none;
+}
+
+.filter-search-box .form-control {
+    padding-left: 38px;
+}
+
+#appointmentResults {
+    transition: opacity 0.18s ease;
+}
+
+#appointmentResults.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
 /* ── Table ────────────────────────────── */
 .table-responsive { overflow-x: auto; }
 
