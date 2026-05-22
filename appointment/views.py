@@ -253,6 +253,17 @@ def cancel_appointment(request, appointment_id):
     return redirect('dashboard')
 
 
+# Delete Appointment (Doctor Side)
+@login_required
+@role_required('doctor')
+def delete_appointment(request, appointment_id):
+    if request.method == 'POST':
+        appointment = get_object_or_404(Appointment, id=appointment_id)
+        appointment.delete()
+        messages.success(request, 'Appointment deleted successfully.')
+    return redirect('appointment:manage_appointments')
+
+
 # ─────────────────────────────────────────
 # Manage Appointments (Doctor)
 # ─────────────────────────────────────────

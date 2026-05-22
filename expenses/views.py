@@ -8,9 +8,10 @@ from django.shortcuts import get_object_or_404
 from .models import Expense, ExpenseCategory
 from doctor.mixins import ExpenseAccessMixin
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 
-
-
+@never_cache
 @login_required(login_url='doctor:login')
 def pending_expenses(request):
 
@@ -46,7 +47,7 @@ def pending_expenses(request):
 
     return render(request,'expenses/pending_expenses.html',context)
 
-
+@method_decorator(never_cache, name='dispatch')
 class CategoryListView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     login_url = 'doctor:login'
@@ -69,7 +70,7 @@ class CategoryListView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
         return render(request,'expenses/category_list.html',context)
 
-
+@method_decorator(never_cache, name='dispatch')
 class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     login_url = 'doctor:login'
@@ -108,7 +109,7 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
             return redirect('expenses:add_category')
 
-
+@method_decorator(never_cache, name='dispatch')
 class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     login_url = 'doctor:login'
@@ -175,7 +176,7 @@ class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
             return redirect('expenses:add_expense')
 
-
+@method_decorator(never_cache, name='dispatch')
 class ExpenseListView(LoginRequiredMixin,ExpenseAccessMixin,View):
 
     login_url = 'doctor:login'
@@ -197,7 +198,7 @@ class ExpenseListView(LoginRequiredMixin,ExpenseAccessMixin,View):
 
         return render(request,'expenses/expense_list.html',context)
 
-        
+@method_decorator(never_cache, name='dispatch')       
 class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     login_url = 'doctor:login'

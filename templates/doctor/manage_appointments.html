@@ -180,9 +180,17 @@
 
                             <!-- Action -->
                             <td>
-                                <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">
-                                    <i class="bi bi-eye"></i><span> View</span>
-                                </a>
+                                <div class="d-flex gap-1 justify-content-center">
+                                    <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-eye"></i><span> View</span>
+                                    </a>
+                                    <form action="{% url 'appointment:delete_appointment' appointment.id %}" method="POST" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn btn-sm btn-danger px-2 delete-btn" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
 
                         </tr>
@@ -296,6 +304,28 @@
     });
 
     bindPaginationLinks();
+
+    // SweetAlert for Delete Buttons using Event Delegation
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.delete-btn');
+        if (btn) {
+            e.preventDefault();
+            const form = btn.closest('form');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this! All associated visits and bills will also be deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        }
+    });
 </script>
 
 {% endblock %}

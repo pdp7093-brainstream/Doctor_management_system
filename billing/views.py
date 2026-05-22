@@ -9,6 +9,8 @@ from .models import Bill, BillItem
 from appointment.models import Visit
 from clinic.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
+from django.utils import timezone
+
 
 def get_bill_summary(visit):
     """
@@ -197,6 +199,7 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request):
+        
         search         = request.GET.get('search', '')
         bill_date      = request.GET.get('bill_date', '')
         payment_status = request.GET.get('payment_status', 'all')
@@ -204,6 +207,14 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         bills = Bill.objects.select_related(
             'visit__patient__user'
         ).order_by('-created_at')
+
+        # Global stats (not affected by search/filters)
+        now = timezone.now()
+        all_bills = Bill.objects.all()
+        total_bills_count = all_bills.count()
+        this_month_count = all_bills.filter(created_at__year=now.year, created_at__month=now.month).count()
+        total_unpaid = all_bills.filter(payment_status='unpaid').count()
+        total_partial = all_bills.filter(payment_status='partial').count()
 
         # Search — patient name ya bill number
         if search:
@@ -227,9 +238,6 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         paginator   = Paginator(bills, 10)
         page_number = request.GET.get('page', 1)
         page_obj    = paginator.get_page(page_number)
-
-        unpaid_count = bills.filter(payment_status='unpaid').count()
-        partial_count = bills.filter(payment_status='partial').count()
         
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return render(request, 'billing/bill_list.html', {
@@ -238,6 +246,10 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
                 'search':         search,
                 'bill_date':      bill_date,
                 'payment_status': payment_status,
+                'total_bills_count': total_bills_count,
+                'this_month_count': this_month_count,
+                'total_unpaid': total_unpaid,
+                'total_partial': total_partial,
             })
 
         return render(request, 'billing/bill_list.html', {
@@ -246,9 +258,30 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
             'search':         search,
             'bill_date':      bill_date,
             'payment_status': payment_status,
-            'unpaid_count':   unpaid_count,
-            'partial_count':  partial_count,
+            'total_bills_count': total_bills_count,
+            'this_month_count': this_month_count,
+            'total_unpaid': total_unpaid,
+            'total_partial': total_partial,
         })
+
+@method_decorator(never_cache, name='dispatch')
+class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
+    login_url = 'doctor:login'
+    
+    def post(self, request, bill_id):
+        bill = get_object_or_404(Bill, id=bill_id)
+        bill_number = bill.bill_number
+        
+        appointment = None
+        if bill.visit and bill.visit.appointment:
+            appointment = bill.visit.appointment
+            
+        bill.delete()
+        if appointment:
+            appointment.delete()
+            
+        messages.success(request, f'Bill {bill_number} and its associated appointment deleted successfully.')
+        return redirect('billing:bill_list')
 
 @method_decorator(never_cache, name='dispatch')
 class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
