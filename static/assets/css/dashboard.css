@@ -543,10 +543,64 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         padding: 14px 16px;
         gap: 0;
     }
-    .sidebar h2 { display: none; }
-    .sidebar ul { flex-direction: row; flex-wrap: wrap; gap: 6px; }
+    .sidebar h2 {
+        display: block;
+        width: 100%;
+        padding: 0 4px 10px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.2);
+        font-size: 1rem;
+    }
+    .sidebar ul {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
     .sidebar li { flex: none; }
     .main-content { margin-left: 0; padding: 20px 16px; }
+
+    #appointmentsTable {
+        table-layout: auto;
+        min-width: 680px;
+    }
+
+    #appointmentsTable td,
+    #appointmentsTable th {
+        white-space: nowrap;
+        word-break: normal;
+        overflow-wrap: normal;
+    }
+
+    .profile-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .profile-info-table .info-label {
+        width: 110px;
+    }
+
+    .card-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        padding: 16px 10px;
+    }
+
+    .profile-info-table .info-label {
+        width: 90px;
+        font-size: 0.72rem;
+    }
+
+    .profile-info-table tbody td {
+        padding: 10px 10px;
+    }
 }
 
 
