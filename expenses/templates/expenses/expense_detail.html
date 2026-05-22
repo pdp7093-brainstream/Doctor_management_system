@@ -1,0 +1,129 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Expense Details{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-1 d-flex align-items-center" style="font-weight: 700; color: #1a2744;">
+                <a href="{% if request.GET.source == 'pending' %}{% url 'expenses:pending_expenses' %}{% else %}{% url 'expenses:expense_list' %}{% endif %}" class="text-decoration-none text-muted me-2" style="font-size: 1.5rem; display: inline-flex; transition: all 0.2s;" onmouseover="this.style.color='#0d6efd';" onmouseout="this.style.color='#6c757d';">
+                    <i class="bi bi-arrow-left-short"></i>
+                </a>
+                Expense Details
+            </h2>
+            <p class="text-muted small mb-0" style="margin-left: 2.5rem;">Detailed view of the expense</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% if request.GET.source == 'pending' %}{% url 'expenses:pending_expenses' %}{% else %}{% url 'expenses:expense_list' %}{% endif %}" class="btn btn-light shadow-sm rounded-pill px-4" style="font-weight: 500;">
+                <i class="bi bi-list-ul me-1"></i> {% if request.GET.source == 'pending' %}Back to Pending{% else %}Back to List{% endif %}
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Details Card -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                        <div>
+                            <span class="badge rounded-pill mb-2" style="background: #e2e8f0; color: #475569; font-weight: 500; padding: 6px 12px;">{{ expense.category.name }}</span>
+                            <h3 class="mb-1 fw-bold" style="color: #0f172a;">{{ expense.title }}</h3>
+                            <p class="text-muted mb-0"><i class="bi bi-calendar3 me-1"></i> {{ expense.expense_date|date:"d M Y" }}</p>
+                        </div>
+                        <div class="text-md-end">
+                            <h2 class="fw-bold mb-1" style="color: #0f172a;">₹{{ expense.amount }}</h2>
+                            {% if expense.status == 'approved' %}
+                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="padding: 6px 12px; font-weight: 600;">Approved</span>
+                            {% elif expense.status == 'pending' %}
+                            <span class="badge rounded-pill bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25" style="padding: 6px 12px; font-weight: 600;">Pending</span>
+                            {% else %}
+                            <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="padding: 6px 12px; font-weight: 600;">Rejected</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <hr class="my-3 text-muted opacity-25">
+                    
+                    <h6 class="fw-bold mb-3" style="color: #334155;"><i class="bi bi-card-text me-2 text-primary"></i>Description & Notes</h6>
+                    <div class="p-4 bg-light rounded-3" style="min-height: 120px; border: 1px solid #f1f5f9;">
+                        {% if expense.notes %}
+                            <p class="mb-0" style="color: #475569; white-space: pre-wrap; line-height: 1.6;">{{ expense.notes }}</p>
+                        {% else %}
+                            <div class="h-100 d-flex align-items-center justify-content-center text-muted fst-italic">
+                                No additional notes provided.
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row mt-4 g-3">
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded-3 bg-white shadow-sm" style="border-color: #f1f5f9 !important;">
+                                <p class="text-muted small mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Created By</p>
+                                <p class="fw-bold mb-0 d-flex align-items-center" style="color: #334155;">
+                                    <i class="bi bi-person-circle me-2 text-primary fs-5"></i> 
+                                    {{ expense.created_by.get_full_name|default:expense.created_by.username }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded-3 bg-white shadow-sm" style="border-color: #f1f5f9 !important;">
+                                <p class="text-muted small mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Created At</p>
+                                <p class="fw-bold mb-0 d-flex align-items-center" style="color: #334155;">
+                                    <i class="bi bi-clock me-2 text-primary fs-5"></i> 
+                                    {{ expense.created_at|date:"d M Y, h:i A" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% if expense.approved_at %}
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="p-3 border border-success border-opacity-25 rounded-3 bg-success bg-opacity-10 shadow-sm">
+                                <p class="text-success small mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">Approval Info</p>
+                                <p class="fw-bold mb-0 d-flex align-items-center text-success">
+                                    <i class="bi bi-check-circle-fill me-2 fs-5"></i> 
+                                    Approved on {{ expense.approved_at|date:"d M Y, h:i A" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Attachment Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px;">
+                <div class="card-header bg-white border-0 pt-4 px-4 pb-2">
+                    <h6 class="fw-bold mb-0" style="color: #334155;"><i class="bi bi-paperclip me-2 text-primary"></i>Attachment</h6>
+                </div>
+                <div class="card-body p-4 text-center">
+                    {% if expense.attachment %}
+                        <div class="attachment-preview mb-4 p-4 bg-light rounded-3 d-flex flex-column align-items-center justify-content-center transition-all" style="border: 2px dashed #cbd5e1; transition: all 0.3s;" onmouseover="this.style.borderColor='#0d6efd'; this.style.backgroundColor='#f8f9fa';" onmouseout="this.style.borderColor='#cbd5e1'; this.style.backgroundColor='#f8f9fa';">
+                            <i class="bi bi-file-earmark-text text-primary mb-3" style="font-size: 4rem;"></i>
+                            <span class="text-truncate d-block w-100 fw-bold" style="color: #475569;" title="{{ expense.attachment.name }}">
+                                Document Attached
+                            </span>
+                            <small class="text-muted mt-1 d-block">Click download to view file</small>
+                        </div>
+                        <a href="{{ expense.attachment.url }}" target="_blank" class="btn btn-primary rounded-pill w-100 fw-semibold shadow-sm py-2">
+                            <i class="bi bi-download me-2"></i> Download File
+                        </a>
+                    {% else %}
+                        <div class="py-5 my-3 rounded-3" style="background: #f8fafc; border: 1px dashed #e2e8f0;">
+                            <i class="bi bi-file-earmark-x text-muted mb-3 opacity-50" style="font-size: 3.5rem;"></i>
+                            <p class="text-muted fw-medium mb-0">No attachment provided</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

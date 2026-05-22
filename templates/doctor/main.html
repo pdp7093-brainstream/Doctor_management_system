@@ -20,12 +20,14 @@
                 left: 0;
                 top: 0;
                 height: 100vh;
-                z-index: 1050; /* Above navbar */
-                transform: translateX(-100%); /* Hidden by default */
+                z-index: 1050;
+                /* Above navbar */
+                transform: translateX(-100%);
+                /* Hidden by default */
                 transition: transform 0.3s ease-in-out;
                 width: 280px;
             }
-            
+
             /* Class added by JS to show sidebar */
             .sidebar.show {
                 transform: translateX(0);
@@ -51,7 +53,8 @@
             }
 
             /* Adjust main content to not be shifted by sidebar on mobile */
-            .main-content, .navbar-custom {
+            .main-content,
+            .navbar-custom {
                 margin-left: 0 !important;
                 width: 100% !important;
             }
@@ -60,15 +63,18 @@
             .navbar-brand-text {
                 font-size: 1rem !important;
             }
+
             .user-name {
-                display: none; /* Hide name on very small screens to save space */
+                display: none;
+                /* Hide name on very small screens to save space */
             }
         }
-        
+
         /* For screens smaller than 400px (like iPhone SE) */
         @media (max-width: 400px) {
             .logout-btn span {
-                display: none; /* Hide 'Logout' text, keep only icon */
+                display: none;
+                /* Hide 'Logout' text, keep only icon */
             }
         }
     </style>
@@ -80,9 +86,11 @@
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 {% if clinic.logo %}
-                <img src="{{clinic.logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                <img src="{{clinic.logo.url}}" alt="Clinic Logo"
+                    style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
                 {% else %}
-                <img src="/static/images/default-logo.png" alt="Default Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                <img src="/static/images/default-logo.png" alt="Default Logo"
+                    style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
 
                 {% endif %}
             </div>
@@ -100,67 +108,78 @@
             </li>
 
             <li>
-                <a href="{% url 'appointment:manage_appointments' %}" class="{% if '/manage_appointments' in request.path %}active{% endif %}">
+                <a href="{% url 'appointment:manage_appointments' %}"
+                    class="{% if '/manage_appointments' in request.path %}active{% endif %}">
                     <i class="bi bi-calendar-check-fill"></i>
                     <span>Appointments</span>
                 </a>
             </li>
 
             <li>
-                <a href="#" class="menu-toggle">
+                <a href="#"
+                    class="menu-toggle {% if 'patient' in request.path %}active expanded parent-active{% endif %}">
                     <div class="menu-toggle-label">
                         <i class="bi bi-people-fill"></i>
                         <span>Patients</span>
                     </div>
                     <i class="arrow-icon"></i>
                 </a>
-                <ul class="submenu">
+                <ul class="submenu {% if 'patient' in request.path %}active{% endif %}">
                     <li>
-                        <a href="{% url 'doctor:add_patient' %}" class="{% if '/add_patient' in request.path %}active{% endif %}">
+                        <a href="{% url 'doctor:add_patient' %}"
+                            class="{% if '/add_patient' in request.path %}active{% endif %}">
                             <i class="bi bi-plus-circle"></i>
                             <span>Add Patient</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'doctor:manage_patients' %}" class="{% if '/manage_patients' in request.path %}active{% endif %}">
+                        <a href="{% url 'doctor:manage_patients' %}"
+                            class="{% if '/manage_patients' in request.path %}active{% endif %}">
                             <i class="bi bi-pencil-square"></i>
                             <span>Manage Patients</span>
                         </a>
                     </li>
                 </ul>
             </li>
-            
+
             <li>
-                <a href="#" class="menu-toggle {% if '/medicine' in request.path %}active{% endif %}">
+                <a href="#"
+                    class="menu-toggle {% if '/medicine' in request.path %}active expanded parent-active{% endif %}">
                     <div class="menu-toggle-label">
                         <i class="bi bi-capsule"></i>
                         <span>Medicine Store</span>
-                        <span class="low-stock-badge" id="sidebarLowStockBadge" style="display:none; background:#dc3545; color:#fff; border-radius:50%; padding:1px 6px; font-size:0.6em; margin-left:6px;">0</span>
+                        <span class="low-stock-badge" id="sidebarLowStockBadge"
+                            style="display:none; background:#dc3545; color:#fff; border-radius:50%; padding:1px 6px; font-size:0.6em; margin-left:6px;">0</span>
                     </div>
                     <i class="arrow-icon"></i>
                 </a>
-                <ul class="submenu">
+                <ul class="submenu {% if '/medicine' in request.path %}active{% endif %}">
                     <li>
-                        <a href="{% url 'medicine:manage_medicine' %}" class="{% if request.path == '/medicine/' or 'manage_medicine' in request.path %}active{% endif %}">
+                        <a href="{% url 'medicine:manage_medicine' %}"
+                            class="{% if request.path == '/medicine/' or 'manage_medicine' in request.path %}active{% endif %}">
                             <i class="bi bi-list-ul"></i>
                             <span>Manage Medicine</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'medicine:low_stock' %}" class="{% if 'low-stock' in request.path %}active{% endif %}" style="color:#dc3545;">
+                        <a href="{% url 'medicine:low_stock' %}"
+                            class="{% if 'low-stock' in request.path %}active{% endif %}" style="color:#dc3545;">
                             <i class="bi bi-exclamation-triangle"></i>
                             <span>Low Stock Alert</span>
-                            <span id="sidebarLowStockCount" style="display:none; background:#dc3545; color:#fff; border-radius:50%; padding:1px 6px; font-size:0.7rem; margin-left:6px;">0</span>
+                            <span id="sidebarLowStockCount"
+                                style="display:none; background:#dc3545; color:#fff; border-radius:50%; padding:1px 6px; font-size:0.7rem; margin-left:6px;">0</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'medicine:vendor_list' %}" class="{% if 'vendor' in request.path %}active{% endif %}">
+                        <a href="{% url 'medicine:vendor_list' %}"
+                            class="{% if 'vendor' in request.path %}active{% endif %}">
                             <i class="bi bi-truck"></i>
                             <span>Vendors</span>
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'medicine:purchase_list' %}" class="{% if 'purchase' in request.path %}active{% endif %}">
+                        <a href="{% url 'medicine:purchase_list' %}"
+                            class="{% if 'purchase' in request.path %}active{% endif %}">
                             <i class="bi bi-cart-plus"></i>
                             <span>Purchases</span>
                         </a>
@@ -175,6 +194,50 @@
             </li>
             {% endif %}
 
+            <!-- Expenses  -->
+            <li>
+                <a href="#"
+                    class="menu-toggle {% if '/expenses' in request.path %}active expanded parent-active{% endif %}">
+                    <div class="menu-toggle-label">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Expenses</span>
+                    </div>
+                    <i class="arrow-icon"></i>
+                </a>
+
+                <ul class="submenu {% if '/expenses' in request.path %}active{% endif %}">
+
+                    <li>
+                        <a href="{% url 'expenses:expense_list' %}" class="{% if request.path == '/expenses/' %}active{% endif %}">
+                            <i class="bi bi-list-ul"></i>
+                            <span>All Expenses</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'expenses:add_expense' %}" class="{% if '/expenses/add' in request.path %}active{% endif %}">
+                            <i class="bi bi-plus-circle"></i>
+                            <span>Add Expense</span>
+                        </a>
+                    </li>
+                    {% if request.user.innermember.role == 'doctor' %}
+                    <li>
+                        <a href="{% url 'expenses:category_list' %}" class="{% if '/expenses/categories' in request.path %}active{% endif %}">
+                            <i class="bi bi-tags"></i>
+                            <span>Expense Categories</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'expenses:pending_expenses' %}" class="{% if '/expenses/pending' in request.path %}active{% endif %}">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Pending Approval</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                </ul>
+            </li>
             <!-- Billing (dono ke liye) -->
             <li>
                 <a href="{% url 'billing:bill_list' %}" class="{% if 'billing' in request.path %}active{% endif %}">
@@ -193,14 +256,15 @@
 
         </ul>
     </aside>
-    
+
     <!-- Overlay (Keep this exactly here outside sidebar) -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <!-- TOP NAVBAR -->
     <nav class="navbar-custom" id="navbar">
         <div class="navbar-left">
-            <button class="toggle-sidebar" id="toggleSidebar" type="button" aria-label="Toggle sidebar" aria-controls="sidebar" aria-expanded="false">
+            <button class="toggle-sidebar" id="toggleSidebar" type="button" aria-label="Toggle sidebar"
+                aria-controls="sidebar" aria-expanded="false">
                 <i class="bi bi-list"></i>
             </button>
             <h1 class="navbar-brand-text">
@@ -208,76 +272,83 @@
                 Doctor Dashboard
             </h1>
         </div>
-        
+
         <div class="navbar-right">
             {% if request.user.innermember.role == 'doctor' %}
             <div class="user-info">
                 <div class="user-avatar">DR</div>
                 <span class="user-name">{{ request.user.first_name }}</span>
             </div>
-            
+
             <!-- Bell Notification - Only for Doctor -->
-            
+
             <div class="position-relative me-3" style="display:inline-block;">
-                <button id="bellBtn" onclick="toggleBellDropdown()" style="background:none; border:none; cursor:pointer; position:relative; padding:6px;">
+                <button id="bellBtn" onclick="toggleBellDropdown()"
+                    style="background:none; border:none; cursor:pointer; position:relative; padding:6px;">
                     <i class="bi bi-bell-fill" style="font-size:1.3rem;"></i>
-                    <span id="bellBadge" style="display:none; position:absolute; top:-4px; right:-4px; background:#dc3545; color:#fff; border-radius:50%; padding:1px 5px; font-size:0.65rem; font-weight:700;">0</span>
+                    <span id="bellBadge"
+                        style="display:none; position:absolute; top:-4px; right:-4px; background:#dc3545; color:#fff; border-radius:50%; padding:1px 5px; font-size:0.65rem; font-weight:700;">0</span>
                 </button>
 
                 <!-- Dropdown -->
-                <div id="bellDropdown" style="display:none; position:absolute; right:0; top:120%; background:#fff; border-radius:12px; min-width:300px; box-shadow:0 8px 30px rgba(0,0,0,0.15); z-index:9999; border:1px solid #eee; overflow:hidden;">
-                    <div style="padding:12px 16px; background:#f8f9fa; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
+                <div id="bellDropdown"
+                    style="display:none; position:absolute; right:0; top:120%; background:#fff; border-radius:12px; min-width:300px; box-shadow:0 8px 30px rgba(0,0,0,0.15); z-index:9999; border:1px solid #eee; overflow:hidden;">
+                    <div
+                        style="padding:12px 16px; background:#f8f9fa; border-bottom:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:700; font-size:0.9rem; color:#1a2744;">
                             <i class="bi bi-exclamation-triangle text-danger me-2"></i>Low Stock Alerts
                         </span>
-                        <a href="{% url 'medicine:low_stock' %}" style="font-size:0.78rem; color:#0d6efd; text-decoration:none;">View All</a>
+                        <a href="{% url 'medicine:low_stock' %}"
+                            style="font-size:0.78rem; color:#0d6efd; text-decoration:none;">View All</a>
                     </div>
                     <div id="bellAlertList" style="max-height:280px; overflow-y:auto;">
                         <div class="text-center py-4 text-muted small">Loading...</div>
                     </div>
                     <div style="padding:10px 16px; border-top:1px solid #eee; text-align:center;">
-                        <a href="{% url 'medicine:low_stock' %}" style="font-size:0.82rem; color:#0d6efd; text-decoration:none; font-weight:600;">Go to Low Stock Page →</a>
+                        <a href="{% url 'medicine:low_stock' %}"
+                            style="font-size:0.82rem; color:#0d6efd; text-decoration:none; font-weight:600;">Go to Low
+                            Stock Page →</a>
                     </div>
                 </div>
             </div>
             {% endif %}
-            
-            <a href="{% url 'doctor:logout' %}" id="logoutBtn"><button class="logout-btn" >
-                <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-            </button></a>
+
+            <a href="{% url 'doctor:logout' %}" id="logoutBtn"><button class="logout-btn">
+                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
+                </button></a>
         </div>
     </nav>
-    
+
     {% block content %}
     {% endblock %}
 
     <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'assets/js/doctor.js' %}"></script>
-    
+
     <!-- Added Mobile Toggle Script so Hamburger Menu works perfectly -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const toggleBtn = document.getElementById('toggleSidebar');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
 
             if (toggleBtn && sidebar && overlay) {
                 // Open sidebar
-                toggleBtn.addEventListener('click', function() {
+                toggleBtn.addEventListener('click', function () {
                     sidebar.classList.add('show');
                     overlay.classList.add('show');
                     this.setAttribute('aria-expanded', 'true');
                 });
 
                 // Close sidebar when clicking on overlay
-                overlay.addEventListener('click', function() {
+                overlay.addEventListener('click', function () {
                     sidebar.classList.remove('show');
                     overlay.classList.remove('show');
                     toggleBtn.setAttribute('aria-expanded', 'false');
                 });
 
                 // Optional: Close sidebar if window resized to desktop size
-                window.addEventListener('resize', function() {
+                window.addEventListener('resize', function () {
                     if (window.innerWidth > 991) {
                         sidebar.classList.remove('show');
                         overlay.classList.remove('show');
@@ -289,64 +360,65 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-  document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function () {
 
-    const logoutBtn = document.getElementById('logoutBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
 
-    if (logoutBtn) {
+            if (logoutBtn) {
 
-      logoutBtn.addEventListener('click', function (e) {
+                logoutBtn.addEventListener('click', function (e) {
 
-        e.preventDefault();
+                    e.preventDefault();
 
-        Swal.fire({
-          title: 'Logout Confirmation',
-          text: 'Are you sure you want to logout from your account?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes, Logout',
-          cancelButtonText: 'Cancel',
-          confirmButtonColor: '#007aff',
-          cancelButtonColor: '#dc3545',
-          reverseButtons: true,
-          backdrop: `
+                    Swal.fire({
+                        title: 'Logout Confirmation',
+                        text: 'Are you sure you want to logout from your account?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Logout',
+                        cancelButtonText: 'Cancel',
+                        confirmButtonColor: '#007aff',
+                        cancelButtonColor: '#dc3545',
+                        reverseButtons: true,
+                        backdrop: `
             rgba(0,0,0,0.45)
           `,
-          customClass: {
-            popup: 'rounded-4 shadow-lg',
-            confirmButton: 'px-4 py-2',
-            cancelButton: 'px-4 py-2'
-          }
+                        customClass: {
+                            popup: 'rounded-4 shadow-lg',
+                            confirmButton: 'px-4 py-2',
+                            cancelButton: 'px-4 py-2'
+                        }
 
-        }).then((result) => {
+                    }).then((result) => {
 
-          if (result.isConfirmed) {
+                        if (result.isConfirmed) {
 
-            Swal.fire({
-              title: 'Logging Out...',
-              html: 'Please wait ',
-              timer: 1500,
-              allowOutsideClick: false,
-              showConfirmButton: false,
-              didOpen: () => {
-                Swal.showLoading();
-              }
-            });
+                            Swal.fire({
+                                title: 'Logging Out...',
+                                html: 'Please wait ',
+                                timer: 1500,
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
 
-            setTimeout(() => {
-              window.location.href = logoutBtn.href;
-            }, 1500);
+                            setTimeout(() => {
+                                window.location.href = logoutBtn.href;
+                            }, 1500);
 
-          }
+                        }
+
+                    });
+
+                });
+
+            }
 
         });
+    </script>
 
-      });
-
-    }
-
-  });
-</script>
-    
 </body>
+
 </html>

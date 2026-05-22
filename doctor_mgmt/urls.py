@@ -27,6 +27,7 @@ urlpatterns = [
     path('medicine/', include(('medicine.urls', 'medicine'), namespace='medicine')),
     path('billing/', include(('billing.urls', 'billing'), namespace='billing')),
     path('clinic/', include(('clinic.urls', 'clinic'), namespace='clinic')),
+    path('expenses/', include(('expenses.urls', 'expenses'), namespace='expenses')),
 
 ]
 

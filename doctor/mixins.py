@@ -3,7 +3,7 @@ from django.contrib import messages
 
 
 class BillingAccessMixin:
-
+    allowed_roles = []
     def dispatch(self, request, *args, **kwargs):
 
         try:
@@ -21,3 +21,8 @@ class BillingAccessMixin:
             return redirect('doctor:login')
 
         return super().dispatch(request, *args, **kwargs)
+
+class ExpenseAccessMixin(BillingAccessMixin):
+    allowed_roles = ['doctor', 'biller']
+
+    

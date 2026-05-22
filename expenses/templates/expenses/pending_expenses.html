@@ -1,0 +1,95 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Pending Expenses{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-1" style="font-weight: 700; color: #1a2744;">
+                <i class="bi bi-clock-history me-2 text-warning"></i>Pending Approvals
+            </h2>
+            <p class="text-muted small mb-0">Review and approve clinic expenses submitted by staff</p>
+        </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="min-width: 900px;">
+                <thead style="background: #f8fafc;">
+                    <tr>
+                        <th class="px-4 py-3 text-uppercase" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Submitted By / Date</th>
+                        <th class="py-3 text-uppercase" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Expense Details</th>
+                        <th class="py-3 text-uppercase" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Amount</th>
+                        <th class="py-3 text-uppercase text-center" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for expense in expenses %}
+                    <tr>
+                        <td class="px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-light text-primary d-flex align-items-center justify-content-center me-3 text-uppercase" style="width: 40px; height: 40px; font-weight: 600;">
+                                    {{ expense.created_by.first_name|first|default:expense.created_by.username|first }}{{ expense.created_by.last_name|first }}
+                                </div>
+                                <div>
+                                    <span class="d-block fw-bold" style="color: #0f172a; font-size: 0.95rem;">{{ expense.created_by.get_full_name|default:expense.created_by.username }}</span>
+                                    <span class="text-muted" style="font-size: 0.8rem;">{{ expense.expense_date|date:"d M Y" }}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <span class="d-block fw-bold" style="color: #334155; font-size: 0.95rem;"><a href="{% url 'expenses:expense_detail' expense.id %}?source=pending" class="text-decoration-none text-dark">{{ expense.title }}</a></span>
+                            <div class="d-flex align-items-center mt-1">
+                                <span class="badge rounded-pill bg-light text-secondary me-2" style="font-weight: 500;">{{ expense.category.name }}</span>
+                                {% if expense.attachment %}
+                                <a href="{{ expense.attachment.url }}" target="_blank" class="text-decoration-none" style="font-size: 0.75rem; font-weight: 600;"><i class="bi bi-paperclip"></i> Receipt</a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="py-3">
+                            <span class="fw-bold text-dark" style="font-size: 1.1rem;">₹{{ expense.amount }}</span>
+                        </td>
+                        <td class="py-3 text-center">
+                            <a href="{% url 'expenses:expense_detail' expense.id %}?source=pending" class="btn btn-sm btn-light text-primary rounded-circle me-1 shadow-sm" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="View Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <form method="post" action="{% url 'expenses:pending_expenses' %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="approve">
+                                <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                                <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm me-1" style="font-weight: 600;">
+                                    <i class="bi bi-check-circle me-1"></i> Approve
+                                </button>
+                            </form>
+                            <form method="post" action="{% url 'expenses:pending_expenses' %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="reject">
+                                <input type="hidden" name="expense_id" value="{{ expense.id }}">
+                                <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm" style="font-weight: 600;">
+                                    <i class="bi bi-x-circle me-1"></i> Reject
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon mb-3">
+                                    <i class="bi bi-check2-all" style="font-size: 2.5rem; color: #e2e8f0;"></i>
+                                </div>
+                                <p class="text-muted mb-3" style="font-weight: 500;">All caught up! No pending approvals.</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
