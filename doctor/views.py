@@ -83,6 +83,15 @@ class DashboardView(View):
 @login_required
 @require_POST
 def cancel_appointment(request, appointment_id):
+    try:
+        payload = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        payload = {}
+
+    reason = (payload.get('cancellation_reason') or "").strip()
+    if not reason:
+        return JsonResponse({'success': False, 'error': 'Cancellation reason is required.'}, status=400)
+
     doctor = InnerMember.objects.get(user=request.user)
     appointment = get_object_or_404(
         Appointment.objects.select_related('doctor'),
@@ -99,7 +108,8 @@ def cancel_appointment(request, appointment_id):
         return JsonResponse({'success': False, 'error': 'You do not have permission to cancel this appointment.'}, status=403)
 
     appointment.status = 'cancelled'
-    appointment.save()
+    appointment.cancellation_reason = reason
+    appointment.save(update_fields=['status', 'cancellation_reason'])
 
     today = timezone.localdate()
     today_counts = Appointment.objects.filter(

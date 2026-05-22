@@ -207,6 +207,19 @@ def get_slots(request):
 # Cancel Appointment (User Side)
 @login_required
 def cancel_appointment(request, appointment_id):
+    reason = ""
+    if request.method == 'POST':
+        try:
+            payload = json.loads(request.body or "{}")
+        except json.JSONDecodeError:
+            payload = {}
+        reason = (payload.get('cancellation_reason') or "").strip()
+
+        if not reason:
+            return JsonResponse({
+                'success': False,
+                'error': 'Cancellation reason is required.'
+            }, status=400)
 
     appointment = get_object_or_404(
         Appointment,
@@ -217,7 +230,8 @@ def cancel_appointment(request, appointment_id):
     # Only pending appointment can be cancelled
     if appointment.status == 'pending':
         appointment.status = 'cancelled'
-        appointment.save()
+        appointment.cancellation_reason = reason
+        appointment.save(update_fields=['status', 'cancellation_reason'])
         if request.method == 'POST':
             return JsonResponse({
                 'success': True,
@@ -547,6 +561,7 @@ class PrescriptionView(View):
         items = prescription.items.select_related(
             'medicine_variant', 'medicine_variant__medicine'
         )
+        lab_documents = visit.lab_documents.all()
 
         for item in items:
             try:
@@ -564,6 +579,7 @@ class PrescriptionView(View):
             'visit': visit,
             'variants': variants,
             'items': items,
+            'lab_documents': lab_documents,
             'visit_completed': visit.visted_status == 'completed' or visit.appointment.status == 'completed',
             'is_today': is_today,
         })
@@ -659,6 +675,18 @@ class PrescriptionView(View):
         items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
         if items_to_delete:
             PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
+
+        uploaded_documents = request.FILES.getlist("lab_documents")
+        for document in uploaded_documents:
+            LabDocument.objects.create(
+                visit=visit,
+                file=document,
+                original_name=document.name,
+                uploaded_by=request.user,
+            )
+
+        if uploaded_documents:
+            messages.success(request, f"{len(uploaded_documents)} lab document(s) uploaded successfully.")
 
         if is_completing:
             stock_errors = self.reduce_stock(prescription)

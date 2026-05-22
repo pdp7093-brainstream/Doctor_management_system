@@ -326,10 +326,6 @@
                                     <i class="bi bi-check-circle-fill fs-4"></i> Generate Bill
                                 </button>
                                 {% else %}
-                                <button type="button" class="btn btn-success btn-sm rounded-3 shadow-sm fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all" data-bs-toggle="modal" data-bs-target="#paymentModal">
-                                    <i class="bi bi-cash-stack fs-4"></i> Update Bill
-                                </button>
-                                
                                 <a href="{% url 'billing:print_bill' visit.id %}?bill_id={{ bill.id }}" target="_blank"
                                     class="btn btn-outline-secondary btn-sm rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all">
                                     <i class="bi bi-printer-fill fs-4"></i> Print Invoice

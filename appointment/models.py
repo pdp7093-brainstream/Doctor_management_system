@@ -5,9 +5,7 @@ from accounts.models import *
 # Create your models here.
 
 from django.contrib.auth.models import User
-
 from accounts.models import Patient, FamilyMember
-from doctor.models import InnerMember
 
 class Appointment(models.Model):
     BOOKED_STATUSES = ('pending', 'confirmed', 'completed')
@@ -52,6 +50,7 @@ class Appointment(models.Model):
     )
 
     notes = models.TextField(blank=True, null=True)
+    cancellation_reason = models.TextField(blank=True, null=True)
 
     class Meta:
         indexes = [
@@ -101,6 +100,26 @@ class Prescription(models.Model):
 
     def __str__(self):
         return f"Prescription for {self.visit.patient.user.username} on {self.visit.appointment.appointment_date}"
+
+
+class LabDocument(models.Model):
+    visit = models.ForeignKey(Visit, on_delete=models.CASCADE, related_name='lab_documents')
+    file = models.FileField(upload_to='lab_documents/%Y/%m/')
+    original_name = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='uploaded_lab_documents'
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"{self.original_name} - {self.visit.patient.user.username}"
 
 # Prescription list 
 class PrescriptionItem(models.Model):

@@ -28,7 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -153,4 +152,5 @@ LOGOUT_REDIRECT_URL = 'login'
 
 CSRF_TRUSTED_ORIGINS = [
     "https://sanctity-litter-machinist.ngrok-free.dev",
+    'https://manmade-chevy-untying.ngrok-free.dev',
 ]

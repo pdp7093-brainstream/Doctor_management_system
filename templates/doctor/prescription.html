@@ -22,7 +22,7 @@
     </div>
 
         <!-- Main Form -->
-        <form method="post" id="visitForm">
+        <form method="post" id="visitForm" enctype="multipart/form-data">
             {% csrf_token %}
 
             <div class="row g-4 align-items-start mb-4">
@@ -123,13 +123,59 @@
                                 <p class="text-muted small mb-2 fw-semibold">Stock Deduct Toggle:</p>
                                 <div class="d-flex align-items-center gap-2 mb-1">
                                     <span class="toggle-demo on"></span>
-                                    <span class="small text-success">ON — Stock minus hoga</span>
+                                    <span class="small text-success">ON — Stock Deducted</span>
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="toggle-demo off"></span>
-                                    <span class="small text-muted">OFF — Skip hoga</span>
+                                    <span class="small text-muted">OFF — Stock Skipped</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0 shadow-sm rounded-3 mt-4">
+                        <div class="card-header bg-light border-0 px-4 py-3">
+                            <h5 class="card-title mb-0 fw-semibold text-dark">
+                                <i class="bi bi-file-earmark-medical me-2 text-primary"></i>Lab Documents
+                            </h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <label for="labDocuments" class="form-label fw-semibold text-dark mb-2">
+                                Upload Lab Files
+                            </label>
+                            <input type="file" class="form-control" id="labDocuments" name="lab_documents" multiple
+                                accept=".pdf,image/*,.doc,.docx">
+                            <div class="form-text mb-3">Upload reports as image, PDF, or document files.</div>
+
+                            <div id="selectedLabDocuments" class="lab-document-list" style="display:none;"></div>
+
+                            {% if lab_documents %}
+                            <div class="lab-document-list">
+                                {% for document in lab_documents %}
+                                <div class="lab-document-item">
+                                    <div class="lab-document-content">
+                                        <div class="lab-document-icon">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </div>
+                                        <div class="lab-document-meta">
+                                            <div class="lab-document-title">{{ document.original_name }}</div>
+                                            <small class="text-muted">Uploaded {{ document.uploaded_at|date:"d M Y, h:i A" }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="lab-document-actions">
+                                        <a href="{{ document.file.url }}" target="_blank"
+                                            class="btn btn-outline-primary btn-sm rounded-3">
+                                            <i class="bi bi-eye me-1"></i>View
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-muted small border rounded-3 p-3 bg-light">
+                                No lab documents uploaded yet.
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -614,6 +660,17 @@
         opacity: 0.25;
         display: block;
         margin-bottom: 12px;
+    }
+
+    .lab-document-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #fff;
     }
 
     /* ===== MODAL ===== */

@@ -9,8 +9,10 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from appointment.models import Appointment
+from appointment.models import Appointment, LabDocument
 from django.db.models import Count, Q
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date, parse_time
 
 def home(request):
     return render(request, 'index.html')
@@ -255,23 +257,90 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard(request):
     """Patient dashboard"""
-    appointments = Appointment.objects.filter(
+    base_appointments = Appointment.objects.filter(
         patient__user=request.user
     ).select_related(
         'patient__user',
         'family_member',
         'doctor__user',
         'booked_by',
-    ).order_by('-appointment_date', '-time_slot')
+    )
+
+    search = request.GET.get('search', '').strip()
+    date_from = request.GET.get('date_from', '').strip()
+    date_to = request.GET.get('date_to', '').strip()
+    time_from = request.GET.get('time_from', '').strip()
+    time_to = request.GET.get('time_to', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    appointments = base_appointments
+
+    if search:
+        appointments = appointments.filter(
+            Q(patient__user__first_name__icontains=search) |
+            Q(patient__user__last_name__icontains=search) |
+            Q(patient__user__email__icontains=search) |
+            Q(patient__phone__icontains=search) |
+            Q(family_member__name__icontains=search) |
+            Q(family_member__relation__icontains=search) |
+            Q(family_member__phone__icontains=search) |
+            Q(doctor__user__first_name__icontains=search) |
+            Q(doctor__user__last_name__icontains=search) |
+            Q(doctor__user__email__icontains=search) |
+            Q(booked_by__first_name__icontains=search) |
+            Q(booked_by__last_name__icontains=search) |
+            Q(booked_by__email__icontains=search)
+        )
+
+    parsed_date_from = parse_date(date_from) if date_from else None
+    parsed_date_to = parse_date(date_to) if date_to else None
+    parsed_time_from = parse_time(time_from) if time_from else None
+    parsed_time_to = parse_time(time_to) if time_to else None
+
+    if parsed_date_from:
+        appointments = appointments.filter(appointment_date__gte=parsed_date_from)
+
+    if parsed_date_to:
+        appointments = appointments.filter(appointment_date__lte=parsed_date_to)
+
+    if parsed_time_from:
+        appointments = appointments.filter(time_slot__gte=parsed_time_from)
+
+    if parsed_time_to:
+        appointments = appointments.filter(time_slot__lte=parsed_time_to)
+
+    valid_statuses = [choice[0] for choice in Appointment.status_choices]
+    if status in valid_statuses:
+        appointments = appointments.filter(status=status)
+
+    appointments = appointments.order_by('-appointment_date', '-time_slot')
     
-    appointment_counts = appointments.aggregate(
+    appointment_counts = base_appointments.aggregate(
         total_visits=Count('id'),
         pending_appointments=Count('id', filter=Q(status='pending')),
     )
+
+    paginator = Paginator(appointments, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    query_params = request.GET.copy()
+    query_params.pop('page', None)
+
     total_spent = 0
 
     context = {
-        'appointments': appointments,
+        'appointments': page_obj,
+        'page_obj': page_obj,
+        'query_string': query_params.urlencode(),
+        'filters': {
+            'search': search,
+            'date_from': date_from,
+            'date_to': date_to,
+            'time_from': time_from,
+            'time_to': time_to,
+            'status': status,
+        },
+        'status_choices': Appointment.status_choices,
         'total_visits': appointment_counts['total_visits'],
         'pending_appointments': appointment_counts['pending_appointments'],
         'total_spent': total_spent,
@@ -284,9 +353,17 @@ def profile(request):
     """Patient profile page"""
     patient, created = Patient.objects.get_or_create(user=request.user)
     family_members = FamilyMember.objects.filter(patient=patient)
+    lab_documents = LabDocument.objects.filter(
+        visit__patient=patient
+    ).select_related(
+        'visit__appointment',
+        'visit__appointment__family_member',
+        'visit__doctor__user',
+    )
     
     return render(request, 'pdashboard/profile.html', {
         'family_members': family_members,
+        'lab_documents': lab_documents,
     })
 
 
