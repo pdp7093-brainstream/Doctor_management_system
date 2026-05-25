@@ -264,18 +264,22 @@ def search_medicine(request):
     query = request.GET.get("q", "").strip()
 
     if not query:
-        return JsonResponse([], safe=False)
-
-    variants = (
-        MedicineVariant.objects.select_related("medicine")
-        .filter(
-            Q(medicine__name__icontains=query)
-            | Q(medicine__short_name__icontains=query)
-            | Q(medicine__company__icontains=query),
-            medicine__is_active=True,
+        variants = (
+            MedicineVariant.objects.select_related("medicine")
+            .filter(medicine__is_active=True)
+            .order_by("medicine__name", "power")[:50]
         )
-        .order_by("medicine__name", "power")[:10]
-    )
+    else:
+        variants = (
+            MedicineVariant.objects.select_related("medicine")
+            .filter(
+                Q(medicine__name__icontains=query)
+                | Q(medicine__short_name__icontains=query)
+                | Q(medicine__company__icontains=query),
+                medicine__is_active=True,
+            )
+            .order_by("medicine__name", "power")[:50]
+        )
 
     data = [
         {
@@ -762,6 +766,9 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
         discount_list = request.POST.getlist(
             "discount_amount[]"
         )
+        
+        mfg_date_list = request.POST.getlist("mfg_date[]")
+        exp_date_list = request.POST.getlist("exp_date[]")
 
         grand_total = Decimal("0.00")
 
@@ -771,12 +778,16 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
             strip_price_str,
             tax_str,
             discount_str,
+            mfg_date_str,
+            exp_date_str,
         ) in zip(
             item_ids,
             received_qty_list,
             strip_price_list,
             tax_list,
             discount_list,
+            mfg_date_list,
+            exp_date_list,
         ):
 
             purchase_item = get_object_or_404(
@@ -854,6 +865,11 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
             variant.unit_per_strip = (
                 purchase_item.unit_per_strip
             )
+            
+            if mfg_date_str:
+                variant.mfg_date = mfg_date_str
+            if exp_date_str:
+                variant.exp_date = exp_date_str
 
             variant.save()
 

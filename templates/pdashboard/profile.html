@@ -608,19 +608,26 @@
         }
     </script>
 
-    {% if messages %}
-    {% for message in messages %}
-    <script>
-        Swal.fire({
-            icon: '{% if message.tags == "success" %}success{% else %}error{% endif %}',
-            title: '{% if message.tags == "success" %}Success{% else %}Error{% endif %}',
-            text: '{{ message|escapejs }}',
-            confirmButtonColor: '#3085d6',
-            confirmButtonText: 'OK'
-        });
-    </script>
-    {% endfor %}
-    {% endif %}
+    
+{% if messages %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+                title: '{{ message|escapejs }}',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}
+
 
     
 </body>

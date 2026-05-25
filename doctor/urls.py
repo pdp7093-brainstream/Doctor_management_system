@@ -25,8 +25,12 @@ urlpatterns = [
     path('staff/',views.staff_view,name='staff'), 
     path('staff/add/',views.add_staff,name='add_staff'),
     path('staff/edit/<int:member_id>/',views.edit_staff,name='edit_staff'),
+    path("staff/<int:pk>/delete/", views.delete_staff, name="delete_staff"),
     path('staff/delete/<int:member_id>/',views.delete_staff,name='delete_staff'),
     path('staff/reset-password/<int:member_id>/', views.reset_staff_password, name='reset_staff_password'),
+
+    path("leaves/", views.manage_leaves, name="manage_leaves"),
+    path("leaves/<int:pk>/delete/", views.delete_leave, name="delete_leave"),
 
     path('settings/', RedirectView.as_view(pattern_name='clinic:settings', permanent=False), name='settings'),
 

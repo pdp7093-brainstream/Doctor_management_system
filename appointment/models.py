@@ -42,7 +42,8 @@ class Appointment(models.Model):
 
     appointment_date = models.DateField()
     time_slot = models.TimeField()
-
+    is_archived = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True,blank=True)
     status = models.CharField(
         max_length=20,
         choices=status_choices,
@@ -65,7 +66,7 @@ class Appointment(models.Model):
 
     @classmethod
     def booked_slots(cls):
-        return cls.objects.filter(status__in=cls.BOOKED_STATUSES)
+        return cls.objects.filter(status__in=cls.BOOKED_STATUSES, is_archived=False)
 
 # Visit Model 
 class Visit(models.Model):
@@ -133,6 +134,7 @@ class PrescriptionItem(models.Model):
     )
     dosage = models.CharField(max_length=100)
     days = models.IntegerField()
+    notes = models.TextField(blank=True, null=True)
     should_deduct    = models.BooleanField(default=True) 
     was_deducted = models.BooleanField(default=False)
     

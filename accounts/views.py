@@ -258,7 +258,8 @@ def logout_view(request):
 def dashboard(request):
     """Patient dashboard"""
     base_appointments = Appointment.objects.filter(
-        patient__user=request.user
+        patient__user=request.user,
+        is_archived=False
     ).select_related(
         'patient__user',
         'family_member',

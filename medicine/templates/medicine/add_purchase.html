@@ -19,14 +19,7 @@
             <form method="POST" action="{% url 'medicine:add_purchase' %}" class="patient-form-grid">
                 {% csrf_token %}
 
-                {% if messages %}
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {% for message in messages %}
-                        <i class="bi bi-exclamation-circle me-2"></i>{{ message }}
-                    {% endfor %}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-                {% endif %}
+                
 
                 <!-- Vendor Select -->
                 <div class="patient-field">
@@ -324,8 +317,8 @@
         variantIdInput.value = '';
 
         if (!query) {
-            hideAutocomplete(row);
-            return;
+            // Still search with empty query to get top options
+            // but we don't return early
         }
 
         showAutocompleteMessage(dropdown, 'Searching...');
@@ -352,6 +345,17 @@
         if (timer) clearTimeout(timer);
 
         autocompleteTimers.set(input, setTimeout(() => searchMedicines(input), 300));
+    });
+
+    document.addEventListener('focusin', function (e) {
+        if (e.target.classList.contains('medicine-search')) {
+            const input = e.target;
+            const dropdown = input.closest('.purchase-item-row').querySelector('.autocomplete-list');
+            // If dropdown is hidden or empty, trigger a search to show top options
+            if (!dropdown.style.display || dropdown.style.display === 'none' || dropdown.innerHTML === '') {
+                searchMedicines(input);
+            }
+        }
     });
 
     document.addEventListener('click', function (e) {

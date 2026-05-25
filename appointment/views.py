@@ -179,7 +179,8 @@ def get_slots(request):
         current += timedelta(minutes=interval)
 
     booked_slots = Appointment.booked_slots().filter(
-        appointment_date=selected_date
+        appointment_date=selected_date,
+        is_archived=False
     ).values_list('time_slot', flat=True)
 
     booked_slots = [t.strftime("%H:%M") for t in booked_slots]
@@ -224,7 +225,8 @@ def cancel_appointment(request, appointment_id):
     appointment = get_object_or_404(
         Appointment,
         id=appointment_id,
-        patient__user=request.user
+        patient__user=request.user,
+        is_archived=False
     )
 
     # Only pending appointment can be cancelled
@@ -258,7 +260,7 @@ def cancel_appointment(request, appointment_id):
 @role_required('doctor')
 def delete_appointment(request, appointment_id):
     if request.method == 'POST':
-        appointment = get_object_or_404(Appointment, id=appointment_id)
+        appointment = get_object_or_404(Appointment, id=appointment_id,is_archived=False)
         appointment.delete()
         messages.success(request, 'Appointment deleted successfully.')
     return redirect('appointment:manage_appointments')
@@ -277,7 +279,9 @@ class Manage_appointments(View):
         appointment_date = request.GET.get('appointment_date', '')
         status           = request.GET.get('status', 'all')
 
-        appointments = Appointment.objects.all()
+        appointments = Appointment.objects.filter(
+    is_archived=False
+)
 
         if search:
             appointments = appointments.filter(
@@ -312,7 +316,7 @@ class Manage_appointments(View):
 
 @role_required('doctor')
 def appointment_detail_modal(request, id):
-    appointment = get_object_or_404(Appointment, id=id)
+    appointment = get_object_or_404(Appointment, id=id,is_archived=False)
     visit        = Visit.objects.filter(appointment=appointment).first()
     prescription = None
     prescription_items = []
@@ -393,6 +397,7 @@ class Add_appointment(View):
             return redirect('appointment:add_appointment')
 
         if Appointment.booked_slots().filter(
+            is_archived=False,
             appointment_date=appointment_date_obj,
             time_slot=time_slot
         ).exists():
@@ -481,6 +486,7 @@ class Book_appointment(View):
 
         # Double booking prevention
         if Appointment.booked_slots().filter(
+            is_archived=False,
             appointment_date=appointment_date,
             time_slot=time_24
         ).exists():
@@ -537,7 +543,7 @@ class Book_appointment(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
     def get(self, request, appointment_id):
-        appointment = get_object_or_404(Appointment, id=appointment_id)
+        appointment = get_object_or_404(Appointment, id=appointment_id,is_archived=False)
 
         visit, created = Visit.objects.get_or_create(
             appointment=appointment,
@@ -557,6 +563,23 @@ class StartVisitView(View):
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class PrescriptionView(View):
+    def parse_dosage(self, dosage):
+        try:
+            parts = dosage.split(' (')
+            dose_parts = [int(part) for part in parts[0].split('-')]
+            meal = parts[1].replace(')', '')
+        except Exception:
+            dose_parts = []
+            meal = 'after_food'
+
+        morning = dose_parts[0] if len(dose_parts) > 0 else 0
+        afternoon = dose_parts[1] if len(dose_parts) > 1 else 0
+        evening = dose_parts[2] if len(dose_parts) > 3 else 0
+        night_index = 3 if len(dose_parts) > 3 else 2
+        night = dose_parts[night_index] if len(dose_parts) > night_index else 0
+
+        return morning, afternoon, evening, night, meal
+
     def get(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
         
@@ -575,16 +598,12 @@ class PrescriptionView(View):
         lab_documents = visit.lab_documents.all()
 
         for item in items:
-            try:
-                parts = item.dosage.split(' (')
-                m_a_n = parts[0].split('-')
-                item.parsed_morning   = int(m_a_n[0])
-                item.parsed_afternoon = int(m_a_n[1])
-                item.parsed_night     = int(m_a_n[2])
-                item.parsed_meal      = parts[1].replace(')', '')
-            except Exception:
-                item.parsed_morning = item.parsed_afternoon = item.parsed_night = 0
-                item.parsed_meal = 'after_food'
+            morning, afternoon, evening, night, meal = self.parse_dosage(item.dosage)
+            item.parsed_morning = morning
+            item.parsed_afternoon = afternoon
+            item.parsed_evening = evening
+            item.parsed_night = night
+            item.parsed_meal = meal
 
         return render(request, 'doctor/prescription.html', {
             'visit': visit,
@@ -611,14 +630,9 @@ class PrescriptionView(View):
         
         for item in pending_items:
             variant = item.medicine_variant
-            try:
-                parts = item.dosage.split(' (')
-                m_a_n = parts[0].split('-')
-                morning, afternoon, night = int(m_a_n[0]), int(m_a_n[1]), int(m_a_n[2])
-            except:
-                morning = afternoon = night = 0
-            
-            total_qty = (morning + afternoon + night) * item.days
+            morning, afternoon, evening, night, _ = self.parse_dosage(item.dosage)
+
+            total_qty = (morning + afternoon + evening + night) * item.days
             
             if total_qty <= 0:
                 item.should_deduct, item.was_deducted = False, True
@@ -656,31 +670,44 @@ class PrescriptionView(View):
         item_ids = request.POST.getlist("item_id[]")
         morning_list = request.POST.getlist("morning")
         afternoon_list = request.POST.getlist("afternoon")
+        evening_list = request.POST.getlist("evening")
         night_list = request.POST.getlist("night")
         meal_list = request.POST.getlist("meal")
         days_list = request.POST.getlist("days")
+        notes_list = request.POST.getlist("medicine_notes")
         deduct_list = request.POST.getlist("should_deduct[]")
 
         existing_item_ids = list(prescription.items.values_list('id', flat=True))
         submitted_item_ids = []
 
-        for i, (item_id_str, v_id, m, a, n, meal, days) in enumerate(zip(item_ids, variant_ids, morning_list, afternoon_list, night_list, meal_list, days_list)):
+        for i, (item_id_str, v_id, m, a, e, n, meal, days, medicine_notes) in enumerate(zip(item_ids, variant_ids, morning_list, afternoon_list, evening_list, night_list, meal_list, days_list, notes_list)):
             if not v_id:
                 continue
             variant = MedicineVariant.objects.get(id=v_id)
-            dosage = f"{m}-{a}-{n} ({meal})"
+            dosage = f"{m}-{a}-{e}-{n} ({meal})"
             should_deduct = str(i) in deduct_list
             if item_id_str:
                 try:
                     item_id_int = int(item_id_str)
                     submitted_item_ids.append(item_id_int)
                     item = PrescriptionItem.objects.get(id=item_id_int, prescription=prescription)
-                    item.medicine_variant, item.dosage, item.days, item.should_deduct = variant, dosage, int(days), should_deduct
+                    item.medicine_variant = variant
+                    item.dosage = dosage
+                    item.days = int(days)
+                    item.notes = medicine_notes
+                    item.should_deduct = should_deduct
                     item.save()
                 except:
                     pass
             else:
-                new_item = PrescriptionItem.objects.create(prescription=prescription, medicine_variant=variant, dosage=dosage, days=int(days), should_deduct=should_deduct)
+                new_item = PrescriptionItem.objects.create(
+                    prescription=prescription,
+                    medicine_variant=variant,
+                    dosage=dosage,
+                    days=int(days),
+                    notes=medicine_notes,
+                    should_deduct=should_deduct,
+                )
                 submitted_item_ids.append(new_item.id)
 
         items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
@@ -746,7 +773,7 @@ class PrescriptionView(View):
 
 @login_required(login_url='login')
 def appointment_detail(request, id):
-    appointment = get_object_or_404(Appointment, id=id, patient=request.user.patient)
+    appointment = get_object_or_404(Appointment, id=id, patient=request.user.patient,is_archived=False)
 
     visit             = Visit.objects.filter(appointment=appointment).first()
     prescription      = None

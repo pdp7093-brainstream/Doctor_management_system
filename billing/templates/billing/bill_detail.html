@@ -32,16 +32,7 @@
             </div>
         </div>
 
-        {% if messages %}
-        <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-3 border-0 border-start border-5 border-success"
-            role="alert">
-            {% for message in messages %}
-            <i class="bi bi-check-circle-fill text-success me-2 fs-5 align-middle"></i>
-            <span class="fw-medium">{{ message }}</span>
-            {% endfor %}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endif %}
+        
 
         <form method="post">
             {% csrf_token %}

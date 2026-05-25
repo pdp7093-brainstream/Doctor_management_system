@@ -1,0 +1,136 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Manage Leaves{% endblock %}
+
+{% block content %}
+
+<style>
+    .btn-delete-leave {
+        background-color: #fee2e2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    .btn-delete-leave:hover {
+        background-color: #fecaca;
+        color: #dc2626;
+    }
+</style>
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h2 class="page-title mb-1">Manage Leaves</h2>
+            <p class="text-muted small mb-0">Set your leaves and automatically cancel overlapping appointments.</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Add Leave Form -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0 text-primary"><i class="bi bi-calendar-x"></i> Add Leave</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'doctor:manage_leaves' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Date</label>
+                            <input type="date" name="date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Leave Type</label>
+                            <select name="leave_type" class="form-select" required>
+                                <option value="" disabled selected>Select Type</option>
+                                <option value="first_half">First Half</option>
+                                <option value="second_half">Second Half</option>
+                                <option value="full_day">Full Day</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Reason</label>
+                            <textarea name="reason" class="form-control" rows="3" required placeholder="Reason for leave..."></textarea>
+                            <small class="text-muted">This reason will be shown to patients if their appointments are cancelled.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Add Leave</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leaves Table -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Your Leaves</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Reason</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leaves %}
+                                <tr>
+                                    <td class="fw-semibold">{{ leave.date|date:"d M Y" }}</td>
+                                    <td>
+                                        {% if leave.leave_type == 'full_day' %}
+                                            <span class="badge bg-danger">Full Day</span>
+                                        {% elif leave.leave_type == 'first_half' %}
+                                            <span class="badge bg-warning text-dark">First Half</span>
+                                        {% else %}
+                                            <span class="badge bg-info text-dark">Second Half</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-muted text-truncate" style="max-width: 200px;" title="{{ leave.reason }}">
+                                        {{ leave.reason }}
+                                    </td>
+                                    <td class="text-end">
+                                        <form method="post" action="{% url 'doctor:delete_leave' leave.id %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this leave? Appointments will NOT be restored automatically.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-delete-leave" title="Delete">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        <i class="bi bi-calendar2-x fs-1 text-light d-block mb-2"></i>
+                                        No leaves found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    // Set min date to today for the date input
+    document.addEventListener("DOMContentLoaded", function() {
+        const dateInput = document.querySelector('input[type="date"]');
+        if (dateInput && !dateInput.min) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+        }
+    });
+</script>
+
+{% endblock %}

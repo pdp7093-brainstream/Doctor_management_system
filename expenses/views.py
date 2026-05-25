@@ -24,7 +24,7 @@ def pending_expenses(request):
         expense_id = request.POST.get('expense_id')
         
         try:
-            expense = Expense.objects.get(id=expense_id, status='pending')
+            expense = Expense.objects.get(id=expense_id, status='pending', is_archived=False)
             if action == 'approve':
                 expense.status = 'approved'
                 expense.approved_at = timezone.now()
@@ -39,7 +39,7 @@ def pending_expenses(request):
             
         return redirect('expenses:pending_expenses')
 
-    expenses = Expense.objects.select_related('category','created_by').filter(status='pending').order_by('-created_at')
+    expenses = Expense.objects.select_related('category','created_by').filter(status='pending', is_archived=False).order_by('-created_at')
 
     context = {'expenses': expenses}
 
@@ -178,11 +178,11 @@ class ExpenseListView(LoginRequiredMixin,ExpenseAccessMixin,View):
         # Doctor → all expenses
         if member.role == 'doctor':
 
-            expenses = Expense.objects.select_related('category','created_by').order_by('-created_at')
+            expenses = Expense.objects.select_related('category','created_by').filter(is_archived=False).order_by('-created_at')
 
         # Biller → only own expenses
         else:
-            expenses = Expense.objects.select_related('category','created_by').filter(created_by=request.user).order_by('-created_at')
+            expenses = Expense.objects.select_related('category','created_by').filter(created_by=request.user, is_archived=False).order_by('-created_at')
 
         context = {'expenses': expenses}
 
@@ -200,13 +200,13 @@ class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
         # Doctor sab expenses dekh sakta hai
         if member.role == 'doctor':
 
-            expense = get_object_or_404(Expense.objects.select_related('category','created_by'),id=pk)
+            expense = get_object_or_404(Expense.objects.select_related('category','created_by'), id=pk, is_archived=False)
 
         # Biller sirf apna expense
         else:
 
             expense = get_object_or_404(
-                Expense.objects.select_related('category','created_by'),id=pk,created_by=request.user)
+                Expense.objects.select_related('category','created_by'), id=pk, created_by=request.user, is_archived=False)
 
         context = {'expense': expense}
 

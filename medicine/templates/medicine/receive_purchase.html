@@ -27,18 +27,18 @@
         </a>
     </div>
 
-    <div class="patient-form-card">
-        <form method="POST" class="patient-form-grid">
+    <div class="patient-form-card" style="max-width:100%; overflow:hidden;">
+        <form method="POST" class="patient-form-grid" style="min-width:0;">
             {% csrf_token %}
 
             <!-- Receive Purchase Items Table -->
-            <div class="table-section">
+            <div class="table-section mt-0" style="min-width:0; max-width:100%; overflow:hidden;">
                 <h5 class="mb-3 fw-semibold">
                     <i class="bi bi-box-seam me-2"></i>Receive Purchase Items
                 </h5>
 
-                <div class="table-responsive">
-                    <table class="table table-custom">
+                <div class="table-responsive" style="max-width:100%; overflow-x:auto;">
+                    <table class="table table-custom align-middle" style="min-width:1120px; width:100%;">
                         <thead>
                             <tr>
                                 <th>Medicine</th>
@@ -49,6 +49,8 @@
                                 <th>Strip Price (₹)</th>
                                 <th>Tax %</th>
                                 <th>Discount (₹)</th>
+                                <th>Mfg Date</th>
+                                <th>Exp Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,28 +71,39 @@
                                 </td>
                                 <td>
                                     <input type="number" name="received_quantity_strips[]"
-                                        class="patient-input" value="{{ item.quantity_strips }}"
+                                        class="patient-input" style="min-width:72px;"
+                                        value="{{ item.quantity_strips }}"
                                         min="0" {% if purchase.status == "received" %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     <input type="number" name="strip_price[]"
-                                        class="patient-input" min="0" step="0.01"
+                                        class="patient-input" style="min-width:72px;" min="0" step="0.01"
                                         {% if purchase.status == "received" %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     <input type="number" name="tax_percent[]"
-                                        class="patient-input" value="0" min="0" step="0.01"
+                                        class="patient-input" style="min-width:72px;" value="0" min="0" step="0.01"
                                         {% if purchase.status == "received" %}disabled{% endif %}>
                                 </td>
                                 <td>
                                     <input type="number" name="discount_amount[]"
-                                        class="patient-input" value="0" min="0" step="0.01"
+                                        class="patient-input" style="min-width:84px;" value="0" min="0" step="0.01"
+                                        {% if purchase.status == "received" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="date" name="mfg_date[]"
+                                        class="patient-input" style="min-width:150px;"
+                                        {% if purchase.status == "received" %}disabled{% endif %}>
+                                </td>
+                                <td>
+                                    <input type="date" name="exp_date[]"
+                                        class="patient-input" style="min-width:150px;"
                                         {% if purchase.status == "received" %}disabled{% endif %}>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="8" class="text-center py-4 text-muted">
+                                <td colspan="10" class="text-center py-4 text-muted">
                                     No items in this purchase order
                                 </td>
                             </tr>
@@ -100,7 +113,7 @@
                 </div>
             </div>
 
-            <div class="patient-form-actions">
+            <div class="patient-form-actions flex-wrap gap-2">
                 <button type="submit" class="patient-submit-btn me-2"
                     {% if purchase.status == "received" %}disabled{% endif %}>
                     <i class="bi bi-check2-circle"></i>

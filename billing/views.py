@@ -18,8 +18,8 @@ def get_bill_summary(visit):
     Returns payment tracking information
     """
     # Original bill
-    original_bill = Bill.objects.filter(visit=visit, is_addon=False).first()
-    addon_bills = Bill.objects.filter(visit=visit, is_addon=True)
+    original_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
+    addon_bills = Bill.objects.filter(visit=visit, is_addon=True, is_archived=False)
     
     summary = {
         'original_bill': original_bill,
@@ -59,7 +59,7 @@ def generate_bill_from_visit(visit):
     ).filter(billed_on__isnull=True)
 
     # Check करो - क्या पहले से कोई bill है
-    existing_bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+    existing_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
     
     clinic = ClinicSettings.get()
     subtotal = Decimal('0')
@@ -76,7 +76,7 @@ def generate_bill_from_visit(visit):
             )
             return bill
         else:
-            return visit.bills.order_by('-created_at').first()
+            return visit.bills.filter(is_archived=False).order_by('-created_at').first()
 
     if existing_bill:
         # Addon bill बनाओ
@@ -107,14 +107,11 @@ def generate_bill_from_visit(visit):
 
         try:
             parts = item.dosage.split(' (')
-            m_a_n = parts[0].split('-')
-            m = int(m_a_n[0])
-            a = int(m_a_n[1])
-            n = int(m_a_n[2])
+            dose_parts = [int(part) for part in parts[0].split('-')]
         except Exception:
-            m = a = n = 0
+            dose_parts = []
 
-        qty = (m + a + n) * item.days
+        qty = sum(dose_parts) * item.days
 
         unit_price = variant.selling_price
         total = qty * unit_price
@@ -153,13 +150,13 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
 
         bill_id = request.GET.get('bill_id')
         if bill_id:
-            bill = get_object_or_404(Bill, id=bill_id, visit=visit)
+            bill = get_object_or_404(Bill, id=bill_id, visit=visit, is_archived=False)
         else:
             bill = latest_bill
 
         if not bill:
             # अगर कोई बिल नहीं है तो original bill check करो
-            bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+            bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
             if not bill:
                 messages.error(request, 'No prescription found for this visit!')
                 return redirect('appointment:manage_appointments')
@@ -177,9 +174,9 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
         visit = get_object_or_404(Visit, id=visit_id)
         bill_id = request.POST.get('bill_id')
         if bill_id:
-            bill = get_object_or_404(Bill, id=bill_id, visit=visit)
+            bill = get_object_or_404(Bill, id=bill_id, visit=visit, is_archived=False)
         else:
-            bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+            bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
 
         # Update fields
         bill.gst_percent    = Decimal(request.POST.get('gst_percent', 18))
@@ -206,11 +203,11 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
 
         bills = Bill.objects.select_related(
             'visit__patient__user'
-        ).order_by('-created_at')
+        ).filter(is_archived=False).order_by('-created_at')
 
         # Global stats (not affected by search/filters)
         now = timezone.now()
-        all_bills = Bill.objects.all()
+        all_bills = Bill.objects.filter(is_archived=False)
         total_bills_count = all_bills.count()
         this_month_count = all_bills.filter(created_at__year=now.year, created_at__month=now.month).count()
         total_unpaid = all_bills.filter(payment_status='unpaid').count()
@@ -269,7 +266,7 @@ class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
     login_url = 'doctor:login'
     
     def post(self, request, bill_id):
-        bill = get_object_or_404(Bill, id=bill_id)
+        bill = get_object_or_404(Bill, id=bill_id, is_archived=False)
         bill_number = bill.bill_number
         
         appointment = None
@@ -292,9 +289,9 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
         visit = get_object_or_404(Visit, id=visit_id)
         bill_id = request.GET.get('bill_id')
         if bill_id:
-            bill = get_object_or_404(Bill, id=bill_id, visit=visit)
+            bill = get_object_or_404(Bill, id=bill_id, visit=visit, is_archived=False)
         else:
-            bill = Bill.objects.filter(visit=visit, is_addon=False).first()
+            bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
 
         # Clinic settings is a singleton managed by the clinic app.
         settings = ClinicSettings.get()

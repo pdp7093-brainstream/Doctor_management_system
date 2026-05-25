@@ -60,11 +60,13 @@ class DashboardView(View):
         # Show all appointments for today so doctor can handle any booked slot.
         # This includes appointments booked by patients and unassigned doctor slots.
         today_appointments = Appointment.objects.filter(
-            appointment_date=today
+            appointment_date=today,
+            is_archived=False
         ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('time_slot')
 
         today_counts = Appointment.objects.filter(
-            appointment_date=today
+            appointment_date=today,
+            is_archived=False
         ).aggregate(
             total=Count('id'),
             remaining_today=Count('id', filter=Q(status='pending')),
@@ -95,7 +97,8 @@ def cancel_appointment(request, appointment_id):
     doctor = InnerMember.objects.get(user=request.user)
     appointment = get_object_or_404(
         Appointment.objects.select_related('doctor'),
-        id=appointment_id
+        id=appointment_id,
+        is_archived=False
     )
 
     if appointment.status == 'cancelled':
@@ -113,7 +116,8 @@ def cancel_appointment(request, appointment_id):
 
     today = timezone.localdate()
     today_counts = Appointment.objects.filter(
-        appointment_date=today
+        appointment_date=today,
+        is_archived=False
     ).aggregate(
         total=Count('id'),
         remaining_today=Count('id', filter=Q(status='pending')),
@@ -593,3 +597,70 @@ def delete_family(request, id):
     if request.method == 'POST':
         member.delete()
     return redirect('doctor:manage_patients')
+
+from .models import DoctorLeave
+from clinic.models import ClinicSettings
+from appointment.models import Appointment
+from django.db.models import Q
+
+@login_required(login_url='doctor:login')
+@role_required('doctor')
+def manage_leaves(request):
+    doctor = request.user.innermember
+    leaves = DoctorLeave.objects.filter(doctor=doctor).order_by('-date')
+
+    if request.method == 'POST':
+        date = request.POST.get('date')
+        leave_type = request.POST.get('leave_type')
+        reason = request.POST.get('reason')
+
+        if DoctorLeave.objects.filter(doctor=doctor, date=date).exists():
+            messages.error(request, f"Leave already exists for {date}.")
+        else:
+            leave = DoctorLeave.objects.create(
+                doctor=doctor,
+                date=date,
+                leave_type=leave_type,
+                reason=reason
+            )
+            
+            # Cancel overlapping appointments
+            clinic = ClinicSettings.objects.first()
+            if clinic and clinic.lunch_start:
+                lunch_time = clinic.lunch_start
+                overlapping = Appointment.objects.filter(
+                    doctor=doctor,
+                    appointment_date=date,
+                    status__in=['pending', 'confirmed'],
+                    is_archived=False
+                )
+                
+                if leave_type == 'first_half':
+                    overlapping = overlapping.filter(appointment_time__lt=lunch_time)
+                elif leave_type == 'second_half':
+                    overlapping = overlapping.filter(appointment_time__gte=lunch_time)
+                
+                count = overlapping.count()
+                overlapping.update(status='cancelled', cancellation_reason=reason)
+                
+                msg = "Leave added successfully."
+                if count > 0:
+                    msg += f" {count} appointment(s) were automatically cancelled."
+                messages.success(request, msg)
+            else:
+                messages.success(request, "Leave added successfully. (Note: Please set clinic lunch time in settings for accurate half-day tracking).")
+            
+        return redirect('doctor:manage_leaves')
+
+    return render(request, 'doctor/manage_leaves.html', {'leaves': leaves})
+
+
+@login_required(login_url='doctor:login')
+@role_required('doctor')
+def delete_leave(request, pk):
+    doctor = request.user.innermember
+    leave = get_object_or_404(DoctorLeave, pk=pk, doctor=doctor)
+    if request.method == 'POST':
+        leave.delete()
+        messages.success(request, "Leave deleted successfully.")
+    return redirect('doctor:manage_leaves')
