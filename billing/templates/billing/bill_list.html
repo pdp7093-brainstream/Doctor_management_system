@@ -12,6 +12,11 @@
             </h2>
             <p class="text-muted small mb-0">Manage all patient bills & invoices</p>
         </div>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBillModal">
+                <i class="bi bi-plus-lg me-1"></i>Add Bill
+            </button>
+        </div>
     </div>
 
     <!-- Stats Cards -->
@@ -238,6 +243,48 @@
 
     </div>
 
+        <!-- Add Bill Modal -->
+        <div class="modal fade" id="addBillModal" tabindex="-1" aria-labelledby="addBillModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="POST" action="{% url 'billing:add_bill' %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addBillModalLabel">Add Bill (without appointment)</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                                                        <div class="mb-3">
+                                                                <label class="form-label">Patient Name</label>
+                                                                <input type="text" id="patientSearch" name="name" class="form-control" placeholder="Full name" autocomplete="off" required>
+                                                                <div id="patientSuggestions" class="list-group position-absolute w-100 mt-1" style="z-index:1050; display:none;"></div>
+                                                                <input type="hidden" name="patient_id" id="patient_id">
+                                                                <input type="hidden" name="family_member_id" id="family_member_id">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                                <label class="form-label">Mobile</label>
+                                                                <input type="text" id="patientPhone" name="phone" class="form-control" placeholder="Mobile number" required>
+                                                        </div>
+                                                        <div class="row g-2">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Appointment Date</label>
+                                                                    <input type="date" name="appointment_date" class="form-control" required>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Appointment Time</label>
+                                                                    <input type="time" name="appointment_time" class="form-control" required>
+                                                                </div>
+                                                        </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create Bill</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
 </main>
 
 <script>
@@ -330,6 +377,103 @@
             });
         }
     });
+
+    // Live search for patient/name in Add Bill modal
+    (function(){
+        const searchInput = document.getElementById('patientSearch');
+        const suggestions = document.getElementById('patientSuggestions');
+        const patientIdInput = document.getElementById('patient_id');
+        const familyMemberIdInput = document.getElementById('family_member_id');
+        const phoneInput = document.getElementById('patientPhone');
+
+        let timer;
+
+        function clearSuggestions(){
+            suggestions.innerHTML = '';
+            suggestions.style.display = 'none';
+        }
+
+        function renderResults(items){
+            suggestions.innerHTML = '';
+            if(!items || items.length === 0){
+                clearSuggestions();
+                return;
+            }
+            items.forEach(item => {
+                const el = document.createElement('button');
+                el.type = 'button';
+                el.className = 'list-group-item list-group-item-action';
+                el.textContent = item.display;
+                el.dataset.type = item.type; // patient or family
+                el.dataset.id = item.id;
+                el.dataset.name = item.name || '';
+                el.dataset.phone = item.phone || '';
+                el.addEventListener('click', () => {
+                    searchInput.value = el.dataset.name || el.textContent;
+                    phoneInput.value = el.dataset.phone || '';
+                    if(el.dataset.type === 'family'){
+                        familyMemberIdInput.value = el.dataset.id;
+                        patientIdInput.value = '';
+                    } else {
+                        patientIdInput.value = el.dataset.id;
+                        familyMemberIdInput.value = '';
+                    }
+                    clearSuggestions();
+                });
+                suggestions.appendChild(el);
+            });
+            suggestions.style.display = 'block';
+        }
+
+        function fetchSearch(q){
+            if(!q || q.length < 2){ clearSuggestions(); return; }
+            fetch(`/appointment/search-patients/?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(data => {
+                    const results = data.results || [];
+                    // normalize to {id,type,display,name,phone}
+                    const items = results.map(it => {
+                        let parsedType = 'patient';
+                        let parsedId = it.id;
+                        if(typeof it.id === 'string'){
+                            if(it.id.startsWith('patient_')){
+                                parsedType = 'patient';
+                                parsedId = it.id.split('_')[1];
+                            } else if(it.id.startsWith('family_')){
+                                parsedType = 'family';
+                                parsedId = it.id.split('_')[1];
+                            }
+                        }
+                        return {
+                            id: parsedId,
+                            type: parsedType,
+                            display: it.display || it.name || it.phone || '',
+                            name: it.name || '',
+                            phone: it.phone || ''
+                        };
+                    });
+                    renderResults(items);
+                })
+                .catch(err => { console.error('search error', err); clearSuggestions(); });
+        }
+
+        searchInput && searchInput.addEventListener('input', function(){
+            clearTimeout(timer);
+            timer = setTimeout(()=> fetchSearch(this.value.trim()), 250);
+            // clear selected ids when typing
+            patientIdInput.value = '';
+            familyMemberIdInput.value = '';
+        });
+
+        // hide suggestions when clicking outside
+        document.addEventListener('click', function(e){
+            if(!e.target.closest('#patientSuggestions') && !e.target.closest('#patientSearch')){
+                clearSuggestions();
+            }
+        });
+    })();
+
+    // remove item-related handlers (modal simplified)
 </script>
 
 {% endblock %}

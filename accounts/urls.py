@@ -20,6 +20,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('logout/',views.logout_view, name='logout'),
     path('profile-setting/',views.profile_settings,name='profile-setting'),
+    path('upload-profile-document/', views.upload_profile_document, name='upload_profile_document'),
 
     #Family member urls
     path('add-family-member/', views.add_family_member, name='add_family_member'),

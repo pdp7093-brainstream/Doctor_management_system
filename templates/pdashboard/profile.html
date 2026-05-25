@@ -236,6 +236,90 @@
                 </div>
             </div>
 
+            <!-- ── Upload Documents Card ── -->
+            <div class="card mb-4" style="max-width:820px;margin-left:0;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-upload"></i> Upload Documents</h4>
+                    <span style="font-size:0.82rem;color:var(--muted);">
+                        {{ uploaded_documents|length }} file{% if uploaded_documents|length != 1 %}s{% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'upload_profile_document' %}" enctype="multipart/form-data" class="mb-3">
+                        {% csrf_token %}
+                        <div class="row g-2 align-items-end">
+                            <div class="col-md-5">
+                                <label class="form-label mb-1">Document File</label>
+                                <input type="file" name="document" class="form-control" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label mb-1">Whose Document?</label>
+                                <select name="family_member_id" class="form-select">
+                                    <option value="">Main Patient (Me)</option>
+                                    {% for member in family_members %}
+                                    <option value="{{ member.id }}">{{ member.name }} ({{ member.relation }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    {% if uploaded_documents %}
+                    <div class="table-responsive">
+                        <table class="fm-table">
+                            <thead>
+                                <tr>
+                                    <th>Document</th>
+                                    <th>Belongs To</th>
+                                    <th>Type</th>
+                                    <th>Uploaded</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for document in uploaded_documents %}
+                                <tr>
+                                    <td><strong>{{ document.original_name }}</strong></td>
+                                    <td>
+                                        {% if document.family_member %}
+                                            {{ document.family_member.name }}
+                                        {% else %}
+                                            {{ request.user.get_full_name|default:request.user.username }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if document.family_member %}
+                                            Family Member ({{ document.family_member.relation }})
+                                        {% else %}
+                                            Main Patient
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                                    <td>
+                                        <a href="{{ document.file.url }}" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="empty-fm">
+                        <i class="fas fa-upload"
+                            style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
+                        No uploaded documents yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
     </div>
 

@@ -9,7 +9,8 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from appointment.models import Appointment, LabDocument
+from appointment.models import Appointment, LabDocument, PatientUploadedDocument
+from django.db import OperationalError, ProgrammingError
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date, parse_time
@@ -361,11 +362,58 @@ def profile(request):
         'visit__appointment__family_member',
         'visit__doctor__user',
     )
+    try:
+        uploaded_documents = list(
+            PatientUploadedDocument.objects.filter(
+                patient=patient
+            ).select_related('family_member', 'uploaded_by')
+        )
+    except (ProgrammingError, OperationalError):
+        uploaded_documents = []
     
     return render(request, 'pdashboard/profile.html', {
         'family_members': family_members,
         'lab_documents': lab_documents,
+        'uploaded_documents': uploaded_documents,
     })
+
+@login_required
+def upload_profile_document(request):
+    if request.method != 'POST':
+        return redirect('profile')
+
+    patient, _ = Patient.objects.get_or_create(user=request.user)
+    uploaded_file = request.FILES.get('document')
+    family_member_id = request.POST.get('family_member_id', '').strip()
+
+    if not uploaded_file:
+        messages.error(request, 'Please choose a document to upload.')
+        return redirect('profile')
+
+    family_member = None
+    if family_member_id:
+        family_member = FamilyMember.objects.filter(
+            id=family_member_id,
+            patient=patient
+        ).first()
+        if family_member is None:
+            messages.error(request, 'Invalid family member selected.')
+            return redirect('profile')
+
+    try:
+        PatientUploadedDocument.objects.create(
+            patient=patient,
+            family_member=family_member,
+            file=uploaded_file,
+            original_name=uploaded_file.name,
+            uploaded_by=request.user,
+        )
+    except (ProgrammingError, OperationalError):
+        messages.error(request, 'Document upload table is not ready yet. Please run migrations first.')
+        return redirect('profile')
+
+    messages.success(request, 'Document uploaded successfully.')
+    return redirect('profile')
 
 
 @login_required

@@ -173,6 +173,130 @@
     </div>
     {% endif %}
 
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                <i class="bi bi-file-medical-fill"></i> Doctor Uploaded Documents
+            </div>
+            <span class="badge bg-light text-primary">{{ lab_documents|length }} file{{ lab_documents|length|pluralize }}</span>
+        </div>
+
+        <div class="card-body p-0">
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+                {% if lab_documents %}
+                <table class="table table-hover mb-0" style="min-width:720px; width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Belongs To</th>
+                            <th>Visit Date</th>
+                            <th>Doctor</th>
+                            <th>Uploaded</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in lab_documents %}
+                        <tr>
+                            <td style="font-weight:600;">{{ document.original_name }}</td>
+                            <td>
+                                {% if document.visit.appointment.family_member %}
+                                    <div style="font-weight:600;">{{ document.visit.appointment.family_member.name }}</div>
+                                    <div style="font-size:0.78rem; color:#6c757d;">{{ document.visit.appointment.family_member.relation }}</div>
+                                {% else %}
+                                    <div style="font-weight:600;">{{ document.visit.patient.user.get_full_name|default:document.visit.patient.user.username }}</div>
+                                    <div style="font-size:0.78rem; color:#6c757d;">Main Patient</div>
+                                {% endif %}
+                            </td>
+                            <td>{{ document.visit.appointment.appointment_date|date:"d M Y" }}</td>
+                            <td>
+                                {% if document.visit.doctor and document.visit.doctor.user %}
+                                    Dr. {{ document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                            <td>
+                                <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-file-earmark-medical" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                    No doctor uploaded documents yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                <i class="bi bi-upload"></i> Patient Added Documents
+            </div>
+            <span class="badge bg-light text-primary">{{ uploaded_documents|length }} file{{ uploaded_documents|length|pluralize }}</span>
+        </div>
+
+        <div class="card-body p-0">
+            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+                {% if uploaded_documents %}
+                <table class="table table-hover mb-0" style="min-width:720px; width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Belongs To</th>
+                            <th>Patient Type</th>
+                            <th>Uploaded By</th>
+                            <th>Uploaded</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for document in uploaded_documents %}
+                        <tr>
+                            <td style="font-weight:600;">{{ document.original_name }}</td>
+                            <td>
+                                {% if document.family_member %}
+                                    {{ document.family_member.name }}
+                                {% else %}
+                                    {% if is_family %}
+                                        {{ parent.user.get_full_name|default:parent.user.username }}
+                                    {% else %}
+                                        {{ patient.user.get_full_name|default:patient.user.username }}
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if document.family_member %}
+                                    Family Member ({{ document.family_member.relation }})
+                                {% else %}
+                                    Main Patient
+                                {% endif %}
+                            </td>
+                            <td>{{ document.uploaded_by.get_full_name|default:document.uploaded_by.username|default:"Patient" }}</td>
+                            <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                            <td>
+                                <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-primary">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-upload" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                    No patient uploaded documents yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
 </main>
 
 {% endblock %}
