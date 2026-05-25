@@ -6,7 +6,11 @@ from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from decimal import Decimal
 from .models import Bill, BillItem
-from appointment.models import Visit
+from appointment.models import Visit, Appointment, Prescription, PrescriptionItem
+from django.contrib.auth.models import User
+from accounts.models import Patient, FamilyMember
+from doctor.models import InnerMember
+from appointment.models import Prescription
 from clinic.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
 from django.utils import timezone
@@ -252,6 +256,8 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
                 'total_partial': total_partial,
             })
 
+        doctors = InnerMember.objects.filter(role='doctor').select_related('user')
+
         return render(request, 'billing/bill_list.html', {
             'bills':          page_obj,
             'page_obj':       page_obj,
@@ -262,7 +268,74 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
             'this_month_count': this_month_count,
             'total_unpaid': total_unpaid,
             'total_partial': total_partial,
+            'doctors': doctors,
         })
+
+
+@method_decorator(never_cache, name='dispatch')
+class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
+    login_url = 'doctor:login'
+
+    def post(self, request):
+        # Only collect minimal info: name, phone, appointment_date, appointment_time
+        name = (request.POST.get('name') or '').strip()
+        phone = (request.POST.get('phone') or '').strip()
+        appointment_date = request.POST.get('appointment_date')
+        appointment_time = request.POST.get('appointment_time')
+
+        if not name or not phone or not appointment_date or not appointment_time:
+            messages.error(request, 'Name, phone, appointment date and time are required.')
+            return redirect('billing:bill_list')
+
+        # Find existing patient by phone or create new user+patient
+        patient = Patient.objects.filter(phone=phone).first()
+        family_member = None
+
+        if not patient:
+            # create new User
+            username = phone or (name.replace(' ', '')[:30] or f'user{int(timezone.now().timestamp())}')
+            if User.objects.filter(username=username).exists():
+                username = f"{username}{int(timezone.now().timestamp())}"
+
+            parts = name.split()
+            first_name = parts[0] if parts else ''
+            last_name = ' '.join(parts[1:]) if len(parts) > 1 else ''
+
+            user = User.objects.create_user(username=username, password='password@123', first_name=first_name, last_name=last_name)
+            try:
+                patient = user.patient
+                patient.phone = phone
+                patient.save()
+            except Exception:
+                patient = Patient.objects.create(user=user, phone=phone)
+
+        # parse appointment date/time
+        appt_date_val = timezone.localdate()
+        appt_time_val = timezone.localtime().time()
+        try:
+            appt_date_val = timezone.datetime.strptime(appointment_date, '%Y-%m-%d').date()
+            appt_time_val = timezone.datetime.strptime(appointment_time, '%H:%M').time()
+        except Exception:
+            pass
+
+        # create appointment and visit
+        appointment = Appointment.objects.create(
+            patient=patient,
+            appointment_date=appt_date_val,
+            time_slot=appt_time_val,
+            status='pending'
+        )
+
+        visit = Visit.objects.create(
+            patient=patient,
+            doctor=None,
+            appointment=appointment,
+            visted_status='in_progress'
+        )
+
+        # redirect to prescription page to allow doctor to add prescription and then generate bill
+        from django.urls import reverse
+        return redirect(reverse('appointment:prescription', args=[visit.id]))
 
 @method_decorator(never_cache, name='dispatch')
 class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):

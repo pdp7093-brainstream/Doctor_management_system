@@ -121,6 +121,38 @@ class LabDocument(models.Model):
     def __str__(self):
         return f"{self.original_name} - {self.visit.patient.user.username}"
 
+
+class PatientUploadedDocument(models.Model):
+    patient = models.ForeignKey(
+        Patient,
+        on_delete=models.CASCADE,
+        related_name='uploaded_documents'
+    )
+    family_member = models.ForeignKey(
+        FamilyMember,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='uploaded_documents'
+    )
+    file = models.FileField(upload_to='patient_documents/%Y/%m/')
+    original_name = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='patient_uploaded_documents'
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        owner = self.family_member.name if self.family_member else (self.patient.user.get_full_name() or self.patient.user.username)
+        return f"{self.original_name} - {owner}"
+
 # Prescription list 
 class PrescriptionItem(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name="items")

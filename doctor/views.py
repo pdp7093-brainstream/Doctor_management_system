@@ -1,6 +1,6 @@
 import json
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db import transaction
+from django.db import OperationalError, ProgrammingError, transaction
 from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User 
@@ -8,7 +8,7 @@ from django.views.decorators.cache import never_cache
 from django.views import View
 from .decorators import role_required
 from .models import InnerMember
-from appointment.models import Appointment
+from appointment.models import Appointment, LabDocument, PatientUploadedDocument
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
@@ -193,21 +193,55 @@ def view_patient_dynamic(request, type, id):
     if type == 'main':
         patient = get_object_or_404(Patient, id=id)
         family_members = FamilyMember.objects.filter(patient=patient)
+        lab_documents = LabDocument.objects.filter(
+            visit__patient=patient
+        ).select_related(
+            'visit__appointment',
+            'visit__appointment__family_member',
+            'visit__doctor__user',
+        )
+        try:
+            uploaded_documents = list(
+                PatientUploadedDocument.objects.filter(
+                    patient=patient
+                ).select_related('family_member', 'uploaded_by')
+            )
+        except (ProgrammingError, OperationalError):
+            uploaded_documents = []
 
         return render(request, 'doctor/view_patient.html', {
             'patient': patient,
             'family_members': family_members,
-            'is_family': False
+            'is_family': False,
+            'lab_documents': lab_documents,
+            'uploaded_documents': uploaded_documents,
         })
 
     else:
         member = get_object_or_404(FamilyMember, id=id)
+        lab_documents = LabDocument.objects.filter(
+            visit__patient=member.patient
+        ).select_related(
+            'visit__appointment',
+            'visit__appointment__family_member',
+            'visit__doctor__user',
+        )
+        try:
+            uploaded_documents = list(
+                PatientUploadedDocument.objects.filter(
+                    patient=member.patient
+                ).select_related('family_member', 'uploaded_by')
+            )
+        except (ProgrammingError, OperationalError):
+            uploaded_documents = []
 
         return render(request, 'doctor/view_patient.html', {
             'member': member,
             'parent': member.patient,
             'family_members': member.patient.members.all(),
-            'is_family': True
+            'is_family': True,
+            'lab_documents': lab_documents,
+            'uploaded_documents': uploaded_documents,
         })
     
 @never_cache
