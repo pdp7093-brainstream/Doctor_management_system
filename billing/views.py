@@ -14,6 +14,7 @@ from appointment.models import Prescription
 from clinic.models import ClinicSettings
 from doctor.mixins import BillingAccessMixin
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 
 
 def get_bill_summary(visit):
@@ -203,6 +204,7 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         
         search         = request.GET.get('search', '')
         bill_date      = request.GET.get('bill_date', '')
+        selected_month = request.GET.get('bill_month', '')
         payment_status = request.GET.get('payment_status', 'all')
 
         bills = Bill.objects.select_related(
@@ -216,6 +218,7 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         this_month_count = all_bills.filter(created_at__year=now.year, created_at__month=now.month).count()
         total_unpaid = all_bills.filter(payment_status='unpaid').count()
         total_partial = all_bills.filter(payment_status='partial').count()
+        bill_months = all_bills.dates('bill_date', 'month', order='DESC')
 
         # Search — patient name ya bill number
         if search:
@@ -230,43 +233,80 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
         if bill_date:
             bills = bills.filter(bill_date=bill_date)
 
+        # Month filter
+        if selected_month:
+            month_date = parse_date(f'{selected_month}-01')
+            if month_date:
+                bills = bills.filter(
+                    bill_date__year=month_date.year,
+                    bill_date__month=month_date.month
+                )
+
         # Status filter
         if payment_status and payment_status != 'all':
             bills = bills.filter(payment_status=payment_status)
 
-        # Pagination — 10 per page
+        # Month-wise pagination logic
         from django.core.paginator import Paginator
-        paginator   = Paginator(bills, 10)
-        page_number = request.GET.get('page', 1)
-        page_obj    = paginator.get_page(page_number)
+        from django.db.models import Sum
+
+        filtered_months = bills.dates('bill_date', 'month', order='DESC')
         
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return render(request, 'billing/bill_list.html', {
-                'bills':          page_obj,
-                'page_obj':       page_obj,
-                'search':         search,
-                'bill_date':      bill_date,
-                'payment_status': payment_status,
-                'total_bills_count': total_bills_count,
-                'this_month_count': this_month_count,
-                'total_unpaid': total_unpaid,
-                'total_partial': total_partial,
+        month_paginator = Paginator(filtered_months, 4)
+        month_page_number = request.GET.get('page', 1)
+        month_page_obj = month_paginator.get_page(month_page_number)
+
+        month_data = []
+        for m_date in month_page_obj:
+            month_bills = bills.filter(
+                bill_date__year=m_date.year, 
+                bill_date__month=m_date.month
+            ).order_by('-created_at')
+
+            totals = month_bills.aggregate(
+                total_sum=Sum('total'),
+            )
+            total_sum = totals.get('total_sum') or 0
+            
+            paid_sum = month_bills.filter(payment_status='paid').aggregate(t=Sum('total'))['t'] or 0
+            unpaid_sum = month_bills.filter(payment_status='unpaid').aggregate(t=Sum('total'))['t'] or 0
+
+            page_param_name = f"page_{m_date.strftime('%Y_%m')}"
+            inner_page_number = request.GET.get(page_param_name, 1)
+            inner_paginator = Paginator(month_bills, 5)
+            inner_page_obj = inner_paginator.get_page(inner_page_number)
+
+            month_data.append({
+                'month_date': m_date,
+                'month_name': m_date.strftime('%B %Y'),
+                'total_amount': total_sum,
+                'paid_amount': paid_sum,
+                'unpaid_amount': unpaid_sum,
+                'bills': inner_page_obj,
+                'page_param': page_param_name,
             })
 
-        doctors = InnerMember.objects.filter(role='doctor').select_related('user')
-
-        return render(request, 'billing/bill_list.html', {
-            'bills':          page_obj,
-            'page_obj':       page_obj,
+        context_data = {
+            'month_data':     month_data,
+            'page_obj':       month_page_obj,
             'search':         search,
             'bill_date':      bill_date,
+            'selected_month': selected_month,
+            'bill_months':    bill_months,
             'payment_status': payment_status,
             'total_bills_count': total_bills_count,
             'this_month_count': this_month_count,
             'total_unpaid': total_unpaid,
             'total_partial': total_partial,
-            'doctors': doctors,
-        })
+        }
+
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return render(request, 'billing/bill_list.html', context_data)
+
+        doctors = InnerMember.objects.filter(role='doctor').select_related('user')
+        context_data['doctors'] = doctors
+
+        return render(request, 'billing/bill_list.html', context_data)
 
 
 @method_decorator(never_cache, name='dispatch')

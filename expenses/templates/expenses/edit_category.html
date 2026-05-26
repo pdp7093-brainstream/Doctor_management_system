@@ -1,0 +1,52 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Edit Category{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="page-title mb-1" style="font-weight: 700; color: #1a2744;">
+                <i class="bi bi-pencil-square me-2 text-primary"></i>Edit Category
+            </h2>
+            <p class="text-muted small mb-0">Update your expense category details</p>
+        </div>
+        <a href="{% url 'expenses:category_list' %}" class="btn btn-outline-secondary rounded-pill px-4" style="font-weight: 500;">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        <!-- Edit Category Form -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px; background: #ffffff;">
+                <div class="card-body p-4">
+                    <form method="post" action="{% url 'expenses:edit_category' category.id %}">
+                        {% csrf_token %}
+                        <div class="form-group mb-4">
+                            <label class="form-label" style="font-weight: 600; color: #4a5568; font-size: 0.9rem;">Category Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" value="{{ category.name }}" class="form-control form-control-lg bg-light border-0" placeholder="e.g. Salary, Utilities" required style="border-radius: 10px; font-size: 0.95rem;">
+                        </div>
+                        <div class="form-check form-switch mb-4">
+                            <input class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch" name="is_active" {% if category.is_active %}checked{% endif %} style="cursor: pointer;">
+                            <label class="form-check-label ms-2" for="isActiveSwitch" style="font-weight: 500; color: #64748b; cursor: pointer;">Active Status</label>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-sm" style="font-weight: 600; font-size: 1rem;">
+                            <i class="bi bi-save me-1"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+    .form-control:focus {
+        box-shadow: none;
+        background-color: #f8fafc !important;
+        border: 1px solid #3b82f6 !important;
+    }
+</style>
+{% endblock %}

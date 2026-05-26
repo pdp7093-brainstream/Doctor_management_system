@@ -66,6 +66,10 @@ class ExportDataView(DoctorRequiredMixin, View):
         from_date = request.POST.get('from_date')
         to_date = request.POST.get('to_date')
 
+        if not from_date or not to_date:
+            messages.error(request, 'Please select both From Date and To Date to export data.')
+            return redirect('reports_archive:export_data')
+
         # Only appointments for now
         if data_type == 'appointments':
             appointments = Appointment.objects.filter(

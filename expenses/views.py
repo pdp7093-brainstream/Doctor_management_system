@@ -90,8 +90,8 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
         try:
 
             name = request.POST.get('name')
-
-            ExpenseCategory.objects.create(name=name)
+            is_active = request.POST.get('is_active') == 'on'
+            ExpenseCategory.objects.create(name=name, is_active=is_active)
 
             return redirect('expenses:category_list')
 
@@ -165,6 +165,56 @@ class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
             print("Expense Create Error:", e)
 
             return redirect('expenses:add_expense')
+
+
+@method_decorator(never_cache, name='dispatch')
+class EditCategoryView(LoginRequiredMixin, ExpenseAccessMixin,View):
+    login_url = 'doctor:login'
+
+    def dispatch(self,request, *args, **kwargs):
+        if request.user.innermember.role != 'doctor':
+            return redirect('expenses:expense_list')
+        
+        return super().dispatch(request,*args,**kwargs)
+
+    def get(self,request,pk):
+        category = get_object_or_404(ExpenseCategory, id=pk)
+
+        context = {'category':category}
+
+        return render(request, 'expenses/edit_category.html',context)
+
+    def post(self,request, pk):
+        category = get_object_or_404(ExpenseCategory, id=pk)
+
+        category.name = request.POST.get('name')
+        category.is_active = request.POST.get('is_active') == 'on'
+
+        category.save()
+
+        return redirect('expenses:category_list')
+
+
+@method_decorator(never_cache, name='dispatch')
+class DeleteCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
+    login_url = 'doctor:login'
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.innermember.role != 'doctor':
+            return redirect('expenses:expense_list')
+        
+        return super().dispatch(request, *args, **kwargs)
+
+    def post(self, request, pk):
+        category = get_object_or_404(ExpenseCategory, id=pk)
+        try:
+            category.delete()
+            messages.success(request, 'Category deleted successfully.')
+        except Exception as e:
+            messages.error(request, 'Failed to delete category. It might be in use.')
+        
+        return redirect('expenses:category_list')
+
 
 @method_decorator(never_cache, name='dispatch')
 class ExpenseListView(LoginRequiredMixin,ExpenseAccessMixin,View):
