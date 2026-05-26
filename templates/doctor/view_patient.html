@@ -11,17 +11,15 @@
             <h2 class="page-title mb-1">Patient Profile</h2>
             <p class="text-muted small mb-0">Full details and family members of this patient.</p>
         </div>
-        <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn">
+        <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn btn btn-outline-primary btn-sm">
             <i class="bi bi-arrow-left me-1"></i> Back to Patients
-                            <td style="white-space:nowrap; vertical-align:middle;">
+        </a>
     </div>
 
     <!-- Family member context banner -->
     {% if is_family %}
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="profile" data-id="{{ document.id }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-        <i class="bi bi-people-fill"></i>
+    <div class="alert alert-info d-flex align-items-center gap-2 mb-4 border-0 shadow-sm rounded-3">
+        <i class="bi bi-people-fill fs-5"></i>
         <span>
             <strong>{{ member.name }}</strong> is the
             <strong>{{ member.relation }}</strong> of
@@ -30,8 +28,10 @@
     </div>
     {% endif %}
 
-    <!-- Profile Card -->
-    <div class="card mb-4">
+    <div class="row g-4 mb-4">
+        <div class="{% if is_family %}col-12{% else %}col-lg-6{% endif %}">
+            <!-- Profile Card -->
+    <div class="card h-100 border-0 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
                 <i class="bi bi-person-fill"></i>
@@ -53,7 +53,7 @@
                         {{ patient.user.first_name|slice:":1"|upper }}
                     {% endif %}
                 </div>
-                <div>2
+                <div>
                     <div style="font-weight:700; font-size:1.1rem; color:var(--dark-text);">
                         {% if is_family %}
                             {{ member.name }}
@@ -191,10 +191,12 @@
             </div>
         </div>
     </div>
+        </div>
 
     <!-- Family Members Card (only for main patients) -->
     {% if not is_family %}
-    <div class="card">
+        <div class="col-lg-6">
+    <div class="card h-100 border-0 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
                 <i class="bi bi-people-fill"></i> Family Members
@@ -243,9 +245,13 @@
             </div>
         </div>
     </div>
+        </div>
     {% endif %}
+    </div>
 
-    <div class="card mt-4">
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+    <div class="card h-100 border-0 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
                 <i class="bi bi-file-medical-fill"></i> Doctor Uploaded Documents
@@ -341,7 +347,9 @@
         </div>
     </div>
 
-    <div class="card mt-4">
+        </div>
+        <div class="col-lg-6">
+    <div class="card h-100 border-0 shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
                 <i class="bi bi-upload"></i> Patient Added Documents
@@ -432,6 +440,9 @@
                 </div>
                 {% endif %}
             </div>
+        </div>
+    </div>
+
         </div>
     </div>
 
