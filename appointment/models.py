@@ -42,6 +42,17 @@ class Appointment(models.Model):
 
     appointment_date = models.DateField()
     time_slot = models.TimeField()
+    # Consultation type: in-person / phone / video
+    CONSULTATION_CHOICES = [
+        ('in_person', 'In Person'),
+        ('phone', 'Phone'),
+        ('video', 'Video'),
+    ]
+    consultation_type = models.CharField(
+        max_length=20,
+        choices=CONSULTATION_CHOICES,
+        default='in_person'
+    )
     is_archived = models.BooleanField(default=False)
     archived_at = models.DateTimeField(null=True,blank=True)
     status = models.CharField(

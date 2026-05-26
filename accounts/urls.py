@@ -22,6 +22,10 @@ urlpatterns = [
     path('profile-setting/',views.profile_settings,name='profile-setting'),
     path('upload-profile-document/', views.upload_profile_document, name='upload_profile_document'),
 
+    # document delete endpoints
+    path('delete-lab-document/<int:doc_id>/', views.delete_lab_document, name='delete_lab_document'),
+    path('delete-profile-document/<int:doc_id>/', views.delete_profile_document, name='delete_profile_document'),
+
     #Family member urls
     path('add-family-member/', views.add_family_member, name='add_family_member'),
     path('update-family-member/<int:member_id>/', views.update_family_member, name='update_family_member'),

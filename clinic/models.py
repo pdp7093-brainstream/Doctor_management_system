@@ -62,6 +62,12 @@ class ClinicSettings(models.Model):
     default_consultation_fee = models.DecimalField(
         max_digits=8, decimal_places=2, default=0
     )
+    phone_consultation_fee = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0
+    )
+    video_consultation_fee = models.DecimalField(
+        max_digits=8, decimal_places=2, default=0
+    )
     bill_prefix        = models.CharField(max_length=10, default='BILL')
     bill_footer_note   = models.CharField(
         max_length=300,

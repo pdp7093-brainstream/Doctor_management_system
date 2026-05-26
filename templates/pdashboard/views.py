@@ -421,50 +421,55 @@ def upload_profile_document(request):
 def delete_lab_document(request, doc_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
-    # find without raising Http404 so we can return JSON
-    doc = LabDocument.objects.filter(id=doc_id).first()
-    if not doc:
-        return JsonResponse({'success': False, 'error': 'LabDocument not found'}, status=404)
-
-    is_doctor = hasattr(request.user, 'innermember') and request.user.innermember.role == 'doctor'
-    is_patient_owner = (doc.visit.patient.user == request.user)
-    is_uploader = (doc.uploaded_by == request.user)
-
-    if not (is_doctor or is_patient_owner or is_uploader):
-        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-
     try:
-        if doc.file:
-            doc.file.delete(save=False)
-    except Exception:
-        pass
-    doc.delete()
-    return JsonResponse({'success': True})
+        doc = get_object_or_404(LabDocument, id=doc_id)
+
+        is_doctor = hasattr(request.user, 'innermember') and request.user.innermember.role == 'doctor'
+        is_patient_owner = (doc.visit.patient.user == request.user)
+        is_uploader = (doc.uploaded_by == request.user)
+
+        if not (is_doctor or is_patient_owner or is_uploader):
+            return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+
+        # delete file from storage then record
+        try:
+            if doc.file:
+                doc.file.delete(save=False)
+        except Exception:
+            pass
+        doc.delete()
+        return JsonResponse({'success': True})
+    except LabDocument.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Document not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 @login_required
 def delete_profile_document(request, doc_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
-    # find without raising Http404 so we can return JSON
-    doc = PatientUploadedDocument.objects.filter(id=doc_id).first()
-    if not doc:
-        return JsonResponse({'success': False, 'error': 'PatientUploadedDocument not found'}, status=404)
-
-    is_doctor = hasattr(request.user, 'innermember') and request.user.innermember.role == 'doctor'
-    is_patient_owner = (doc.patient.user == request.user)
-    is_uploader = (doc.uploaded_by == request.user)
-
-    if not (is_doctor or is_patient_owner or is_uploader):
-        return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
-
     try:
-        if doc.file:
-            doc.file.delete(save=False)
-    except Exception:
-        pass
-    doc.delete()
-    return JsonResponse({'success': True})
+        doc = get_object_or_404(PatientUploadedDocument, id=doc_id)
+
+        is_doctor = hasattr(request.user, 'innermember') and request.user.innermember.role == 'doctor'
+        is_patient_owner = (doc.patient.user == request.user)
+        is_uploader = (doc.uploaded_by == request.user)
+
+        if not (is_doctor or is_patient_owner or is_uploader):
+            return JsonResponse({'success': False, 'error': 'Permission denied'}, status=403)
+
+        try:
+            if doc.file:
+                doc.file.delete(save=False)
+        except Exception:
+            pass
+        doc.delete()
+        return JsonResponse({'success': True})
+    except PatientUploadedDocument.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Document not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 @login_required
