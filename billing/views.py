@@ -68,6 +68,15 @@ def generate_bill_from_visit(visit):
     clinic = ClinicSettings.get()
     subtotal = Decimal('0')
 
+    # Determine consultation fee based on appointment consultation_type if available
+    consultation_fee = clinic.default_consultation_fee
+    appt = getattr(visit, 'appointment', None)
+    appt_type = getattr(appt, 'consultation_type', None)
+    if appt_type == 'phone':
+        consultation_fee = getattr(clinic, 'phone_consultation_fee', clinic.default_consultation_fee)
+    elif appt_type == 'video':
+        consultation_fee = getattr(clinic, 'video_consultation_fee', clinic.default_consultation_fee)
+
     if not new_items.exists():
         if not existing_bill:
             # Original bill बनाओ (सिर्फ consultation fee)
@@ -75,7 +84,7 @@ def generate_bill_from_visit(visit):
                 visit=visit,
                 subtotal=0,
                 gst_percent=clinic.default_gst,
-                consultation_fee=clinic.default_consultation_fee,
+                consultation_fee=consultation_fee,
                 is_addon=False
             )
             return bill
@@ -99,7 +108,7 @@ def generate_bill_from_visit(visit):
             visit=visit,
             subtotal=0,
             gst_percent=clinic.default_gst,
-            consultation_fee=clinic.default_consultation_fee,
+            consultation_fee=consultation_fee,
             is_addon=False
         )
 
@@ -279,14 +288,32 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
         phone = (request.POST.get('phone') or '').strip()
         appointment_date = request.POST.get('appointment_date')
         appointment_time = request.POST.get('appointment_time')
+        patient_id = request.POST.get('patient_id')
+        family_member_id = request.POST.get('family_member_id')
 
         if not name or not phone or not appointment_date or not appointment_time:
             messages.error(request, 'Name, phone, appointment date and time are required.')
             return redirect('billing:bill_list')
 
-        # Find existing patient by phone or create new user+patient
-        patient = Patient.objects.filter(phone=phone).first()
+        # Resolve selected patient / family member (if chosen from suggestions)
+        patient = None
         family_member = None
+        if family_member_id:
+            try:
+                family_member = FamilyMember.objects.get(id=family_member_id)
+                patient = family_member.patient
+            except FamilyMember.DoesNotExist:
+                family_member = None
+
+        if not patient and patient_id:
+            try:
+                patient = Patient.objects.get(id=patient_id)
+            except Patient.DoesNotExist:
+                patient = None
+
+        # If still no patient found, fallback to lookup by phone or create new
+        if not patient:
+            patient = Patient.objects.filter(phone=phone).first()
 
         if not patient:
             # create new User
@@ -316,11 +343,14 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
             pass
 
         # create appointment and visit
+        consultation_type = request.POST.get('consultation_type', 'in_person')
         appointment = Appointment.objects.create(
             patient=patient,
             appointment_date=appt_date_val,
             time_slot=appt_time_val,
-            status='pending'
+            status='pending',
+            consultation_type=consultation_type,
+            family_member=family_member
         )
 
         visit = Visit.objects.create(

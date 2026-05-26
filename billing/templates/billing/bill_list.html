@@ -275,6 +275,15 @@
                                                                     <input type="time" name="appointment_time" class="form-control" required>
                                                                 </div>
                                                         </div>
+                                                        <div class="mt-3">
+                                                            <label class="form-label fw-semibold">Consultation Mode</label>
+                                                            <input type="hidden" name="consultation_type" id="consultation_type" value="in_person">
+                                                            <div class="d-flex gap-2">
+                                                                <button type="button" class="btn btn-outline-primary btn-mode active" data-value="in_person">In Person</button>
+                                                                <button type="button" class="btn btn-outline-primary btn-mode" data-value="phone">Via Phone Consultant</button>
+                                                                <button type="button" class="btn btn-outline-primary btn-mode" data-value="video">Via Video Call Consultant</button>
+                                                            </div>
+                                                        </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -471,6 +480,50 @@
                 clearSuggestions();
             }
         });
+    })();
+
+    // Consultation mode buttons handler in Add Bill modal — behave like radio buttons
+    (function(){
+        const modeButtons = Array.from(document.querySelectorAll('.btn-mode'));
+        const hiddenInput = document.getElementById('consultation_type');
+        const modalEl = document.getElementById('addBillModal');
+        if(!modeButtons.length || !hiddenInput) return;
+
+        function setActiveButton(btn){
+            modeButtons.forEach(b => {
+                b.classList.toggle('active', b === btn);
+                b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+            });
+            hiddenInput.value = btn ? (btn.dataset.value || 'in_person') : 'in_person';
+        }
+
+        // initialize based on hidden input value
+        const initialVal = (hiddenInput.value || 'in_person');
+        const initialBtn = modeButtons.find(b => b.dataset.value === initialVal) || modeButtons[0];
+        setActiveButton(initialBtn);
+
+        // clicks
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', function(e){
+                setActiveButton(this);
+            });
+            // keyboard activation (Space / Enter)
+            btn.addEventListener('keydown', function(e){
+                if(e.key === ' ' || e.key === 'Enter'){
+                    e.preventDefault();
+                    setActiveButton(this);
+                }
+            });
+        });
+
+        // when modal opens, ensure UI reflects hidden input (in case value changed programmatically)
+        if(modalEl){
+            modalEl.addEventListener('shown.bs.modal', function(){
+                const val = (hiddenInput.value || 'in_person');
+                const btn = modeButtons.find(b => b.dataset.value === val) || modeButtons[0];
+                setActiveButton(btn);
+            });
+        }
     })();
 
     // remove item-related handlers (modal simplified)

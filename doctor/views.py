@@ -213,12 +213,19 @@ def view_patient_dynamic(request, type, id):
         except (ProgrammingError, OperationalError):
             uploaded_documents = []
 
+        # paginate documents (5 per page)
+        lab_paginator = Paginator(lab_documents, 5)
+        lab_page = lab_paginator.get_page(request.GET.get('lab_page'))
+
+        upload_paginator = Paginator(uploaded_documents, 5)
+        upload_page = upload_paginator.get_page(request.GET.get('upload_page'))
+
         return render(request, 'doctor/view_patient.html', {
             'patient': patient,
             'family_members': family_members,
             'is_family': False,
-            'lab_documents': lab_documents,
-            'uploaded_documents': uploaded_documents,
+            'lab_page_obj': lab_page,
+            'uploaded_page_obj': upload_page,
         })
 
     else:
@@ -239,13 +246,20 @@ def view_patient_dynamic(request, type, id):
         except (ProgrammingError, OperationalError):
             uploaded_documents = []
 
+        # paginate documents (5 per page)
+        lab_paginator = Paginator(lab_documents, 5)
+        lab_page = lab_paginator.get_page(request.GET.get('lab_page'))
+
+        upload_paginator = Paginator(uploaded_documents, 5)
+        upload_page = upload_paginator.get_page(request.GET.get('upload_page'))
+
         return render(request, 'doctor/view_patient.html', {
             'member': member,
             'parent': member.patient,
             'family_members': member.patient.members.all(),
             'is_family': True,
-            'lab_documents': lab_documents,
-            'uploaded_documents': uploaded_documents,
+            'lab_page_obj': lab_page,
+            'uploaded_page_obj': upload_page,
         })
     
 @never_cache
