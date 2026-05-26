@@ -207,6 +207,12 @@ class DeleteCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     def post(self, request, pk):
         category = get_object_or_404(ExpenseCategory, id=pk)
+        
+        # Prevent deletion if expenses are linked to this category
+        if category.expenses.exists():
+            messages.error(request, 'Cannot delete this category because it contains existing expenses. Please delete or reassign the expenses first.')
+            return redirect('expenses:category_list')
+
         try:
             category.delete()
             messages.success(request, 'Category deleted successfully.')
@@ -261,3 +267,88 @@ class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
         context = {'expense': expense}
 
         return render(request,'expenses/expense_detail.html',context)
+
+
+@method_decorator(never_cache, name='dispatch')
+class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
+    login_url = 'doctor:login'
+
+    def get(self, request, pk):
+        member = request.user.innermember
+        
+        if member.role == 'doctor':
+            expense = get_object_or_404(Expense, id=pk, is_archived=False)
+        else:
+            # Biller can only edit their own pending expenses
+            expense = get_object_or_404(Expense, id=pk, created_by=request.user, is_archived=False)
+            if expense.status != 'pending':
+                messages.error(request, 'You can only edit pending expenses. Approved or rejected expenses cannot be modified.')
+                return redirect('expenses:expense_detail', pk=pk)
+
+        categories = ExpenseCategory.objects.filter(is_active=True).order_by('name')
+        # If current expense category is inactive, we should still show it in the list
+        if expense.category not in categories:
+            categories = list(categories) + [expense.category]
+
+        context = {
+            'expense': expense,
+            'categories': categories
+        }
+        return render(request, 'expenses/edit_expense.html', context)
+
+    def post(self, request, pk):
+        member = request.user.innermember
+        
+        if member.role == 'doctor':
+            expense = get_object_or_404(Expense, id=pk, is_archived=False)
+        else:
+            expense = get_object_or_404(Expense, id=pk, created_by=request.user, is_archived=False)
+            if expense.status != 'pending':
+                messages.error(request, 'You can only edit pending expenses. Approved or rejected expenses cannot be modified.')
+                return redirect('expenses:expense_detail', pk=pk)
+
+        try:
+            expense.title = request.POST.get('title')
+            category_id = request.POST.get('category')
+            expense.category = ExpenseCategory.objects.get(id=category_id)
+            expense.amount = request.POST.get('amount')
+            expense.expense_date = request.POST.get('expense_date')
+            expense.notes = request.POST.get('notes')
+            
+            attachment = request.FILES.get('attachment')
+            if attachment:
+                expense.attachment = attachment
+
+            expense.save()
+            messages.success(request, 'Expense updated successfully.')
+            return redirect('expenses:expense_detail', pk=pk)
+
+        except Exception as e:
+            print("Expense Edit Error:", e)
+            messages.error(request, 'Failed to update expense. Please check your inputs.')
+            return redirect('expenses:edit_expense', pk=pk)
+
+
+@method_decorator(never_cache, name='dispatch')
+class DeleteExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
+    login_url = 'doctor:login'
+
+    def post(self, request, pk):
+        member = request.user.innermember
+        
+        if member.role == 'doctor':
+            expense = get_object_or_404(Expense, id=pk, is_archived=False)
+        else:
+            # Biller can only delete their own pending expenses
+            expense = get_object_or_404(Expense, id=pk, created_by=request.user, is_archived=False)
+            if expense.status != 'pending':
+                messages.error(request, 'You can only delete pending expenses.')
+                return redirect('expenses:expense_detail', pk=pk)
+
+        try:
+            expense.delete()
+            messages.success(request, 'Expense deleted successfully.')
+        except Exception as e:
+            messages.error(request, 'Failed to delete expense.')
+            
+        return redirect('expenses:expense_list')

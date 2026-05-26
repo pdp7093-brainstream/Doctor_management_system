@@ -273,6 +273,7 @@ class ArchiveRecordsView(DoctorRequiredMixin, View):
     def post(self, request):
         data_type = request.POST.get('data_type')
         archive_age = request.POST.get('archive_age')
+        archive_type = request.POST.get('archiveType')
 
         today = timezone.now().date()
 
@@ -310,14 +311,69 @@ class ArchiveRecordsView(DoctorRequiredMixin, View):
             return redirect('reports_archive:archive_records')
 
         queryset, label = archive_config
-        archived_count = queryset.update(is_archived=True, archived_at=timezone.now())
 
-        messages.success(
-            request,
-            f'{archived_count} {label} archived successfully.'
-        )
+        # If export_archive is selected, generate CSV before archiving
+        if archive_type == 'export_archive':
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = f'attachment; filename="{label}_backup.csv"'
+            writer = csv.writer(response)
 
-        return redirect('reports_archive:archive_records')
+            if data_type == 'appointments':
+                # Headers for appointments
+                writer.writerow(['Patient Name', 'Date', 'Slot', 'Status'])
+                # Data
+                for appointment in queryset:
+                    writer.writerow([
+                        appointment_patient_name(appointment),
+                        appointment.appointment_date,
+                        appointment.time_slot,
+                        appointment.status,
+                    ])
+
+            elif data_type == 'bills':
+                # Headers for bills
+                writer.writerow(['Bill Number', 'Patient Name', 'Date', 'Total Amount', 'Status'])
+                # Data
+                for bill in queryset:
+                    writer.writerow([
+                        bill.bill_number,
+                        f"{bill.visit.patient.user.first_name} {bill.visit.patient.user.last_name}",
+                        bill.bill_date,
+                        bill.total,
+                        bill.payment_status,
+                    ])
+
+            elif data_type == 'expenses':
+                # Headers for expenses
+                writer.writerow(['Title', 'Category', 'Amount', 'Date', 'Status', 'Created By'])
+                # Data
+                for expense in queryset:
+                    writer.writerow([
+                        expense.title,
+                        expense.category.name,
+                        expense.amount,
+                        expense.expense_date,
+                        expense.status,
+                        expense.created_by.get_full_name() or expense.created_by.username,
+                    ])
+
+            # Now archive the records
+            archived_count = queryset.update(is_archived=True, archived_at=timezone.now())
+            
+            return response
+
+        # If archive_only is selected, just archive without exporting
+        elif archive_type == 'archive_only':
+            archived_count = queryset.update(is_archived=True, archived_at=timezone.now())
+            messages.success(
+                request,
+                f'{archived_count} {label} archived successfully.'
+            )
+            return redirect('reports_archive:archive_records')
+
+        else:
+            messages.error(request, 'Invalid archive type.')
+            return redirect('reports_archive:archive_records')
 
 
 class ArchivedAppointmentsView(DoctorRequiredMixin, View):

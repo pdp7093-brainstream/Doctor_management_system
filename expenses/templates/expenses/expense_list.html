@@ -86,7 +86,18 @@
                         </td>
                         <td class="py-3 text-center">
                             <div class="d-flex justify-content-center gap-2">
-                                <a href="{% url 'expenses:expense_detail' expense.id %}" class="btn btn-sm btn-light text-primary rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="View Details">
+                                {% if request.user.innermember.role == 'doctor' or expense.status == 'pending' and request.user == expense.created_by %}
+                                <a href="{% url 'expenses:edit_expense' expense.id %}" class="btn btn-sm btn-light text-primary rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Edit Expense">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <form method="post" action="{% url 'expenses:delete_expense' expense.id %}" class="d-inline delete-form m-0">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-sm btn-light text-danger rounded-circle delete-btn" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Delete Expense">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'expenses:expense_detail' expense.id %}" class="btn btn-sm btn-light text-info rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="View Details">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 {% if expense.attachment %}
@@ -135,5 +146,31 @@
             });
         });
     }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('.delete-form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
 </script>
 {% endblock %}

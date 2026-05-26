@@ -15,7 +15,18 @@
             </h2>
             <p class="text-muted small mb-0" style="margin-left: 2.5rem;">Detailed view of the expense</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 align-items-center">
+            {% if request.user.innermember.role == 'doctor' or expense.status == 'pending' and request.user == expense.created_by %}
+            <a href="{% url 'expenses:edit_expense' expense.id %}" class="btn btn-primary shadow-sm rounded-pill px-4" style="font-weight: 500;">
+                <i class="bi bi-pencil-square me-1"></i> Edit
+            </a>
+            <form method="post" action="{% url 'expenses:delete_expense' expense.id %}" class="d-inline delete-form m-0">
+                {% csrf_token %}
+                <button type="button" class="btn btn-danger shadow-sm rounded-pill px-4 delete-btn" style="font-weight: 500;">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            </form>
+            {% endif %}
             <a href="{% if request.GET.source == 'pending' %}{% url 'expenses:pending_expenses' %}{% else %}{% url 'expenses:expense_list' %}{% endif %}" class="btn btn-light shadow-sm rounded-pill px-4" style="font-weight: 500;">
                 <i class="bi bi-list-ul me-1"></i> {% if request.GET.source == 'pending' %}Back to Pending{% else %}Back to List{% endif %}
             </a>
@@ -126,4 +137,29 @@
     </div>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteBtns = document.querySelectorAll('.delete-btn');
+        deleteBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = this.closest('.delete-form');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+    });
+</script>
 {% endblock %}

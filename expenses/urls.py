@@ -12,6 +12,8 @@ urlpatterns = [
     path('add/', views.AddExpenseView.as_view(), name='add_expense'),
     path('pending/', views.pending_expenses, name='pending_expenses'),
     path('expense-detail/<int:pk>/', views.ExpenseDetailView.as_view(), name='expense_detail'),
+    path('edit-expense/<int:pk>/', views.EditExpenseView.as_view(), name='edit_expense'),
+    path('delete-expense/<int:pk>/', views.DeleteExpenseView.as_view(), name='delete_expense'),
 
     # Category
     path('categories/', views.CategoryListView.as_view(), name='category_list'),
