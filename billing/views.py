@@ -459,10 +459,10 @@ class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
         # Accept numeric id or hashid for bill
         from doctor import hashid as _hashid
         try:
-            if isinstance(bill_id, str) and bill_id.isdigit():
-                bid = int(bill_id)
+            if isinstance(hid, str) and hid.isdigit():
+                bid = int(hid)
             else:
-                bid = _hashid.decode_hash(bill_id)
+                bid = _hashid.decode_hash(hid)
         except Exception:
             bid = None
 

@@ -1,9 +1,6 @@
 from django.db import models
 from doctor.models import InnerMember,Medicine
 from accounts.models import *
-
-# Create your models here.
-
 from django.contrib.auth.models import User
 from accounts.models import Patient, FamilyMember
 
@@ -33,11 +30,13 @@ class Appointment(models.Model):
         ('phone', 'Phone'),
         ('video', 'Video'),
     ]
+    
     consultation_type = models.CharField(
         max_length=20,
         choices=CONSULTATION_CHOICES,
         default='in_person'
     )
+    
     is_archived = models.BooleanField(default=False)
     archived_at = models.DateTimeField(null=True,blank=True)
     status = models.CharField(

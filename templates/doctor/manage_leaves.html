@@ -96,7 +96,7 @@
                                         {{ leave.reason }}
                                     </td>
                                     <td class="text-end">
-                                        <form method="post" action="{% url 'doctor:delete_leave' leave.id %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this leave? Appointments will NOT be restored automatically.');">
+                                        <form method="post" action="{% url 'doctor:delete_leave' leave.id %}" style="display:inline;" class="delete-leave-form">
                                             {% csrf_token %}
                                             <button type="submit" class="btn btn-sm btn-delete-leave" title="Delete">
                                                 <i class="bi bi-trash"></i> Delete
@@ -129,6 +129,26 @@
         if (dateInput && !dateInput.min) {
             const today = new Date().toISOString().split('T')[0];
             dateInput.min = today;
+        }
+    });
+
+    document.addEventListener('submit', function(e) {
+        if (e.target.classList.contains('delete-leave-form')) {
+            e.preventDefault();
+            const form = e.target;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'Appointments cancelled due to this leave will NOT be restored automatically.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
         }
     });
 </script>
