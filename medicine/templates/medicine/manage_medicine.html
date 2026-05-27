@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% load static %}
 {% block title %}Manage Medicines{% endblock %}
 {% block content %}
@@ -129,11 +130,11 @@
                             </td>
                             <td onclick="event.stopPropagation();">
                                 <div class="d-flex align-items-center justify-content-center gap-2">
-                                    <a href="{% url 'medicine:edit_medicine' medicine.pk %}"
+                                                <a href="{% url 'medicine:edit_medicine' medicine.id|hid %}"
                                        class="btn btn-sm btn-edit-med" title="Edit">
                                         <i class="bi bi-pencil"></i><span> Edit</span>
                                     </a>
-                                    <form method="post" action="{% url 'medicine:delete_medicine' medicine.pk %}"
+                                    <form method="post" action="{% url 'medicine:delete_medicine' medicine.id|hid %}"
                                           style="display:inline;" class="deleteMedicineForm">
                                         {% csrf_token %}
                                         <button type="button" class="btn btn-sm btn-delete-med deleteMedicineBtn"

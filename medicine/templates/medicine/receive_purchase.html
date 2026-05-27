@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% load static %}
 {% block title %}Receive Purchase - Medicine Store{% endblock %}
 {% block content %}
@@ -22,7 +23,7 @@
                 {{ purchase.vendor.name }} - {{ purchase.date|date:"d M, Y" }}
             </p>
         </div>
-        <a href="{% url 'medicine:purchase_detail' purchase.id %}" class="patient-link-btn btn-sm">
+        <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}" class="patient-link-btn btn-sm">
             <i class="bi bi-arrow-left me-2"></i>Back to Purchase Detail
         </a>
     </div>
@@ -119,8 +120,8 @@
                     <i class="bi bi-check2-circle"></i>
                     <span>Receive Purchase</span>
                 </button>
-                <a href="{% url 'medicine:purchase_detail' purchase.id %}"
-                    class="btn btn-outline-secondary">
+                <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}"
+                        class="btn btn-outline-secondary">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </a>
             </div>

@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% load static %}
 {% block title %}Low Stock Alert - Medicine Store{% endblock %}
 {% block content %}
@@ -81,7 +82,7 @@
                         </td>
                         <td>
                             {% if v.is_ordered %}
-                            <a href="{% url 'medicine:purchase_detail' v.pending_purchase_id %}"
+                            <a href="{% url 'medicine:purchase_detail' v.pending_purchase_id|hid %}"
                                 class="btn btn-sm btn-warning">
                                 Ordered
                             </a>
