@@ -22,6 +22,7 @@ def get_bill_summary(visit):
     Summary of all bills for a visit - original + addon bills
     Returns payment tracking information
     """
+    
     # Original bill
     original_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
     addon_bills = Bill.objects.filter(visit=visit, is_addon=True, is_archived=False)
@@ -156,15 +157,37 @@ def generate_bill_from_visit(visit):
 class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
     login_url = 'doctor:login'
 
-    def get(self, request, visit_id):
-        visit = get_object_or_404(Visit, id=visit_id)
+    def get(self, request, hid):
+        # Prefer numeric IDs when path segment is digits, else decode hashid
+        from doctor import hashid as _hashid
+        try:
+            if isinstance(hid, str) and hid.isdigit():
+                vid = int(hid)
+            else:
+                vid = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Visit, id=0)
+
+        visit = get_object_or_404(Visit, id=vid)
 
         # Generate bill (so that any pending items will be billed)
         latest_bill = generate_bill_from_visit(visit)
 
         bill_id = request.GET.get('bill_id')
         if bill_id:
-            bill = get_object_or_404(Bill, id=bill_id, visit=visit, is_archived=False)
+            # bill_id may be a hashid or numeric id; prefer numeric when digits
+            try:
+                if bill_id.isdigit():
+                    bid = int(bill_id)
+                else:
+                    bid = _hashid.decode_hash(bill_id)
+            except Exception:
+                bid = None
+
+            if bid is None:
+                bill = None
+            else:
+                bill = get_object_or_404(Bill, id=bid, visit=visit, is_archived=False)
         else:
             bill = latest_bill
 
@@ -184,11 +207,33 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
             'bill_summary': bill_summary,
         })
 
-    def post(self, request, visit_id):
-        visit = get_object_or_404(Visit, id=visit_id)
+    def post(self, request, hid):
+        # Prefer numeric IDs when path segment is digits, else decode hashid
+        from doctor import hashid as _hashid
+        try:
+            if isinstance(hid, str) and hid.isdigit():
+                vid = int(hid)
+            else:
+                vid = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Visit, id=0)
+
+        visit = get_object_or_404(Visit, id=vid)
+
         bill_id = request.POST.get('bill_id')
         if bill_id:
-            bill = get_object_or_404(Bill, id=bill_id, visit=visit, is_archived=False)
+            try:
+                if bill_id.isdigit():
+                    bid = int(bill_id)
+                else:
+                    bid = _hashid.decode_hash(bill_id)
+            except Exception:
+                bid = None
+
+            if bid is None:
+                bill = None
+            else:
+                bill = get_object_or_404(Bill, id=bid, visit=visit, is_archived=False)
         else:
             bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
 
@@ -202,7 +247,9 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
         bill.subtotal       = bill.subtotal  # same rakho
         bill.save()  # GST + total auto calculate hoga
 
-        return redirect('billing:bill_detail', visit_id=visit_id)
+        # Redirect back to bill detail using encoded hid
+        from doctor import hashid as _hashid
+        return redirect('billing:bill_detail', hid=_hashid.encode_id(visit.id))
 
 
 @method_decorator(never_cache, name='dispatch')
@@ -408,8 +455,18 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
 class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
     login_url = 'doctor:login'
     
-    def post(self, request, bill_id):
-        bill = get_object_or_404(Bill, id=bill_id, is_archived=False)
+    def post(self, request, hid):
+        # Accept numeric id or hashid for bill
+        from doctor import hashid as _hashid
+        try:
+            if isinstance(bill_id, str) and bill_id.isdigit():
+                bid = int(bill_id)
+            else:
+                bid = _hashid.decode_hash(bill_id)
+        except Exception:
+            bid = None
+
+        bill = get_object_or_404(Bill, id=bid, is_archived=False)
         bill_number = bill.bill_number
         
         appointment = None
@@ -427,12 +484,32 @@ class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
 class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
     login_url = 'doctor:login'
 
-    def get(self, request, visit_id):
-        # Visit + Bill fetch karo
-        visit = get_object_or_404(Visit, id=visit_id)
+    def get(self, request, hid):
+        # Visit + Bill fetch karo. Accept numeric or hashid for visit and bill_id.
+        from doctor import hashid as _hashid
+        try:
+            if isinstance(visit_id, str) and visit_id.isdigit():
+                vid = int(visit_id)
+            else:
+                vid = _hashid.decode_hash(visit_id)
+        except Exception:
+            return get_object_or_404(Visit, id=0)
+
+        visit = get_object_or_404(Visit, id=vid)
         bill_id = request.GET.get('bill_id')
         if bill_id:
-            bill = get_object_or_404(Bill, id=bill_id, visit=visit, is_archived=False)
+            try:
+                if bill_id.isdigit():
+                    bid = int(bill_id)
+                else:
+                    bid = _hashid.decode_hash(bill_id)
+            except Exception:
+                bid = None
+
+            if bid is None:
+                bill = None
+            else:
+                bill = get_object_or_404(Bill, id=bid, visit=visit, is_archived=False)
         else:
             bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
 

@@ -21,6 +21,26 @@ import json
 import re
 
 
+def resolve_hid(hid):
+    """Resolve a path id that may be a numeric string or a hashid.
+    Prefer numeric ints when the value is all digits to preserve existing numeric URLs.
+    Returns integer id or None.
+    """
+    if not hid:
+        return None
+    # prefer plain numeric ids
+    if isinstance(hid, str) and hid.isdigit():
+        try:
+            return int(hid)
+        except Exception:
+            pass
+    try:
+        from doctor import hashid as _hashid
+        return _hashid.decode_hash(hid)
+    except Exception:
+        return None
+
+
 # ─────────────────────────────────────────
 # Search Patients + Family Members - FIXED
 # ─────────────────────────────────────────
@@ -220,7 +240,7 @@ def get_slots(request):
 
 # Cancel Appointment (User Side)
 @login_required
-def cancel_appointment(request, appointment_id):
+def cancel_appointment(request, hid):
     reason = ""
     if request.method == 'POST':
         try:
@@ -234,6 +254,8 @@ def cancel_appointment(request, appointment_id):
                 'success': False,
                 'error': 'Cancellation reason is required.'
             }, status=400)
+
+    appointment_id = resolve_hid(hid)
 
     appointment = get_object_or_404(
         Appointment,
@@ -285,9 +307,11 @@ def cancel_appointment(request, appointment_id):
 # Delete Appointment (Doctor Side)
 @login_required
 @role_required('doctor')
-def delete_appointment(request, appointment_id):
+def delete_appointment(request, hid):
     if request.method == 'POST':
-        appointment = get_object_or_404(Appointment, id=appointment_id,is_archived=False)
+        appointment_id_val = resolve_hid(hid)
+
+        appointment = get_object_or_404(Appointment, id=appointment_id_val, is_archived=False)
         appointment.delete()
         messages.success(request, 'Appointment deleted successfully.')
     return redirect('appointment:manage_appointments')
@@ -342,8 +366,10 @@ class Manage_appointments(View):
 
 
 @role_required('doctor')
-def appointment_detail_modal(request, id):
-    appointment = get_object_or_404(Appointment, id=id,is_archived=False)
+def appointment_detail_modal(request, hid):
+    appointment_id = resolve_hid(hid)
+
+    appointment = get_object_or_404(Appointment, id=appointment_id, is_archived=False)
     visit        = Visit.objects.filter(appointment=appointment).first()
     prescription = None
     prescription_items = []
@@ -601,19 +627,22 @@ class Book_appointment(View):
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
-    def get(self, request, appointment_id):
-        appointment = get_object_or_404(Appointment, id=appointment_id,is_archived=False)
+    def get(self, request, hid):
+        appointment_id = resolve_hid(hid)
+        appointment = get_object_or_404(Appointment, id=appointment_id, is_archived=False)
 
         visit, created = Visit.objects.get_or_create(
             appointment=appointment,
             defaults={
-                "patient"      : appointment.patient,
-                "doctor"       : appointment.doctor,
+                "patient": appointment.patient,
+                "doctor": appointment.doctor,
                 "visted_status": 'in_progress',
             }
         )
 
-        return redirect("appointment:prescription", visit_id=visit.id)
+        # redirect using encoded hid so URL shows short id
+        from doctor import hashid as _hashid
+        return redirect("appointment:prescription", hid=_hashid.encode_id(visit.id))
 
 
 # ─────────────────────────────────────────
@@ -639,7 +668,8 @@ class PrescriptionView(View):
 
         return morning, afternoon, evening, night, meal
 
-    def get(self, request, visit_id):
+    def get(self, request, hid):
+        visit_id = resolve_hid(hid)
         visit = get_object_or_404(Visit, id=visit_id)
         
         today = timezone.now().date()
@@ -704,7 +734,8 @@ class PrescriptionView(View):
         
         return errors
 
-    def post(self, request, visit_id):
+    def post(self, request, hid):
+        visit_id = resolve_hid(hid)
         visit = get_object_or_404(Visit, id=visit_id)
         visit.symptoms = request.POST.get("symptoms")
         visit.diagnosis = request.POST.get("diagnosis")
@@ -809,7 +840,8 @@ class PrescriptionView(View):
         appointment.save()
 
         if is_completing or new_bill_generated:
-            return redirect('billing:bill_detail', visit_id=visit.id)
+            from doctor import hashid as _hashid
+            return redirect('billing:bill_detail', hid=_hashid.encode_id(visit.id))
         
         if appointment.appointment_date == timezone.now().date():
             return redirect("doctor:dashboard")
@@ -822,8 +854,9 @@ class PrescriptionView(View):
 # ─────────────────────────────────────────
 
 @login_required(login_url='login')
-def appointment_detail(request, id):
-    appointment = get_object_or_404(Appointment, id=id, patient=request.user.patient,is_archived=False)
+def appointment_detail(request, hid):
+    appointment_id = resolve_hid(hid)
+    appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user.patient, is_archived=False)
 
     visit             = Visit.objects.filter(appointment=appointment).first()
     prescription      = None

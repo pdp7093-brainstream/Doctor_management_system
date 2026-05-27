@@ -99,8 +99,18 @@ def update_family_member(request, member_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
     
+    # decode possible hashid
+    from doctor import hashid as _hashid
     try:
-        member = get_object_or_404(FamilyMember, id=member_id, patient=request.user.patient)
+        if not str(member_id).isdigit():
+            member_id_val = _hashid.decode_hash(member_id)
+        else:
+            member_id_val = int(member_id)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid member id'})
+
+    try:
+        member = get_object_or_404(FamilyMember, id=member_id_val, patient=request.user.patient)
         data = json.loads(request.body)
         name = data.get('name', '').strip()
         relation = data.get('relation', '').strip()
@@ -136,8 +146,18 @@ def delete_family_member(request, member_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
     
+    # decode possible hashid
+    from doctor import hashid as _hashid
     try:
-        member = get_object_or_404(FamilyMember, id=member_id, patient=request.user.patient)
+        if not str(member_id).isdigit():
+            member_id_val = _hashid.decode_hash(member_id)
+        else:
+            member_id_val = int(member_id)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid member id'})
+
+    try:
+        member = get_object_or_404(FamilyMember, id=member_id_val, patient=request.user.patient)
         member.delete()
         return JsonResponse({'success': True})
     
@@ -421,8 +441,18 @@ def upload_profile_document(request):
 def delete_lab_document(request, doc_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
+    # decode possible hashid
+    from doctor import hashid as _hashid
+    try:
+        if not str(doc_id).isdigit():
+            doc_id_val = _hashid.decode_hash(doc_id)
+        else:
+            doc_id_val = int(doc_id)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid document id'}, status=400)
+
     # find without raising Http404 so we can return JSON
-    doc = LabDocument.objects.filter(id=doc_id).first()
+    doc = LabDocument.objects.filter(id=doc_id_val).first()
     if not doc:
         return JsonResponse({'success': False, 'error': 'LabDocument not found'}, status=404)
 
@@ -446,8 +476,18 @@ def delete_lab_document(request, doc_id):
 def delete_profile_document(request, doc_id):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
+    # decode possible hashid
+    from doctor import hashid as _hashid
+    try:
+        if not str(doc_id).isdigit():
+            doc_id_val = _hashid.decode_hash(doc_id)
+        else:
+            doc_id_val = int(doc_id)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid document id'}, status=400)
+
     # find without raising Http404 so we can return JSON
-    doc = PatientUploadedDocument.objects.filter(id=doc_id).first()
+    doc = PatientUploadedDocument.objects.filter(id=doc_id_val).first()
     if not doc:
         return JsonResponse({'success': False, 'error': 'PatientUploadedDocument not found'}, status=404)
 

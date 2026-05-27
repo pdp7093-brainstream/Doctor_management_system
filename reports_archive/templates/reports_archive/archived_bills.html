@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% block title %}Archived Bills{% endblock %}
 {% block content %}
 
@@ -71,7 +72,7 @@
                             <td><span class="badge bg-light text-dark">{{ bill.get_payment_status_display }}</span></td>
                             <td>{{ bill.archived_at|date:"d M Y, h:i A"|default:"Not recorded" }}</td>
                             <td class="text-center">
-                                <form action="{% url 'reports_archive:restore_bill' bill.id %}" method="POST" class="m-0 d-inline">
+                                <form action="{% url 'reports_archive:restore_bill' bill.id|hid %}" method="POST" class="m-0 d-inline">
                                     {% csrf_token %}
                                     <button type="button" class="btn btn-sm btn-success restore-btn">
                                         <i class="bi bi-arrow-counterclockwise me-1"></i> Restore

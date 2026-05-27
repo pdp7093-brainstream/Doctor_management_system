@@ -182,10 +182,10 @@
                             <!-- Action -->
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">
+                                    <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm btn-primary">
                                         <i class="bi bi-eye"></i><span> View</span>
                                     </a>
-                                    <form action="{% url 'appointment:delete_appointment' appointment.id %}" method="POST" class="m-0">
+                                    <form action="{% url 'appointment:delete_appointment' appointment.id|hid %}" method="POST" class="m-0">
                                         {% csrf_token %}
                                         <button type="button" class="btn btn-sm btn-danger px-2 delete-btn" title="Delete">
                                             <i class="bi bi-trash"></i>
