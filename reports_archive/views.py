@@ -424,8 +424,31 @@ class ArchivedAppointmentsView(DoctorRequiredMixin, View):
 
 
 class RestoreAppointmentView(DoctorRequiredMixin, View):
-    def post(self, request, appointment_id):
-        appointment = get_object_or_404(Appointment, id=appointment_id, is_archived=True)
+    def post(self, request, appointment_id=None, hid=None):
+        # support param name 'hid' from urls; normalize to id
+        from doctor import hashid as _hashid
+        aid = None
+        if hid:
+            try:
+                aid = _hashid.decode_hash(hid)
+            except Exception:
+                try:
+                    aid = int(hid)
+                except Exception:
+                    aid = None
+        else:
+            try:
+                aid = _hashid.decode_hash(appointment_id)
+            except Exception:
+                try:
+                    aid = int(appointment_id)
+                except Exception:
+                    aid = None
+
+        if aid is None:
+            return redirect('reports_archive:archived_appointments')
+
+        appointment = get_object_or_404(Appointment, id=aid, is_archived=True)
         appointment.is_archived = False
         appointment.archived_at = None
         appointment.save(update_fields=['is_archived', 'archived_at'])
@@ -451,8 +474,30 @@ class ArchivedBillsView(DoctorRequiredMixin, View):
 
 
 class RestoreBillView(DoctorRequiredMixin, View):
-    def post(self, request, bill_id):
-        bill = get_object_or_404(Bill, id=bill_id, is_archived=True)
+    def post(self, request, bill_id=None, hid=None):
+        from doctor import hashid as _hashid
+        bid = None
+        if hid:
+            try:
+                bid = _hashid.decode_hash(hid)
+            except Exception:
+                try:
+                    bid = int(hid)
+                except Exception:
+                    bid = None
+        else:
+            try:
+                bid = _hashid.decode_hash(bill_id)
+            except Exception:
+                try:
+                    bid = int(bill_id)
+                except Exception:
+                    bid = None
+
+        if bid is None:
+            return redirect('reports_archive:archived_bills')
+
+        bill = get_object_or_404(Bill, id=bid, is_archived=True)
         bill.is_archived = False
         bill.archived_at = None
         bill.save(update_fields=['is_archived', 'archived_at'])
@@ -479,8 +524,30 @@ class ArchivedExpensesView(DoctorRequiredMixin, View):
 
 
 class RestoreExpenseView(DoctorRequiredMixin, View):
-    def post(self, request, expense_id):
-        expense = get_object_or_404(Expense, id=expense_id, is_archived=True)
+    def post(self, request, expense_id=None, hid=None):
+        from doctor import hashid as _hashid
+        eid = None
+        if hid:
+            try:
+                eid = _hashid.decode_hash(hid)
+            except Exception:
+                try:
+                    eid = int(hid)
+                except Exception:
+                    eid = None
+        else:
+            try:
+                eid = _hashid.decode_hash(expense_id)
+            except Exception:
+                try:
+                    eid = int(expense_id)
+                except Exception:
+                    eid = None
+
+        if eid is None:
+            return redirect('reports_archive:archived_expenses')
+
+        expense = get_object_or_404(Expense, id=eid, is_archived=True)
         expense.is_archived = False
         expense.archived_at = None
         expense.save(update_fields=['is_archived', 'archived_at'])

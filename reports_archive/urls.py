@@ -12,7 +12,7 @@ urlpatterns = [
     path('archived-appointments/', views.ArchivedAppointmentsView.as_view(), name='archived_appointments'),
 
     path(
-        'archived-appointments/<int:appointment_id>/restore/',
+        'archived-appointments/<str:hid>/restore/',
         views.RestoreAppointmentView.as_view(),
         name='restore_appointment',
     ),
@@ -20,7 +20,7 @@ urlpatterns = [
     path('archived-bills/', views.ArchivedBillsView.as_view(), name='archived_bills'),
 
     path(
-        'archived-bills/<int:bill_id>/restore/',
+        'archived-bills/<str:hid>/restore/',
         views.RestoreBillView.as_view(),
         name='restore_bill',
     ),
@@ -28,7 +28,7 @@ urlpatterns = [
     path('archived-expenses/', views.ArchivedExpensesView.as_view(), name='archived_expenses'),
 
     path(
-        'archived-expenses/<int:expense_id>/restore/',
+        'archived-expenses/<str:hid>/restore/',
         views.RestoreExpenseView.as_view(),
         name='restore_expense',
     ),

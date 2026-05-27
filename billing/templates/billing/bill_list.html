@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% block title %}Billing - Doctor Dashboard{% endblock %}
 {% block content %}
 
@@ -213,18 +214,18 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons d-flex gap-1 justify-content-center align-items-center">
-                                        <a href="{% url 'billing:bill_detail' bill.visit.id %}?bill_id={{ bill.id }}"
+                                        <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}"
                                             class="action-btn btn btn-primary btn-sm"
                                             title="View Bill">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="{% url 'billing:print_bill' bill.visit.id %}"
+                                        <a href="{% url 'billing:print_bill' bill.visit.id|hid %}"
                                             target="_blank"
                                             class="action-btn btn btn-success btn-sm"
                                             title="Print Bill">
                                             <i class="bi bi-printer"></i>
                                         </a>
-                                        <form action="{% url 'billing:delete_bill' bill.id %}" method="POST" class="m-0">
+                                        <form action="{% url 'billing:delete_bill' bill.id|hid %}" method="POST" class="m-0">
                                             {% csrf_token %}
                                             <button type="button" class="action-btn btn btn-danger btn-sm delete-btn" title="Delete Bill">
                                                 <i class="bi bi-trash"></i>

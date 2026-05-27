@@ -1,4 +1,5 @@
 <!-- TABLE ROWS -->
+{% load hashid_tags %}
 <tbody id="tableBody">
     {% for appointment in appointments %}
     <tr>
@@ -29,7 +30,7 @@
             </span>
         </td>
         <td>
-            <a href="{% url 'appointment:start_visit' appointment.id %}" class="btn btn-sm btn-primary">Start</a>
+            <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm btn-primary">Start</a>
         </td>
     </tr>
     {% empty %}

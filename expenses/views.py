@@ -23,9 +23,15 @@ def pending_expenses(request):
     if request.method == 'POST':
         action = request.POST.get('action')
         expense_id = request.POST.get('expense_id')
-        
+        # decode possible hashid
+        from doctor import hashid as _hashid
         try:
-            expense = Expense.objects.get(id=expense_id, status='pending', is_archived=False)
+            try:
+                eid = _hashid.decode_hash(expense_id)
+            except Exception:
+                eid = int(expense_id)
+
+            expense = Expense.objects.get(id=eid, status='pending', is_archived=False)
             if action == 'approve':
                 expense.status = 'approved'
                 expense.approved_at = timezone.now()
@@ -254,6 +260,15 @@ class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, pk):
+        # accept hashid or numeric id
+        from doctor import hashid as _hashid
+        try:
+            if not str(pk).isdigit():
+                pk = _hashid.decode_hash(pk)
+            else:
+                pk = int(pk)
+        except Exception:
+            return redirect('expenses:expense_list')
 
         member = request.user.innermember
 
@@ -278,6 +293,16 @@ class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, pk):
+        # accept hashid or numeric id
+        from doctor import hashid as _hashid
+        try:
+            if not str(pk).isdigit():
+                pk = _hashid.decode_hash(pk)
+            else:
+                pk = int(pk)
+        except Exception:
+            return redirect('expenses:expense_list')
+
         member = request.user.innermember
         
         if member.role == 'doctor':
@@ -301,6 +326,16 @@ class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
         return render(request, 'expenses/edit_expense.html', context)
 
     def post(self, request, pk):
+        # accept hashid or numeric id
+        from doctor import hashid as _hashid
+        try:
+            if not str(pk).isdigit():
+                pk = _hashid.decode_hash(pk)
+            else:
+                pk = int(pk)
+        except Exception:
+            return redirect('expenses:expense_list')
+
         member = request.user.innermember
         
         if member.role == 'doctor':
@@ -338,6 +373,16 @@ class DeleteExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
     login_url = 'doctor:login'
 
     def post(self, request, pk):
+        # accept hashid or numeric id
+        from doctor import hashid as _hashid
+        try:
+            if not str(pk).isdigit():
+                pk = _hashid.decode_hash(pk)
+            else:
+                pk = int(pk)
+        except Exception:
+            return redirect('expenses:expense_list')
+
         member = request.user.innermember
         
         if member.role == 'doctor':

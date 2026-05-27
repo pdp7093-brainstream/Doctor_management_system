@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% block title %}Bill #{{ bill.bill_number }}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
@@ -22,7 +23,7 @@
                 </p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'billing:print_bill' visit.id %}?bill_id={{ bill.id }}" target="_blank"
+                <a href="{% url 'billing:print_bill' visit.id|hid %}?bill_id={{ bill.id|hid }}" target="_blank"
                     class="btn btn-outline-primary rounded-3 px-3 fw-semibold">
                     <i class="bi bi-printer me-2"></i>Print
                 </a>
@@ -36,7 +37,7 @@
 
         <form method="post">
             {% csrf_token %}
-            <input type="hidden" name="bill_id" value="{{ bill.id }}">
+            <input type="hidden" name="bill_id" value="{{ bill.id|hid }}">
 
             <div class="row g-4">
 
@@ -284,7 +285,7 @@
                             <div class="alert alert-info py-2 small mb-4 rounded-3 border-0">
                                 <strong><i class="bi bi-info-circle-fill me-1"></i> Addon Bill</strong><br>
                                 <span class="text-muted">Parent:</span> 
-                                <a href="{% url 'billing:bill_detail' visit.id %}?bill_id={{ bill.parent_bill.id }}" class="fw-bold text-decoration-none ms-1">
+                                <a href="{% url 'billing:bill_detail' visit.id|hid %}?bill_id={{ bill.parent_bill.id|hid }}" class="fw-bold text-decoration-none ms-1">
                                     {{ bill.parent_bill.bill_number }}
                                 </a>
                             </div>
@@ -294,7 +295,7 @@
                                 <div class="d-flex flex-column gap-2 mt-2">
                                     {% for addon in bill_summary.addon_bills %}
                                     <div class="d-flex justify-content-between align-items-center bg-white p-2 border rounded-2 shadow-sm">
-                                        <a href="{% url 'billing:bill_detail' visit.id %}?bill_id={{ addon.id }}" class="text-decoration-none fw-semibold small">
+                                        <a href="{% url 'billing:bill_detail' visit.id|hid %}?bill_id={{ addon.id|hid }}" class="text-decoration-none fw-semibold small">
                                             {{ addon.bill_number }}
                                         </a>
                                         <div class="d-flex align-items-center gap-2">
@@ -317,7 +318,7 @@
                                     <i class="bi bi-check-circle-fill fs-4"></i> Generate Bill
                                 </button>
                                 {% else %}
-                                <a href="{% url 'billing:print_bill' visit.id %}?bill_id={{ bill.id }}" target="_blank"
+                                <a href="{% url 'billing:print_bill' visit.id|hid %}?bill_id={{ bill.id|hid }}" target="_blank"
                                     class="btn btn-outline-secondary btn-sm rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all">
                                     <i class="bi bi-printer-fill fs-4"></i> Print Invoice
                                 </a>

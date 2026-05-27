@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% block title %}Archived Appointments{% endblock %}
 {% block content %}
 
@@ -140,7 +141,7 @@
                                 {% endif %}
                             </td>
                             <td class="text-center">
-                                <form action="{% url 'reports_archive:restore_appointment' appointment.id %}" method="POST" class="m-0 d-inline">
+                                <form action="{% url 'reports_archive:restore_appointment' appointment.id|hid %}" method="POST" class="m-0 d-inline">
                                     {% csrf_token %}
                                     <button type="button" class="btn btn-sm btn-success restore-btn">
                                         <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
