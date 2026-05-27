@@ -310,6 +310,30 @@ def cancel_appointment(request, hid):
 def delete_appointment(request, hid):
     if request.method == 'POST':
         appointment_id_val = resolve_hid(hid)
+        appointment = None
+        if appointment_id is not None:
+            appointment = Appointment.objects.filter(id=appointment_id, is_archived=False).first()
+
+        if not appointment:
+            # attempt to interpret the incoming hid as a visit id
+            try:
+                from doctor import hashid as _hashid
+                if isinstance(hid, str) and hid.isdigit():
+                    possible_vid = int(hid)
+                else:
+                    possible_vid = _hashid.decode_hash(hid)
+            except Exception:
+                possible_vid = None
+
+            if possible_vid:
+                visit_obj = Visit.objects.filter(id=possible_vid).select_related('appointment').first()
+                if visit_obj and visit_obj.appointment:
+                    # redirect to prescription for this visit
+                    from doctor import hashid as _hashid
+                    return redirect("appointment:prescription", hid=_hashid.encode_id(visit_obj.id))
+
+        # If still no appointment, raise 404
+        appointment = get_object_or_404(Appointment, id=getattr(appointment, 'id', None), is_archived=False)
 
         appointment = get_object_or_404(Appointment, id=appointment_id_val, is_archived=False)
         appointment.delete()
@@ -671,6 +695,14 @@ class PrescriptionView(View):
     def get(self, request, hid):
         visit_id = resolve_hid(hid)
         visit = get_object_or_404(Visit, id=visit_id)
+        # Canonicalize prescription URL to hashed visit id
+        try:
+            from doctor import hashid as _hashid
+            canonical = _hashid.encode_id(visit.id)
+            if hid != canonical:
+                return redirect('appointment:prescription', hid=canonical)
+        except Exception:
+            pass
         
         today = timezone.now().date()
         is_today = visit.appointment.appointment_date == today
@@ -711,7 +743,7 @@ class PrescriptionView(View):
             was_deducted=False
         )
         
-        for item in pending_items:
+        for item in pending_items:  
             variant = item.medicine_variant
             morning, afternoon, evening, night, _ = self.parse_dosage(item.dosage)
 
@@ -862,6 +894,17 @@ def appointment_detail(request, hid):
     prescription      = None
     prescription_items = []
 
+    # Ensure canonical (hashed) URL: if incoming hid doesn't match the
+    # encoded appointment id, redirect to the hashed URL so users always
+    # see the short `hid` in the browser.
+    try:
+        from doctor import hashid as _hashid
+        canonical = _hashid.encode_id(appointment.id)
+        if hid != canonical:
+            return redirect('appointment:appointment_detail', hid=canonical)
+    except Exception:
+        pass
+
     if visit:
         prescription = Prescription.objects.filter(visit=visit).first()
         if prescription:
@@ -876,3 +919,4 @@ def appointment_detail(request, hid):
         'prescription'      : prescription,
         'prescription_items': prescription_items,
     })
+
