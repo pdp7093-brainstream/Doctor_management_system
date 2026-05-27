@@ -23,7 +23,7 @@
         <div class="col-lg-6">
             <div class="card border-0 shadow-sm" style="border-radius: 16px; background: #ffffff;">
                 <div class="card-body p-4">
-                    <form method="post" action="{% url 'expenses:edit_category' category.id|hid %}">
+                    <form method="post" action="{% url 'expenses:edit_category' category.id %}">
                         {% csrf_token %}
                         <div class="form-group mb-4">
                             <label class="form-label" style="font-weight: 600; color: #4a5568; font-size: 0.9rem;">Category Name <span class="text-danger">*</span></label>

@@ -195,8 +195,8 @@ class EditCategoryView(LoginRequiredMixin, ExpenseAccessMixin,View):
 
         return render(request, 'expenses/edit_category.html',context)
 
-    def post(self,request, hid):
-        pk = hid
+    def post(self,request, pk):
+        pk = pk
         category = get_object_or_404(ExpenseCategory, id=pk)
 
         category.name = request.POST.get('name')
@@ -217,8 +217,8 @@ class DeleteCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
         
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, hid):
-        pk = hid
+    def post(self, request,pk):
+        pk = pk
         category = get_object_or_404(ExpenseCategory, id=pk)
         
         # Prevent deletion if expenses are linked to this category

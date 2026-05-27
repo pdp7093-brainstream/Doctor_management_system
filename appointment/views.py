@@ -629,8 +629,37 @@ class Book_appointment(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
     def get(self, request, hid):
+        # Resolve incoming identifier which may be a numeric PK or a hashid.
         appointment_id = resolve_hid(hid)
-        appointment = get_object_or_404(Appointment, id=appointment_id, is_archived=False)
+
+        appointment = None
+        if appointment_id is not None:
+            # Prefer active (not archived) appointment
+            appointment = Appointment.objects.filter(id=appointment_id, is_archived=False).first()
+            # Fallback to any appointment with that id (in case data is inconsistent)
+            if not appointment:
+                appointment = Appointment.objects.filter(id=appointment_id).first()
+
+        if not appointment:
+            # The incoming value might be a Visit id (numeric or hashid).
+            try:
+                from doctor import hashid as _hashid
+                if isinstance(hid, str) and hid.isdigit():
+                    possible_vid = int(hid)
+                else:
+                    possible_vid = _hashid.decode_hash(hid)
+            except Exception:
+                possible_vid = None
+
+            if possible_vid:
+                visit_obj = Visit.objects.filter(id=possible_vid).select_related('appointment').first()
+                if visit_obj and visit_obj.appointment:
+                    # Redirect to prescription for this visit (use hashed id)
+                    from doctor import hashid as _hashid
+                    return redirect("appointment:prescription", hid=_hashid.encode_id(visit_obj.id))
+
+        # If still no appointment found, raise 404
+        appointment = get_object_or_404(Appointment, id=getattr(appointment, 'id', None), is_archived=False)
 
         visit, created = Visit.objects.get_or_create(
             appointment=appointment,
