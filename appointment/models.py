@@ -19,26 +19,11 @@ class Appointment(models.Model):
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
 
-    family_member = models.ForeignKey(
-        FamilyMember,
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
+    family_member = models.ForeignKey(FamilyMember,on_delete=models.CASCADE,null=True,blank=True)
 
-    doctor = models.ForeignKey(
-        InnerMember,
-        on_delete=models.CASCADE,
-        null=True
-    )
+    doctor = models.ForeignKey(InnerMember,on_delete=models.CASCADE,null=True)
 
-    booked_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='booked_appointments'
-    )
+    booked_by = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='booked_appointments')
 
     appointment_date = models.DateField()
     time_slot = models.TimeField()
@@ -95,12 +80,6 @@ class Visit(models.Model):
     def __str__(self):
         return f"{self.patient.user.username} - {self.doctor.user.username} on {self.appointment.appointment_date}"
 
-# # Medicine 
-# class Medicine(models.Model):
-#     name = models.CharField(max_length=255)
-
-#     def __str__(self):
-#         return self.name
 
 
 # Prescription Model 
@@ -135,27 +114,11 @@ class LabDocument(models.Model):
 
 
 class PatientUploadedDocument(models.Model):
-    patient = models.ForeignKey(
-        Patient,
-        on_delete=models.CASCADE,
-        related_name='uploaded_documents'
-    )
-    family_member = models.ForeignKey(
-        FamilyMember,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='uploaded_documents'
-    )
+    patient = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='uploaded_documents')
+    family_member = models.ForeignKey(FamilyMember,on_delete=models.SET_NULL,null=True,blank=True,related_name='uploaded_documents')
     file = models.FileField(upload_to='patient_documents/%Y/%m/')
     original_name = models.CharField(max_length=255)
-    uploaded_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='patient_uploaded_documents'
-    )
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True,related_name='patient_uploaded_documents')
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -169,27 +132,20 @@ class PatientUploadedDocument(models.Model):
 class PrescriptionItem(models.Model):
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name="items")
 
-    medicine_variant = models.ForeignKey(   
-        'medicine.MedicineVariant',
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True
-    )
+    medicine_variant = models.ForeignKey('medicine.MedicineVariant', on_delete=models.CASCADE, null=True, blank=True)
     dosage = models.CharField(max_length=100)
     days = models.IntegerField()
     notes = models.TextField(blank=True, null=True)
     should_deduct    = models.BooleanField(default=True) 
     was_deducted = models.BooleanField(default=False)
     
-    # Billing tracking - यह track करता है कि item किस bill में शामिल हुआ
-    billed_on = models.DateTimeField(null=True, blank=True)  # जब bill बना
-    bill_id = models.IntegerField(null=True, blank=True)  # कौन सा bill
+    # Billing tracking - tracks which bill this item was included in
+    billed_on = models.DateTimeField(null=True, blank=True)  # when the bill was generated
+    bill_id = models.IntegerField(null=True, blank=True)  # which bill ID
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Prescription Item for {self.prescription.visit.patient.user.username} on {self.prescription.visit.appointment.appointment_date}"
-
-
 

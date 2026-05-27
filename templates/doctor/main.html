@@ -116,6 +116,14 @@
             </li>
 
             <li>
+                <a href="{% url 'doctor:manage_leaves' %}"
+                    class="{% if '/leaves' in request.path %}active{% endif %}">
+                    <i class="bi bi-calendar-x"></i>
+                    <span>Leaves</span>
+                </a>
+            </li>
+
+            <li>
                 <a href="#"
                     class="menu-toggle {% if 'patient' in request.path %}active expanded parent-active{% endif %}">
                     <div class="menu-toggle-label">

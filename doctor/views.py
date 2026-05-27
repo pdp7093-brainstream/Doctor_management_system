@@ -341,7 +341,7 @@ def delete_patient(request, hid):
 
     return redirect('doctor:manage_patients')
 
-# doctor/views.py — add_patient view replace karo
+# doctor/views.py - replaced add_patient view
 
 @never_cache
 @role_required('doctor')
@@ -363,7 +363,7 @@ def add_patient(request):
 
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
-        # ── Case 1: Parent selected → sirf FamilyMember banao ──────────
+        # ── Case 1: Parent selected → create only FamilyMember ──────────
         if parent_id and relation:
             try:
                 parent_patient = Patient.objects.get(id=parent_id)
@@ -392,7 +392,7 @@ def add_patient(request):
                
                 return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
-        # ── Case 2: No parent → Main Patient banao (User + Patient) ────
+        # ── Case 2: No parent → Create Main Patient (User + Patient) ────
         if not phone:
            
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
@@ -592,7 +592,7 @@ def reset_staff_password(request, member_id):
         if not password or len(password) < 6:
             return JsonResponse({'success': False, 'error': 'Password must be at least 6 characters.'})
 
-        # make_password → hashed format, set_password karta hai same kaam
+        # make_password uses hashed format, set_password does the same
         member.user.set_password(password)   # auto hashes
         member.user.save()
 
@@ -614,7 +614,7 @@ def delete_staff(request, member_id):
 
     try:
         member = get_object_or_404(InnerMember, id=member_id, role='biller')
-        member.user.delete()   # cascades → InnerMember bhi delete hoga
+        member.user.delete()   # cascades → InnerMember will also be deleted
         return JsonResponse({'success': True})
 
     except Exception as e:
@@ -715,9 +715,9 @@ def manage_leaves(request):
                 )
                 
                 if leave_type == 'first_half':
-                    overlapping = overlapping.filter(appointment_time__lt=lunch_time)
+                    overlapping = overlapping.filter(time_slot__lt=lunch_time)
                 elif leave_type == 'second_half':
-                    overlapping = overlapping.filter(appointment_time__gte=lunch_time)
+                    overlapping = overlapping.filter(time_slot__gte=lunch_time)
                 
                 count = overlapping.count()
                 overlapping.update(status='cancelled', cancellation_reason=reason)

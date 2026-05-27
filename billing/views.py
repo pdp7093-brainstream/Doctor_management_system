@@ -19,7 +19,7 @@ from django.utils.dateparse import parse_date
 
 def get_bill_summary(visit):
     """
-    Visit के सभी bills का summary - original + addon bills
+    Summary of all bills for a visit - original + addon bills
     Returns payment tracking information
     """
     # Original bill
@@ -46,10 +46,10 @@ def get_bill_summary(visit):
 
 def generate_bill_from_visit(visit):
     """
-    Visit complete होने पर automatically bill बनाओ
-    Prescription items से BillItems create करो
+    Automatically generate bill when visit is completed
+    Create BillItems from Prescription items
     
-    Addon bills भी create करेगा अगर नई medicines add हों
+    Will also create Addon bills if new medicines are added
     """
     from django.utils import timezone
     
@@ -58,12 +58,12 @@ def generate_bill_from_visit(visit):
     if not prescription:
         return None
 
-    # सभी items जो अभी तक billed नहीं हुई हैं
+    # All items that haven't been billed yet
     new_items = prescription.items.select_related(
         'medicine_variant__medicine'
     ).filter(billed_on__isnull=True)
 
-    # Check करो - क्या पहले से कोई bill है
+    # Check if a bill already exists
     existing_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
     
     clinic = ClinicSettings.get()
@@ -80,7 +80,7 @@ def generate_bill_from_visit(visit):
 
     if not new_items.exists():
         if not existing_bill:
-            # Original bill बनाओ (सिर्फ consultation fee)
+            # Create Original bill (only consultation fee)
             bill = Bill.objects.create(
                 visit=visit,
                 subtotal=0,
@@ -93,18 +93,18 @@ def generate_bill_from_visit(visit):
             return visit.bills.filter(is_archived=False).order_by('-created_at').first()
 
     if existing_bill:
-        # Addon bill बनाओ
+        # Create Addon bill
         bill = Bill.objects.create(
             visit=visit,
             subtotal=0,
             gst_percent=clinic.default_gst,
-            consultation_fee=0,  # Addon में consultation fee नहीं
+            consultation_fee=0,  # No consultation fee in Addon
             is_addon=True,
             parent_bill=existing_bill,
             notes="Prescription amendment/addon"
         )
     else:
-        # Original bill बनाओ
+        # Create Original bill
         bill = Bill.objects.create(
             visit=visit,
             subtotal=0,
@@ -142,7 +142,7 @@ def generate_bill_from_visit(visit):
 
         subtotal += total
         
-        # Item को mark करो - यह bill में add हो गई
+        # Mark the item as added to a bill
         item.billed_on = timezone.now()
         item.bill_id = bill.id
         item.save()
@@ -159,7 +159,7 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
     def get(self, request, visit_id):
         visit = get_object_or_404(Visit, id=visit_id)
 
-        # Bill generate करो (ताकि कोई pending items हों तो उनका bill बन जाए)
+        # Generate bill (so that any pending items will be billed)
         latest_bill = generate_bill_from_visit(visit)
 
         bill_id = request.GET.get('bill_id')
@@ -169,13 +169,13 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
             bill = latest_bill
 
         if not bill:
-            # अगर कोई बिल नहीं है तो original bill check करो
+            # If no bill exists, check for original bill
             bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
             if not bill:
                 messages.error(request, 'No prescription found for this visit!')
                 return redirect('appointment:manage_appointments')
 
-        # Bill summary - सभी bills के साथ
+        # Bill summary - with all bills
         bill_summary = get_bill_summary(visit)
 
         return render(request, 'billing/bill_detail.html', {

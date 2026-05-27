@@ -257,12 +257,12 @@ class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
         member = request.user.innermember
 
-        # Doctor sab expenses dekh sakta hai
+        # Doctor can see all expenses
         if member.role == 'doctor':
 
             expense = get_object_or_404(Expense.objects.select_related('category','created_by'), id=pk, is_archived=False)
 
-        # Biller sirf apna expense
+        # Biller can only see their own expenses
         else:
 
             expense = get_object_or_404(

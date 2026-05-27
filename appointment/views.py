@@ -178,6 +178,19 @@ def get_slots(request):
         slots.append(current_time)
         current += timedelta(minutes=interval)
 
+    # Apply Doctor Leave filtering
+    from doctor.models import DoctorLeave, InnerMember
+    doctor = InnerMember.objects.filter(role='doctor').first()
+    if doctor:
+        leave = DoctorLeave.objects.filter(doctor=doctor, date=selected_date).first()
+        if leave:
+            if leave.leave_type == 'full_day':
+                slots = []
+            elif leave.leave_type == 'first_half' and lunch_start:
+                slots = [s for s in slots if s >= lunch_start]
+            elif leave.leave_type == 'second_half' and lunch_start:
+                slots = [s for s in slots if s < lunch_start]
+
     booked_slots = Appointment.booked_slots().filter(
         appointment_date=selected_date,
         is_archived=False
@@ -228,6 +241,20 @@ def cancel_appointment(request, appointment_id):
         patient__user=request.user,
         is_archived=False
     )
+
+    # Check 24-hour cancellation deadline
+    appointment_datetime = datetime.combine(appointment.appointment_date, appointment.time_slot)
+    if timezone.is_naive(appointment_datetime):
+        appointment_datetime = timezone.make_aware(appointment_datetime)
+    
+    if (appointment_datetime - timezone.now()) < timedelta(hours=24):
+        if request.method == 'POST':
+            return JsonResponse({
+                'success': False,
+                'error': 'Cancellations are only allowed up to 24 hours before the appointment time.'
+            }, status=400)
+        messages.error(request, 'Cancellations are only allowed up to 24 hours before the appointment time.')
+        return redirect('dashboard')
 
     # Only pending appointment can be cancelled
     if appointment.status == 'pending':
@@ -404,6 +431,22 @@ class Add_appointment(View):
             messages.error(request, "This slot is already booked")
             return redirect('appointment:add_appointment')
 
+        # Doctor Leave Check
+        from doctor.models import DoctorLeave
+        from clinic.models import ClinicSettings
+        clinic = ClinicSettings.get()
+        leave = DoctorLeave.objects.filter(doctor=doctor, date=appointment_date_obj).first()
+        if leave:
+            if leave.leave_type == 'full_day':
+                messages.error(request, "Doctor is on leave on this date.")
+                return redirect('appointment:add_appointment')
+            elif leave.leave_type == 'first_half' and clinic.lunch_start and time_slot < clinic.lunch_start:
+                messages.error(request, "Doctor is on leave during this time.")
+                return redirect('appointment:add_appointment')
+            elif leave.leave_type == 'second_half' and clinic.lunch_start and time_slot >= clinic.lunch_start:
+                messages.error(request, "Doctor is on leave during this time.")
+                return redirect('appointment:add_appointment')
+
         # Create appointment
         Appointment.objects.create(
             patient          = patient,
@@ -497,6 +540,22 @@ class Book_appointment(View):
             )
 
             return redirect('appointment:appointment')
+
+        # Doctor Leave Check
+        from doctor.models import DoctorLeave
+        from clinic.models import ClinicSettings
+        clinic = ClinicSettings.get()
+        leave = DoctorLeave.objects.filter(doctor=doctor, date=appointment_date).first()
+        if leave:
+            if leave.leave_type == 'full_day':
+                messages.error(request, "Doctor is on leave on this date.")
+                return redirect('appointment:appointment')
+            elif leave.leave_type == 'first_half' and clinic.lunch_start and time_24 < clinic.lunch_start:
+                messages.error(request, "Doctor is on leave during this time.")
+                return redirect('appointment:appointment')
+            elif leave.leave_type == 'second_half' and clinic.lunch_start and time_24 >= clinic.lunch_start:
+                messages.error(request, "Doctor is on leave during this time.")
+                return redirect('appointment:appointment')
 
         # Family member resolve
         family_member = None
@@ -615,12 +674,6 @@ class PrescriptionView(View):
         })
 
     def reduce_stock(self, prescription):
-        """
-        Stock को सिर्फ उन items के लिए reduce करो जो:
-        1. should_deduct = True हों
-        2. was_deducted = False हों (अभी तक deduct नहीं हुई)
-        3. billed_on = NULL हों (नई items)
-        """
         from datetime import datetime
         errors = []
         pending_items = prescription.items.select_related('medicine_variant__medicine').filter(
@@ -731,8 +784,6 @@ class PrescriptionView(View):
             if stock_errors:
                 for err in stock_errors:
                     messages.warning(request, f"Low stock: {err}")
-            
-            # Bill को generate करो automatically
             try:
                 generate_bill_from_visit(visit)
                 messages.success(request, "Bill generated successfully!")
@@ -740,7 +791,6 @@ class PrescriptionView(View):
                 print("BILL GENERATION ERROR:", str(e))
                 messages.warning(request, f"Bill generation error: {str(e)}")
         else:
-            # अगर सिर्फ update है (complete नहीं), तब भी addon bill generate करो अगर नई items हैं
             new_bill_generated = False
             try:
                 new_bill = generate_bill_from_visit(visit)

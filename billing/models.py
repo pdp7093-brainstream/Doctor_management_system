@@ -24,14 +24,14 @@ class Bill(models.Model):
     bill_number    = models.CharField(max_length=20, unique=True)
     
     # Addon bill tracking
-    is_addon = models.BooleanField(default=False)  # True = यह addon/amendment bill है
+    is_addon = models.BooleanField(default=False)  # True = this is an addon/amendment bill
     parent_bill = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
         related_name='addons'
-    )  # Original bill का reference
+    )  # Reference to the original bill
     
     bill_date      = models.DateField(auto_now_add=True)
     consultation_fee = models.DecimalField(max_digits=10,decimal_places=2,default=0)

@@ -4,6 +4,7 @@ from .views import *
 
 
 app_name = 'appointment'
+
 urlpatterns = [
     path('',Book_appointment.as_view(),name='appointment'),
     path('get-slots/',views.get_slots,name='get_slots'),
