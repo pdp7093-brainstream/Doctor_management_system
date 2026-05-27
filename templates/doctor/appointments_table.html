@@ -30,7 +30,9 @@
             </span>
         </td>
         <td>
-            <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm btn-primary">Start</a>
+            <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm btn-primary">
+                {% if appointment.status == 'completed' %}View{% else %}Start{% endif %}
+            </a>
         </td>
     </tr>
     {% empty %}

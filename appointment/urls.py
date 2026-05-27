@@ -17,6 +17,7 @@ urlpatterns = [
     # Prescription Url 
     path('start-visit/<str:hid>/',StartVisitView.as_view(),name='start_visit'),
     path('prescription/<str:hid>/',PrescriptionView.as_view(),name='prescription'),
+    path('prescription/<str:hid>/print/', views.print_prescription, name='print_prescription'),
     path('detail-modal/<str:hid>/', views.appointment_detail_modal, name='appointment_detail_modal'),
     path('appointment/<str:hid>/', views.appointment_detail, name='appointment_detail'),
 

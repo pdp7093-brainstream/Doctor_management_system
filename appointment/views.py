@@ -1,6 +1,7 @@
 from medicine.models import *
 from .models import *
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import Http404
 from django.template.loader import render_to_string
 from django.views import View
 from doctor.decorators import role_required
@@ -875,4 +876,34 @@ def appointment_detail(request, hid):
         'visit'             : visit,
         'prescription'      : prescription,
         'prescription_items': prescription_items,
+    })
+
+# ─────────────────────────────────────────
+# Print Prescription View
+# ─────────────────────────────────────────
+
+@login_required(login_url='login')
+def print_prescription(request, hid):
+    visit_id = resolve_hid(hid)
+    # Both patient and doctor can print the prescription.
+    # Prioritize staff/doctor check first. If they are staff/doctor, they can print any visit.
+    if request.user.is_staff or request.user.is_superuser or hasattr(request.user, 'innermember'):
+        visit = get_object_or_404(Visit, id=visit_id)
+    elif hasattr(request.user, 'patient'):
+        visit = get_object_or_404(Visit, id=visit_id, appointment__patient=request.user.patient)
+    else:
+        raise Http404("You do not have permission to view this prescription.")
+        
+    prescription = get_object_or_404(Prescription, visit=visit)
+    prescription_items = prescription.items.select_related(
+        'medicine_variant', 'medicine_variant__medicine'
+    ).all()
+    
+    settings = ClinicSettings.get()
+    
+    return render(request, 'appointment/prescription_print.html', {
+        'visit': visit,
+        'prescription': prescription,
+        'prescription_items': prescription_items,
+        'clinic': settings,
     })

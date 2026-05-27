@@ -488,10 +488,10 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
         # Visit + Bill fetch karo. Accept numeric or hashid for visit and bill_id.
         from doctor import hashid as _hashid
         try:
-            if isinstance(visit_id, str) and visit_id.isdigit():
-                vid = int(visit_id)
+            if isinstance(hid, str) and hid.isdigit():
+                vid = int(hid)
             else:
-                vid = _hashid.decode_hash(visit_id)
+                vid = _hashid.decode_hash(hid)
         except Exception:
             return get_object_or_404(Visit, id=0)
 
