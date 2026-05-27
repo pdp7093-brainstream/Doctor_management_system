@@ -187,14 +187,16 @@ class EditCategoryView(LoginRequiredMixin, ExpenseAccessMixin,View):
         
         return super().dispatch(request,*args,**kwargs)
 
-    def get(self,request,pk):
+    def get(self,request,hid):
+        pk = hid
         category = get_object_or_404(ExpenseCategory, id=pk)
 
         context = {'category':category}
 
         return render(request, 'expenses/edit_category.html',context)
 
-    def post(self,request, pk):
+    def post(self,request, hid):
+        pk = hid
         category = get_object_or_404(ExpenseCategory, id=pk)
 
         category.name = request.POST.get('name')
@@ -215,7 +217,8 @@ class DeleteCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
         
         return super().dispatch(request, *args, **kwargs)
 
-    def post(self, request, pk):
+    def post(self, request, hid):
+        pk = hid
         category = get_object_or_404(ExpenseCategory, id=pk)
         
         # Prevent deletion if expenses are linked to this category
@@ -259,7 +262,8 @@ class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     login_url = 'doctor:login'
 
-    def get(self, request, pk):
+    def get(self, request, hid):
+        pk = hid
         # accept hashid or numeric id
         from doctor import hashid as _hashid
         try:
@@ -292,7 +296,8 @@ class ExpenseDetailView(LoginRequiredMixin, ExpenseAccessMixin, View):
 class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
     login_url = 'doctor:login'
 
-    def get(self, request, pk):
+    def get(self, request, hid):
+        pk = hid
         # accept hashid or numeric id
         from doctor import hashid as _hashid
         try:
@@ -325,7 +330,8 @@ class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
         }
         return render(request, 'expenses/edit_expense.html', context)
 
-    def post(self, request, pk):
+    def post(self, request, hid):
+        pk = hid
         # accept hashid or numeric id
         from doctor import hashid as _hashid
         try:
@@ -372,7 +378,8 @@ class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
 class DeleteExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
     login_url = 'doctor:login'
 
-    def post(self, request, pk):
+    def post(self, request, hid):
+        pk = hid
         # accept hashid or numeric id
         from doctor import hashid as _hashid
         try:

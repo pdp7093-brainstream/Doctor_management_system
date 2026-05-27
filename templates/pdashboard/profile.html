@@ -1,4 +1,5 @@
 {% load static %}
+{% load hashid_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -143,7 +144,7 @@
                                     <td>{{ member.bld_grop|default:"—" }}</td>
                                     <td>{{ member.phone|default:"—" }}</td>
                                     <td>
-                                        <button class="btn-icon btn-edit-fm" data-id="{{ member.id }}"
+                                        <button class="btn-icon btn-edit-fm" data-id="{{ member.id|hid }}"
                                             data-name="{{ member.name }}" data-relation="{{ member.relation }}"
                                             data-gender="{{ member.gender }}"
                                             data-dob="{% if member.dob %}{{ member.dob|date:'Y-m-d' }}{% endif %}"
@@ -151,7 +152,7 @@
                                             title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </button>
-                                        <button class="btn-icon btn-delete-fm ms-1" data-id="{{ member.id }}"
+                                        <button class="btn-icon btn-delete-fm ms-1" data-id="{{ member.id|hid }}"
                                             data-name="{{ member.name }}" title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -220,7 +221,7 @@
                                         <a href="{{ document.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm me-1" title="View" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="lab" data-id="{{ document.id }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                        <button type="button" class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="lab" data-id="{{ document.id|hid }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
@@ -307,7 +308,7 @@
                                         <a href="{{ document.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm me-1" title="View" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="profile" data-id="{{ document.id }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                        <button type="button" class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="profile" data-id="{{ document.id|hid }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>

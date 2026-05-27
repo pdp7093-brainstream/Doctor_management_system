@@ -94,7 +94,8 @@ def add_family_member(request):
 
 
 @login_required
-def update_family_member(request, member_id):
+def update_family_member(request, hid):
+    member_id = hid
     """Update family member via AJAX"""
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
@@ -141,7 +142,8 @@ def update_family_member(request, member_id):
 
 
 @login_required
-def delete_family_member(request, member_id):
+def delete_family_member(request, hid):
+    member_id = hid
     """Delete family member via AJAX"""
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
@@ -438,7 +440,8 @@ def upload_profile_document(request):
 
 
 @login_required
-def delete_lab_document(request, doc_id):
+def delete_lab_document(request, hid):
+    doc_id = hid
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
     # decode possible hashid
@@ -473,7 +476,8 @@ def delete_lab_document(request, doc_id):
 
 
 @login_required
-def delete_profile_document(request, doc_id):
+def delete_profile_document(request, hid):
+    doc_id = hid
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Invalid method'})
     # decode possible hashid

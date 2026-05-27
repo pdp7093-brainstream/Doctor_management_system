@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% load static %}
 {% load hashid_tags %}
 {% block title %}View Patient{% endblock %}
@@ -300,7 +301,7 @@
                                 <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary me-1" title="View" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="lab" data-id="{{ document.id }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="lab" data-id="{{ document.id|hid }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </td>
@@ -398,7 +399,7 @@
                             <td>{{ document.uploaded_at|date:"d M Y" }}</td>
                             <td>
                                 <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary me-1" title="View"><i class="bi bi-eye"></i></a>
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="profile" data-id="{{ document.id }}" title="Delete"><i class="bi bi-trash"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="profile" data-id="{{ document.id|hid }}" title="Delete"><i class="bi bi-trash"></i></button>
                             </td>
                         </tr>
                         {% endfor %}

@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load hashid_tags %}
 {% load static %}
 {% block title %}Expense Categories{% endblock %}
 {% block content %}
@@ -86,7 +87,7 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body p-4">
-                                                    <form method="post" action="{% url 'expenses:edit_category' category.id %}">
+                                                    <form method="post" action="{% url 'expenses:edit_category' category.id|hid %}">
                                                         {% csrf_token %}
                                                         <div class="form-group mb-4">
                                                             <label class="form-label d-block text-start" style="font-weight: 600; color: #4a5568; font-size: 0.9rem;">Category Name <span class="text-danger">*</span></label>
@@ -104,7 +105,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <form method="post" action="{% url 'expenses:delete_category' category.id %}" style="display: inline;" class="delete-category-form">
+                                    <form method="post" action="{% url 'expenses:delete_category' category.id|hid %}" style="display: inline;" class="delete-category-form">
                                         {% csrf_token %}
                                         <button type="button" class="btn btn-sm btn-light text-danger rounded-circle delete-category-btn" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Delete">
                                             <i class="bi bi-trash"></i>
