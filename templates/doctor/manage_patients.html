@@ -1,5 +1,6 @@
 {% extends "doctor/main.html" %}
 {% load static %}
+{% load hashid_tags %}
 {% block title %}Manage Patients{% endblock %}
 
 {% block content %}
@@ -135,32 +136,32 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <!-- View -->
-                                    <a href="{% url 'doctor:view_patient' p.type p.id %}" class="btn btn-sm btn-view-patient" title="View">
+                                    <a href="{% url 'doctor:view_patient' p.type p.id|hid %}" class="btn btn-sm btn-view-patient" title="View">
                                         <i class="bi bi-eye"></i><span class="d-none d-md-inline"> View</span>
                                     </a>
 
 
                                     <!-- Edit -->
                                     {% if p.type == 'main' %}
-                                    <a href="{% url 'doctor:edit_patient' p.id %}" class="btn btn-sm btn-edit-patient" title="Edit">
+                                    <a href="{% url 'doctor:edit_patient' p.id|hid %}" class="btn btn-sm btn-edit-patient" title="Edit">
                                         <i class="bi bi-pencil"></i><span class="d-none d-md-inline"> Edit</span>
                                     </a>
                                     {% else %}
-                                    <a href="{% url 'doctor:edit_family' p.id %}" class="btn btn-sm btn-edit-patient" title="Edit">
+                                    <a href="{% url 'doctor:edit_family' p.id|hid %}" class="btn btn-sm btn-edit-patient" title="Edit">
                                         <i class="bi bi-pencil"></i><span class="d-none d-md-inline"> Edit</span>
                                     </a>
                                     {% endif %}
 
                                     <!-- Delete -->
                                     {% if p.type == 'main' %}
-                                    <form method="post" action="{% url 'doctor:delete_patient' p.id %}" style="display:inline;">
+                                    <form method="post" action="{% url 'doctor:delete_patient' p.id|hid %}" style="display:inline;">
                                         {% csrf_token %}
                                         <button type="button" class="btn btn-sm btn-delete-patient delete-btn" data-type="patient" title="Delete">
                                             <i class="bi bi-trash"></i><span class="d-none d-md-inline"> Delete</span>
                                         </button>
                                     </form>
                                     {% else %}
-                                    <form method="post" action="{% url 'doctor:delete_family' p.id %}" style="display:inline;">
+                                    <form method="post" action="{% url 'doctor:delete_family' p.id|hid %}" style="display:inline;">
                                         {% csrf_token %}
                                         <button type="button" class="btn btn-sm btn-delete-patient delete-btn" data-type="family member" title="Delete">
                                             <i class="bi bi-trash"></i><span class="d-none d-md-inline"> Delete</span>

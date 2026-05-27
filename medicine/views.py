@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from doctor import hashid as _hashid
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
@@ -110,8 +111,12 @@ class AddMedicineView(LoginRequiredMixin, View):
 
 class DeleteMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    def post(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Medicine, id=0)
 
-    def post(self, request, pk):
         medicine = get_object_or_404(Medicine, pk=pk)
         medicine.delete()
         return redirect("medicine:manage_medicine")
@@ -119,8 +124,12 @@ class DeleteMedicineView(LoginRequiredMixin, View):
 
 class EditMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    def get(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Medicine, id=0)
 
-    def get(self, request, pk):
         medicine = get_object_or_404(Medicine, pk=pk)
         medicine_types = Medicine.MEDICINE_TYPE
         unit_choices = MedicineVariant.UNIT_CHOICES
@@ -133,8 +142,12 @@ class EditMedicineView(LoginRequiredMixin, View):
                 "unit_choices": unit_choices,
             },
         )
+    def post(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Medicine, id=0)
 
-    def post(self, request, pk):
         medicine = get_object_or_404(Medicine, pk=pk)
         medicine.name = request.POST.get("name", "").strip()
         medicine.short_name = request.POST.get("short_name", "").strip()
@@ -425,12 +438,20 @@ class AddVendorView(LoginRequiredMixin, View):
 
 class EditVendorView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    def get(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Vendor, id=0)
 
-    def get(self, request, pk):
         vendor = get_object_or_404(Vendor, pk=pk)
         return render(request, "medicine/edit_vendor.html", {"vendor": vendor})
+    def post(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Vendor, id=0)
 
-    def post(self, request, pk):
         vendor = get_object_or_404(Vendor, pk=pk)
         vendor.name = request.POST.get("name", "").strip()
         vendor.phone = request.POST.get("phone", "").strip()
@@ -444,8 +465,12 @@ class EditVendorView(LoginRequiredMixin, View):
 
 class DeleteVendorView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    def post(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Vendor, id=0)
 
-    def post(self, request, pk):
         vendor = get_object_or_404(Vendor, pk=pk)
         name = vendor.name
         vendor.delete()
@@ -507,8 +532,12 @@ class PurchaseListView(LoginRequiredMixin, View):
 
 class DeletePurchaseView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    def post(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Purchase, id=0)
 
-    def post(self, request, pk):
         purchase = get_object_or_404(Purchase, pk=pk)
         purchase.delete()
         messages.success(request, "Purchase deleted successfully.")
@@ -552,7 +581,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
 
                     return redirect(
                         "medicine:purchase_detail",
-                        pk=pending_purchase.pk,
+                        hid=_hashid.encode_id(pending_purchase.pk),
                     )
 
         return render(
@@ -615,7 +644,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
 
             return redirect(
                 "medicine:purchase_detail",
-                pk=pending_item.purchase_id,
+                hid=_hashid.encode_id(pending_item.purchase_id),
             )
 
         # Purchase Create
@@ -711,7 +740,11 @@ class AddPurchaseView(LoginRequiredMixin, View):
 class ReceivePurchaseView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
-    def get(self, request, pk):
+    def get(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Purchase, id=0)
 
         purchase = get_object_or_404(
             Purchase.objects.select_related("vendor").prefetch_related(
@@ -723,7 +756,7 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
         # Already received validation
         if purchase.status == "received":
             messages.warning(request, "Purchase already received.")
-            return redirect("medicine:purchase_detail", pk=pk)
+            return redirect("medicine:purchase_detail", hid=_hashid.encode_id(pk))
 
         context = {
             "purchase": purchase,
@@ -735,7 +768,11 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
             context,
         )
 
-    def post(self, request, pk):
+    def post(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Purchase, id=0)
 
         purchase = get_object_or_404(
             Purchase.objects.prefetch_related(
@@ -747,7 +784,7 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
         # Prevent duplicate receive
         if purchase.status == "received":
             messages.warning(request, "Purchase already received.")
-            return redirect("medicine:purchase_detail", pk=pk)
+            return redirect("medicine:purchase_detail", hid=_hashid.encode_id(pk))
 
         item_ids = request.POST.getlist("item_id[]")
 
@@ -889,13 +926,17 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
 
         return redirect(
             "medicine:purchase_detail",
-            pk=purchase.pk,
+            hid=_hashid.encode_id(purchase.pk),
         )
 
 class PurchaseDetailView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    def get(self, request, hid):
+        try:
+            pk = _hashid.decode_hash(hid)
+        except Exception:
+            return get_object_or_404(Purchase, id=0)
 
-    def get(self, request, pk):
         purchase = get_object_or_404(
             Purchase.objects.select_related("vendor").prefetch_related(
                 "items__medicine_variant__medicine"

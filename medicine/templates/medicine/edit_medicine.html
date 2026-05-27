@@ -1,5 +1,6 @@
 {% extends "doctor/main.html" %}
 {% load static %}
+{% load hashid_tags %}
 {% block title %}Edit Medicine - Doctor Dashboard{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
@@ -15,7 +16,7 @@
         </div>
 
         <div class="patient-form-card">
-            <form method="POST" action="{% url 'medicine:edit_medicine' medicine.pk %}" class="patient-form-grid">
+            <form method="POST" action="{% url 'medicine:edit_medicine' medicine.id|hid %}" class="patient-form-grid">
                 {% csrf_token %}
 
                 <!-- Row 1: Medicine Name + Short Name -->

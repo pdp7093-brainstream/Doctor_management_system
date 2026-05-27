@@ -10,6 +10,7 @@ from doctor.mixins import ExpenseAccessMixin
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
+from django.db import IntegrityError
 
 @never_cache
 @login_required(login_url='doctor:login')
@@ -82,23 +83,26 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request):
-
-        return render(request,'expenses/add_category.html')
+        # The add-category form is available on the category list page.
+        # Redirect there to avoid TemplateDoesNotExist when visiting /expenses/categories/add/
+        return redirect('expenses:category_list')
 
     def post(self, request):
 
+        name = request.POST.get('name')
+        is_active = request.POST.get('is_active') == 'on'
         try:
-
-            name = request.POST.get('name')
-            is_active = request.POST.get('is_active') == 'on'
             ExpenseCategory.objects.create(name=name, is_active=is_active)
-
+            messages.success(request, 'Category created successfully.')
             return redirect('expenses:category_list')
-
+        except IntegrityError:
+            # Duplicate category name
+            messages.error(request, 'A category with this name already exists.')
+            return redirect('expenses:category_list')
         except Exception as e:
-
             print("Category Create Error:", e)
-            return redirect('expenses:add_category')
+            messages.error(request, 'Failed to create category.')
+            return redirect('expenses:category_list')
 
 @method_decorator(never_cache, name='dispatch')
 class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):

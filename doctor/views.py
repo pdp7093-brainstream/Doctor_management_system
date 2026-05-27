@@ -191,8 +191,15 @@ def manage_patients(request):
 
 @never_cache
 @role_required('doctor')
-def view_patient_dynamic(request, type, id):
+def view_patient_dynamic(request, type, hid):
 
+    # decode hashed id into integer id
+    from . import hashid as _hashid
+    try:
+        id = _hashid.decode_hash(hid)
+    except Exception:
+        # invalid hash → 404
+        return get_object_or_404(Patient, id=0)  # will raise 404
 
     if type == 'main':
         patient = get_object_or_404(Patient, id=id)
@@ -264,7 +271,13 @@ def view_patient_dynamic(request, type, id):
     
 @never_cache
 @role_required('doctor')
-def edit_patient(request, patient_id):
+def edit_patient(request, hid):
+    from . import hashid as _hashid
+    try:
+        patient_id = _hashid.decode_hash(hid)
+    except Exception:
+        return get_object_or_404(Patient, id=0)
+
     patient = get_object_or_404(Patient, pk=patient_id)
 
     if request.method == 'POST':
@@ -314,7 +327,13 @@ def edit_patient(request, patient_id):
 
 @never_cache
 @role_required('doctor')
-def delete_patient(request, patient_id):
+def delete_patient(request, hid):
+    from . import hashid as _hashid
+    try:
+        patient_id = _hashid.decode_hash(hid)
+    except Exception:
+        return get_object_or_404(Patient, id=0)
+
     patient = get_object_or_404(Patient, pk=patient_id)
 
     if request.method == 'POST':
@@ -603,8 +622,14 @@ def delete_staff(request, member_id):
 
 @never_cache
 @role_required('doctor')
-def edit_family(request, id):
-    member = get_object_or_404(FamilyMember, id=id)
+def edit_family(request, hid):
+    from . import hashid as _hashid
+    try:
+        member_id = _hashid.decode_hash(hid)
+    except Exception:
+        return get_object_or_404(FamilyMember, id=0)
+
+    member = get_object_or_404(FamilyMember, id=member_id)
 
     if request.method == 'POST':
         name     = request.POST.get('name', '').strip()
@@ -639,8 +664,14 @@ def edit_family(request, id):
 
 @never_cache
 @role_required('doctor')
-def delete_family(request, id):
-    member = get_object_or_404(FamilyMember, id=id)
+def delete_family(request, hid):
+    from . import hashid as _hashid
+    try:
+        member_id = _hashid.decode_hash(hid)
+    except Exception:
+        return get_object_or_404(FamilyMember, id=0)
+
+    member = get_object_or_404(FamilyMember, id=member_id)
 
     if request.method == 'POST':
         member.delete()

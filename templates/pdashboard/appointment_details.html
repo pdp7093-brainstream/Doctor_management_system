@@ -24,7 +24,7 @@
     <div class="detail-card mb-4">
 
         <!-- Appointment Info -->
-        <div class="detail-section">
+        <div class="detail-section">    
             <div class="section-title"><i class="fas fa-calendar-alt"></i> Appointment Info
             </div>
             <div class="info-grid">
@@ -174,7 +174,11 @@
                         {% if appointment.doctor and appointment.doctor.user %}
                             Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}
                         {% else %}
-                            <span style="color:var(--muted);">Not assigned yet</span>
+                            {% if super_admin %}
+                                Dr. {{ super_admin.username }}
+                            {% else %}
+                                —
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>
