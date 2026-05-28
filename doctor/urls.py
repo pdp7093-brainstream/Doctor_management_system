@@ -20,7 +20,7 @@ urlpatterns = [
     path('family/delete/<str:hid>/', views.delete_family, name='delete_family'),
     
     path('billing/',views.billing,name='billing'),
-    path('appointment/cancel/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+    path('appointment/cancel/<str:hid>/', views.cancel_appointment, name='cancel_appointment'),
 
     path('staff/',views.staff_view,name='staff'), 
     path('staff/add/',views.add_staff,name='add_staff'),

@@ -23,23 +23,24 @@ import re
 
 
 def resolve_hid(hid):
-    """Resolve a path id that may be a numeric string or a hashid.
-    Prefer numeric ints when the value is all digits to preserve existing numeric URLs.
+    """Resolve a path id that is a hashid.
     Returns integer id or None.
     """
     if not hid:
         return None
-    # prefer plain numeric ids
+    try:
+        from doctor import hashid as _hashid
+        return _hashid.decode_hash(str(hid))
+    except Exception:
+        pass
+
+    # fallback just in case
     if isinstance(hid, str) and hid.isdigit():
         try:
             return int(hid)
         except Exception:
             pass
-    try:
-        from doctor import hashid as _hashid
-        return _hashid.decode_hash(hid)
-    except Exception:
-        return None
+    return None
 
 
 # ─────────────────────────────────────────

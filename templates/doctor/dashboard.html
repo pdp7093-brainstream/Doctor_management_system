@@ -167,7 +167,7 @@
                                 <button
                                     type="button"
                                     class="btn btn-danger btn-sm btn-cancel-appointment"
-                                    data-url="{% url 'doctor:cancel_appointment' appointment.id %}"
+                                    data-url="{% url 'doctor:cancel_appointment' appointment.id|hid %}"
                                 >
                                     <i class="bi bi-x-circle me-1"></i>Cancel
                                 </button>
