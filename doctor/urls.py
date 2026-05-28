@@ -33,5 +33,7 @@ urlpatterns = [
     path("leaves/<int:pk>/delete/", views.delete_leave, name="delete_leave"),
 
     path('settings/', RedirectView.as_view(pattern_name='clinic:settings', permanent=False), name='settings'),
+    path('old-data/', views.old_data_upload, name='old_data_upload'),
+    path('old-data/delete/<str:hid>/', views.delete_old_document, name='delete_old_document'),
 
 ]

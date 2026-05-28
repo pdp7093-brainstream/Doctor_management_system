@@ -141,7 +141,7 @@
                                         {{ appointment.family_member.name }}
                                     {% else %}
                                     {{ appointment.patient.user.first_name }}
-                                        {% if appointment.patient.user.last_name %} 
+                                        {% if appointment.patient.user.last_name %}
                                             {{ appointment.patient.user.last_nam}}
                                         {% endif %}
                                     {% endif %}
@@ -166,9 +166,9 @@
                             <!-- Booked By -->
                             <td style="color:#6c757d; font-size:13px;">
                                 {{ appointment.patient.user.first_name }}
-                                {% if appointment.patient.user.last_name %}
-                                    {{ appointment.patient.user.last_name }}
-                                {% endif %}
+                                    {% if appointment.patient.user.last_name %}
+                                        {{ appointment.patient.user.last_name }}
+                                    {% endif %}
                             </td>
 
                             <td style="font-size:0.9rem;">{{ appointment.appointment_date }}</td>
@@ -235,7 +235,7 @@
                         <span class="text-muted"> of {{ page_obj.paginator.count }} appointments</span>
                     </span>
                     <span class="text-muted">
-                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages}}</strong>
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{page_obj.paginator.num_pages}}</strong>
                     </span>
                 </div>
                 <nav aria-label="Appointment pagination" class="w-100">

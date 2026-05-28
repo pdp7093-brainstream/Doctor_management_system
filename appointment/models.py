@@ -148,3 +148,18 @@ class PrescriptionItem(models.Model):
     def __str__(self):
         return f"Prescription Item for {self.prescription.visit.patient.user.username} on {self.prescription.visit.appointment.appointment_date}"
 
+class PatientOldDocument(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='old_documents')
+    family_member = models.ForeignKey(FamilyMember, on_delete=models.SET_NULL, null=True, blank=True, related_name='old_documents')
+    file = models.FileField(upload_to='old_patient_data/%Y/%m/')
+    original_name = models.CharField(max_length=255)
+    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='uploaded_old_documents')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+    class Meta:
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        owner = self.family_member.name if self.family_member else (self.patient.user.get_full_name() or self.patient.user.username)
+        return f"{self.original_name} - {owner} (Old Data)"
