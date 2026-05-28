@@ -84,7 +84,7 @@ class DashboardView(View):
 @never_cache
 @login_required
 @require_POST
-def cancel_appointment(request, appointment_id):
+def cancel_appointment(request, hid):
     try:
         payload = json.loads(request.body or "{}")
     except json.JSONDecodeError:
@@ -93,6 +93,16 @@ def cancel_appointment(request, appointment_id):
     reason = (payload.get('cancellation_reason') or "").strip()
     if not reason:
         return JsonResponse({'success': False, 'error': 'Cancellation reason is required.'}, status=400)
+
+    try:
+        from doctor import hashid as _hashid
+        appointment_id = _hashid.decode_hash(str(hid))
+    except Exception:
+        # Fallback to plain id if it's purely digits and decoding failed, or return error
+        if isinstance(hid, str) and hid.isdigit():
+            appointment_id = int(hid)
+        else:
+            return JsonResponse({'success': False, 'error': 'Invalid appointment ID.'}, status=400)
 
     doctor = InnerMember.objects.get(user=request.user)
     appointment = get_object_or_404(

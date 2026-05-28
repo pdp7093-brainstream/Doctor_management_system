@@ -3,6 +3,7 @@
 {% block title %}Manage Appointments{% endblock %}
 {% block content %}
 
+
 <style>
     /* View button — matches staff.html btn-edit-staff style */
     .btn-view-appt {
@@ -54,7 +55,7 @@
             <h2 class="page-title mb-1">Manage Appointments</h2>
             <p class="text-muted small mb-0">Search, filter, and manage all patient visits.</p>
         </div>
-        
+
         <a href="{% url 'appointment:add_appointment' %}" class="action-btn">
             <i class="bi bi-plus-lg"></i> Add Appointment
         </a>
@@ -71,7 +72,8 @@
                     <label class="form-label" style="font-size:0.85rem; font-weight:600;">Search Patient</label>
                     <div class="input-icon-wrap">
                         <i class="bi bi-search"></i>
-                        <input type="text" id="search" class="form-control" placeholder="Name or phone..." value="{{ search }}">
+                        <input type="text" id="search" class="form-control" placeholder="Name or phone..."
+                            value="{{ search }}">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -86,11 +88,11 @@
                     <div class="input-icon-wrap">
                         <i class="bi bi-filter"></i>
                         <select id="appointmentStatus" class="form-select">
-                            <option value="all"       {% if status == "all" %}selected{% endif %}>All</option>
-                            <option value="pending"   {% if status == "pending" %}selected{% endif %}>Pending</option>
-                            <option value="confirmed" {% if status == "confirmed" %}selected{% endif %}>Confirmed</option>
-                            <option value="cancelled" {% if status == "cancelled" %}selected{% endif %}>Cancelled</option>
-                            <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
+                            <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
+                            <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="confirmed" {% if status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                            <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
                         </select>
                     </div>
                 </div>
@@ -138,8 +140,10 @@
                                     {% if appointment.family_member %}
                                         {{ appointment.family_member.name }}
                                     {% else %}
-                                        {{ appointment.patient.user.first_name }}
-                                        {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                    {{ appointment.patient.user.first_name }}
+                                        {% if appointment.patient.user.last_name %} 
+                                            {{ appointment.patient.user.last_nam}}
+                                        {% endif %}
                                     {% endif %}
                                 </span>
                             </td>
@@ -147,20 +151,24 @@
                             <!-- Relation -->
                             <td>
                                 {% if appointment.family_member %}
-                                    <span class="badge bg-primary bg-opacity-10 text-primary" style="font-weight:600; font-size:0.78rem;">
-                                        {{ appointment.family_member.relation }}
-                                    </span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary"
+                                    style="font-weight:600; font-size:0.78rem;">
+                                    {{ appointment.family_member.relation }}
+                                </span>
                                 {% else %}
-                                    <span class="badge bg-success bg-opacity-10 text-success" style="font-weight:600; font-size:0.78rem;">
-                                        Self
-                                    </span>
+                                <span class="badge bg-success bg-opacity-10 text-success"
+                                    style="font-weight:600; font-size:0.78rem;">
+                                    Self
+                                </span>
                                 {% endif %}
                             </td>
 
                             <!-- Booked By -->
                             <td style="color:#6c757d; font-size:13px;">
                                 {{ appointment.patient.user.first_name }}
-                                {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
+                                {% if appointment.patient.user.last_name %}
+                                    {{ appointment.patient.user.last_name }}
+                                {% endif %}
                             </td>
 
                             <td style="font-size:0.9rem;">{{ appointment.appointment_date }}</td>
@@ -169,25 +177,32 @@
                             <!-- Status Badge -->
                             <td>
                                 {% if appointment.status == 'pending' %}
-                                    <span class="badge bg-warning bg-opacity-25 text-warning" style="font-weight:600;">Pending</span>
+                                <span class="badge bg-warning bg-opacity-25 text-warning"
+                                    style="font-weight:600;">Pending</span>
                                 {% elif appointment.status == 'confirmed' %}
-                                    <span class="badge bg-info bg-opacity-25 text-info" style="font-weight:600;">Confirmed</span>
+                                <span class="badge bg-info bg-opacity-25 text-info"
+                                    style="font-weight:600;">Confirmed</span>
                                 {% elif appointment.status == 'cancelled' %}
-                                    <span class="badge bg-danger bg-opacity-25 text-danger" style="font-weight:600;">Cancelled</span>
+                                <span class="badge bg-danger bg-opacity-25 text-danger"
+                                    style="font-weight:600;">Cancelled</span>
                                 {% elif appointment.status == 'completed' %}
-                                    <span class="badge bg-success bg-opacity-25 text-success" style="font-weight:600;">Completed</span>
+                                <span class="badge bg-success bg-opacity-25 text-success"
+                                    style="font-weight:600;">Completed</span>
                                 {% endif %}
                             </td>
 
                             <!-- Action -->
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm btn-primary">
+                                    <a href="{% url 'appointment:start_visit' appointment.id|hid %}"
+                                        class="btn btn-sm btn-primary">
                                         <i class="bi bi-eye"></i><span> View</span>
                                     </a>
-                                    <form action="{% url 'appointment:delete_appointment' appointment.id|hid %}" method="POST" class="m-0">
+                                    <form action="{% url 'appointment:delete_appointment' appointment.id|hid %}"
+                                        method="POST" class="m-0">
                                         {% csrf_token %}
-                                        <button type="button" class="btn btn-sm btn-danger px-2 delete-btn" title="Delete">
+                                        <button type="button" class="btn btn-sm btn-danger px-2 delete-btn"
+                                            title="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -198,7 +213,8 @@
                         {% empty %}
                         <tr>
                             <td colspan="7" class="text-center text-muted py-5">
-                                <i class="bi bi-calendar-x" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                                <i class="bi bi-calendar-x"
+                                    style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
                                 No appointments found.
                             </td>
                         </tr>
@@ -212,19 +228,20 @@
         <div id="paginationContainer">
             {% if page_obj.paginator.count > 10 %}
             <div id="paginationWrapper" class="card-footer bg-white d-flex flex-column align-items-center py-3">
-                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1" style="font-size:0.875rem;">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1"
+                    style="font-size:0.875rem;">
                     <span>
                         <strong>{{ page_obj.start_index }} – {{ page_obj.end_index }}</strong>
                         <span class="text-muted"> of {{ page_obj.paginator.count }} appointments</span>
                     </span>
                     <span class="text-muted">
-                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages}}</strong>
                     </span>
                 </div>
                 <nav aria-label="Appointment pagination" class="w-100">
                     <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1 mb-0">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}"{% endif %} href="#">Prev</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}" {% endif %} href="#">Prev</a>
                         </li>
 
                         <li class="page-item active">
@@ -232,7 +249,8 @@
                         </li>
 
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}"{% endif %} href="#">Next</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_next %}
+                                data-page="{{ page_obj.next_page_number }}" {% endif %} href="#">Next</a>
                         </li>
                     </ul>
                 </nav>
@@ -244,40 +262,40 @@
 </main>
 
 <script>
-    const searchInput  = document.getElementById('search');
-    const dateInput    = document.getElementById('appointmentDate');
-    const statusInput  = document.getElementById('appointmentStatus');
-    const clearBtn     = document.getElementById('clearBtn');
+    const searchInput = document.getElementById('search');
+    const dateInput = document.getElementById('appointmentDate');
+    const statusInput = document.getElementById('appointmentStatus');
+    const clearBtn = document.getElementById('clearBtn');
     let debounceTimer;
 
     function fetchAppointments(page = 1) {
         const params = new URLSearchParams({
-            search          : searchInput.value,
+            search: searchInput.value,
             appointment_date: dateInput.value,
-            status          : statusInput.value,
-            page            : page,
+            status: statusInput.value,
+            page: page,
         });
 
         fetch(`/appointment/manage_appointments/?${params.toString()}`, {
             headers: { 'x-requested-with': 'XMLHttpRequest' }
         })
-        .then(res => res.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc    = parser.parseFromString(html, 'text/html');
+            .then(res => res.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
 
-            const newTbody = doc.querySelector('#tableBody');
-            const oldTbody = document.querySelector('#tableBody');
-            if (newTbody && oldTbody) oldTbody.replaceWith(newTbody);
+                const newTbody = doc.querySelector('#tableBody');
+                const oldTbody = document.querySelector('#tableBody');
+                if (newTbody && oldTbody) oldTbody.replaceWith(newTbody);
 
-            const newPag = doc.querySelector('#paginationWrapper');
-            const oldPag = document.querySelector('#paginationWrapper');
-            if (newPag && oldPag) oldPag.replaceWith(newPag);
-            else if (newPag) document.getElementById('paginationContainer').appendChild(newPag);
+                const newPag = doc.querySelector('#paginationWrapper');
+                const oldPag = document.querySelector('#paginationWrapper');
+                if (newPag && oldPag) oldPag.replaceWith(newPag);
+                else if (newPag) document.getElementById('paginationContainer').appendChild(newPag);
 
-            bindPaginationLinks();
-        })
-        .catch(err => console.error('Fetch error:', err));
+                bindPaginationLinks();
+            })
+            .catch(err => console.error('Fetch error:', err));
     }
 
     function bindPaginationLinks() {
@@ -294,12 +312,12 @@
         debounceTimer = setTimeout(fn, delay);
     }
 
-    searchInput.addEventListener('input',  () => debounce(() => fetchAppointments(1)));
-    dateInput.addEventListener('change',   () => fetchAppointments(1));
+    searchInput.addEventListener('input', () => debounce(() => fetchAppointments(1)));
+    dateInput.addEventListener('change', () => fetchAppointments(1));
     statusInput.addEventListener('change', () => fetchAppointments(1));
     clearBtn.addEventListener('click', () => {
         searchInput.value = '';
-        dateInput.value   = '';
+        dateInput.value = '';
         statusInput.value = 'all';
         fetchAppointments(1);
     });
@@ -307,7 +325,7 @@
     bindPaginationLinks();
 
     // SweetAlert for Delete Buttons using Event Delegation
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         const btn = e.target.closest('.delete-btn');
         if (btn) {
             e.preventDefault();
