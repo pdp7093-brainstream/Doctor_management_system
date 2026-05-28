@@ -135,14 +135,14 @@
                 <ul class="submenu {% if 'patient' in request.path %}active{% endif %}">
                     <li>
                         <a href="{% url 'doctor:add_patient' %}"
-                            class="{% if '/add_patient' in request.path %}active{% endif %}">
+                            class="{% if '/add-patient' in request.path %}active{% endif %}">
                             <i class="bi bi-plus-circle"></i>
                             <span>Add Patient</span>
                         </a>
                     </li>
                     <li>
                         <a href="{% url 'doctor:manage_patients' %}"
-                            class="{% if '/manage_patients' in request.path %}active{% endif %}">
+                            class="{% if '/manage-patients' in request.path %}active{% endif %}">
                             <i class="bi bi-pencil-square"></i>
                             <span>Manage Patients</span>
                         </a>

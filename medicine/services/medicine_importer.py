@@ -12,8 +12,7 @@ def import_medicines_from_excel(file):
 
     with transaction.atomic():
         for row_number, row in enumerate(
-            sheet.iter_rows(min_row=2, values_only=True),start=2
-        ):
+            sheet.iter_rows(min_row=2, values_only=True),start=2):
 
             try:
 
