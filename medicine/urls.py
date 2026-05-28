@@ -35,4 +35,7 @@ urlpatterns = [
     ),
     
     path('purchases/<str:hid>/delete/', DeletePurchaseView.as_view(), name='delete_purchase'),
+
+    # Medicine Importer
+    path('import/', ImportMedicineView.as_view(), name='import_medicine'),
 ]

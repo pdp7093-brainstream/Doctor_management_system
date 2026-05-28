@@ -192,6 +192,13 @@
                             <span>Purchases</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{% url 'medicine:import_medicine' %}"
+                            class="{% if 'import' in request.path %}active{% endif %}">
+                            <i class="bi bi-file-earmark-excel"></i>
+                            <span>Import Medicine</span>
+                        </a>
+                    </li>
                 </ul>
             </li>
             <li>

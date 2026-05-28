@@ -10,6 +10,7 @@ from django.db import models as db_models
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
+from .services.medicine_importer import import_medicines_from_excel
 
 class ManageMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
@@ -44,6 +45,11 @@ class AddMedicineView(LoginRequiredMixin, View):
     def post(self, request):
         name = request.POST.get("name", "").strip()
         short_name = request.POST.get("short_name", "").strip()
+        
+        if Medicine.objects.filter(short_name__iexact=short_name).exists():
+            messages.error(request, f"A medicine with short name '{short_name}' already exists.")
+            return redirect("medicine:add_medicine")
+
         med_type = request.POST.get("medicine_type", "")
         company = request.POST.get("company", "").strip()
         description = request.POST.get("description", "").strip()
@@ -149,8 +155,14 @@ class EditMedicineView(LoginRequiredMixin, View):
             return get_object_or_404(Medicine, id=0)
 
         medicine = get_object_or_404(Medicine, pk=pk)
+        
+        short_name = request.POST.get("short_name", "").strip()
+        if Medicine.objects.filter(short_name__iexact=short_name).exclude(pk=medicine.pk).exists():
+            messages.error(request, f"A medicine with short name '{short_name}' already exists.")
+            return redirect("medicine:edit_medicine", hid=hid)
+
         medicine.name = request.POST.get("name", "").strip()
-        medicine.short_name = request.POST.get("short_name", "").strip()
+        medicine.short_name = short_name
         medicine.medicine_type = request.POST.get("medicine_type", "")
         medicine.company = request.POST.get("company", "").strip()
         medicine.description = request.POST.get("description", "").strip()
@@ -944,3 +956,34 @@ class PurchaseDetailView(LoginRequiredMixin, View):
             pk=pk,
         )
         return render(request, "medicine/purchase_detail.html", {"purchase": purchase})
+
+# Medicine Import 
+class ImportMedicineView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def get(self,request):
+        return render(request,"medicine/import_medicine.html")
+    
+    def post(self,request):
+        excel_file = request.FILES.get("excel_file")
+
+        if not excel_file:
+            messages.error(request,"Please upload an Excel file.")
+            return redirect("medicine:import_medicine")
+
+        try:
+            result = import_medicines_from_excel(excel_file)
+
+            messages.success(
+                request,f"{result['success_count']} medicines imported successfully"
+            )
+
+            if result["errors"]:
+                for error in result["errors"]:
+                    messages.warning(request,error)
+
+        except Exception as e:
+            messages.error(request, f"Import failed: {str(e)}")
+        
+        return redirect("medicine:manage_medicine")
+        
