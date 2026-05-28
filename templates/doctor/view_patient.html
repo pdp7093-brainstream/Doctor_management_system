@@ -448,6 +448,272 @@
         </div>
     </div>
 
+    <!-- Appointments Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                        <i class="bi bi-calendar-check-fill"></i> Appointments
+                    </div>
+                    <span class="badge bg-light text-primary">{% if appt_page_obj %}{{ appt_page_obj.paginator.count }} appointment{{ appt_page_obj.paginator.count|pluralize }}{% else %}0 appointments{% endif %}</span>
+                </div>
+                <div class="card-body p-0">
+                    <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+                        {% if appt_page_obj and appt_page_obj.object_list %}
+                        <table class="table table-hover mb-0" style="min-width:720px; width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Status</th>
+                                    <th>Type</th>
+                                    <th>Doctor</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appt in appt_page_obj %}
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:600; color:var(--dark-text);">{{ appt.appointment_date|date:"d M Y" }}</div>
+                                        <div style="font-size:0.85rem; color:#6c757d;"><i class="bi bi-clock"></i> {{ appt.time_slot|time:"h:i A" }}</div>
+                                    </td>
+                                    <td>
+                                        {% if appt.status == 'pending' %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning" style="font-weight:600;">Pending</span>
+                                        {% elif appt.status == 'confirmed' %}
+                                        <span class="badge bg-info bg-opacity-10 text-info" style="font-weight:600;">Confirmed</span>
+                                        {% elif appt.status == 'cancelled' %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger" style="font-weight:600;">Cancelled</span>
+                                        {% elif appt.status == 'completed' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success" style="font-weight:600;">Completed</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span style="font-size:0.9rem;">
+                                            {% if appt.consultation_type == 'in_person' %}
+                                            <i class="bi bi-person-fill text-primary"></i> In Person
+                                            {% elif appt.consultation_type == 'video' %}
+                                            <i class="bi bi-camera-video-fill text-success"></i> Video
+                                            {% else %}
+                                            <i class="bi bi-telephone-fill text-info"></i> Phone
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if appt.doctor and appt.doctor.user %}
+                                            Dr. {{ appt.doctor.user.get_full_name|default:appt.doctor.user.username }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td style="white-space:nowrap; vertical-align:middle;">
+                                        <a href="{% url 'appointment:start_visit' appt.id|hid %}" class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        {% if appt_page_obj.has_other_pages %}
+                        <div class="p-3">
+                            <nav aria-label="Appointments pagination">
+                                <ul class="pagination mb-0">
+                                    {% if appt_page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?appt_page={{ appt_page_obj.previous_page_number }}{% if lab_page_obj %}&lab_page={{ lab_page_obj.number }}{% endif %}{% if uploaded_page_obj %}&upload_page={{ uploaded_page_obj.number }}{% endif %}">Previous</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                    {% endif %}
+
+                                    {% for num in appt_page_obj.paginator.page_range %}
+                                    <li class="page-item {% if appt_page_obj.number == num %}active{% endif %}">
+                                        <a class="page-link" href="?appt_page={{ num }}{% if lab_page_obj %}&lab_page={{ lab_page_obj.number }}{% endif %}{% if uploaded_page_obj %}&upload_page={{ uploaded_page_obj.number }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                    {% endfor %}
+
+                                    {% if appt_page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?appt_page={{ appt_page_obj.next_page_number }}{% if lab_page_obj %}&lab_page={{ lab_page_obj.number }}{% endif %}{% if uploaded_page_obj %}&upload_page={{ uploaded_page_obj.number }}{% endif %}">Next</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-calendar-x" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                            No appointments found for this patient.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Old Details Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+                        <i class="bi bi-file-earmark-medical-fill"></i> Old Details
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        {% if old_doc_page_obj %}
+                        <table class="table table-hover align-middle mb-0" style="font-size:0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" style="font-weight:600; color:#555; padding:12px 16px;">Document Name</th>
+                                    <th scope="col" style="font-weight:600; color:#555; padding:12px 16px;">Date</th>
+                                    <th scope="col" style="font-weight:600; color:#555; padding:12px 16px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in old_doc_page_obj %}
+                                <tr>
+                                    <td style="padding:12px 16px;">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark-text text-primary" style="font-size:1.2rem;"></i>
+                                            <span style="font-weight:500; color:#333;">{{ doc.original_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td style="padding:12px 16px;">{{ doc.uploaded_at|date:"M d, Y g:i A" }}</td>
+                                    <td style="padding:12px 16px; white-space:nowrap;">
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View Document">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Document" onclick="deleteOldDocument('{{ doc.id|hid }}', this)">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                        {% if old_doc_page_obj.has_other_pages %}
+                        <div class="p-3">
+                            <nav aria-label="Old Documents pagination">
+                                <ul class="pagination mb-0">
+                                    {% if old_doc_page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?old_doc_page={{ old_doc_page_obj.previous_page_number }}{% if appt_page_obj %}&appt_page={{ appt_page_obj.number }}{% endif %}">Previous</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                                    {% endif %}
+
+                                    {% for num in old_doc_page_obj.paginator.page_range %}
+                                    <li class="page-item {% if old_doc_page_obj.number == num %}active{% endif %}">
+                                        <a class="page-link" href="?old_doc_page={{ num }}{% if appt_page_obj %}&appt_page={{ appt_page_obj.number }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                    {% endfor %}
+
+                                    {% if old_doc_page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?old_doc_page={{ old_doc_page_obj.next_page_number }}{% if appt_page_obj %}&appt_page={{ appt_page_obj.number }}{% endif %}">Next</a>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item disabled"><span class="page-link">Next</span></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                        {% endif %}
+
+                        {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-folder-x" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                            No old data found for this patient.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
+
+<script>
+    function deleteOldDocument(docId, btnElement) {
+        const doDelete = () => {
+            const tr = btnElement.closest("tr");
+            tr.style.opacity = '0.5';
+
+            fetch(`/doctor/old-data/delete/${docId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    tr.remove();
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Deleted!',
+                            text: 'The document has been deleted.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error', data.error || 'Failed to delete document', 'error');
+                    } else {
+                        alert("Failed to delete document: " + (data.error || "Unknown error"));
+                    }
+                    tr.style.opacity = '1';
+                }
+            })
+            .catch(err => {
+                console.error("Error deleting document:", err);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire('Error', 'An error occurred. Please try again.', 'error');
+                } else {
+                    alert("An error occurred. Please try again.");
+                }
+                tr.style.opacity = '1';
+            });
+        };
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to delete this old document?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    doDelete();
+                }
+            });
+        } else {
+            if (confirm("Are you sure you want to delete this old document?")) {
+                doDelete();
+            }
+        }
+    }
+</script>
 
 {% endblock %}

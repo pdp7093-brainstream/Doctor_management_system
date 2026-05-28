@@ -8,7 +8,7 @@ from django.views.decorators.cache import never_cache
 from django.views import View
 from .decorators import role_required
 from .models import InnerMember
-from appointment.models import Appointment, LabDocument, PatientUploadedDocument
+from appointment.models import Appointment, LabDocument, PatientUploadedDocument, PatientOldDocument
 from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
@@ -237,12 +237,23 @@ def view_patient_dynamic(request, type, hid):
         upload_paginator = Paginator(uploaded_documents, 5)
         upload_page = upload_paginator.get_page(request.GET.get('upload_page'))
 
+        # fetch appointments for the main patient
+        appointments = Appointment.objects.filter(patient=patient, family_member__isnull=True).order_by('-appointment_date', '-time_slot')
+        appt_paginator = Paginator(appointments, 5)
+        appt_page = appt_paginator.get_page(request.GET.get('appt_page'))
+
+        old_documents = PatientOldDocument.objects.filter(patient=patient, family_member__isnull=True)
+        old_doc_paginator = Paginator(old_documents, 5)
+        old_doc_page = old_doc_paginator.get_page(request.GET.get('old_doc_page'))
+
         return render(request, 'doctor/view_patient.html', {
             'patient': patient,
             'family_members': family_members,
             'is_family': False,
             'lab_page_obj': lab_page,
             'uploaded_page_obj': upload_page,
+            'appt_page_obj': appt_page,
+            'old_doc_page_obj': old_doc_page,
         })
 
     else:
@@ -270,6 +281,15 @@ def view_patient_dynamic(request, type, hid):
         upload_paginator = Paginator(uploaded_documents, 5)
         upload_page = upload_paginator.get_page(request.GET.get('upload_page'))
 
+        # fetch appointments for the family member
+        appointments = Appointment.objects.filter(family_member=member).order_by('-appointment_date', '-time_slot')
+        appt_paginator = Paginator(appointments, 5)
+        appt_page = appt_paginator.get_page(request.GET.get('appt_page'))
+
+        old_documents = PatientOldDocument.objects.filter(family_member=member)
+        old_doc_paginator = Paginator(old_documents, 5)
+        old_doc_page = old_doc_paginator.get_page(request.GET.get('old_doc_page'))
+
         return render(request, 'doctor/view_patient.html', {
             'member': member,
             'parent': member.patient,
@@ -277,6 +297,8 @@ def view_patient_dynamic(request, type, hid):
             'is_family': True,
             'lab_page_obj': lab_page,
             'uploaded_page_obj': upload_page,
+            'appt_page_obj': appt_page,
+            'old_doc_page_obj': old_doc_page,
         })
     
 @never_cache
@@ -753,3 +775,64 @@ def delete_leave(request, pk):
         leave.delete()
         messages.success(request, "Leave deleted successfully.")
     return redirect('doctor:manage_leaves')
+
+@never_cache
+@role_required('doctor')
+def old_data_upload(request):
+    if request.method == 'POST':
+        patient_id = request.POST.get('patient_id')
+        family_member_id = request.POST.get('family_member_id')
+        file = request.FILES.get('document')
+
+        if not patient_id or not file:
+            messages.error(request, 'Patient and document are required.')
+            return redirect('doctor:old_data_upload')
+            
+        try:
+            if patient_id == 'family_only' and family_member_id:
+                family_member = get_object_or_404(FamilyMember, id=family_member_id)
+                patient = family_member.patient
+            else:
+                patient = get_object_or_404(Patient, id=patient_id)
+                family_member = None
+                
+            PatientOldDocument.objects.create(
+                patient=patient,
+                family_member=family_member,
+                file=file,
+                original_name=file.name,
+                uploaded_by=request.user
+            )
+            messages.success(request, 'Old data document uploaded successfully.')
+            
+            from . import hashid as _hashid
+            if family_member:
+                return redirect('doctor:view_patient', type='family', hid=_hashid.encode_id(family_member.id))
+            else:
+                return redirect('doctor:view_patient', type='main', hid=_hashid.encode_id(patient.id))
+                
+        except Exception as e:
+            messages.error(request, f"Error uploading document: {str(e)}")
+            return redirect('doctor:old_data_upload')
+            
+    return render(request, 'doctor/old_data.html')
+
+@require_POST
+@login_required(login_url='login')
+def delete_old_document(request, hid):
+    try:
+        from doctor import hashid as _hashid
+        doc_id = _hashid.decode_hash(hid)
+        document = PatientOldDocument.objects.get(id=doc_id)
+        
+        # Only allow deleting if they are doctor or it belongs to them
+        if hasattr(request.user, 'innermember') and request.user.innermember.role == 'doctor':
+            document.delete()
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+            
+    except PatientOldDocument.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Document not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

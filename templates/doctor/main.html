@@ -124,6 +124,14 @@
             </li>
 
             <li>
+                <a href="{% url 'doctor:old_data_upload' %}"
+                    class="{% if '/old-data' in request.path %}active{% endif %}">
+                    <i class="bi bi-file-earmark-arrow-up"></i>
+                    <span>Old Data</span>
+                </a>
+            </li>
+
+            <li>
                 <a href="#"
                     class="menu-toggle {% if 'patient' in request.path %}active expanded parent-active{% endif %}">
                     <div class="menu-toggle-label">
