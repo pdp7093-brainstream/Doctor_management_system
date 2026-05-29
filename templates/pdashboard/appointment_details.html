@@ -174,12 +174,10 @@
                     <div class="value">
                         {% if appointment.doctor and appointment.doctor.user %}
                             Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}
+                        {% elif default_doctor %}
+                            Dr. {{ default_doctor.user.get_full_name|default:default_doctor.user.username }}
                         {% else %}
-                            {% if super_admin %}
-                                Dr. {{ super_admin.username }}
-                            {% else %}
-                                —
-                            {% endif %}
+                            —
                         {% endif %}
                     </div>
                 </div>

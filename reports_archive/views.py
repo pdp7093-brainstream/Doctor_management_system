@@ -11,7 +11,7 @@ from expenses.models import Expense
 from django.utils import timezone
 from datetime import timedelta
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.utils.dateparse import parse_date
 
 
@@ -55,7 +55,15 @@ class ExportDataView(DoctorRequiredMixin, View):
 
     def get(self, request):
 
-        context = {}
+        total_appointments = Appointment.objects.filter(is_archived=False).count()
+        total_bills = Bill.objects.filter(is_archived=False).count()
+        total_revenue = Bill.objects.filter(is_archived=False, payment_status='paid').aggregate(Sum('total'))['total__sum'] or 0
+
+        context = {
+            'total_appointments': total_appointments,
+            'total_bills': total_bills,
+            'total_revenue': total_revenue,
+        }
 
         return render(request,'reports_archive/export_data.html',context)
 

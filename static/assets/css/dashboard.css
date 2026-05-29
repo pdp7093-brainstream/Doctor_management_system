@@ -100,25 +100,62 @@ body {
 
 /* ── Stat Cards ───────────────────────── */
 .stats .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px;
+    background: linear-gradient(145deg, #ffffff, #f8faff);
+    border: 1px solid rgba(226, 234, 255, 0.8);
+    border-radius: 16px;
+    padding: 24px;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stats .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), #6366f1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stats .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.04);
+}
+
+.stats .stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-card i {
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    display: inline-block;
+    transition: transform 0.3s ease;
+}
+
+.stat-card:hover i {
+    transform: scale(1.1);
 }
 
 .stat-card h3 {
-    font-size: 1.8rem;
-    font-weight: 700;
+    font-size: 2.2rem;
+    font-weight: 800;
     color: var(--primary);
     margin: 8px 0 4px;
+    letter-spacing: -0.5px;
 }
 
 .stat-card p {
     color: var(--muted);
-    font-size: 0.88rem;
+    font-size: 0.95rem;
+    font-weight: 600;
     margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* ── Card ─────────────────────────────── */
@@ -243,35 +280,53 @@ body {
 }
 
 /* ── Table ────────────────────────────── */
-.table-responsive { overflow-x: auto; }
+.table-responsive { 
+    overflow-x: auto; 
+    border-radius: 12px;
+}
 
 .table {
     width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9rem;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.92rem;
+    margin-bottom: 0;
 }
 
 .table thead th {
-    background: var(--primary);
-    color: #fff;
-    padding: 12px 14px;
-    font-weight: 600;
+    background: #f8faff;
+    color: #475569;
+    padding: 14px 16px;
+    font-weight: 700;
     text-align: left;
-    border: none;
+    border-bottom: 2px solid var(--border);
+    text-transform: uppercase;
+    font-size: 0.78rem;
+    letter-spacing: 0.5px;
 }
 
-.table thead th:first-child { border-radius: 0; }
+.table thead th:first-child { border-top-left-radius: 12px; }
+.table thead th:last-child { border-top-right-radius: 12px; }
 
 .table tbody td {
-    padding: 12px 14px;
+    padding: 16px;
     border-bottom: 1px solid var(--border);
     vertical-align: middle;
     color: var(--text);
+    transition: background-color 0.2s ease;
 }
 
-.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr {
+    transition: all 0.2s ease;
+}
 
-.table tbody tr:hover { background: #f7f9ff; }
+.table tbody tr:hover { 
+    background: #f8fbff; 
+    transform: scale(1.001);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    position: relative;
+    z-index: 1;
+}
 
 #appointmentsTable {
     table-layout: fixed;
@@ -635,14 +690,15 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 /* profile.html css/ */
 
  /* ── Profile Info Table ── */
-        .profile-info-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+        .profile-info-table { width:100%; border-collapse: separate; border-spacing: 0; font-size:0.9rem; margin-bottom: 0; }
         .profile-info-table tbody td {
-            padding: 12px 16px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
         .profile-info-table tbody tr:last-child td { border-bottom: none; }
-        .profile-info-table tbody tr:hover { background: #f7f9ff; }
+        .profile-info-table tbody tr { transition: all 0.2s ease; }
+        .profile-info-table tbody tr:hover { background: #f8fbff; transform: scale(1.001); }
         .profile-info-table .info-label {
             font-size: 0.78rem;
             font-weight: 700;
@@ -650,48 +706,65 @@ textarea.form-control { min-height: 90px; resize: vertical; }
             letter-spacing: 0.05em;
             color: var(--muted);
             width: 160px;
+            background: #f8faff;
         }
         .profile-info-table .info-value {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text);
         }
-        .info-empty { color: var(--muted); font-style: italic; font-size: 0.85rem; }
+        .info-empty { color: #94a3b8; font-style: italic; font-size: 0.85rem; }
 
         /* ── Profile Picture Section (always visible) ── */
         .profile-top {
             display: flex;
             align-items: center;
-            gap: 20px;
-            padding: 20px 20px 20px;
+            gap: 24px;
+            padding: 24px 28px;
+            background: linear-gradient(145deg, #ffffff, #f8faff);
             border-bottom: 1px solid var(--border);
         }
         .profile-avatar {
-            width: 72px; height: 72px;
+            width: 80px; height: 80px;
             border-radius: 50%; object-fit: cover;
-            border: 3px solid var(--border);
+            border: 4px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             flex-shrink: 0;
         }
         .profile-avatar-initials {
-            width: 72px; height: 72px;
+            width: 80px; height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg,#6366f1,#818cf8);
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
             display: flex; align-items: center; justify-content: center;
-            color: #fff; font-size: 1.8rem; font-weight: 700;
+            color: #fff; font-size: 2rem; font-weight: 700;
             flex-shrink: 0;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
         .profile-top-info .name {
-            font-size: 1.05rem; font-weight: 700; color: var(--text);
+            font-size: 1.3rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px;
         }
         .profile-top-info .email {
-            font-size: 0.85rem; color: var(--muted); margin-top: 2px;
+            font-size: 0.9rem; color: var(--muted); margin-top: 4px; font-weight: 500;
         }
 
         /* ── Family Members Table ── */
-        .fm-table { width:100%; border-collapse:collapse; font-size:0.88rem; }
-        .fm-table thead th { background:var(--primary); color:#fff; padding:11px 14px; text-align:left; font-weight:600; }
-        .fm-table tbody td { padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle; }
-        .fm-table tbody tr:last-child td { border-bottom:none; }
-        .fm-table tbody tr:hover { background:#f7f9ff; }
+        .fm-table { width:100%; border-collapse: separate; border-spacing: 0; font-size:0.92rem; }
+        .fm-table thead th { 
+            background: #f8faff; 
+            color: #475569; 
+            padding: 14px 16px; 
+            font-weight: 700; 
+            text-align: left; 
+            text-transform: uppercase;
+            font-size: 0.78rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+        }
+        .fm-table tbody td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .fm-table tbody tr:last-child td { border-bottom: none; }
+        .fm-table tbody tr { transition: all 0.2s ease; }
+        .fm-table tbody tr:hover { background: #f8fbff; transform: scale(1.001); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 
         .btn-icon {
             width:30px; height:30px; border-radius:7px; border:none;

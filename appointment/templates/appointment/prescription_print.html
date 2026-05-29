@@ -338,7 +338,7 @@
             <h6>Consulting Doctor</h6>
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% else %}N/A{% endif %}</span>
+                <span class="info-value">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% elif default_doctor %}{{ default_doctor.user.get_full_name|default:default_doctor.user.username }}{% else %}N/A{% endif %}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Specialization</span>

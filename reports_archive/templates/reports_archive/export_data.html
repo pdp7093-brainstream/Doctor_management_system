@@ -1,5 +1,5 @@
 {% extends "doctor/main.html" %}
-{% load static %}
+{% load static humanize %}
 {% block title %}Export Data{% endblock %}
 {% block content %}
 
@@ -24,7 +24,7 @@
                     </div>
                     <div>
                         <h6 class="text-muted mb-0 small text-uppercase fw-bold">Total Appointments</h6>
-                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">1,248</h4>
+                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">{{ total_appointments|default:0|intcomma }}</h4>
                     </div>
                 </div>
             </div>
@@ -37,7 +37,7 @@
                     </div>
                     <div>
                         <h6 class="text-muted mb-0 small text-uppercase fw-bold">Total Bills</h6>
-                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">856</h4>
+                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">{{ total_bills|default:0|intcomma }}</h4>
                     </div>
                 </div>
             </div>
@@ -50,7 +50,7 @@
                     </div>
                     <div>
                         <h6 class="text-muted mb-0 small text-uppercase fw-bold">Total Revenue</h6>
-                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">₹4,52,000</h4>
+                        <h4 class="mb-0 fw-bold" style="color: #0f172a;">₹{{ total_revenue|default:0|intcomma }}</h4>
                     </div>
                 </div>
             </div>
