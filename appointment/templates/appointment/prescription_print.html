@@ -1,14 +1,12 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Prescription - {{ visit.patient.user.get_full_name }}</title>
     <style>
         :root {
-            --primary-color: #0284c7;
-            /* Medical Blue */
+            --primary-color: #0284c7; /* Medical Blue */
             --primary-light: #e0f2fe;
             --text-dark: #1e293b;
             --text-muted: #64748b;
@@ -16,12 +14,8 @@
             --bg-light: #f8fafc;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             font-size: 13px;
@@ -37,7 +31,6 @@
             text-align: right;
             margin-bottom: 20px;
         }
-
         .print-btn {
             display: inline-flex;
             align-items: center;
@@ -50,24 +43,14 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             transition: all 0.2s;
         }
-
-        .print-btn:hover {
-            background: #0369a1;
-        }
+        .print-btn:hover { background: #0369a1; }
 
         @media print {
-            .print-btn-container {
-                display: none !important;
-            }
-
-            body {
-                padding: 0;
-                margin: 0;
-                max-width: 100%;
-            }
+            .print-btn-container { display: none !important; }
+            body { padding: 0; margin: 0; max-width: 100%; }
         }
 
         /* Header Layout */
@@ -84,7 +67,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .clinic-logo-name {
             font-size: 28px;
             font-weight: 800;
@@ -94,7 +76,6 @@
             gap: 8px;
             letter-spacing: -0.5px;
         }
-
         .clinic-address {
             margin-top: 6px;
             font-size: 12px;
@@ -105,7 +86,6 @@
         .invoice-title-box {
             text-align: right;
         }
-
         .invoice-title {
             font-size: 28px;
             font-weight: 800;
@@ -113,7 +93,6 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
-
         .bill-number {
             font-size: 14px;
             font-weight: 700;
@@ -135,7 +114,6 @@
             padding: 16px;
             border-radius: 0 8px 8px 0;
         }
-
         .info-card h6 {
             font-size: 11px;
             text-transform: uppercase;
@@ -144,26 +122,20 @@
             margin-bottom: 10px;
             font-weight: 700;
         }
-
         .info-row {
             display: flex;
             flex-direction: column;
             margin-bottom: 8px;
         }
-
-        .info-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .info-label {
-            font-size: 11px;
-            color: var(--text-muted);
+        .info-row:last-child { margin-bottom: 0; }
+        .info-label { 
+            font-size: 11px; 
+            color: var(--text-muted); 
             margin-bottom: 2px;
         }
-
-        .info-value {
-            font-size: 13px;
-            font-weight: 600;
+        .info-value { 
+            font-size: 13px; 
+            font-weight: 600; 
             color: var(--text-dark);
         }
 
@@ -175,7 +147,6 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
         }
-
         .visit-notes h6 {
             font-size: 13px;
             color: var(--primary-color);
@@ -183,15 +154,10 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .note-group {
             margin-bottom: 12px;
         }
-
-        .note-group:last-child {
-            margin-bottom: 0;
-        }
-
+        .note-group:last-child { margin-bottom: 0; }
         .note-label {
             font-weight: 700;
             color: var(--text-dark);
@@ -199,7 +165,6 @@
             margin-bottom: 4px;
             font-size: 12px;
         }
-
         .note-text {
             color: var(--text-dark);
             line-height: 1.5;
@@ -212,12 +177,10 @@
             border-radius: 8px;
             overflow: hidden;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
         }
-
         th {
             background: var(--primary-light);
             color: var(--primary-color);
@@ -228,39 +191,17 @@
             font-weight: 700;
             text-align: left;
         }
-
-        th.text-center {
-            text-align: center;
-        }
-
+        th.text-center { text-align: center; }
         td {
             padding: 12px 16px;
             font-size: 13px;
             border-bottom: 1px solid var(--border-color);
             vertical-align: top;
         }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        td.text-center {
-            text-align: center;
-        }
-
-        .item-name {
-            font-weight: 700;
-            color: var(--text-dark);
-            font-size: 14px;
-        }
-
-        .item-type {
-            font-size: 11px;
-            color: var(--text-muted);
-            display: block;
-            margin-top: 2px;
-        }
-
+        tr:last-child td { border-bottom: none; }
+        td.text-center { text-align: center; }
+        .item-name { font-weight: 700; color: var(--text-dark); font-size: 14px;}
+        .item-type { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
         .dosage-badge {
             display: inline-block;
             padding: 4px 8px;
@@ -272,7 +213,6 @@
             letter-spacing: 1px;
             color: #334155;
         }
-
         .meal-timing {
             display: block;
             margin-top: 6px;
@@ -280,7 +220,6 @@
             color: #0f172a;
             font-weight: 600;
         }
-
         .med-notes {
             display: block;
             margin-top: 4px;
@@ -298,14 +237,13 @@
             color: var(--text-muted);
             font-size: 12px;
         }
-
         .footer-thankyou {
             font-weight: 600;
             color: var(--primary-color);
             font-size: 14px;
             margin-bottom: 4px;
         }
-
+        
         /* Signature Area */
         .signature-area {
             display: flex;
@@ -313,31 +251,26 @@
             margin-top: 60px;
             margin-bottom: 20px;
         }
-
         .signature-box {
             text-align: center;
             width: 200px;
         }
-
         .signature-line {
             border-bottom: 1px solid var(--text-dark);
             margin-bottom: 8px;
             height: 40px;
         }
-
         .signature-name {
             font-weight: 700;
             color: var(--text-dark);
         }
     </style>
 </head>
-
 <body>
 
     <div class="print-btn-container">
         <button class="print-btn" onclick="window.print()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 6 2 18 2 18 9"></polyline>
                 <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                 <rect x="6" y="14" width="12" height="8"></rect>
@@ -351,11 +284,9 @@
         <div class="clinic-brand">
             <div class="clinic-logo-name">
                 {% if clinic.logo %}
-                <img src="{{clinic.logo.url}}" alt="Clinic Logo"
-                    style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                <img src="{{clinic.logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
                 {% else %}
-                <span
-                    style="display:flex;align-items:center;justify-content:center;width:45px;height:45px;border-radius:50%;background:var(--primary-light);color:var(--primary-color);font-size:11px;font-weight:700;border:1.5px solid var(--primary-color);">CLINIC</span>
+                <span style="display:flex;align-items:center;justify-content:center;width:45px;height:45px;border-radius:50%;background:var(--primary-light);color:var(--primary-color);font-size:11px;font-weight:700;border:1.5px solid var(--primary-color);">CLINIC</span>
                 {% endif %}
                 {{clinic.clinic_name}}
             </div>
@@ -380,9 +311,9 @@
                 <span class="info-label">Name</span>
                 <span class="info-value">
                     {% if visit.appointment.family_member %}
-                    {{ visit.appointment.family_member.name }}
+                        {{ visit.appointment.family_member.name }}
                     {% else %}
-                    {{ visit.appointment.patient.user.get_full_name }}
+                        {{ visit.appointment.patient.user.get_full_name }}
                     {% endif %}
                 </span>
             </div>
@@ -390,9 +321,9 @@
                 <span class="info-label">Age / Gender</span>
                 <span class="info-value">
                     {% if visit.appointment.family_member %}
-                    {{ visit.appointment.family_member.gender|default:"Not specified"|capfirst }}
+                        {{ visit.appointment.family_member.gender|default:"Not specified"|capfirst }}
                     {% else %}
-                    {{ visit.appointment.patient.gender|default:"Not specified"|capfirst }}
+                        {{ visit.appointment.patient.gender|default:"Not specified"|capfirst }}
                     {% endif %}
                 </span>
             </div>
@@ -407,7 +338,7 @@
             <h6>Consulting Doctor</h6>
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">Dr. </span>
+                <span class="info-value">Dr. {{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Specialization</span>
@@ -460,18 +391,17 @@
                     <td>{{ forloop.counter }}</td>
                     <td>
                         <span class="item-name">{{ item.medicine_variant.medicine.name }}</span>
-                        <span class="item-type">{{ item.medicine_variant.medicine.get_medicine_type_display }} • {{
-                            item.medicine_variant.power }}</span>
+                        <span class="item-type">{{ item.medicine_variant.medicine.get_medicine_type_display }} • {{ item.medicine_variant.power }}</span>
                     </td>
                     <td>
                         <span class="dosage-badge">{{ item.dosage }}</span>
                         <span class="meal-timing">
                             {% if 'after_food' in item.notes|lower or 'After Food' in item.notes %}
-                            After Food
+                                After Food
                             {% elif 'before_food' in item.notes|lower or 'Before Food' in item.notes %}
-                            Before Food
+                                Before Food
                             {% else %}
-                            As Directed
+                                As Directed
                             {% endif %}
                         </span>
                         {% if item.notes %}
@@ -495,7 +425,7 @@
     <div class="signature-area">
         <div class="signature-box">
             <div class="signature-line"></div>
-            <div class="signature-name">Dr. </div>
+            <div class="signature-name">Dr. {{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}</div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Signature / Stamp</div>
         </div>
     </div>
@@ -504,10 +434,8 @@
     <div class="footer">
         <div class="footer-thankyou">Wishing you a speedy recovery!</div>
         <div>Please follow up after completing the medication course if symptoms persist.</div>
-        <div style="margin-top: 4px; color: #94a3b8;">This prescription is valid only for the patient mentioned above.
-        </div>
+        <div style="margin-top: 4px; color: #94a3b8;">This prescription is valid only for the patient mentioned above.</div>
     </div>
 
 </body>
-
 </html>
