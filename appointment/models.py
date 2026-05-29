@@ -80,7 +80,6 @@ class Visit(models.Model):
         return f"{self.patient.user.username} - {self.doctor.user.username} on {self.appointment.appointment_date}"
 
 
-
 # Prescription Model 
 class Prescription(models.Model):
     visit = models.OneToOneField(Visit, on_delete=models.CASCADE)
