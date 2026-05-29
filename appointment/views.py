@@ -915,10 +915,28 @@ def appointment_detail(request, hid):
     if visit:
         prescription = Prescription.objects.filter(visit=visit).first()
         if prescription:
-            prescription_items = prescription.items.select_related(
+            items_qs = prescription.items.select_related(
                 'medicine_variant',
                 'medicine_variant__medicine'
             ).all()
+            prescription_items = list(items_qs)
+
+            # Parse dosage for template display
+            for item in prescription_items:
+                try:
+                    parts = item.dosage.split(' (')
+                    dose_parts = [int(part) for part in parts[0].split('-')]
+                    meal = parts[1].replace(')', '') if len(parts) > 1 else 'after_food'
+                except Exception:
+                    dose_parts = []
+                    meal = 'after_food'
+
+                item.parsed_morning = dose_parts[0] if len(dose_parts) > 0 else 0
+                item.parsed_afternoon = dose_parts[1] if len(dose_parts) > 1 else 0
+                item.parsed_evening = dose_parts[2] if len(dose_parts) > 3 else 0
+                night_index = 3 if len(dose_parts) > 3 else 2
+                item.parsed_night = dose_parts[night_index] if len(dose_parts) > night_index else 0
+                item.parsed_meal = meal
 
     from doctor.models import InnerMember
     default_doctor = InnerMember.objects.filter(role='doctor').first()
