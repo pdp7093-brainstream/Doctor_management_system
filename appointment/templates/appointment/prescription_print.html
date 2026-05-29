@@ -298,7 +298,7 @@
         </div>
         <div class="invoice-title-box">
             <div class="invoice-title">PRESCRIPTION</div>
-            <div class="bill-number">Date: {{ visit.appointment.appointment_date|date:"d M, Y" }}</div>
+            <div class="bill-number">Date: {% if visit.appointment %}{{ visit.appointment.appointment_date|date:"d M, Y" }}{% else %}{{ visit.created_at|date:"d M, Y" }}{% endif %}</div>
         </div>
     </div>
 
@@ -310,26 +310,26 @@
             <div class="info-row">
                 <span class="info-label">Name</span>
                 <span class="info-value">
-                    {% if visit.appointment.family_member %}
+                    {% if visit.appointment and visit.appointment.family_member %}
                         {{ visit.appointment.family_member.name }}
                     {% else %}
-                        {{ visit.appointment.patient.user.get_full_name }}
+                        {{ visit.patient.user.get_full_name }}
                     {% endif %}
                 </span>
             </div>
             <div class="info-row">
                 <span class="info-label">Age / Gender</span>
                 <span class="info-value">
-                    {% if visit.appointment.family_member %}
+                    {% if visit.appointment and visit.appointment.family_member %}
                         {{ visit.appointment.family_member.gender|default:"Not specified"|capfirst }}
                     {% else %}
-                        {{ visit.appointment.patient.gender|default:"Not specified"|capfirst }}
+                        {{ visit.patient.gender|default:"Not specified"|capfirst }}
                     {% endif %}
                 </span>
             </div>
             <div class="info-row">
                 <span class="info-label">Contact</span>
-                <span class="info-value">{{ visit.appointment.patient.phone|default:"N/A" }}</span>
+                <span class="info-value">{{ visit.patient.phone|default:"N/A" }}</span>
             </div>
         </div>
 
@@ -338,7 +338,7 @@
             <h6>Consulting Doctor</h6>
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">Dr. {{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}</span>
+                <span class="info-value">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% else %}N/A{% endif %}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Specialization</span>
@@ -425,7 +425,7 @@
     <div class="signature-area">
         <div class="signature-box">
             <div class="signature-line"></div>
-            <div class="signature-name">Dr. {{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}</div>
+            <div class="signature-name">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% else %}N/A{% endif %}</div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Signature / Stamp</div>
         </div>
     </div>

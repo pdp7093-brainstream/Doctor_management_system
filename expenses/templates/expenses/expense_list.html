@@ -88,17 +88,17 @@
                         <td class="py-3 text-center">
                             <div class="d-flex justify-content-center gap-2">
                                 {% if request.user.innermember.role == 'doctor' or expense.status == 'pending' and request.user == expense.created_by %}
-                                <a href="{% url 'expenses:edit_expense' expense.id %}" class="btn btn-sm btn-light text-primary rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Edit Expense">
+                                <a href="{% url 'expenses:edit_expense' expense.id|hid %}" class="btn btn-sm btn-light text-primary rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Edit Expense">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                <form method="post" action="{% url 'expenses:delete_expense' expense.id %}" class="d-inline delete-form m-0">
+                                <form method="post" action="{% url 'expenses:delete_expense' expense.id|hid %}" class="d-inline delete-form m-0">
                                     {% csrf_token %}
                                     <button type="button" class="btn btn-sm btn-light text-danger rounded-circle delete-btn" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Delete Expense">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                                 {% endif %}
-                                <a href="{% url 'expenses:expense_detail' expense.id %}" class="btn btn-sm btn-light text-info rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="View Details">
+                                <a href="{% url 'expenses:expense_detail' expense.id|hid %}" class="btn btn-sm btn-light text-info rounded-circle" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="View Details">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 {% if expense.attachment %}
