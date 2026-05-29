@@ -2,7 +2,6 @@
 {% load hashid_tags %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,46 +11,44 @@
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
 
 </head>
-
 <body>
-    <div class="container py-5">
+<div class="container py-5">
 
-        <div class="header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <h3><i class="fas fa-calendar-check"></i> Appointment Details</h3>
-            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back
-            </a>
-        </div>
+    <div class="header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <h3><i class="fas fa-calendar-check"></i> Appointment Details</h3>
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
 
-        <!-- ── Card 1: Appointment + Patient + Doctor ── -->
-        <div class="detail-card mb-4">
+    <!-- ── Card 1: Appointment + Patient + Doctor ── -->
+    <div class="detail-card mb-4">
 
-            <!-- Appointment Info -->
-            <div class="detail-section">
-                <div class="section-title"><i class="fas fa-calendar-alt"></i> Appointment Info
+        <!-- Appointment Info -->
+        <div class="detail-section">    
+            <div class="section-title"><i class="fas fa-calendar-alt"></i> Appointment Info
+            </div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Date</div>
+                    <div class="value">{{ appointment.appointment_date }}</div>
                 </div>
-                <div class="info-grid">
-                    <div class="info-box">
-                        <div class="label">Date</div>
-                        <div class="value">{{ appointment.appointment_date }}</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Time</div>
-                        <div class="value">{{ appointment.time_slot }}</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Status</div>
-                        <div class="value">
-                            {% if appointment.status == 'confirmed' %}
+                <div class="info-box">
+                    <div class="label">Time</div>
+                    <div class="value">{{ appointment.time_slot }}</div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Status</div>
+                    <div class="value">
+                        {% if appointment.status == 'confirmed' %}
                             <span class="status-badge status-confirmed">Confirmed</span>
-                            {% elif appointment.status == 'cancelled' %}
+                        {% elif appointment.status == 'cancelled' %}
                             <span class="status-badge status-cancelled">Cancelled</span>
-                            {% elif appointment.status == 'completed' %}
+                        {% elif appointment.status == 'completed' %}
                             <span class="status-badge status-completed">Completed</span>
-                            {% else %}
-                            <span class="status-badge status-pending">Pending</span>
-                            {% endif %}
-                        </div>
+                        {% else %}
+                            <span    class="status-badge status-pending">Pending</span>
+                        {% endif %}
                     </div>
                     <div class="info-box">
                         <div class="label">Booked On</div>
@@ -67,27 +64,41 @@
                     </div>    
                     {% endif %}
                 </div>
-                {% if appointment.notes %}
+                <div class="info-box">
+                    <div class="label">Booked On</div>
+                    <div class="value">{{ appointment.appointment_date|date:"d M-Y" }}</div>
+                </div>
+            
+                {% if appointment.status == 'cancelled' %}
                 <div class="info-grid full mt-3">
                     <div class="info-box">
-                        <div class="label">Reason for Visit / Notes</div>
-                        <div class="value">{{ appointment.notes }}</div>
+                        <div class="label">Reason</div>
+                        <div class="value">{{ appointment.cancellation_reason }}</div>
                     </div>
                 </div>
                 {% endif %}
             </div>
-
-            <!-- Patient Info -->
-            <div class="detail-section">
-                <div class="section-title">
-                    <i class="fas fa-user"></i> Patient Info
-                    {% if appointment.family_member %}
-                    <span class="section-tag">Family Member</span>
-                    {% endif %}
+            {% if appointment.notes %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Reason for Visit / Notes</div>
+                    <div class="value">{{ appointment.notes }}</div>
                 </div>
-                <div class="info-grid">
+            </div>
+            {% endif %}
+        </div>
 
-                    {% if appointment.family_member %}
+        <!-- Patient Info -->
+        <div class="detail-section">
+            <div class="section-title">
+                <i class="fas fa-user"></i> Patient Info
+                {% if appointment.family_member %}
+                    <span class="section-tag">Family Member</span>
+                {% endif %}
+            </div>
+            <div class="info-grid">
+
+                {% if appointment.family_member %}
                     <!-- Family member ki details -->
                     <div class="info-box">
                         <div class="label">Full Name</div>
@@ -133,7 +144,7 @@
                         </div>
                     </div>
 
-                    {% else %}
+                {% else %}
                     <!-- Self booking -->
                     <div class="info-box">
                         <div class="label">Full Name</div>
@@ -166,10 +177,10 @@
                         <div class="value">{{ appointment.patient.bld_grop }}</div>
                     </div>
                     {% endif %}
-                    {% endif %}
+                {% endif %}
 
-                </div>
             </div>
+        </div>
 
             <!-- Doctor Info -->
             <div class="detail-section mb-0">
@@ -191,7 +202,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- ── Card 2: Visit Details ── -->
@@ -343,7 +353,92 @@
         </div>
         {% endif %}
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 
+    <!-- ── Card 2: Visit Details ── -->
+    {% if visit %}
+    <div class="detail-card mb-4">
+        <div class="detail-section mb-0">
+            <div class="section-title"><i class="fas fa-stethoscope"></i> Visit Details</div>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="label">Visit Status</div>
+                    <div class="value"><span class="visit-badge">{{ visit.visted_status|capfirst }}</span></div>
+                </div>
+                <div class="info-box">
+                    <div class="label">Visit Date</div>
+                    <div class="value">{{ visit.created_at|date:"d M Y" }}</div>
+                </div>
+            </div>
+            {% if visit.symptoms %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Symptoms</div>
+                    <div class="value">{{ visit.symptoms }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if visit.diagnosis %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Diagnosis</div>
+                    <div class="value">{{ visit.diagnosis }}</div>
+                </div>
+            </div>
+            {% endif %}
+            {% if visit.notes %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Doctor's Notes</div>
+                    <div class="value">{{ visit.notes }}</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Card 3: Prescription ── -->
+    {% if prescription and prescription_items %}
+    <div class="detail-card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="section-title mb-0"><i class="fas fa-prescription-bottle-alt"></i> Prescription</div>
+            <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-print"></i> Print
+            </a>
+        </div>
+        <div style="overflow-x:auto;border-radius:8px;border:1px solid var(--border);">
+            <table class="rx-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Type</th>
+                        <th>Power</th>
+                        <th>Dosage</th>
+                        <th>Days</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prescription_items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{% if item.medicine_variant %}{{ item.medicine_variant.medicine.name }}{% else %}—{% endif %}</td>
+                        <td>{% if item.medicine_variant %}{{ item.medicine_variant.medicine.get_medicine_type_display }}{% else %}—{% endif %}</td>
+                        <td>{% if item.medicine_variant %}{{ item.medicine_variant.power }}{% else %}—{% endif %}</td>
+                        <td>{{ item.dosage }}</td>
+                        <td>{{ item.days }} days</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-2" style="font-size:0.8rem;color:var(--muted);">
+            Prescribed on: {{ prescription.created_at|date:"d M Y" }}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

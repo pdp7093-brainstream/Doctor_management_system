@@ -920,28 +920,15 @@ def appointment_detail(request, hid):
                 'medicine_variant__medicine'
             ).all()
 
-            # Parse dosage for template display
-            for item in prescription_items:
-                try:
-                    parts = item.dosage.split(' (')
-                    dose_parts = [int(part) for part in parts[0].split('-')]
-                    meal = parts[1].replace(')', '') if len(parts) > 1 else 'after_food'
-                except Exception:
-                    dose_parts = []
-                    meal = 'after_food'
-
-                item.parsed_morning = dose_parts[0] if len(dose_parts) > 0 else 0
-                item.parsed_afternoon = dose_parts[1] if len(dose_parts) > 1 else 0
-                item.parsed_evening = dose_parts[2] if len(dose_parts) > 3 else 0
-                night_index = 3 if len(dose_parts) > 3 else 2
-                item.parsed_night = dose_parts[night_index] if len(dose_parts) > night_index else 0
-                item.parsed_meal = meal
+    from doctor.models import InnerMember
+    default_doctor = InnerMember.objects.filter(role='doctor').first()
 
     return render(request, 'pdashboard/appointment_details.html', {
         'appointment'       : appointment,
         'visit'             : visit,
         'prescription'      : prescription,
         'prescription_items': prescription_items,
+        'default_doctor'    : default_doctor,
     })
 
 # ─────────────────────────────────────────
@@ -967,9 +954,13 @@ def print_prescription(request, hid):
     
     settings = ClinicSettings.get()
     
+    from doctor.models import InnerMember
+    default_doctor = InnerMember.objects.filter(role='doctor').first()
+    
     return render(request, 'appointment/prescription_print.html', {
         'visit': visit,
         'prescription': prescription,
         'prescription_items': prescription_items,
         'clinic': settings,
+        'default_doctor': default_doctor,
     })
