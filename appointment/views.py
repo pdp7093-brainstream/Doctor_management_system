@@ -920,11 +920,15 @@ def appointment_detail(request, hid):
                 'medicine_variant__medicine'
             ).all()
 
+    from doctor.models import InnerMember
+    default_doctor = InnerMember.objects.filter(role='doctor').first()
+
     return render(request, 'pdashboard/appointment_details.html', {
         'appointment'       : appointment,
         'visit'             : visit,
         'prescription'      : prescription,
         'prescription_items': prescription_items,
+        'default_doctor'    : default_doctor,
     })
 
 # ─────────────────────────────────────────
@@ -950,9 +954,13 @@ def print_prescription(request, hid):
     
     settings = ClinicSettings.get()
     
+    from doctor.models import InnerMember
+    default_doctor = InnerMember.objects.filter(role='doctor').first()
+    
     return render(request, 'appointment/prescription_print.html', {
         'visit': visit,
         'prescription': prescription,
         'prescription_items': prescription_items,
         'clinic': settings,
+        'default_doctor': default_doctor,
     })

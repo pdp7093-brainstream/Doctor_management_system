@@ -138,20 +138,7 @@
 </style>
 
 <script>
-    // Show Django messages via SweetAlert (if available)
-    (function(){
-        {% if messages %}
-            {% for m in messages %}
-                Swal.fire({
-                    icon: '{% if 'success' in m.tags %}success{% elif 'error' in m.tags %}error{% else %}info{% endif %}',
-                    title: `{% if 'success' in m.tags %}Success{% elif 'error' in m.tags %}Error{% else %}Info{% endif %}`,
-                    text: '{{ m|escapejs }}',
-                    timer: 2500,
-                    showConfirmButton: false
-                });
-            {% endfor %}
-        {% endif %}
-    })();
+
 
     // Delete category with SweetAlert confirmation
     (function(){
