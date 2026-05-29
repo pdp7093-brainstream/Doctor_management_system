@@ -1,657 +1,657 @@
 {% load static %}
-  <!DOCTYPE html>
-  <html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 
-  <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Appointment - Clinic Bootstrap Template</title>
-    <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-    <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
-    <link href="https://fonts.googleapis.com" rel="preconnect">
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
-      rel="stylesheet">
-    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
-    <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Appointment - Clinic Bootstrap Template</title>
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
+    rel="stylesheet">
+  <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
 
-    <style>
-      .time-btn {
-        font-size: 11px !important;
-        padding: 5px 2px !important;
-        white-space: nowrap;
-        margin-bottom: 5px;
-        font-weight: bolder;
+  <style>
+    .time-btn {
+      font-size: 11px !important;
+      padding: 5px 2px !important;
+      white-space: nowrap;
+      margin-bottom: 5px;
+      font-weight: bolder;
+    }
+
+    @media (max-width: 576px) {
+      .row-cols-3>* {
+        flex: 0 0 auto;
+        width: 33.333333%;
+      }
+    }
+
+    /* ── Patient Selector ── */
+    .patient-selector-label {
+      font-weight: 600;
+      font-size: 0.88rem;
+      color: #555;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .patient-selector-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .patient-selector-wrapper select {
+      flex: 1;
+    }
+
+    .btn-add-member {
+      white-space: nowrap;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 9px 14px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1.5px solid #007aff;
+      color: #007aff;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-add-member:hover {
+      background: #007aff;
+      color: #fff;
+    }
+
+    /* ── Add Member Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+      animation: slideUp 0.25s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
       }
 
-      @media (max-width: 576px) {
-        .row-cols-3>* {
-          flex: 0 0 auto;
-          width: 33.333333%;
-        }
+      to {
+        transform: translateY(0);
+        opacity: 1;
       }
+    }
 
-      /* ── Patient Selector ── */
-      .patient-selector-label {
-        font-weight: 600;
-        font-size: 0.88rem;
-        color: #555;
-        margin-bottom: 6px;
-        display: block;
-      }
+    .modal-box h5 {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 18px;
+      color: #1a2035;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-      .patient-selector-wrapper {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-      }
+    .modal-box h5 i {
+      color: #007aff;
+    }
 
-      .patient-selector-wrapper select {
-        flex: 1;
-      }
+    .modal-field {
+      margin-bottom: 14px;
+    }
 
-      .btn-add-member {
-        white-space: nowrap;
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 9px 14px;
-        border-radius: 8px;
-        background: transparent;
-        border: 1.5px solid #007aff;
-        color: #007aff;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
+    .modal-field label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #666;
+      display: block;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
 
-      .btn-add-member:hover {
-        background: #007aff;
-        color: #fff;
-      }
+    .modal-field input,
+    .modal-field select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #e2eaff;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      background: #f7f9ff;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
 
-      /* ── Add Member Modal ── */
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.45);
-        z-index: 9999;
-        align-items: center;
-        justify-content: center;
-      }
+    .modal-field input:focus,
+    .modal-field select:focus {
+      border-color: #007aff;
+      outline: none;
+      background: #fff;
+    }
 
-      .modal-overlay.active {
-        display: flex;
-      }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
 
-      .modal-box {
-        background: #fff;
-        border-radius: 14px;
-        padding: 28px;
-        width: 100%;
-        max-width: 420px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-        animation: slideUp 0.25s ease;
-      }
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
 
-      @keyframes slideUp {
-        from {
-          transform: translateY(20px);
-          opacity: 0;
-        }
+    .modal-actions .btn-save {
+      background: #007aff;
+      color: #fff;
+    }
 
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
+    .modal-actions .btn-save:hover {
+      opacity: 0.88;
+    }
 
-      .modal-box h5 {
-        font-weight: 700;
-        font-size: 1.1rem;
-        margin-bottom: 18px;
-        color: #1a2035;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
+    .modal-actions .btn-close-modal {
+      background: #f0f4ff;
+      color: #555;
+      border: 1.5px solid #e2eaff;
+    }
 
-      .modal-box h5 i {
-        color: #007aff;
-      }
+    .modal-actions .btn-close-modal:hover {
+      background: #e2eaff;
+    }
+  </style>
+</head>
 
-      .modal-field {
-        margin-bottom: 14px;
-      }
+<body class="appointment-page">
 
-      .modal-field label {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #666;
-        display: block;
-        margin-bottom: 5px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
+  {% include 'header.html' %}
 
-      .modal-field input,
-      .modal-field select {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1.5px solid #e2eaff;
-        border-radius: 8px;
-        font-size: 0.92rem;
-        background: #f7f9ff;
-        transition: border-color 0.2s;
-        font-family: inherit;
-      }
+  <main class="main">
 
-      .modal-field input:focus,
-      .modal-field select:focus {
-        border-color: #007aff;
-        outline: none;
-        background: #fff;
-      }
-
-      .modal-actions {
-        display: flex;
-        gap: 10px;
-        margin-top: 20px;
-      }
-
-      .modal-actions button {
-        flex: 1;
-        padding: 10px;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        border: none;
-        cursor: pointer;
-        transition: opacity 0.2s;
-      }
-
-      .modal-actions .btn-save {
-        background: #007aff;
-        color: #fff;
-      }
-
-      .modal-actions .btn-save:hover {
-        opacity: 0.88;
-      }
-
-      .modal-actions .btn-close-modal {
-        background: #f0f4ff;
-        color: #555;
-        border: 1.5px solid #e2eaff;
-      }
-
-      .modal-actions .btn-close-modal:hover {
-        background: #e2eaff;
-      }
-    </style>
-  </head>
-
-  <body class="appointment-page">
-
-    {% include 'header.html' %}
-
-    <main class="main">
-
-      <!-- Page Title -->
-      <div class="page-title">
-        <div class="heading">
-          <div class="container">
-            <div class="row d-flex justify-content-center text-center">
-              <div class="col-lg-8">
-                <h1 class="heading-title">Appointment</h1>
-                <p class="mb-0">Book your appointment easily. You can also book for a family member.</p>
-              </div>
+    <!-- Page Title -->
+    <div class="page-title">
+      <div class="heading">
+        <div class="container">
+          <div class="row d-flex justify-content-center text-center">
+            <div class="col-lg-8">
+              <h1 class="heading-title">Appointment</h1>
+              <p class="mb-0">Book your appointment easily. You can also book for a family member.</p>
             </div>
           </div>
         </div>
-        <nav class="breadcrumbs">
-          <div class="container">
-            <ol>
-              <li><a href="#">Home</a></li>
-              <li class="current">Appointment</li>
-            </ol>
-          </div>
-        </nav>
       </div>
-
-      <!-- Appointment Section -->
-      <section id="appointmnet" class="appointmnet section">
-        <div class="container" data-aos="fade-up" data-aos-delay="100">
-          <div class="row">
-            <div class="col-lg-8 mx-auto">
-              <div class="booking-wrapper">
-
-                <div class="booking-header text-center" data-aos="fade-up" data-aos-delay="200">
-                  <h2>Schedule Your Appointment</h2>
-                  <p>Book your medical appointment in just a few simple steps.</p>
-                </div>
-
-                <div class="booking-steps" data-aos="fade-up" data-aos-delay="300">
-                  <div class="step">
-                    <div class="step-icon"><i class="bi bi-calendar-check"></i></div>
-                    <div class="step-content">
-                      <h4>Enter Details</h4>
-                      <p>Choose who the appointment is for</p>
-                    </div>
-                  </div>
-                  <div class="step">
-                    <div class="step-icon"><i class="bi bi-clock"></i></div>
-                    <div class="step-content">
-                      <h4>Pick Date &amp; Time</h4>
-                      <p>Select your preferred slot</p>
-                    </div>
-                  </div>
-                  <div class="step">
-                    <div class="step-icon"><i class="bi bi-person-check"></i></div>
-                    <div class="step-content">
-                      <h4>Confirm Details</h4>
-                      <p>Review and confirm</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="appointment-form" data-aos="fade-up" data-aos-delay="400">
-
-                  
-{% if messages %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        {% for message in messages %}
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
-                title: '{{ message|escapejs }}',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            });
-        {% endfor %}
-    });
-</script>
-{% endif %}
-
-
-                  <form method="POST" id="appointmentForm">
-                    {% csrf_token %}
-
-                    <div class="row gy-4">
-
-                      <!-- ── Patient Selector ── -->
-                      <div class="col-12">
-                        <span class="patient-selector-label">Booking For</span>
-                        <div class="patient-selector-wrapper">
-                          <select name="for_whom" id="forWhomSelect" class="form-control" required>
-                            <!-- Myself -->
-                            <option value="self" data-phone="{{ request.user.patient.phone }}">
-                              Myself — {{ request.user.get_full_name|default:request.user.username }}
-                            </option>
-                            <!-- Family Members -->
-                            {% for member in family_members %}
-                            <option value="member_{{ member.id }}" data-phone="{{ member.phone }}"
-                              data-name="{{ member.name }}">
-                              {{ member.name }} ({{ member.relation }})
-                            </option>
-                            {% endfor %}
-                          </select>
-                          <button type="button" class="btn-add-member" id="openAddMember">
-                            <i class="bi bi-person-plus"></i> + Family Member
-                          </button>
-                        </div>
-                        <!-- Hidden fields filled by JS -->
-                        <input type="hidden" name="name" id="hiddenName">
-                        <input type="hidden" name="phone" id="hiddenPhone">
-                        <input type="hidden" name="family_member_id" id="hiddenFamilyMemberId">
-                      </div>
-
-                      <!-- Email -->
-                      <div class="col-md-12">
-                        <input type="email" name="email" class="form-control" placeholder="Email Address"
-                          value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
-                      </div>
-
-                      <!-- Date -->
-                      <div class="col-md-12">
-                        <input type="date" name="date" id="appointment_date" class="form-control" required>
-                      </div>
-
-                      <!-- Time Slots -->
-                      <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
-                        <label><strong>Select Preferred Time:</strong></label>
-                        <div class="row g-2 row-cols-3 row-cols-md-6" id="time_buttons_container"></div>
-                      </div>
-                      <input type="hidden" name="time_slot" id="selected_time">
-
-                      <!-- Notes -->
-                      <div class="col-12">
-                        <textarea name="message" class="form-control" rows="4" placeholder="Notes (optional)"></textarea>
-                      </div>
-
-                      <button type="button" id="submitBtn" class="btn btn-primary btn-lg w-100">
-                        Book Appointment
-                      </button>
-
-                    </div>
-                  </form>
-                </div>
-
-                <div class="emergency-info" data-aos="fade-up" data-aos-delay="500">
-                  <p><i class="bi bi-exclamation-triangle"></i> For medical emergencies, please call <strong>911</strong>
-                    or go to the nearest emergency room.</p>
-                </div>
-
-              </div>
-            </div>
-          </div>
+      <nav class="breadcrumbs">
+        <div class="container">
+          <ol>
+            <li><a href="#">Home</a></li>
+            <li class="current">Appointment</li>
+          </ol>
         </div>
-      </section>
-
-    </main>
-
-    {% include 'footer.html' %}
-
-    <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
-      <i class="bi bi-arrow-up-short"></i>
-    </a>
-
-    <!-- ══════════════════════════════════════
-        Add Family Member Modal
-    ══════════════════════════════════════ -->
-    <div class="modal-overlay" id="addMemberModal">
-      <div class="modal-box">
-        <h5><i class="bi bi-person-plus-fill"></i> Add Family Member</h5>
-
-        <div class="modal-field">
-          <label>Full Name *</label>
-          <input type="text" id="memberName" placeholder="e.g. Priya Shah">
-        </div>
-        <div class="modal-field">
-          <label>Relation *</label>
-          <select id="memberRelation">
-            <option value="">Select Relation</option>
-            <option value="Wife">Wife</option>
-            <option value="Husband">Husband</option>
-            <option value="Son">Son</option>
-            <option value="Daughter">Daughter</option>
-            <option value="Father">Father</option>
-            <option value="Mother">Mother</option>
-            <option value="Brother">Brother</option>
-            <option value="Sister">Sister</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Phone Number</label>
-          <input type="tel" id="memberPhone" placeholder="e.g. 9876543210" maxlength="15">
-        </div>
-        <div class="modal-field">
-          <label>Gender</label>
-          <select id="memberGender">
-            <option value="">Select Gender</option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <div class="modal-field">
-          <label>Date of Birth</label>
-          <input type="date" id="memberDob">
-        </div>
-        <div class="modal-field">
-          <label>Blood Group</label>
-          <select id="memberBloodGroup">
-            <option value="">Select Blood Group</option>
-            <option value="A+">A+</option>
-            <option value="A-">A-</option>
-            <option value="B+">B+</option>
-            <option value="B-">B-</option>
-            <option value="O+">O+</option>
-            <option value="O-">O-</option>
-            <option value="AB+">AB+</option>
-            <option value="AB-">AB-</option>
-          </select>
-        </div>
-
-        <div id="memberError" style="color:#dc2626; font-size:0.85rem; display:none; margin-top:6px;"></div>
-
-        <div class="modal-actions">
-          <button class="btn-close-modal" id="closeAddMember">Cancel</button>
-          <button class="btn-save" id="saveMember">Save Member</button>
-        </div>
-      </div>
+      </nav>
     </div>
 
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'assets/aos/aos.js' %}"></script>
-    <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
-    <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-    <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
-    <script src="{% static 'assets/js/main.js' %}"></script>
+    <!-- Appointment Section -->
+    <section id="appointmnet" class="appointmnet section">
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row">
+          <div class="col-lg-8 mx-auto">
+            <div class="booking-wrapper">
 
-    <script>
-      // ── Sync hidden fields from dropdown ──────────────────
-      const forWhomSelect = document.getElementById('forWhomSelect');
-      const hiddenName = document.getElementById('hiddenName');
-      const hiddenPhone = document.getElementById('hiddenPhone');
-      const hiddenFamilyMember = document.getElementById('hiddenFamilyMemberId');
+              <div class="booking-header text-center" data-aos="fade-up" data-aos-delay="200">
+                <h2>Schedule Your Appointment</h2>
+                <p>Book your medical appointment in just a few simple steps.</p>
+              </div>
 
-      const selfName = "{{ request.user.get_full_name|default:request.user.username }}";
-      const selfPhone = "{{ request.user.patient.phone }}";
+              <div class="booking-steps" data-aos="fade-up" data-aos-delay="300">
+                <div class="step">
+                  <div class="step-icon"><i class="bi bi-calendar-check"></i></div>
+                  <div class="step-content">
+                    <h4>Enter Details</h4>
+                    <p>Choose who the appointment is for</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-icon"><i class="bi bi-clock"></i></div>
+                  <div class="step-content">
+                    <h4>Pick Date &amp; Time</h4>
+                    <p>Select your preferred slot</p>
+                  </div>
+                </div>
+                <div class="step">
+                  <div class="step-icon"><i class="bi bi-person-check"></i></div>
+                  <div class="step-content">
+                    <h4>Confirm Details</h4>
+                    <p>Review and confirm</p>
+                  </div>
+                </div>
+              </div>
 
-      function syncHiddenFields() {
-        const selected = forWhomSelect.options[forWhomSelect.selectedIndex];
-        const value = selected.value;
-
-        if (value === 'self') {
-          hiddenName.value = selfName;
-          hiddenPhone.value = selfPhone;
-          hiddenFamilyMember.value = '';
-        } else {
-          // value = "member_<id>"
-          hiddenName.value = selected.dataset.name;
-          hiddenPhone.value = selected.dataset.phone || '';
-          hiddenFamilyMember.value = value.replace('member_', '');
-        }
-      }
-
-      // Init on load
-      syncHiddenFields();
-      forWhomSelect.addEventListener('change', syncHiddenFields);
+              <div class="appointment-form" data-aos="fade-up" data-aos-delay="400">
 
 
-      // ── Date → Time Slots ─────────────────────────────────
-      document.addEventListener('DOMContentLoaded', function () {
-        const dateInput = document.getElementById('appointment_date');
-        const container = document.getElementById('time_buttons_container');
-        const wrapper = document.getElementById('time-slot-wrapper');
-        const hiddenTime = document.getElementById('selected_time');
-
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.setAttribute('min', today);
-
-        dateInput.addEventListener('change', function () {
-          const date = this.value;
-          hiddenTime.value = '';
-          if (!date) { wrapper.style.display = 'none'; return; }
-
-          wrapper.style.display = 'block';
-
-          fetch(`/appointment/get-slots/?appointment_date=${date}`, { cache: 'no-store' })
-            .then(res => res.json())
-            .then(data => {
-              container.innerHTML = '';
-              if (!data.slots || data.slots.length === 0) {
-                container.innerHTML = '<p class="text-muted">No slots available for this date.</p>';
-                return;
-              }
-
-              data.slots.forEach(slot => {
-                // Backend already returns 12-hour format e.g. "05:00 PM"
-                let col = document.createElement('div');
-                col.className = 'col';
-
-                let btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'btn btn-outline-primary w-100 time-btn';
-                btn.innerText = slot;
-                btn.dataset.time = slot;
-
-                btn.onclick = function (e) {
-                  e.preventDefault();
-                  document.querySelectorAll('.time-btn').forEach(b => {
-                    b.classList.remove('btn-primary');
-                    b.classList.add('btn-outline-primary');
+                {% if messages %}
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                  document.addEventListener("DOMContentLoaded", function () {
+                    {% for message in messages %}
+                    Swal.fire({
+                      toast: true,
+                      position: 'top-end',
+                      icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+                      title: '{{ message|escapejs }}',
+                      showConfirmButton: false,
+                      timer: 3000,
+                      timerProgressBar: true,
+                    });
+                    {% endfor %}
                   });
-                  btn.classList.remove('btn-outline-primary');
-                  btn.classList.add('btn-primary');
-                  hiddenTime.value = slot;  // FIX: Use 'slot' instead of undefined 'displayTime'
-                };
-
-                col.appendChild(btn);
-                container.appendChild(col);
-              });
-            })
-            .catch(err => console.error('Slot error:', err));
-        });
-      });
+                </script>
+                {% endif %}
 
 
-      // ── Add Member Modal ──────────────────────────────────
-      const modal = document.getElementById('addMemberModal');
-      const openBtn = document.getElementById('openAddMember');
-      const closeBtn = document.getElementById('closeAddMember');
-      const saveBtn = document.getElementById('saveMember');
-      const memberError = document.getElementById('memberError');
+                <form method="POST" id="appointmentForm">
+                  {% csrf_token %}
 
-      openBtn.addEventListener('click', () => {
-        modal.classList.add('active');
-        document.getElementById('memberName').value = '';
-        document.getElementById('memberRelation').value = '';
-        document.getElementById('memberPhone').value = '';
-        memberError.style.display = 'none';
-      });
+                  <div class="row gy-4">
 
-      closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+                    <!-- ── Patient Selector ── -->
+                    <div class="col-12">
+                      <span class="patient-selector-label">Booking For</span>
+                      <div class="patient-selector-wrapper">
+                        <select name="for_whom" id="forWhomSelect" class="form-control" required>
+                          <!-- Myself -->
+                          <option value="self" data-phone="{{ request.user.patient.phone }}">
+                            Myself — {{ request.user.get_full_name|default:request.user.username }}
+                          </option>
+                          <!-- Family Members -->
+                          {% for member in family_members %}
+                          <option value="member_{{ member.id }}" data-phone="{{ member.phone }}"
+                            data-name="{{ member.name }}">
+                            {{ member.name }} ({{ member.relation }})
+                          </option>
+                          {% endfor %}
+                        </select>
+                        <button type="button" class="btn-add-member" id="openAddMember">
+                          <i class="bi bi-person-plus"></i> + Family Member
+                        </button>
+                      </div>
+                      <!-- Hidden fields filled by JS -->
+                      <input type="hidden" name="name" id="hiddenName">
+                      <input type="hidden" name="phone" id="hiddenPhone">
+                      <input type="hidden" name="family_member_id" id="hiddenFamilyMemberId">
+                    </div>
 
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.classList.remove('active');
-      });
+                    <!-- Email -->
+                    <div class="col-md-12">
+                      <input type="email" name="email" class="form-control" placeholder="Email Address"
+                        value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+                    </div>
 
-      saveBtn.addEventListener('click', function () {
-        const name = document.getElementById('memberName').value.trim();
-        const relation = document.getElementById('memberRelation').value;
-        const phone = document.getElementById('memberPhone').value.trim();
-        const gender = document.getElementById('memberGender').value;
-        const dob = document.getElementById('memberDob').value;
-        const bld_grop = document.getElementById('memberBloodGroup').value;
+                    <!-- Date -->
+                    <div class="col-md-12">
+                      <input type="date" name="date" id="appointment_date" class="form-control" required>
+                    </div>
 
-        // Basic validation
-        if (!name || !relation) {
-          memberError.textContent = 'Name and Relation are required.';
-          memberError.style.display = 'block';
-          return;
-        }
+                    <!-- Time Slots -->
+                    <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
+                      <label><strong>Select Preferred Time:</strong></label>
+                      <div class="row g-2 row-cols-3 row-cols-md-6" id="time_buttons_container"></div>
+                    </div>
+                    <input type="hidden" name="time_slot" id="selected_time">
 
-        memberError.style.display = 'none';
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving...';
+                    <!-- Notes -->
+                    <div class="col-12">
+                      <textarea name="message" class="form-control" rows="4" placeholder="Notes (optional)"></textarea>
+                    </div>
 
-        fetch("{% url 'add_family_member' %}", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}',
-          },
-        body: JSON.stringify({ name, relation, phone, gender, dob, bld_grop }),
-        })
+                    <button type="button" id="submitBtn" class="btn btn-primary btn-lg w-100">
+                      Book Appointment
+                    </button>
+
+                  </div>
+                </form>
+              </div>
+
+              <div class="emergency-info" data-aos="fade-up" data-aos-delay="500">
+                <p><i class="bi bi-exclamation-triangle"></i> For medical emergencies, please call <strong>911</strong>
+                  or go to the nearest emergency room.</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  {% include 'footer.html' %}
+
+  <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
+    <i class="bi bi-arrow-up-short"></i>
+  </a>
+
+  <!-- ══════════════════════════════════════
+        Add Family Member Modal
+    ══════════════════════════════════════ -->
+  <div class="modal-overlay" id="addMemberModal">
+    <div class="modal-box">
+      <h5><i class="bi bi-person-plus-fill"></i> Add Family Member</h5>
+
+      <div class="modal-field">
+        <label>Full Name *</label>
+        <input type="text" id="memberName" placeholder="e.g. Priya Shah">
+      </div>
+      <div class="modal-field">
+        <label>Relation *</label>
+        <select id="memberRelation">
+          <option value="">Select Relation</option>
+          <option value="Wife">Wife</option>
+          <option value="Husband">Husband</option>
+          <option value="Son">Son</option>
+          <option value="Daughter">Daughter</option>
+          <option value="Father">Father</option>
+          <option value="Mother">Mother</option>
+          <option value="Brother">Brother</option>
+          <option value="Sister">Sister</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Phone Number</label>
+        <input type="tel" id="memberPhone" placeholder="e.g. 9876543210" maxlength="15">
+      </div>
+      <div class="modal-field">
+        <label>Gender</label>
+        <select id="memberGender">
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label>Date of Birth</label>
+        <input type="date" id="memberDob">
+      </div>
+      <div class="modal-field">
+        <label>Blood Group</label>
+        <select id="memberBloodGroup">
+          <option value="">Select Blood Group</option>
+          <option value="A+">A+</option>
+          <option value="A-">A-</option>
+          <option value="B+">B+</option>
+          <option value="B-">B-</option>
+          <option value="O+">O+</option>
+          <option value="O-">O-</option>
+          <option value="AB+">AB+</option>
+          <option value="AB-">AB-</option>
+        </select>
+      </div>
+
+      <div id="memberError" style="color:#dc2626; font-size:0.85rem; display:none; margin-top:6px;"></div>
+
+      <div class="modal-actions">
+        <button class="btn-close-modal" id="closeAddMember">Cancel</button>
+        <button class="btn-save" id="saveMember">Save Member</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'assets/aos/aos.js' %}"></script>
+  <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
+  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
+  <script src="{% static 'assets/js/main.js' %}"></script>
+
+  <script>
+    // ── Sync hidden fields from dropdown ──────────────────
+    const forWhomSelect = document.getElementById('forWhomSelect');
+    const hiddenName = document.getElementById('hiddenName');
+    const hiddenPhone = document.getElementById('hiddenPhone');
+    const hiddenFamilyMember = document.getElementById('hiddenFamilyMemberId');
+
+    const selfName = "{{ request.user.get_full_name|default:request.user.username }}";
+    const selfPhone = "{{ request.user.patient.phone }}";
+
+    function syncHiddenFields() {
+      const selected = forWhomSelect.options[forWhomSelect.selectedIndex];
+      const value = selected.value;
+
+      if (value === 'self') {
+        hiddenName.value = selfName;
+        hiddenPhone.value = selfPhone;
+        hiddenFamilyMember.value = '';
+      } else {
+        // value = "member_<id>"
+        hiddenName.value = selected.dataset.name;
+        hiddenPhone.value = selected.dataset.phone || '';
+        hiddenFamilyMember.value = value.replace('member_', '');
+      }
+    }
+
+    // Init on load
+    syncHiddenFields();
+    forWhomSelect.addEventListener('change', syncHiddenFields);
+
+
+    // ── Date → Time Slots ─────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function () {
+      const dateInput = document.getElementById('appointment_date');
+      const container = document.getElementById('time_buttons_container');
+      const wrapper = document.getElementById('time-slot-wrapper');
+      const hiddenTime = document.getElementById('selected_time');
+
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.setAttribute('min', today);
+
+      dateInput.addEventListener('change', function () {
+        const date = this.value;
+        hiddenTime.value = '';
+        if (!date) { wrapper.style.display = 'none'; return; }
+
+        wrapper.style.display = 'block';
+
+        fetch(`/appointment/get-slots/?appointment_date=${date}`, { cache: 'no-store' })
           .then(res => res.json())
           .then(data => {
-            if (data.success) {
-              // Add new option to dropdown and select it
-              const option = document.createElement('option');
-              option.value = `member_${data.member.id}`;
-              option.dataset.name = data.member.name;
-              option.dataset.phone = data.member.phone;
-              option.textContent = `${data.member.name} (${data.member.relation})`;
-
-              forWhomSelect.appendChild(option);
-              forWhomSelect.value = `member_${data.member.id}`;
-              syncHiddenFields();
-
-              modal.classList.remove('active');
-
-              Swal.fire({
-                icon: 'success',
-                title: 'Member Added!',
-                text: `${data.member.name} has been added.`,
-                timer: 2000,
-                showConfirmButton: false,
-              });
-            } else {
-              memberError.textContent = data.error || 'Something went wrong.';
-              memberError.style.display = 'block';
+            container.innerHTML = '';
+            if (!data.slots || data.slots.length === 0) {
+              container.innerHTML = '<p class="text-muted">No slots available for this date.</p>';
+              return;
             }
-          })
-          .catch(() => {
-            memberError.textContent = 'Network error. Please try again.';
-            memberError.style.display = 'block';
-          })
-          .finally(() => {
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Member';
-          });
-      });
 
+            data.slots.forEach(slot => {
+              // Backend already returns 12-hour format e.g. "05:00 PM"
+              let col = document.createElement('div');
+              col.className = 'col';
 
-      // ── Submit with SweetAlert confirm ───────────────────
-      document.getElementById('submitBtn').addEventListener('click', function () {
-        const name = hiddenName.value;
-        const date = document.getElementById('appointment_date').value;
-        const time = document.getElementById('selected_time').value;
+              let btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'btn btn-outline-primary w-100 time-btn';
+              btn.innerText = slot;
+              btn.dataset.time = slot;
 
-        if (!name || !date || !time) {
-          Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please fill all fields and select a time slot!' });
-          return;
-        }
+              btn.onclick = function (e) {
+                e.preventDefault();
+                document.querySelectorAll('.time-btn').forEach(b => {
+                  b.classList.remove('btn-primary');
+                  b.classList.add('btn-outline-primary');
+                });
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary');
+                hiddenTime.value = slot;  // FIX: Use 'slot' instead of undefined 'displayTime'
+              };
 
-        Swal.fire({
-          title: 'Confirm Appointment',
-          html: `<p><strong>For:</strong> ${name}</p><p><strong>Date:</strong> ${date}</p><p><strong>Time:</strong> ${time}</p>`,
-          icon: 'info',
-          showCancelButton: true,
-          confirmButtonText: 'Confirm Booking',
-          confirmButtonColor: '#28a745',
-        }).then(result => {
-          if (result.isConfirmed) {
-            Swal.fire({
-              title: 'Booking...',
-              html: '❤️ Processing your appointment...',
-              allowOutsideClick: false,
-              showConfirmButton: false,
-              didOpen: () => Swal.showLoading(),
+              col.appendChild(btn);
+              container.appendChild(col);
             });
-            setTimeout(() => document.getElementById('appointmentForm').submit(), 1500);
-          }
-        });
+          })
+          .catch(err => console.error('Slot error:', err));
       });
-    </script>
+    });
 
-  </body>
 
-  </html>
+    // ── Add Member Modal ──────────────────────────────────
+    const modal = document.getElementById('addMemberModal');
+    const openBtn = document.getElementById('openAddMember');
+    const closeBtn = document.getElementById('closeAddMember');
+    const saveBtn = document.getElementById('saveMember');
+    const memberError = document.getElementById('memberError');
+
+    openBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+      document.getElementById('memberName').value = '';
+      document.getElementById('memberRelation').value = '';
+      document.getElementById('memberPhone').value = '';
+      memberError.style.display = 'none';
+    });
+
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+
+    saveBtn.addEventListener('click', function () {
+      const name = document.getElementById('memberName').value.trim();
+      const relation = document.getElementById('memberRelation').value;
+      const phone = document.getElementById('memberPhone').value.trim();
+      const gender = document.getElementById('memberGender').value;
+      const dob = document.getElementById('memberDob').value;
+      const bld_grop = document.getElementById('memberBloodGroup').value;
+
+      // Basic validation
+      if (!name || !relation) {
+        memberError.textContent = 'Name and Relation are required.';
+        memberError.style.display = 'block';
+        return;
+      }
+
+      memberError.style.display = 'none';
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      fetch("{% url 'add_family_member' %}", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({ name, relation, phone, gender, dob, bld_grop }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            // Add new option to dropdown and select it
+            const option = document.createElement('option');
+            option.value = `member_${data.member.id}`;
+            option.dataset.name = data.member.name;
+            option.dataset.phone = data.member.phone;
+            option.textContent = `${data.member.name} (${data.member.relation})`;
+
+            forWhomSelect.appendChild(option);
+            forWhomSelect.value = `member_${data.member.id}`;
+            syncHiddenFields();
+
+            modal.classList.remove('active');
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Member Added!',
+              text: `${data.member.name} has been added.`,
+              timer: 2000,
+              showConfirmButton: false,
+            });
+          } else {
+            memberError.textContent = data.error || 'Something went wrong.';
+            memberError.style.display = 'block';
+          }
+        })
+        .catch(() => {
+          memberError.textContent = 'Network error. Please try again.';
+          memberError.style.display = 'block';
+        })
+        .finally(() => {
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Member';
+        });
+    });
+
+
+    // ── Submit with SweetAlert confirm ───────────────────
+    document.getElementById('submitBtn').addEventListener('click', function () {
+      const name = hiddenName.value;
+      const date = document.getElementById('appointment_date').value;
+      const time = document.getElementById('selected_time').value;
+
+      if (!name || !date || !time) {
+        Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please fill all fields and select a time slot!' });
+        return;
+      }
+
+      Swal.fire({
+        title: 'Confirm Appointment',
+        html: `<p><strong>For:</strong> ${name}</p><p><strong>Date:</strong> ${date}</p><p><strong>Time:</strong> ${time}</p>`,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Confirm Booking',
+        confirmButtonColor: '#28a745',
+      }).then(result => {
+        if (result.isConfirmed) {
+          Swal.fire({
+            title: 'Booking...',
+            html: '❤️ Processing your appointment...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => Swal.showLoading(),
+          });
+          setTimeout(() => document.getElementById('appointmentForm').submit(), 1500);
+        }
+      });
+    });
+  </script>
+
+</body>
+
+</html>
