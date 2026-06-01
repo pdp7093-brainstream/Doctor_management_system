@@ -425,7 +425,7 @@
     <div class="signature-area">
         <div class="signature-box">
             <div class="signature-line"></div>
-            <div class="signature-name">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% else %}N/A{% endif %}</div>
+            <div class="signature-name">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% elif default_doctor %}{{ default_doctor.user.get_full_name|default:default_doctor.user.username }}{% else %}N/A{% endif %}</div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;">Signature / Stamp</div>
         </div>
     </div>

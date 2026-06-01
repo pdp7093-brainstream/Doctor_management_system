@@ -13,7 +13,7 @@ from datetime import timedelta
 from django.core.paginator import Paginator
 from django.db.models import Q, Sum
 from django.utils.dateparse import parse_date
-
+from accounts.models import Patient
 
 def appointment_patient_name(appointment):
     if appointment.family_member:
@@ -258,6 +258,55 @@ class ExportDataView(DoctorRequiredMixin, View):
 
                 return response
 
+        elif data_type == 'patients':
+            patients = Patient.objects.select_related('user').all()
+
+            if export_format == 'csv':
+                response = HttpResponse(content_type = 'text/csv')
+                response['Content-Disposition'] = ('attachment; filename = "patients.csv"')
+
+                writer = csv.writer(response)
+
+                writer.writerow(['Full Name','Email','Phone','Gender','DOB','Blood Group','Address','Registered Date'])
+
+                for patient in patients:
+                    writer.writerow([
+                        patient.user.get_full_name(),
+                        patient.user.email,
+                        patient.phone,
+                        patient.gender,
+                        patient.dob,
+                        patient.bld_grop,
+                        patient.address,
+                        patient.created_at.date() if patient.created_at else '',
+                    ])
+                return response
+            
+            elif export_format == 'xlsx':
+                workbook = create_workbook(request)
+                if workbook is None:
+                    return redirect('reports_archive:export_data')
+                
+                sheet = workbook.active
+                sheet.title = 'Patients'
+
+                sheet.append([
+                    'Full Name','Email','Phone','Gender','DOB',
+                    'Blood Group','Address','Registered Date'
+                ])
+
+                for patient in patients:
+                    sheet.append([patient.user.get_full_name(),patient.user.email,patient.phone, 
+                    patient.gender,str(patient.dob) if patient.dob else '',patient.bld_grop, 
+                    patient.address,str(patient.created_at.date()) if patient.created_at else '',])
+
+                response = HttpResponse(content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+                response['Content-Disposition'] = ('attachment; filename="patients.xlsx"')
+
+                workbook.save(response)
+
+                return response
         else:
             messages.error(request, 'Invalid export type.')
             return redirect('reports_archive:export_data')

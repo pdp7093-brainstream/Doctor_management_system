@@ -408,3 +408,4 @@ class DeleteExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
             messages.error(request, 'Failed to delete expense.')
             
         return redirect('expenses:expense_list')
+
