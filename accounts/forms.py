@@ -35,13 +35,6 @@ class RegistrationForm(forms.Form):
             'required': 'required'
         })
     )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control', 
-            'placeholder': 'Confirm Password',
-            'required': 'required'
-        })
-    )
 
     def clean_name(self):
         """Name validation"""
@@ -133,12 +126,6 @@ class RegistrationForm(forms.Form):
         cleaned_data = super().clean()
         name = cleaned_data.get("name", '').strip()
         password = cleaned_data.get("password", '')
-        confirm_password = cleaned_data.get("confirm_password", '')
-
-        # Check password match
-        if password and confirm_password:
-            if password != confirm_password:
-                raise ValidationError("Passwords do not match!")
         
         # Check password similarity to name
         if password and name:

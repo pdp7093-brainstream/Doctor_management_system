@@ -177,56 +177,58 @@
         </div>
 
         <div class="auth-body">
-            <!-- Error Message -->
-            {% if error %}
-            <div class="error-message">
-                <strong>Login Failed:</strong> {{ error }}
-            </div>
-            {% endif %}
+            <!-- Global Alert Container -->
+            <div id="alert-container"></div>
 
-            <form method="POST" action="{% url 'login' %}" novalidate>
+            <form id="login-form" novalidate>
                 {% csrf_token %}
 
-                <!-- Phone Number Field -->
-                <div class="mb-3">
-                    <label class="form-label" for="phone">Phone Number</label> <span class="helper-text">Format: 1234567890 </span>
-                    <input 
-                        type="tel" 
-                        id="phone"
-                        name="phone" 
-                        class="form-control" 
-                        placeholder="9876543210"
-                        pattern="[0-9\s\-\+\(\)]+"
-                        title="Enter a valid phone number (10-15 digits)"
-                        required
-                        autocomplete="tel"
-                    >
-                </div>
-
-                <!-- Password Field -->
-                <div class="mb-3 password-toggle-wrapper">
-                    <label class="form-label" for="password">Password</label>
-                    <input 
-                        type="password" 
-                        id="password"
-                        name="password" 
-                        class="form-control" 
-                        placeholder="Enter your password"
-                        required
-                        autocomplete="current-password"
-                    >
-                    <button type="button" class="password-toggle" aria-label="Toggle password visibility">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
-                            <path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/>
-                            <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
-                        </svg>
+                <!-- Step 1: Phone -->
+                <div id="step-phone">
+                    <div class="mb-3">
+                        <label class="form-label" for="phone">Phone Number</label> <span class="helper-text">Format: 1234567890 </span>
+                        <input 
+                            type="tel" 
+                            id="phone"
+                            name="phone" 
+                            class="form-control" 
+                            placeholder="9876543210"
+                            pattern="[0-9\s\-\+\(\)]+"
+                            required
+                            autocomplete="tel"
+                        >
+                    </div>
+                    <button type="button" id="btn-get-otp" class="btn btn-login shadow-sm">
+                        Get OTP
                     </button>
                 </div>
 
-                <!-- Login Button -->
-                <button type="submit" class="btn btn-login shadow-sm">
-                    Login
-                </button>
+                <!-- Step 2: OTP (Hidden initially) -->
+                <div id="step-otp" style="display: none;">
+                    <div id="otp-alert" class="alert alert-success py-2 text-center" style="background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 15px; display: none;">
+                        OTP has been generated: <strong id="debug-otp-display"></strong><br>
+                        <small>Please enter it below.</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label" for="otp">Enter OTP</label>
+                        <input 
+                            type="text" 
+                            id="otp"
+                            name="otp" 
+                            class="form-control" 
+                            placeholder="6-digit OTP" 
+                            maxlength="6"
+                            autocomplete="off"
+                        >
+                    </div>
+                    <button type="button" id="btn-verify-otp" class="btn btn-login shadow-sm" style="display: none;">
+                        Verify OTP
+                    </button>
+                    <div class="text-center mt-3">
+                        <a href="#" id="btn-back" style="font-size: 0.85rem; color: #4183ff; text-decoration: none;">Change Phone Number</a>
+                    </div>
+                </div>
 
                 <!-- Sign Up Link -->
                 <p class="text-center mt-3 mb-0" style="font-size: 0.9rem;">
@@ -243,23 +245,116 @@
     </div>
 
     <script>
-        const eyeOpenSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';
-        const eyeSlashSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M13.359 11.238l1.287 1.287a.5.5 0 0 1-.708.708l-1.26-1.26A7.488 7.488 0 0 1 8 13.5C4.5 13.5 1.8 10.1 1 8a7.506 7.506 0 0 1 2.22-2.912L1.854 3.5a.5.5 0 1 1 .708-.708l1.285 1.285A7.485 7.485 0 0 1 8 2.5c3.5 0 6.2 3.4 7 5.5a7.485 7.485 0 0 1-1.641 3.238z"/><path d="M10.478 11.178A3.998 3.998 0 0 1 4.822 6.522l.738.738a3 3 0 0 0 4.125 4.125l.793.793zm.7-2.017L6.04 5.023A3 3 0 0 1 10.478 9.16z"/></svg>';
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnGetOtp = document.getElementById('btn-get-otp');
+        const phoneInput = document.getElementById('phone');
+        const stepPhone = document.getElementById('step-phone');
+        const stepOtp = document.getElementById('step-otp');
+        const otpInput = document.getElementById('otp');
+        const alertContainer = document.getElementById('alert-container');
+        const debugOtpDisplay = document.getElementById('debug-otp-display');
+        const otpAlert = document.getElementById('otp-alert');
+        const btnBack = document.getElementById('btn-back');
 
-        document.querySelectorAll('.password-toggle-wrapper').forEach(function(wrapper) {
-            var input = wrapper.querySelector('input[type="password"]');
-            var button = wrapper.querySelector('.password-toggle');
-            if (!input || !button) return;
-            button.addEventListener('click', function() {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    button.innerHTML = eyeSlashSVG;
+        function showAlert(message, type='danger') {
+            alertContainer.innerHTML = `<div class="error-message" style="background: ${type === 'danger' ? '#fee' : '#d4edda'}; color: ${type === 'danger' ? '#c33' : '#155724'}; border-left-color: ${type === 'danger' ? '#c33' : '#155724'}; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid;">${message}</div>`;
+        }
+
+        function clearAlert() {
+            alertContainer.innerHTML = '';
+        }
+
+        btnGetOtp.addEventListener('click', function() {
+            const phone = phoneInput.value.trim();
+            if (!phone) {
+                showAlert('Please enter your phone number.');
+                return;
+            }
+
+            clearAlert();
+            btnGetOtp.disabled = true;
+            btnGetOtp.innerText = 'Sending...';
+
+            fetch('{% url "login" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ phone: phone })
+            })
+            .then(response => response.json())
+            .then(data => {
+                btnGetOtp.disabled = false;
+                btnGetOtp.innerText = 'Get OTP';
+
+                if (data.success) {
+                    stepPhone.style.display = 'none';
+                    stepOtp.style.display = 'block';
+                    otpInput.value = '';
+                    otpInput.focus();
+
+                    if (data.debug_otp) {
+                        debugOtpDisplay.innerText = data.debug_otp;
+                        otpAlert.style.display = 'block';
+                    }
                 } else {
-                    input.type = 'password';
-                    button.innerHTML = eyeOpenSVG;
+                    showAlert(data.error || 'Failed to generate OTP.');
                 }
+            })
+            .catch(err => {
+                btnGetOtp.disabled = false;
+                btnGetOtp.innerText = 'Get OTP';
+                showAlert('A network error occurred.');
             });
         });
+
+        otpInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length === 6) {
+                verifyOtp(this.value);
+            }
+        });
+
+        function verifyOtp(otp) {
+            clearAlert();
+            otpInput.disabled = true;
+
+            fetch('{% url "login" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ otp: otp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    otpInput.disabled = false;
+                    showAlert(data.error || 'Invalid OTP.');
+                    otpInput.value = '';
+                    otpInput.focus();
+                }
+            })
+            .catch(err => {
+                otpInput.disabled = false;
+                showAlert('A network error occurred.');
+            });
+        }
+
+        btnBack.addEventListener('click', function(e) {
+            e.preventDefault();
+            stepOtp.style.display = 'none';
+            stepPhone.style.display = 'block';
+            clearAlert();
+            otpInput.value = '';
+        });
+    });
     </script>
 
 </body>
