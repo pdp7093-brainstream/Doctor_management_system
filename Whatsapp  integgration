@@ -1,0 +1,75 @@
+WhatsApp Integration & OTP Login Implementation Plan
+Yeh document aapke Doctor Appointment System me WhatsApp Cloud API integrate karne, Patient OTP login implement karne, aur automated notifications send karne ka ek complete, step-by-step architectural plan hai.
+
+1. Meta (Facebook) Developer Account Setup
+WhatsApp Cloud API use karne ke liye hume sabse pehle Meta par setup karna hoga:
+
+Developer Account: developers.facebook.com par ja kar login/signup karein.
+Create App: "My Apps" > "Create App" > "Other" > "Business" select karein.
+Add WhatsApp Product: App dashboard me "WhatsApp" product add karein aur "API Setup" par jayein.
+Get Credentials: Yahan se aapko Temporary Access Token, Phone Number ID, aur WhatsApp Business Account ID milega (Production ke liye aapko inka Permanent Access Token generate karna hoga).
+Create Message Templates: WhatsApp API me direct custom messages bhejmana allow nahi hota (24-hour window ke baahar). Humein Meta dashboard me templates approve karwane honge:
+OTP Template: Aapka login OTP hai: {{1}}. Yeh 5 minute tak valid hai.
+Booking Template: Hello {{1}}, aapki appointment Dr. {{2}} ke saath {{3}} ko confirm ho gayi hai.
+Prescription Template: Hello {{1}}, aapka recent visit ka prescription generate ho gaya hai. Aap ise yahan check kar sakte hain: {{2}}
+2. Django auth_user Password/Username Solution
+Aapka sawal tha ki Django ka default User model password aur username mandatory maangta hai, jabki humein OTP se login karwana hai. Iska best aur standard solution yeh hai:
+
+Solution: Custom Authentication Backend
+Hum Django ke default login system ko over-ride karenge. User backend me hi banega, lekin password mangne ki zaroorat nahi padegi.
+
+Username: Jab koi naya patient number daalega, hum uska phone number hi as a username store kar lenge (ya fir ek auto-generated random ID patient_919876543210).
+Password: Hum Django ka ek built-in function use karenge: user.set_unusable_password(). Isse backend me ek dummy hash set ho jata hai jisse koi normal password daal kar login nahi kar sakta.
+Custom Auth Backend (accounts/backends.py): Ek custom backend class likhenge WhatsAppOTPBackend. Jab user correct OTP daalega, hum manually is backend ke through Django ko batayenge ki "Ye OTP sahi hai, is user ko bina password check kiye authenticate kar do".
+python
+# Example logic conceptualization
+def authenticate(self, request, phone=None, otp=None):
+    # OTP check in our DB
+    if otp_is_valid(phone, otp):
+        return User.objects.get(username=phone)
+    return None
+3. Database Models (Naye Tables Kya Banenge?)
+WhatsApp features ko track karne ke liye humein 2 naye models banane honge:
+
+A. WhatsAppOTP Model (in accounts/models.py)
+OTP tracking aur validation ke liye.
+
+phone_number (CharField)
+otp (CharField - 4 or 6 digits)
+created_at (DateTimeField)
+expires_at (DateTimeField - current time + 5 minutes)
+is_used (BooleanField - taaki ek OTP 2 baar use na ho)
+B. WhatsAppLog Model (in appointment/models.py or new notifications app)
+Future tracking aur debugging ke liye ki message gaya ya fail hua.
+
+patient (ForeignKey to Patient)
+phone_number (CharField)
+template_name (CharField - e.g., 'booking_confirm')
+status (CharField - 'Sent', 'Failed', 'Delivered')
+response_data (JSONField - WhatsApp API ka response)
+sent_at (DateTimeField)
+4. Patient OTP Login Flow (Step-by-Step Changes)
+Files to modify: accounts/views.py, accounts/urls.py, templates/accounts/login.html
+
+Step 1 View (Send OTP): User apna phone number dalega. View me number aayega, random OTP generate hoga, WhatsAppOTP table me save hoga, aur Meta API ko call jayegi us number par OTP template bhejane ke liye.
+Step 2 View (Verify OTP): User ko ek nayi screen/modal dikhegi OTP input karne ke liye. User OTP dalega, backend check karega WhatsAppOTP table me ki OTP correct hai aur expire toh nahi hua.
+Authentication: Agar OTP correct hai, toh Custom Backend trigger hoga aur login(request, user) call hoga. Patient sidha dashboard par redirect ho jayega.
+5. WhatsApp Message Automation (Kahan aur Kaise?)
+Utility File: Hum ek alag file banayenge utils/whatsapp.py jisme API request bhejne ka generic code hoga send_whatsapp_template(phone, template_name, parameters).
+
+Event 1: Appointment Booking
+File: appointment/views.py (Class: Book_appointment & Add_appointment)
+Hook: Jaise hi Appointment.objects.create(...) success hota hai, hum background me ya turant send_whatsapp_template call karenge patient ke phone number par.
+Event 2: Prescription Generation
+File: appointment/views.py (Class: PrescriptionView.post)
+Hook: Jab doctor visit complete karta hai (is_completing = True) aur bill ban jata hai, tab hum prescription download link ya details generate karke patient ko message bhejenge.
+Event 3: Appointment Cancellation
+File: appointment/views.py (Function: cancel_appointment)
+Hook: Status 'cancelled' me update hote hi notification send hoga "Aapki appointment cancel kar di gayi hai."
+Developer Feedback Needed
+Kya aapko is architecture aur plan me koi changes chahiye?
+
+OTP Digits: OTP 4 digit ka rakhna hai ya 6 digit ka?
+WhatsApp API Partner: Kya aap directly Meta Developer API use karna chahte hain, ya kisi third-party provider (jaise Twilio, Interakt, Wati) ke through? (Meta API direct sasti hoti hai par setup thoda lamba hai).
+Agar aap is plan se sehmat hain, toh mujhe batayein aur hum ise future me develop karna shuru kar sakte hain!
+
