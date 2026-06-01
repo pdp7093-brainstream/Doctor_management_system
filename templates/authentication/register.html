@@ -1,189 +1,137 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">  
+    <meta charset="UTF-8">
     <title>Signup - Clinic</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/font/bootstrap-icons.css' %}">
 </head>
 
 <style>
-body {
-    background-color: #f8f9fa;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.auth-card {
-    width: 100%;
-    max-width: 400px;
-    background: #fff;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.auth-header {
-    background: #4183ff;
-    color: white;
-    padding: 35px 20px;
-    text-align: center;
-}
-
-.auth-header h2 {
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.auth-header p {
-    font-size: 0.9rem;
-    opacity: 0.85;
-}
-
-.auth-body {
-    padding: 25px;
-}
-
-.form-control {
-    border-radius: 8px;
-    padding: 10px 15px;
-    margin-bottom: 12px;
-}
-
-.btn-auth {
-    background: linear-gradient(135deg, #4183ff, #4183ff);
-    color: white;
-    border: none;
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    margin-top: 10px;
-}
-
-.btn-auth:hover {
-    opacity: 0.9;
-}
-
-.switch {
-    text-align: center;
-    margin-top: 15px;
-    font-size: 0.9rem;
-}
-
-.switch a {
-    color: #4183ff;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.switch a:hover {
-    text-decoration: underline;
-}
-
-    .password-toggle-wrapper {
-        position: relative;
-    }
-
-    .password-toggle-wrapper input {
-        padding-right: 3rem;
-    }
-
-    .password-toggle {
-        position: absolute;
-        right: 0.85rem;
-        top: 0;
-        bottom: 0;
-        margin: auto 0;
-        background: transparent;
-        border: none;
-        color: #4183ff;
-        cursor: pointer;
-        padding: 0.35rem;
-        font-size: 1rem;
-        line-height: 1;
-        height: 1.9rem;
-        display: inline-flex;
+    body {
+        background-color: #f8f9fa;
+        height: 100vh;
+        display: flex;
         align-items: center;
         justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    .password-toggle:hover {
-        color: #1b6be0;
+    .auth-card {
+        width: 100%;
+        max-width: 400px;
+        background: #fff;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     }
 
+    .auth-header {
+        background: #4183ff;
+        color: white;
+        padding: 35px 20px;
+        text-align: center;
+    }
+
+    .auth-header h2 {
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .auth-header p {
+        font-size: 0.9rem;
+        opacity: 0.85;
+    }
+
+    .auth-body {
+        padding: 25px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 10px 15px;
+        margin-bottom: 12px;
+    }
+
+    .btn-auth {
+        background: linear-gradient(135deg, #4183ff, #4183ff);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    .btn-auth:hover {
+        opacity: 0.9;
+    }
+
+    .switch {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }
+
+    .switch a {
+        color: #4183ff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .switch a:hover {
+        text-decoration: underline;
+    }
 </style>
 
 <body>
 
-<div class="auth-card">
+    <div class="auth-card">
 
-    <!-- SAME HEADER AS LOGIN -->
-    <div class="auth-header">
-        <h2>Create Account</h2>
-        <p>Join our clinic platform</p>
-    </div>
+        <!-- SAME HEADER AS LOGIN -->
+        <div class="auth-header">
+            <h2>Create Account</h2>
+            <p>Join our clinic platform</p>
+        </div>
 
-    <div class="auth-body">
+        <div class="auth-body">
 
-        <form method="POST" action="{% url 'signup' %}">
-            {% csrf_token %}
+            <form method="POST" action="{% url 'signup' %}">
+                {% csrf_token %}
 
-            {% if form.non_field_errors %}
+                {% if form.non_field_errors %}
                 <div class="alert alert-danger py-2 text-center">
                     {{ form.non_field_errors.0 }}
                 </div>
-            {% endif %}
+                {% endif %}
 
-            {% for field in form %}
+                {% for field in form %}
                 {{ field }}
                 {% if field.errors %}
-                    <div class="error-text">{{ field.errors.0 }}</div>
+                <div class="error-text">{{ field.errors.0 }}</div>
                 {% endif %}
-            {% endfor %}
+                {% endfor %}
 
-            <button type="submit" class="btn btn-auth">Sign Up</button>
+                <button type="submit" class="btn btn-auth">Sign Up</button>
 
-            <div class="switch">
-                Already have an account?
-                <a href="{% url 'login' %}">Login</a>
-            </div>
-        </form>
+                <div class="switch">
+                    Already have an account?
+                    <a href="{% url 'login' %}">Login</a>
+                </div>
+            </form>
 
+        </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('input[type="password"]').forEach(function(input) {
-            var wrapper = document.createElement('div');
-            wrapper.className = 'password-toggle-wrapper';
-            input.parentNode.insertBefore(wrapper, input);
-            wrapper.appendChild(input);
-
-            var button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'password-toggle';
-            button.setAttribute('aria-label', 'Toggle password visibility');
-            button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';
-            wrapper.appendChild(button);
-
-            button.addEventListener('click', function() {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M13.359 11.238l1.287 1.287a.5.5 0 0 1-.708.708l-1.26-1.26A7.488 7.488 0 0 1 8 13.5C4.5 13.5 1.8 10.1 1 8a7.506 7.506 0 0 1 2.22-2.912L1.854 3.5a.5.5 0 1 1 .708-.708l1.285 1.285A7.485 7.485 0 0 1 8 2.5c3.5 0 6.2 3.4 7 5.5a7.485 7.485 0 0 1-1.641 3.238z"/><path d="M10.478 11.178A3.998 3.998 0 0 1 4.822 6.522l.738.738a3 3 0 0 0 4.125 4.125l.793.793zm.7-2.017L6.04 5.023A3 3 0 0 1 10.478 9.16z"/></svg>';
-                } else {
-                    input.type = 'password';
-                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';
-                }
-            });
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Form initialization if needed
         });
-    });
-</script>
+    </script>
 
 </body>
+
 </html>

@@ -1,4 +1,5 @@
 import json
+import random
 from .models import *
 from .forms import *
 from django.http import JsonResponse
@@ -225,15 +226,59 @@ class LoginView(View):
         return render(request, self.template_name)
 
     def post(self, request):
+        from django.urls import reverse
+        from django.http import JsonResponse
+        import json
+        
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json'
+        
+        if request.content_type == 'application/json':
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = {}
+        else:
+            data = request.POST
 
-        # Fast input fetch
-        phone = request.POST.get('phone', '').strip()
-        password = request.POST.get('password', '').strip()
+        if 'otp' in data:
+            session_otp = request.session.get('login_otp')
+            submitted_otp = str(data.get('otp', '')).strip()
+            
+            if session_otp and str(session_otp) == submitted_otp:
+                # OTP is correct, log in user
+                user_id = request.session.get('login_user_id')
+                if not user_id:
+                    if is_ajax: return JsonResponse({'success': False, 'error': 'Session expired. Please try again.'})
+                    return render(request, self.template_name, {'error': 'Session expired. Please try again.'})
+                
+                try:
+                    user = User.objects.get(id=user_id)
+                    # When manually logging a user in without authenticate(), we must specify the backend
+                    # if multiple authentication backends are configured.
+                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    
+                    if 'login_otp' in request.session:
+                        del request.session['login_otp']
+                    if 'login_user_id' in request.session:
+                        del request.session['login_user_id']
+                        
+                    if is_ajax: return JsonResponse({'success': True, 'redirect_url': reverse('dashboard')})
+                    return redirect('dashboard')
+                except User.DoesNotExist:
+                    if is_ajax: return JsonResponse({'success': False, 'error': 'User not found. Please try again.'})
+                    return render(request, self.template_name, {'error': 'User not found. Please try again.'})
+            else:
+                if is_ajax: return JsonResponse({'success': False, 'error': 'Invalid OTP. Please try again.'})
+                return render(request, self.template_name, {'show_otp': True, 'error': 'Invalid OTP. Please try again.'})
+
+        # Phone input fetch
+        phone = data.get('phone', '').strip()
 
         # Validation
-        if not phone or not password:
+        if not phone:
+            if is_ajax: return JsonResponse({'success': False, 'error': 'Phone number is required.'})
             return render(request, self.template_name, {
-                'error': 'Phone and password are required.'
+                'error': 'Phone number is required.'
             })
 
         # Clean phone once
@@ -244,31 +289,27 @@ class LoginView(View):
             patient = (
                 Patient.objects
                 .select_related('user')
-                .only('phone', 'user__username', 'user__password')
+                .only('phone', 'user__id')
                 .get(phone=cleaned_phone)
             )
 
         except Patient.DoesNotExist:
+            if is_ajax: return JsonResponse({'success': False, 'error': 'Phone number not registered. Please Sign Up.'})
             return render(request, self.template_name, {
-                'error': 'Invalid phone number or password.'
+                'error': 'Phone number not registered.Please Sign Up.'
             })
 
-        # Authenticate
-        user = authenticate(
-            request,
-            username=patient.user.username,
-            password=password
-        )
+        # Generate OTP
+        import random
+        otp = random.randint(100000, 999999)
+        print(f"=============================\nOTP for Login ({patient.phone}): {otp}\n=============================")
+        
+        request.session['login_otp'] = str(otp)
+        request.session['login_user_id'] = patient.user.id
 
-        if user is None:
-            return render(request, self.template_name, {
-                'error': 'Invalid phone number or password.'
-            })
-
-        # Login
-        auth_login(request, user)
-
-        return redirect('dashboard')
+        if is_ajax:
+            return JsonResponse({'success': True, 'debug_otp': otp})
+        return render(request, self.template_name, {'show_otp': True, 'debug_otp': otp})
 
 def logout_view(request):
     """Logout user"""
