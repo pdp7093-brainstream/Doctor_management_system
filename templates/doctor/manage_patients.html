@@ -10,10 +10,11 @@
     .btn-view-patient {
         background-color: #dbeafe;
         color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        border: 1px solid #bfdbfe;  
         padding: 0.375rem 0.75rem;
         font-size: 0.875rem;
     }
+    
     .btn-view-patient:hover {
         background-color: #bfdbfe;
         color: #1d4ed8;
@@ -116,15 +117,15 @@
                             <td class="text-muted fw-semibold">{{ forloop.counter }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="user-avatar" style="width:36px; height:36px; font-size:0.82rem; flex-shrink:0;">
+                                    <div class="user-avatar" style="width:30px; height:30px; font-size:0.82rem; flex-shrink:0;">
                                         {{ p.name|slice:":1"|upper }}
                                     </div>
                                     <div>
                                         <div style="font-weight:600; font-size:0.9rem;">{{ p.name }}</div>
                                         {% if p.type == 'family' %}
-                                        <div style="font-size:0.75rem; color:#888;">Family Member</div>
+                                        <div style="font-size:0.75rem; color:#888;"></div>
                                         {% else %}
-                                        <div style="font-size:0.75rem; color:#888;">Main Patient</div>
+                                        <div style="font-size:0.75rem; color:#888;"></div>
                                         {% endif %}
                                     </div>
                                 </div>
