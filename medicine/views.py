@@ -33,14 +33,7 @@ class AddMedicineView(LoginRequiredMixin, View):
     def get(self, request):
         medicine_types = Medicine.MEDICINE_TYPE
         unit_choices = MedicineVariant.UNIT_CHOICES
-        return render(
-            request,
-            "medicine/add_medicine1.html",
-            {
-                "medicine_types": medicine_types,
-                "unit_choices": unit_choices,
-            },
-        )
+        return render(request,"medicine/add_medicine1.html",{"medicine_types": medicine_types,"unit_choices": unit_choices})
 
     def post(self, request):
         name = request.POST.get("name", "").strip()
@@ -578,11 +571,8 @@ class AddPurchaseView(LoginRequiredMixin, View):
             else:
                 pending_purchase = (
                     Purchase.objects.filter(
-                        items__medicine_variant=preselected_variant,
-                        status="ordered",
-                    )
-                    .order_by("-id")
-                    .first()
+                        items__medicine_variant=preselected_variant,status="ordered",
+                    ).order_by("-id").first()
                 )
 
                 if pending_purchase:
@@ -591,15 +581,9 @@ class AddPurchaseView(LoginRequiredMixin, View):
                         f"{preselected_variant.medicine.name} already has a pending order.",
                     )
 
-                    return redirect(
-                        "medicine:purchase_detail",
-                        hid=_hashid.encode_id(pending_purchase.pk),
-                    )
+                    return redirect("medicine:purchase_detail",hid=_hashid.encode_id(pending_purchase.pk))
 
-        return render(
-            request,
-            "medicine/add_purchase.html",
-            {
+        return render(request,"medicine/add_purchase.html",{
                 "vendors": vendors,
                 "preselected_variant": preselected_variant,
             },
@@ -721,11 +705,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
         purchase.total_amount = grand_total
         purchase.save()
 
-        messages.success(
-            request,
-            f"Purchase order created successfully. Total ₹{grand_total}",
-        )
-
+        messages.success(request,f"Purchase order created successfully. Total ₹{grand_total}",)
         return redirect("medicine:purchase_list")
 
 class ReceivePurchaseView(LoginRequiredMixin, View):
@@ -738,26 +718,17 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
             return get_object_or_404(Purchase, id=0)
 
         purchase = get_object_or_404(
-            Purchase.objects.select_related("vendor").prefetch_related(
-                "items__medicine_variant__medicine"
-            ),
-            pk=pk,
-        )
+            Purchase.objects.select_related("vendor").prefetch_related("items__medicine_variant__medicine")
+            ,pk=pk,)
 
         # Already received validation
         if purchase.status == "received":
             messages.warning(request, "Purchase already received.")
             return redirect("medicine:purchase_detail", hid=_hashid.encode_id(pk))
 
-        context = {
-            "purchase": purchase,
-        }
+        context = {"purchase": purchase,}
 
-        return render(
-            request,
-            "medicine/receive_purchase.html",
-            context,
-        )
+        return render(request,"medicine/receive_purchase.html",context,)
 
     def post(self, request, hid):
         try:
