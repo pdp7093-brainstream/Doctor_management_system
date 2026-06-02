@@ -104,3 +104,4 @@ typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.7.0
 uvicorn==0.46.0
+django-cleanup==9.0.0

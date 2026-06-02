@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
 
+    <!-- Favicons -->
+    {% if clinic and clinic.logo %}
+    <link href="{{ clinic.logo.url }}" rel="icon">
+    <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
+    {% else %}
+    <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+    <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+    {% endif %}
+
     <link href="{% static 'assets/css/doctor.css' %}?v=2" rel="stylesheet">
     <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -87,10 +96,10 @@
             <div class="sidebar-logo">
                 {% if clinic.logo %}
                 <img src="{{clinic.logo.url}}" alt="Clinic Logo"
-                    style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                    style="max-height:45px;max-width:140px;object-fit:contain;mix-blend-mode:multiply;">
                 {% else %}
                 <img src="/static/images/default-logo.png" alt="Default Logo"
-                    style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                    style="max-height:45px;max-width:140px;object-fit:contain;mix-blend-mode:multiply;">
 
                 {% endif %}
             </div>

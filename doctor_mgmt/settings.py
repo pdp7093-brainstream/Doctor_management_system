@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'billing',
     'expenses',
     'reports_archive',
+    'django_cleanup.apps.CleanupConfig',
 ]
     
 MIDDLEWARE = [

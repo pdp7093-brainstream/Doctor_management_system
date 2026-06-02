@@ -634,14 +634,8 @@ class AddPurchaseView(LoginRequiredMixin, View):
 
         # Pending validation
         pending_item = (
-            PurchaseItem.objects.select_related(
-                "purchase",
-                "medicine_variant__medicine",
-            )
-            .filter(
-                medicine_variant_id__in=selected_variant_ids,
-                purchase__status="ordered",
-            )
+            PurchaseItem.objects.select_related("purchase","medicine_variant__medicine",)
+            .filter(medicine_variant_id__in=selected_variant_ids,purchase__status="ordered",)
             .first()
         )
 
@@ -649,15 +643,9 @@ class AddPurchaseView(LoginRequiredMixin, View):
 
             medicine_name = pending_item.medicine_variant.medicine.name
 
-            messages.error(
-                request,
-                f"{medicine_name} already has a pending purchase order.",
-            )
+            messages.error(request,f"{medicine_name} already has a pending purchase order.",)
 
-            return redirect(
-                "medicine:purchase_detail",
-                hid=_hashid.encode_id(pending_item.purchase_id),
-            )
+            return redirect("medicine:purchase_detail",hid=_hashid.encode_id(pending_item.purchase_id),)
 
         # Purchase Create
         purchase = Purchase.objects.create(
@@ -687,10 +675,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
             if not v_id:
                 continue
 
-            variant = get_object_or_404(
-                MedicineVariant,
-                pk=v_id,
-            )
+            variant = get_object_or_404(MedicineVariant,pk=v_id,)
 
             # Convert values
             qty_strips = int(qty_str or 0)
@@ -710,15 +695,9 @@ class AddPurchaseView(LoginRequiredMixin, View):
                 subtotal * tax_percent
             ) / Decimal("100")
 
-            final_amount = (
-                subtotal + tax_amount - discount_amount
-            )
+            final_amount = (subtotal + tax_amount - discount_amount)
 
-            effective_unit_cost = (
-                final_amount / total_units
-                if total_units > 0
-                else Decimal("0")
-            )
+            effective_unit_cost = (final_amount / total_units if total_units > 0 else Decimal("0"))
 
             # Save Purchase Item
             PurchaseItem.objects.create(
@@ -786,12 +765,7 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
         except Exception:
             return get_object_or_404(Purchase, id=0)
 
-        purchase = get_object_or_404(
-            Purchase.objects.prefetch_related(
-                "items__medicine_variant"
-            ),
-            pk=pk,
-        )
+        purchase = get_object_or_404(Purchase.objects.prefetch_related("items__medicine_variant"),pk=pk,)
 
         # Prevent duplicate receive
         if purchase.status == "received":
@@ -799,23 +773,10 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
             return redirect("medicine:purchase_detail", hid=_hashid.encode_id(pk))
 
         item_ids = request.POST.getlist("item_id[]")
-
-        received_qty_list = request.POST.getlist(
-            "received_quantity_strips[]"
-        )
-
-        strip_price_list = request.POST.getlist(
-            "strip_price[]"
-        )
-
-        tax_list = request.POST.getlist(
-            "tax_percent[]"
-        )
-
-        discount_list = request.POST.getlist(
-            "discount_amount[]"
-        )
-        
+        received_qty_list = request.POST.getlist("received_quantity_strips[]")
+        strip_price_list = request.POST.getlist("strip_price[]")
+        tax_list = request.POST.getlist("tax_percent[]")
+        discount_list = request.POST.getlist("discount_amount[]")
         mfg_date_list = request.POST.getlist("mfg_date[]")
         exp_date_list = request.POST.getlist("exp_date[]")
 
@@ -831,21 +792,10 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
                 discount_str,
                 mfg_date_str,
                 exp_date_str,
-            ) in zip(
-                item_ids,
-                received_qty_list,
-                strip_price_list,
-                tax_list,
-                discount_list,
-                mfg_date_list,
-                exp_date_list,
-            ):
-    
-                purchase_item = get_object_or_404(
-                    PurchaseItem,
-                    pk=item_id,
-                    purchase=purchase,
-                )
+            ) in zip(item_ids,received_qty_list,strip_price_list,tax_list,discount_list,
+            mfg_date_list,exp_date_list,):
+
+                purchase_item = get_object_or_404(PurchaseItem,pk=item_id,purchase=purchase,)
     
                 # Lock the variant to prevent race conditions when updating stock
                 variant = MedicineVariant.objects.select_for_update().get(pk=purchase_item.medicine_variant_id)
@@ -920,15 +870,9 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
             purchase.status = "received"
             purchase.save()
 
-        messages.success(
-            request,
-            "Purchase received successfully."
-        )
+        messages.success(request,"Purchase received successfully.")
 
-        return redirect(
-            "medicine:purchase_detail",
-            hid=_hashid.encode_id(purchase.pk),
-        )
+        return redirect("medicine:purchase_detail", hid=_hashid.encode_id(purchase.pk))
 
 class PurchaseDetailView(LoginRequiredMixin, View):
     login_url = "doctor:login"
@@ -939,9 +883,7 @@ class PurchaseDetailView(LoginRequiredMixin, View):
             return get_object_or_404(Purchase, id=0)
 
         purchase = get_object_or_404(
-            Purchase.objects.select_related("vendor").prefetch_related(
-                "items__medicine_variant__medicine"
-            ),
+            Purchase.objects.select_related("vendor").prefetch_related("items__medicine_variant__medicine"),
             pk=pk,
         )
         return render(request, "medicine/purchase_detail.html", {"purchase": purchase})
