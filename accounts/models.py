@@ -34,19 +34,7 @@ class Patient(models.Model):
         verbose_name_plural = 'Patients'
 
 
-# Signal: Jab naya User create ho toh Patient auto-create ho
-@receiver(post_save, sender=User)
-def create_patient(sender, instance, created, **kwargs):
-    """Auto-create Patient record when User is created"""
-    if created:
-        Patient.objects.get_or_create(user=instance)
 
-# Optional: Keep patient updated if user is updated
-@receiver(post_save, sender=User)
-def save_patient(sender, instance, **kwargs):
-    """Ensure patient exists when user is saved"""
-    if hasattr(instance, 'patient'):
-        instance.patient.save()
 
 
 class FamilyMember(models.Model):

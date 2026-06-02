@@ -159,14 +159,7 @@ class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
                 status=status
             )
 
-            # Dynamic success message
-            # if status == 'approved':
-
-            #     messages.success(request,'Expense added and approved successfully.')
-
-            # else:
-
-            #     messages.success(request,'Expense submitted for approval.')
+            
 
             return redirect('expenses:expense_list')
 

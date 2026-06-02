@@ -7,6 +7,7 @@ from medicine.views import *
 app_name = 'doctor'
 
 urlpatterns = [
+    path('', RedirectView.as_view(pattern_name='doctor:dashboard', permanent=False), name='doctor_root'),
     path('login/',views.login_view,name='login'),  
     path('logout/',views.logout_view,name='logout'),
     path('dashboard/',DashboardView.as_view(),name='dashboard'),

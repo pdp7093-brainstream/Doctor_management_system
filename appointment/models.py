@@ -1,5 +1,5 @@
 from django.db import models
-from doctor.models import InnerMember,Medicine
+from doctor.models import InnerMember
 from accounts.models import *
 from django.contrib.auth.models import User
 from accounts.models import Patient, FamilyMember
