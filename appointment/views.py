@@ -744,32 +744,35 @@ class PrescriptionView(View):
 
     def reduce_stock(self, prescription):
         from datetime import datetime
+        from django.db import transaction
         errors = []
-        pending_items = prescription.items.select_related('medicine_variant__medicine').filter(
+        pending_items = prescription.items.filter(
             should_deduct=True,
             was_deducted=False
         )
         
-        for item in pending_items:  
-            variant = item.medicine_variant
-            morning, afternoon, evening, night, _ = self.parse_dosage(item.dosage)
-
-            total_qty = (morning + afternoon + evening + night) * item.days
-            
-            if total_qty <= 0:
+        with transaction.atomic():
+            for item in pending_items:  
+                # Lock the variant for update to prevent race conditions
+                variant = MedicineVariant.objects.select_for_update().get(pk=item.medicine_variant_id)
+                morning, afternoon, evening, night, _ = self.parse_dosage(item.dosage)
+    
+                total_qty = (morning + afternoon + evening + night) * item.days
+                
+                if total_qty <= 0:
+                    item.should_deduct, item.was_deducted = False, True
+                    item.save()
+                    continue
+                
+                if variant.stock >= total_qty:
+                    variant.stock -= total_qty
+                else:
+                    errors.append(f"{variant.medicine.name}: Req {total_qty}, Avail {variant.stock}")
+                    variant.stock = 0
+                
+                variant.save()
                 item.should_deduct, item.was_deducted = False, True
                 item.save()
-                continue
-            
-            if variant.stock >= total_qty:
-                variant.stock -= total_qty
-            else:
-                errors.append(f"{variant.medicine.name}: Req {total_qty}, Avail {variant.stock}")
-                variant.stock = 0
-            
-            variant.save()
-            item.should_deduct, item.was_deducted = False, True
-            item.save()
         
         return errors
 

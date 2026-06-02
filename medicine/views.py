@@ -819,117 +819,106 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
         mfg_date_list = request.POST.getlist("mfg_date[]")
         exp_date_list = request.POST.getlist("exp_date[]")
 
+        from django.db import transaction
         grand_total = Decimal("0.00")
 
-        for (
-            item_id,
-            received_qty_str,
-            strip_price_str,
-            tax_str,
-            discount_str,
-            mfg_date_str,
-            exp_date_str,
-        ) in zip(
-            item_ids,
-            received_qty_list,
-            strip_price_list,
-            tax_list,
-            discount_list,
-            mfg_date_list,
-            exp_date_list,
-        ):
-
-            purchase_item = get_object_or_404(
-                PurchaseItem,
-                pk=item_id,
-                purchase=purchase,
-            )
-
-            variant = purchase_item.medicine_variant
-
-            # Convert values
-            received_qty = int(received_qty_str or 0)
-
-            strip_price = Decimal(strip_price_str or "0")
-
-            tax_percent = Decimal(tax_str or "0")
-
-            discount_amount = Decimal(discount_str or "0")
-
-            # Total units
-            total_units = (
-                received_qty *
-                purchase_item.unit_per_strip
-            )
-
-            # Price calculations
-            subtotal = (
-                Decimal(received_qty) *
-                strip_price
-            )
-
-            tax_amount = (
-                subtotal * tax_percent
-            ) / Decimal("100")
-
-            final_amount = (
-                subtotal +
-                tax_amount -
-                discount_amount
-            )
-
-            effective_unit_cost = (
-                final_amount / total_units
-                if total_units > 0
-                else Decimal("0")
-            )
-
-            # Save receive details
-            purchase_item.received_quantity_strips = received_qty
-
-            purchase_item.strip_price = strip_price
-
-            purchase_item.tax_percent = tax_percent
-
-            purchase_item.discount_amount = discount_amount
-
-            purchase_item.total_units = total_units
-
-            purchase_item.final_amount = final_amount
-
-            purchase_item.effective_unit_cost = (
-                effective_unit_cost
-            )
-
-            purchase_item.is_received = True
-
-            purchase_item.save()
-
-            # Stock update
-            variant.stock += total_units
-
-            # Initial costing
-            variant.cost_price = effective_unit_cost
-
-            variant.unit_per_strip = (
-                purchase_item.unit_per_strip
-            )
-            
-            if mfg_date_str:
-                variant.mfg_date = mfg_date_str
-            if exp_date_str:
-                variant.exp_date = exp_date_str
-
-            variant.save()
-
-            grand_total += final_amount
-
-        # Purchase update
-        purchase.total_amount = grand_total
-
-        purchase.status = "received"
-
-        purchase.save()
+        with transaction.atomic():
+            for (
+                item_id,
+                received_qty_str,
+                strip_price_str,
+                tax_str,
+                discount_str,
+                mfg_date_str,
+                exp_date_str,
+            ) in zip(
+                item_ids,
+                received_qty_list,
+                strip_price_list,
+                tax_list,
+                discount_list,
+                mfg_date_list,
+                exp_date_list,
+            ):
+    
+                purchase_item = get_object_or_404(
+                    PurchaseItem,
+                    pk=item_id,
+                    purchase=purchase,
+                )
+    
+                # Lock the variant to prevent race conditions when updating stock
+                variant = MedicineVariant.objects.select_for_update().get(pk=purchase_item.medicine_variant_id)
+    
+                # Convert values
+                received_qty = int(received_qty_str or 0)
+                strip_price = Decimal(strip_price_str or "0")
+                tax_percent = Decimal(tax_str or "0")
+                discount_amount = Decimal(discount_str or "0")
+    
+                # Total units
+                total_units = (
+                    received_qty *
+                    purchase_item.unit_per_strip
+                )
+    
+                # Price calculations
+                subtotal = (
+                    Decimal(received_qty) *
+                    strip_price
+                )
+    
+                tax_amount = (
+                    subtotal * tax_percent
+                ) / Decimal("100")
+    
+                final_amount = (
+                    subtotal +
+                    tax_amount -
+                    discount_amount
+                )
+    
+                effective_unit_cost = (
+                    final_amount / total_units
+                    if total_units > 0
+                    else Decimal("0")
+                )
+    
+                # Save receive details
+                purchase_item.received_quantity_strips = received_qty
+                purchase_item.strip_price = strip_price
+                purchase_item.tax_percent = tax_percent
+                purchase_item.discount_amount = discount_amount
+                purchase_item.total_units = total_units
+                purchase_item.final_amount = final_amount
+                purchase_item.effective_unit_cost = (
+                    effective_unit_cost
+                )
+                purchase_item.is_received = True
+                purchase_item.save()
+    
+                # Stock update
+                variant.stock += total_units
+    
+                # Initial costing
+                variant.cost_price = effective_unit_cost
+                variant.unit_per_strip = (
+                    purchase_item.unit_per_strip
+                )
+                
+                if mfg_date_str:
+                    variant.mfg_date = mfg_date_str
+                if exp_date_str:
+                    variant.exp_date = exp_date_str
+    
+                variant.save()
+    
+                grand_total += final_amount
+    
+            # Purchase update
+            purchase.total_amount = grand_total
+            purchase.status = "received"
+            purchase.save()
 
         messages.success(
             request,
