@@ -159,8 +159,6 @@ class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
                 status=status
             )
 
-            
-
             return redirect('expenses:expense_list')
 
         except Exception as e:
