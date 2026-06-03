@@ -81,10 +81,16 @@
                                     {% if request.user.email %}{{ request.user.email }}{% else %}<span class="info-empty">Not set</span>{% endif %}
                                 </td>
                             </tr>
-                            <tr>
+                           <tr>
                                 <td class="info-label">Phone</td>
                                 <td class="info-value">
-                                    {% if request.user.patient.phone %}{{ request.user.patient.phone }}{% else %}<span class="info-empty">Not set</span>{% endif %}
+                                    {% if request.user.patient.phone %}
+                                        <span id="profilePhone">{{ request.user.patient.phone }}</span>
+                                        <button class="btn btn-sm btn-outline-secondary ms-2 changeNumberBtn" data-phone="{{ request.user.patient.phone }}">Change number</button>
+                                    {% else %}
+                                        <span class="info-empty">Not set</span>
+                                        <button class="btn btn-sm btn-outline-secondary ms-2 changeNumberBtn" data-phone="">Change number</button>
+                                    {% endif %}
                                 </td>
                             </tr>
                             <tr>
@@ -781,9 +787,9 @@ document.addEventListener('click', function(e){
         }
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
 {% if messages %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         {% for message in messages %}
@@ -801,8 +807,182 @@ document.addEventListener('click', function(e){
 </script>
 {% endif %}
 
+<script>
+document.querySelectorAll('.changeNumberBtn').forEach(btn => {
+    btn.addEventListener('click', async function () {
+        const btn = this;
+        const currentPhone = btn.dataset.phone || '';
+        const maskPhone = (p) => p ? p.replace(/\d(?=\d{4})/g, '•') : 'Not set';
+        const masked = maskPhone(currentPhone);
 
-    
-</body>
+        // Step 1: Confirmation to change number
+        const { isConfirmed } = await Swal.fire({
+            title: 'Change Phone Number?',
+            html: `Your current number: <strong>${masked}</strong><br><br>We'll send an OTP to verify the change.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Change Number',
+            confirmButtonColor: '#007bff',
+            cancelButtonText: 'Cancel'
+        });
 
-</html>
+        if (!isConfirmed) return;
+
+        // Step 2: Ask for new phone number first (validate format before OTP)
+        let newPhone = '';
+        let isValidPhone = false;
+
+        while (!isValidPhone) {
+            const { value: inputPhone, isDismissed } = await Swal.fire({
+                title: 'Enter New Phone Number',
+                input: 'text',
+                inputLabel: 'Phone number (10 digits only)',
+                inputValue: '',
+                inputPlaceholder: '9876543210',
+                showCancelButton: true,
+                confirmButtonText: 'Next',
+                inputAttributes: {
+                    maxlength: '10',
+                    pattern: '[0-9]*',
+                    inputmode: 'numeric'
+                },
+                inputValidator: (value) => {
+                    if (!value) return 'Phone number is required';
+                    if (!/^\d{10}$/.test(value)) return 'Please enter exactly 10 digits';
+                    if (value === currentPhone) return 'New number must be different from current number';
+                    return undefined;
+                }
+            });
+
+            if (isDismissed) return; // User cancelled
+            
+            newPhone = inputPhone;
+            isValidPhone = true;
+        }
+
+        // Step 3: Send OTP
+        const otp = String(Math.floor(100000 + Math.random() * 900000));
+        await Swal.fire({
+            title: '✓ OTP Sent',
+            html: `We've sent a 6-digit OTP to your registered email.<br><br><strong>For testing: ${otp}</strong>`,
+            icon: 'success',
+            confirmButtonText: 'Continue',
+            allowOutsideClick: false
+        });
+
+        // Step 4: Verify OTP
+        let otpVerified = false;
+        let attempts = 0;
+        const maxAttempts = 3;
+
+        while (!otpVerified && attempts < maxAttempts) {
+            const { value: enteredOtp, isDismissed } = await Swal.fire({
+                title: 'Enter OTP',
+                input: 'text',
+                inputLabel: 'Enter 6-digit OTP',
+                inputValue: '',
+                inputPlaceholder: '000000',
+                showCancelButton: true,
+                confirmButtonText: 'Verify OTP',
+                inputAttributes: {
+                    maxlength: '6',
+                    pattern: '[0-9]*',
+                    inputmode: 'numeric'
+                },
+                inputValidator: (value) => {
+                    if (!value) return 'OTP is required';
+                    if (!/^\d{6}$/.test(value)) return 'OTP must be 6 digits';
+                    return undefined;
+                }
+            });
+
+            if (isDismissed) return; // User cancelled
+
+            if (enteredOtp === otp) {
+                otpVerified = true;
+            } else {
+                attempts++;
+                if (attempts < maxAttempts) {
+                    await Swal.fire({
+                        title: 'Invalid OTP',
+                        text: `Incorrect OTP. ${maxAttempts - attempts} attempt(s) remaining.`,
+                        icon: 'error',
+                        confirmButtonText: 'Try Again'
+                    });
+                } else {
+                    await Swal.fire({
+                        title: 'Failed',
+                        text: 'Too many incorrect attempts. Please try again later.',
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    });
+                    return;
+                }
+            }
+        }
+
+        if (!otpVerified) return;
+
+        // Step 5: Confirmation before saving
+        const { isConfirmed: confirmSave } = await Swal.fire({
+            title: 'Confirm New Number',
+            html: `<strong>New Phone Number:</strong> ${newPhone.slice(0, 3)}•••••${newPhone.slice(-3)}`,
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm & Save',
+            confirmButtonColor: '#28a745',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (!confirmSave) return;
+
+        // Step 6: Save to backend
+        Swal.fire({
+            title: 'Saving...',
+            html: 'Please wait while we update your phone number.',
+            allowOutsideClick: false,
+            didOpen: async () => {
+                Swal.showLoading();
+                try {
+                    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || getCookie('csrftoken');
+                    const res = await fetch('/change-phone/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ phone: newPhone, otp: otp })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        // Update UI
+                        const phoneEl = document.getElementById('profilePhone');
+                        if (phoneEl) phoneEl.textContent = newPhone;
+                        btn.dataset.phone = newPhone;
+
+                        Swal.fire({
+                            title: '✓ Success!',
+                            text: 'Your phone number has been updated successfully.',
+                            icon: 'success',
+                            confirmButtonText: 'Close'
+                        });
+                    } else {
+                        throw new Error(data.error || 'Failed to update phone number');
+                    }
+                } catch (err) {
+                    console.error('Error:', err);
+                    Swal.fire({
+                        title: 'Error',
+                        text: err.message || 'Failed to save phone number. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    });
+                }
+            }
+        });
+    });
+});
+</script>

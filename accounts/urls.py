@@ -31,4 +31,6 @@ urlpatterns = [
     path('update-family-member/<str:hid>/', views.update_family_member, name='update_family_member'),
     path('delete-family-member/<str:hid>/', views.delete_family_member, name='delete_family_member'),
    
+    # Changing phone number
+    path('change-phone/', views.change_phone, name='change_phone'),
 ]

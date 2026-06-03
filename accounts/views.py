@@ -1,4 +1,5 @@
 import json
+import re
 import random
 from .models import *
 from .forms import *
@@ -92,7 +93,6 @@ def add_family_member(request):
 
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
-
 
 @login_required
 def update_family_member(request, hid):
@@ -646,3 +646,59 @@ class ChangePasswordView(LoginRequiredMixin, View):
                 messages.error(request, 'The old password you entered is incorrect.')
 
         return render(request, 'authentication/change_password.html', {'form': form})
+
+# CHANGEING THE PHONE NUMBER
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+import json
+
+@login_required
+def change_phone(request):
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            # Check authentication
+            if not request.user.is_authenticated or not hasattr(request.user, 'patient'):
+                return JsonResponse({'success': False, 'error': 'User not authenticated'}, status=401)
+            
+            data = json.loads(request.body or '{}')
+            new_phone = data.get('phone', '').strip()
+            otp = data.get('otp', '').strip()
+            
+            # Validate phone number
+            if not new_phone:
+                return JsonResponse({'success': False, 'error': 'Phone number is required'}, status=400)
+            
+            if not otp:
+                return JsonResponse({'success': False, 'error': 'OTP is required'}, status=400)
+            
+            # Phone format validation - exactly 10 digits
+            if not re.match(r'^\d{10}$', new_phone):
+                return JsonResponse({'success': False, 'error': 'Phone number must contain exactly 10 digits'}, status=400)
+            
+            # Check if phone is same as current
+            if new_phone == request.user.patient.phone:
+                return JsonResponse({'success': False, 'error': 'New phone number must be different from current number'}, status=400)
+            
+            # Check for duplicate phone in database
+            from .models import Patient
+            if Patient.objects.filter(phone=new_phone).exclude(user=request.user).exists():
+                return JsonResponse({'success': False, 'error': 'This phone number is already registered with another account'}, status=400)
+            
+            # Update phone number
+            request.user.patient.phone = new_phone
+            request.user.patient.save()
+            
+            return JsonResponse({
+                'success': True, 
+                'message': 'Phone number updated successfully',
+                'phone': new_phone
+            }, status=200)
+            
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid request format'}, status=400)
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({'success': False, 'error': f'An error occurred: {str(e)}'}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)
