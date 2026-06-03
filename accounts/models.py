@@ -5,17 +5,12 @@ from django.dispatch import receiver
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(
-        max_length=15,
-        unique=True,
-        db_index=True,
-        blank=True,
-        null=True
-    )
+    phone = models.CharField(max_length=15, unique=True, db_index=True, blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     dob = models.DateField(null=True, blank=True)
     gender = models.CharField(max_length=20, null=True, blank=True)
     bld_grop = models.CharField(max_length=10, null=True, blank=True)
+    
     profile_picture = models.ImageField(
         upload_to='profile_pictures/', 
         null=True, 
@@ -34,20 +29,13 @@ class Patient(models.Model):
         verbose_name_plural = 'Patients'
 
 
-
-
-
 class FamilyMember(models.Model):
     GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other'),
+        ('male', 'Male'),('female', 'Female'),('other', 'Other'),
     ]
     BLOOD_GROUP_CHOICES = [
-        ('A+', 'A+'), ('A-', 'A-'),
-        ('B+', 'B+'), ('B-', 'B-'),
-        ('O+', 'O+'), ('O-', 'O-'),
-        ('AB+', 'AB+'), ('AB-', 'AB-'),
+        ('A+', 'A+'), ('A-', 'A-'),('B+', 'B+'), ('B-', 'B-'),
+        ('O+', 'O+'), ('O-', 'O-'),('AB+', 'AB+'), ('AB-', 'AB-'),
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name="members")

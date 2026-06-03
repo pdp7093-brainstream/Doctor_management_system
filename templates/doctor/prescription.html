@@ -409,11 +409,10 @@
                 </div>
 
                 <div class="modal-footer border-top-0 px-4 pb-4 pt-3">
-                    <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal" onclick="resetModalForm()">Close</button>
                     <button type="button" class="btn btn-outline-primary px-4 rounded-pill"
                         onclick="saveMedicine(false)">Add & Another</button>
-                    <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="saveMedicine(true)">Add to
-                        List</button>
+                    <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="saveMedicine(true)">Add to List</button>
                 </div>
             </div>
         </div>
@@ -804,21 +803,36 @@
                 resetModalForm();
                 document.getElementById('modalSearchInput').focus();
             });
+            document.getElementById('medicineModal').addEventListener('hidden.bs.modal', () => {
+                resetModalForm();
+            });
         });
 
         function resetModalForm() {
-            selectedVariantId = null;
-            selectedMedicineName = '';
-            document.getElementById('modalSearchInput').value = '';
-            document.getElementById('modalSearchResults').innerHTML =
-                '<div class="text-center py-4 text-muted border rounded-3 border-dashed"><p class="mb-0 small">Type to search medicines...</p></div>';
-            document.getElementById('selectedMedicineInfo').style.display = 'none';
-            document.getElementById('modal_morning').value = 0;
-            document.getElementById('modal_afternoon').value = 0;
-            document.getElementById('modal_evening').value = 0;
-            document.getElementById('modal_night').value = 0;
-            document.getElementById('modal_days').value = 7;
-            document.getElementById('modal_medicine_notes').value = '';
+            try {
+                selectedVariantId = null;
+                selectedMedicineName = '';
+                document.getElementById('modalSearchInput').value = '';
+                document.getElementById('modalSearchResults').innerHTML =
+                    '<div class="text-center py-4 text-muted border rounded-3 border-dashed"><p class="mb-0 small">Type to search medicines...</p></div>';
+                
+                const infoBox = document.getElementById('selectedMedicineInfo');
+                if (infoBox) {
+                    infoBox.style.setProperty('display', 'none', 'important');
+                }
+                
+                document.getElementById('modal_morning').value = 0;
+                document.getElementById('modal_afternoon').value = 0;
+                document.getElementById('modal_evening').value = 0;
+                document.getElementById('modal_night').value = 0;
+                document.getElementById('modal_days').value = 7;
+                document.getElementById('modal_meal').value = 'after_food';
+                document.getElementById('modal_medicine_notes').value = '';
+                
+                document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('selected'));
+            } catch (e) {
+                console.error("Error in resetModalForm:", e);
+            }
         }
 
         // ---- Search ----
@@ -877,6 +891,7 @@
 
         function clearSelectedMedicine() {
             selectedVariantId = null;
+            selectedMedicineName = '';
             document.getElementById('selectedMedicineInfo').style.setProperty('display', 'none', 'important');
             document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('selected'));
         }
@@ -964,10 +979,18 @@
 
             document.getElementById('medicineList').insertAdjacentHTML('beforeend', row);
             document.getElementById('emptyMessage').style.display = 'none';
+            currentPage = Math.max(1, Math.ceil(document.getElementById('medicineList').children.length / rowsPerPage));
             updateCounts();
 
-            if (close) bootstrap.Modal.getInstance(document.getElementById('medicineModal')).hide();
-            else resetModalForm();
+            if (close) {
+                const modalEl = document.getElementById('medicineModal');
+                const modal = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.hide();
+                resetModalForm();
+            } else {
+                resetModalForm();
+                document.getElementById('modalSearchInput').focus();
+            }
         }
 
         function removeMedicineRow(btn) {
@@ -1025,9 +1048,15 @@
                 row.style.display = index >= start && index < end ? '' : 'none';
             });
 
-            document.getElementById('emptyMessage').style.display = rows.length ? 'none' : 'block';
-            document.getElementById('paginationInfo').textContent = rows.length;
-            document.getElementById('paginationPlural').textContent = rows.length === 1 ? '' : 's';
+            const emptyMessage = document.getElementById('emptyMessage');
+            if (emptyMessage) emptyMessage.style.display = rows.length ? 'none' : 'block';
+
+            const paginationInfo = document.getElementById('paginationInfo');
+            if (paginationInfo) paginationInfo.textContent = rows.length;
+
+            const paginationPlural = document.getElementById('paginationPlural');
+            if (paginationPlural) paginationPlural.textContent = rows.length === 1 ? '' : 's';
+
             renderPagination(totalPages);
         }
 

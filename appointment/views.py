@@ -43,10 +43,6 @@ def resolve_hid(hid):
     return None
 
 
-# ─────────────────────────────────────────
-# Search Patients + Family Members - FIXED
-# ─────────────────────────────────────────
-
 @role_required('doctor')
 def search_patients(request):
     """Search for patients (main user or family member) - WORKING VERSION"""
@@ -112,10 +108,6 @@ def search_patients(request):
         traceback.print_exc()
         return JsonResponse({'error': f'Search error: {str(e)}'}, status=500)
 
-
-# ─────────────────────────────────────────
-# Slot Generator
-# ─────────────────────────────────────────
 
 def generate_slots(selected_date=None):
     clinic = ClinicSettings.get()
@@ -318,10 +310,6 @@ def delete_appointment(request, hid):
     return redirect('appointment:manage_appointments')
 
 
-# ─────────────────────────────────────────
-# Manage Appointments (Doctor)
-# ─────────────────────────────────────────
-
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
@@ -389,10 +377,6 @@ def appointment_detail_modal(request, hid):
         'prescription_items': prescription_items,
     })
 
-
-# ─────────────────────────────────────────
-# Add Appointment (Doctor) - UPDATED
-# ─────────────────────────────────────────
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Add_appointment(View):
@@ -489,9 +473,6 @@ class Add_appointment(View):
         return redirect('appointment:manage_appointments')
 
 
-# ─────────────────────────────────────────
-# Book Appointment (Patient)
-# ─────────────────────────────────────────
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class Book_appointment(View):
@@ -514,9 +495,6 @@ class Book_appointment(View):
         notes            = request.POST.get("message")
         family_member_id = request.POST.get("family_member_id")
 
-        # =========================
-        # TIME CONVERSION FIX
-        # =========================
 
         try:
 
@@ -600,9 +578,6 @@ class Book_appointment(View):
 
                 family_member = None
 
-        # =========================
-        # CREATE APPOINTMENT
-        # =========================
 
         Appointment.objects.create(
 
@@ -622,10 +597,7 @@ class Book_appointment(View):
         )
 
         return redirect('appointment:appointment')
-    # ─────────────────────────────────────────
-    
-# Start Visit (Doctor)
-# ─────────────────────────────────────────
+
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class StartVisitView(View):
@@ -904,9 +876,7 @@ def appointment_detail(request, hid):
     prescription      = None
     prescription_items = []
 
-    # Ensure canonical (hashed) URL: if incoming hid doesn't match the
-    # encoded appointment id, redirect to the hashed URL so users always
-    # see the short `hid` in the browser.
+
     try:
         from doctor import hashid as _hashid
         canonical = _hashid.encode_id(appointment.id)

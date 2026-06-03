@@ -516,15 +516,39 @@ class RestoreAppointmentView(DoctorRequiredMixin, View):
 
 class ArchivedBillsView(DoctorRequiredMixin, View):
     def get(self, request):
+        search = request.GET.get('search', '').strip()
+        bill_date = request.GET.get('bill_date', '').strip()
+        status = request.GET.get('status', 'all').strip()
+
         bills = Bill.objects.select_related(
             'visit__patient__user'
-        ).filter(is_archived=True).order_by('-archived_at', '-created_at')
+        ).filter(is_archived=True)
 
+        if search:
+            bills = bills.filter(
+                Q(bill_number__icontains=search) |
+                Q(visit__patient__user__first_name__icontains=search) |
+                Q(visit__patient__user__last_name__icontains=search) |
+                Q(visit__patient__phone__icontains=search)
+            )
+
+        if bill_date:
+            parsed_date = parse_date(bill_date)
+            bills = bills.filter(bill_date=parsed_date) if parsed_date else bills.none()
+
+        if status and status != 'all':
+            bills = bills.filter(payment_status=status)
+
+        bills = bills.order_by('-archived_at', '-created_at')
         page_obj = Paginator(bills, 10).get_page(request.GET.get('page'))
 
         return render(request, 'reports_archive/archived_bills.html', {
             'bills': page_obj,
             'page_obj': page_obj,
+            'search': search,
+            'bill_date': bill_date,
+            'status': status,
+            'status_choices': Bill.PAYMENT_STATUS,
             'active_bills_count': Bill.objects.filter(is_archived=False).count(),
             'archived_bills_count': Bill.objects.filter(is_archived=True).count(),
         })
@@ -565,16 +589,38 @@ class RestoreBillView(DoctorRequiredMixin, View):
 
 class ArchivedExpensesView(DoctorRequiredMixin, View):
     def get(self, request):
+        search = request.GET.get('search', '').strip()
+        expense_date = request.GET.get('expense_date', '').strip()
+        status = request.GET.get('status', 'all').strip()
+
         expenses = Expense.objects.select_related(
             'category',
             'created_by',
-        ).filter(is_archived=True).order_by('-archived_at', '-created_at')
+        ).filter(is_archived=True)
 
+        if search:
+            expenses = expenses.filter(
+                Q(title__icontains=search) |
+                Q(category__name__icontains=search)
+            )
+
+        if expense_date:
+            parsed_date = parse_date(expense_date)
+            expenses = expenses.filter(expense_date=parsed_date) if parsed_date else expenses.none()
+
+        if status and status != 'all':
+            expenses = expenses.filter(status=status)
+
+        expenses = expenses.order_by('-archived_at', '-created_at')
         page_obj = Paginator(expenses, 10).get_page(request.GET.get('page'))
 
         return render(request, 'reports_archive/archived_expenses.html', {
             'expenses': page_obj,
             'page_obj': page_obj,
+            'search': search,
+            'expense_date': expense_date,
+            'status': status,
+            'status_choices': Expense.STATUS_CHOICES,
             'active_expenses_count': Expense.objects.filter(is_archived=False).count(),
             'archived_expenses_count': Expense.objects.filter(is_archived=True).count(),
         })
