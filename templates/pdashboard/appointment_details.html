@@ -9,25 +9,36 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}">
-
+    <style>
+        @media print {
+            .btn { display: none; }
+            .header { display: none; }
+        }
+    </style>
 </head>
 <body>
 <div class="container py-5">
 
     <div class="header mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <h3><i class="fas fa-calendar-check"></i> Appointment Details</h3>
-        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Back
-        </a>
+        <div class="gap-2">
+          
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back
+            </a>
+        </div>
     </div>
 
     <!-- ── Card 1: Appointment + Patient + Doctor ── -->
     <div class="detail-card mb-4">
 
         <!-- Appointment Info -->
-        <div class="detail-section">    
-            <div class="section-title"><i class="fas fa-calendar-alt"></i> Appointment Info
+        <div class="detail-section">  
+               
+            <div class="section-title">
+                <i class="fas fa-calendar-alt"></i> Appointment Info
             </div>
+             
             <div class="info-grid">
                 <div class="info-box">
                     <div class="label">Date</div>
@@ -47,35 +58,22 @@
                         {% elif appointment.status == 'completed' %}
                             <span class="status-badge status-completed">Completed</span>
                         {% else %}
-                            <span    class="status-badge status-pending">Pending</span>
+                            <span class="status-badge status-pending">Pending</span>
                         {% endif %}
                     </div>
-                    <div class="info-box">
-                        <div class="label">Booked On</div>
-                        <div class="value">{{ appointment.appointment_date|date:"d M-Y" }}</div>
-                    </div>
-
-                    {% if appointment.status == 'cancelled' %}
-                    <div class="info-grid full mt-3">
-                        <div class="info-box">
-                            <div class="label">Reason</div>
-                            <div class="value">{{ appointment.cancellation_reason }}</div>
-                        </div>
-                    </div>    
-                    {% endif %}
                 </div>
                 <div class="info-box">
                     <div class="label">Booked On</div>
                     <div class="value">{{ appointment.appointment_date|date:"d M-Y" }}</div>
                 </div>
-            
+
                 {% if appointment.status == 'cancelled' %}
                 <div class="info-grid full mt-3">
                     <div class="info-box">
                         <div class="label">Reason</div>
                         <div class="value">{{ appointment.cancellation_reason }}</div>
                     </div>
-                </div>
+                </div>    
                 {% endif %}
             </div>
             {% if appointment.notes %}
