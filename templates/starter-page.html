@@ -62,7 +62,7 @@
     <div class="branding d-flex align-items-cente">
 
       <div class="container position-relative d-flex align-items-center justify-content-between">
-        <a href="index.html" class="logo d-flex align-items-center">
+        <a href="{% url 'index' %}" class="logo d-flex align-items-center">
           <!-- Uncomment the line below if you also wish to use an image logo -->
           <!-- <img src="assets/img/logo.webp" alt=""> -->
           <h1 class="sitename">Clinic</h1>
@@ -70,7 +70,7 @@
 
         <nav id="navmenu" class="navmenu">
           <ul>
-            <li><a href="index.html">Home</a></li>
+            <li><a href="{% url 'index' %}">Home</a></li>
             <li><a href="about.html">About</a></li>
             <li><a href="departments.html">Departments</a></li>
             <li><a href="services.html">Services</a></li>
@@ -141,7 +141,7 @@
       <nav class="breadcrumbs">
         <div class="container">
           <ol>
-            <li><a href="index.html">Home</a></li>
+            <li><a href="{% url 'index' %}">Home</a></li>
             <li class="current">Starter Page</li>
           </ol>
         </div>
@@ -174,7 +174,7 @@
 
           <div class="col-lg-5">
             <div class="brand-section">
-              <a href="index.html" class="logo d-flex align-items-center mb-4">
+              <a href="{% url 'index' %}" class="logo d-flex align-items-center mb-4">
                 <span class="sitename">Clinic</span>
               </a>
               <p class="brand-description">Crafting exceptional digital experiences through thoughtful design and

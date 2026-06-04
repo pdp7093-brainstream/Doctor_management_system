@@ -71,9 +71,9 @@
                     <div class="input-group">
                         <span class="input-group-text"><i class="bi bi-filter"></i></span>
                         <select id="billStatus" class="form-select">
-                            <option value="all" {% if status=="all" %}selected{% endif %}>All</option>
+                            <option value="all" {% if status == "all" %}selected{% endif %}>All</option>
                             {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if status==value %}selected{% endif %}>{{ label }}</option>
+                            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -157,15 +157,13 @@
                 <nav aria-label="Archived bills pagination" class="w-100">
                     <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1 mb-0">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-                            <a class="page-link pagination-link" {% if page_obj.has_previous
-                                %}data-page="{{ page_obj.previous_page_number }}" {% endif %} href="#">Prev</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}" {% endif %} href="#">Prev</a>
                         </li>
                         <li class="page-item active">
                             <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
                         </li>
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-                            <a class="page-link pagination-link" {% if page_obj.has_next
-                                %}data-page="{{ page_obj.next_page_number }}" {% endif %} href="#">Next</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}" {% endif %} href="#">Next</a>
                         </li>
                     </ul>
                 </nav>

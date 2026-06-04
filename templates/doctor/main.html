@@ -326,6 +326,14 @@
                 </a>
             </li>
 
+            {% if request.user.innermember.role == 'doctor' %}
+            <li>
+                <a href="{% url 'doctor:feedback_list' %}" class="{% if '/feedback' in request.path %}active{% endif %}">
+                    <i class="bi bi-chat-heart"></i>
+                    <span>Patient Feedback</span>
+                </a>
+            </li>
+            {% endif %}
 
             <li class="mt-auto">
                 <a href="{% url 'clinic:settings' %}" class="{% if 'settings' in request.path %}active{% endif %}">

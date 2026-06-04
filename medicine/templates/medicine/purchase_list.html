@@ -67,8 +67,7 @@
 
     <!-- Table Section -->
     <div class="table-section">
-        <div id="tableContainer"
-            style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
+        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
             <table class="table table-custom" style="min-width: 950px; width: 100%;">
                 <thead>
                     <tr>
@@ -140,13 +139,11 @@
                                     class="btn btn-primary btn-sm d-flex align-items-center gap-1" title="View Details">
                                     <i class="bi bi-eye"></i> View
                                 </a>
-                                <form method="post" action="{% url 'medicine:delete_purchase' purchase.id|hid %}"
-                                    class="m-0 deletePurchaseForm">
+                                <form method="post" action="{% url 'medicine:delete_purchase' purchase.id|hid %}" class="m-0 deletePurchaseForm">
 
                                     {% csrf_token %}
 
-                                    <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-1"
-                                        title="Delete Purchase">
+                                    <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-1" title="Delete Purchase">
                                         <i class="bi bi-trash"></i> Delete
                                     </button>
 

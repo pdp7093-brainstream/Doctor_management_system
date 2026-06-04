@@ -836,3 +836,41 @@ def delete_old_document(request, hid):
         return JsonResponse({'success': False, 'error': 'Document not found'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+# ─────────────────────────────────────────
+# Patient Feedback
+# ─────────────────────────────────────────
+
+from accounts.models import PatientFeedback
+
+@never_cache
+@role_required('doctor')
+def feedback_list(request):
+    feedbacks = PatientFeedback.objects.all()
+
+    # Mark all unread as read when doctor opens the page
+    unread_count = feedbacks.filter(is_read=False).count()
+    feedbacks.filter(is_read=False).update(is_read=True)
+
+    paginator = Paginator(feedbacks, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'doctor/feedback.html', {
+        'feedbacks': page_obj,
+        'page_obj': page_obj,
+        'unread_count': unread_count,
+    })
+
+
+@never_cache
+@require_POST
+@role_required('doctor')
+def delete_feedback(request, pk):
+    try:
+        feedback = get_object_or_404(PatientFeedback, pk=pk)
+        feedback.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
