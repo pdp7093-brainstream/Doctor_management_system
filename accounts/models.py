@@ -60,3 +60,25 @@ class FamilyMember(models.Model):
     def get_patient_name(self):
         """Helper method to get associated patient's name"""
         return self.patient.user.get_full_name() or self.patient.user.email
+
+
+class PatientFeedback(models.Model):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    email = models.EmailField(blank=True, default='')
+    phone = models.CharField(max_length=15, blank=True, default='')
+    rating = models.PositiveSmallIntegerField(choices=RATING_CHOICES, default=5)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'accounts_patientfeedback'
+        ordering = ['-created_at']
+        verbose_name = 'Patient Feedback'
+        verbose_name_plural = 'Patient Feedbacks'
+
+    def __str__(self):
+        return f"{self.name} — {'⭐' * self.rating} ({self.created_at:%d %b %Y})"

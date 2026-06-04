@@ -6,27 +6,28 @@
     <div class="container-fluid px-4 py-5">
 
         <div class="d-flex justify-content-between align-items-center mb-5">
-    <div>
-        <h1 class="h3 text-dark fw-bold mb-1">Patient Visit</h1>
-        <p class="text-muted small mb-0">Document visit details and create prescription</p>
-    </div>
-    <div class="d-flex gap-2">
-        {% if visit_completed %}
-            <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank" class="btn btn-outline-secondary rounded-2">
-                <i class="bi bi-printer me-2"></i>Print
-            </a>
-        {% endif %}
-        {% if is_today %}
-            <a href="{% url 'doctor:dashboard' %}" class="btn btn-outline-primary rounded-2">
-                <i class="bi me-2"></i>Back to Appointments
-            </a>
-        {% else %}
-            <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-primary rounded-2">
-                <i class="bi bi me-2"></i>View History
-            </a>
-        {% endif %}
-    </div>
-    </div>
+            <div>
+                <h1 class="h3 text-dark fw-bold mb-1">Patient Visit</h1>
+                <p class="text-muted small mb-0">Document visit details and create prescription</p>
+            </div>
+            <div class="d-flex gap-2">
+                {% if visit_completed %}
+                <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank"
+                    class="btn btn-outline-secondary rounded-2">
+                    <i class="bi bi-printer me-2"></i>Print
+                </a>
+                {% endif %}
+                {% if is_today %}
+                <a href="{% url 'doctor:dashboard' %}" class="btn btn-outline-primary rounded-2">
+                    <i class="bi me-2"></i>Back to Appointments
+                </a>
+                {% else %}
+                <a href="{% url 'appointment:manage_appointments' %}" class="btn btn-outline-primary rounded-2">
+                    <i class="bi bi me-2"></i>View History
+                </a>
+                {% endif %}
+            </div>
+        </div>
 
         <!-- Main Form -->
         <form method="post" id="visitForm" enctype="multipart/form-data">
@@ -43,12 +44,11 @@
                         <div class="card-body p-4">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
-                            <input type="text" 
-                                class="form-control bg-secondary-subtle" 
-                                style="text-align: left !important;"
-                                value="{% if visit.appointment.family_member %}{{ visit.appointment.family_member.name }}{% else %}{{ visit.appointment.patient.user.get_full_name }}{% endif %}"
-                                readonly>
+                                    <label class="form-label fw-semibold text-dark mb-2">Patient Name</label>
+                                    <input type="text" class="form-control bg-secondary-subtle"
+                                        style="text-align: left !important;"
+                                        value="{% if visit.appointment.family_member %}{{ visit.appointment.family_member.name }}{% else %}{{ visit.appointment.patient.user.get_full_name }}{% endif %}"
+                                        readonly>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
@@ -166,7 +166,8 @@
                                         </div>
                                         <div class="lab-document-meta">
                                             <div class="lab-document-title">{{ document.original_name }}</div>
-                                            <small class="text-muted">Uploaded {{ document.uploaded_at|date:"d M Y, h:i A" }}</small>
+                                            <small class="text-muted">Uploaded {{ document.uploaded_at|date:"d M Y, h:i
+                                                A" }}</small>
                                         </div>
                                     </div>
                                     <div class="lab-document-actions">
@@ -236,7 +237,8 @@
                                                 <input type="hidden" name="variant_id[]"
                                                     value="{{ item.medicine_variant.id }}">
                                                 <input type="hidden" name="item_id[]" value="{{ item.id }}">
-                                                <input type="hidden" name="medicine_notes" value="{{ item.notes|default:'' }}">
+                                                <input type="hidden" name="medicine_notes"
+                                                    value="{{ item.notes|default:'' }}">
                                             </td>
                                             <td class="text-center">
                                                 {{ item.parsed_morning }}
@@ -272,7 +274,8 @@
                                             <td class="text-center">
                                                 <label class="toggle-switch">
                                                     <input type="checkbox" name="should_deduct[]"
-                                                        value="{{ forloop.counter0 }}" class="toggle-input" {% if item.should_deduct %}checked{% endif %}
+                                                        value="{{ forloop.counter0 }}" class="toggle-input" {% if
+                                                        item.should_deduct %}checked{% endif %}
                                                         onchange="updateDeductCount()">
                                                     <span class="toggle-slider"></span>
                                                 </label>
@@ -281,13 +284,13 @@
                                             <!-- ✅ Stock Status Column -->
                                             <td class="text-center">
                                                 {% if item.was_deducted %}
-                                                    <span class="badge bg-success-subtle text-success rounded-pill">
-                                                        <i class="bi bi-check-circle-fill me-1"></i>Stock Deducted
-                                                    </span>
+                                                <span class="badge bg-success-subtle text-success rounded-pill">
+                                                    <i class="bi bi-check-circle-fill me-1"></i>Stock Deducted
+                                                </span>
                                                 {% else %}
-                                                    <span class="badge bg-light text-muted rounded-pill">
-                                                        <i class="bi bi-clock me-1"></i>Pending
-                                                    </span>
+                                                <span class="badge bg-light text-muted rounded-pill">
+                                                    <i class="bi bi-clock me-1"></i>Pending
+                                                </span>
                                                 {% endif %}
                                             </td>
 
@@ -301,7 +304,8 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                                <div id="emptyMessage" class="text-center py-5 text-muted" {% if item %}style="display:none;" {% endif %}>
+                                <div id="emptyMessage" class="text-center py-5 text-muted" {% if item
+                                    %}style="display:none;" {% endif %}>
                                     <i class="bi bi-capsule-pill d-block mb-3" style="font-size:3rem; opacity:0.2;"></i>
                                     <p class="mb-0">No medicines added to prescription yet.</p>
                                 </div>
@@ -318,7 +322,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg rounded-4">
                 <div class="modal-header border-bottom-0 px-4 pt-4">
-                    <h5 class="modal-title fw-bold">Add Medication</h5>
+                    <h5 class="modal-title fw-bold">Add Medicine</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
@@ -380,7 +384,8 @@
                             <div class="col-md-3">
                                 <label class="form-label small fw-bold text-muted">Evening</label>
                                 <div class="input-group shadow-sm">
-                                    <span class="input-group-text bg-white"><i class="bi bi-sunset text-warning"></i></span>
+                                    <span class="input-group-text bg-white"><i
+                                            class="bi bi-sunset text-warning"></i></span>
                                     <input type="number" id="modal_evening" value="0" min="0"
                                         class="form-control text-center fw-bold">
                                 </div>
@@ -409,7 +414,8 @@
                                 </div>
                             </div>
                             <div class="col-12">
-                                <label class="form-label small fw-bold text-muted">Medicine Notes <span class="fw-normal">(Optional)</span></label>
+                                <label class="form-label small fw-bold text-muted">Medicine Notes <span
+                                        class="fw-normal">(Optional)</span></label>
                                 <textarea id="modal_medicine_notes" class="form-control" rows="2"
                                     placeholder="Example: Take with warm water, avoid empty stomach, SOS instruction..."></textarea>
                             </div>
@@ -418,430 +424,435 @@
                 </div>
 
                 <div class="modal-footer border-top-0 px-4 pb-4 pt-3">
-                    <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal" onclick="resetModalForm()">Close</button>
+                    <button type="button" class="btn btn-light px-4 rounded-pill" data-bs-dismiss="modal"
+                        onclick="resetModalForm()">Close</button>
                     <button type="button" class="btn btn-outline-primary px-4 rounded-pill"
                         onclick="saveMedicine(false)">Add & Another</button>
-                    <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="saveMedicine(true)">Add to List</button>
+                    <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="saveMedicine(true)">Add to
+                        List</button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ===== STYLES ===== -->
-    
-<style>
-    /* ===== PAGE ===== */
-    .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 16px;
-        margin-bottom: 24px;
-        flex-wrap: wrap;
-    }
 
-    .page-title {
-        font-size: 1.7rem;
-        font-weight: 700;
-        color: var(--dark-text);
-        margin-bottom: 4px;
-    }
-
-    .page-subtitle {
-        color: #64748b;
-        font-size: 0.92rem;
-        margin: 0;
-    }
-
-    /* ===== CARD ===== */
-    .visit-card {
-        background: var(--white);
-        border-radius: 16px;
-        border: 1px solid #edf2f7;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
-        overflow: hidden;
-        margin-bottom: 24px;
-    }
-
-    .visit-card-header {
-        padding: 18px 22px;
-        border-bottom: 1px solid #f1f5f9;
-        background: #fff;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .visit-card-title {
-        font-size: 1rem;
-        font-weight: 700;
-        margin: 0;
-        color: var(--dark-text);
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .visit-card-title i {
-        color: var(--primary-color);
-    }
-
-    .visit-card-body {
-        padding: 22px;
-    }
-
-    /* ===== FORM ===== */
-    .form-label {
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: #334155;
-        margin-bottom: 8px;
-    }
-
-    .form-control,
-    .form-select {
-        border-radius: 12px;
-        min-height: 48px;
-        border: 1px solid #dbe2ea;
-        box-shadow: none !important;
-        font-size: 0.92rem;
-    }
-
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08) !important;
-    }
-
-    textarea.form-control {
-        resize: vertical;
-        min-height: 120px;
-    }
-
-    /* ===== BUTTONS ===== */
-    .visit-btn {
-        border: none;
-        border-radius: 12px;
-        padding: 11px 18px;
-        font-size: 0.9rem;
-        font-weight: 600;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        transition: 0.2s ease;
-        text-decoration: none;
-    }
-
-    .visit-btn-primary {
-        background: var(--primary-color);
-        color: #fff;
-    }
-
-    .visit-btn-primary:hover {
-        background: #2563eb;
-        color: #fff;
-    }
-
-    .visit-btn-success {
-        background: #16a34a;
-        color: #fff;
-    }
-
-    .visit-btn-success:hover {
-        background: #15803d;
-        color: #fff;
-    }
-
-    .visit-btn-outline {
-        background: #fff;
-        border: 1px solid #dbe2ea;
-        color: #475569;
-    }
-
-    .visit-btn-outline:hover {
-        background: #f8fafc;
-        color: #111827;
-    }
-
-    /* ===== SUMMARY ===== */
-    .summary-box {
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 18px;
-        background: #f8fafc;
-    }
-
-    .summary-box h6 {
-        font-size: 0.92rem;
-        font-weight: 700;
-        margin-bottom: 14px;
-    }
-
-    .summary-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .summary-badge {
-        background: rgba(59, 130, 246, 0.12);
-        color: var(--primary-color);
-        padding: 4px 12px;
-        border-radius: 50px;
-        font-size: 0.75rem;
-        font-weight: 700;
-    }
-
-    /* ===== TABLE ===== */
-    .table-wrap {
-        overflow-x: auto;
-        width: 100%;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .visit-table {
-        width: 100%;
-        min-width: 950px;
-        margin-bottom: 0;
-    }
-
-    .visit-table thead th {
-        background: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        color: #475569;
-        font-size: 0.84rem;
-        font-weight: 700;
-        padding: 16px;
-        white-space: nowrap;
-    }
-
-    .visit-table tbody td {
-        padding: 16px;
-        vertical-align: middle;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .visit-table tbody tr:hover {
-        background: #f8fbff;
-    }
-
-    /* ===== BADGES ===== */
-    .custom-badge {
-        padding: 6px 12px;
-        border-radius: 50px;
-        font-size: 0.76rem;
-        font-weight: 700;
-    }
-
-    .badge-after {
-        background: #dbeafe;
-        color: #2563eb;
-    }
-
-    .badge-before {
-        background: #fef3c7;
-        color: #b45309;
-    }
-
-    /* ===== TOGGLE ===== */
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        width: 48px;
-        height: 26px;
-    }
-
-    .toggle-input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-    }
-
-    .toggle-slider {
-        position: absolute;
-        inset: 0;
-        background: #dbe2ea;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: 0.2s ease;
-    }
-
-    .toggle-slider::before {
-        content: "";
-        position: absolute;
-        width: 20px;
-        height: 20px;
-        left: 3px;
-        top: 3px;
-        border-radius: 50%;
-        background: #fff;
-        transition: 0.2s ease;
-    }
-
-    .toggle-input:checked + .toggle-slider {
-        background: #16a34a;
-    }
-
-    .toggle-input:checked + .toggle-slider::before {
-        transform: translateX(22px);
-    }
-
-    /* ===== EMPTY ===== */
-    .empty-box {
-        text-align: center;
-        padding: 60px 20px;
-        color: #94a3b8;
-    }
-
-    .empty-box i {
-        font-size: 3rem;
-        opacity: 0.25;
-        display: block;
-        margin-bottom: 12px;
-    }
-
-    .lab-document-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 10px 12px;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        background: #fff;
-    }
-
-    /* ===== MODAL ===== */
-    .modal-content {
-        border: none;
-        border-radius: 20px;
-        overflow: hidden;
-    }
-
-    .modal-header {
-        padding: 22px 24px 0;
-    }
-
-    .modal-body {
-        padding: 22px 24px;
-    }
-
-    .modal-footer {
-        padding: 0 24px 24px;
-    }
-
-    /* ===== SEARCH RESULT ===== */
-    .med-result-item {
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 16px;
-        margin-bottom: 12px;
-        background: #fff;
-        transition: 0.2s ease;
-    }
-
-    .med-result-item:hover {
-        border-color: #bfdbfe;
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08);
-    }
-
-    .variant-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 12px;
-    }
-
-    .v-chip {
-        padding: 7px 14px;
-        background: #f8fafc;
-        border: 1px solid #dbe2ea;
-        border-radius: 50px;
-        font-size: 0.82rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: 0.2s ease;
-    }
-
-    .v-chip:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-    }
-
-    .v-chip.selected {
-        background: var(--primary-color);
-        border-color: var(--primary-color);
-        color: #fff;
-    }
-
-    /* ===== BEAUTIFUL TOAST ANIMATIONS ===== */
-    @keyframes slideInRight {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-
-    .animate-slide-in {
-        animation: slideInRight 0.4s cubic-bezier(0.23, 1, 0.320, 1) !important;
-    }
-
-    .animate-slide-out {
-        animation: slideOutRight 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
-    }
-
-    /* ===== MOBILE ===== */
-    @media (max-width: 768px) {
-        .page-title {
-            font-size: 1.4rem;
-        }
-
-        .visit-card-header,
-        .visit-card-body {
-            padding: 18px;
-        }
-
+    <style>
+        /* ===== PAGE ===== */
         .page-header {
-            flex-direction: column;
-            align-items: stretch;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
 
+        .page-title {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 4px;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            font-size: 0.92rem;
+            margin: 0;
+        }
+
+        /* ===== CARD ===== */
+        .visit-card {
+            background: var(--white);
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .visit-card-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .visit-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark-text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .visit-card-title i {
+            color: var(--primary-color);
+        }
+
+        .visit-card-body {
+            padding: 22px;
+        }
+
+        /* ===== FORM ===== */
+        .form-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 12px;
+            min-height: 48px;
+            border: 1px solid #dbe2ea;
+            box-shadow: none !important;
+            font-size: 0.92rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08) !important;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        /* ===== BUTTONS ===== */
         .visit-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 11px 18px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: 0.2s ease;
+            text-decoration: none;
+        }
+
+        .visit-btn-primary {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .visit-btn-primary:hover {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .visit-btn-success {
+            background: #16a34a;
+            color: #fff;
+        }
+
+        .visit-btn-success:hover {
+            background: #15803d;
+            color: #fff;
+        }
+
+        .visit-btn-outline {
+            background: #fff;
+            border: 1px solid #dbe2ea;
+            color: #475569;
+        }
+
+        .visit-btn-outline:hover {
+            background: #f8fafc;
+            color: #111827;
+        }
+
+        /* ===== SUMMARY ===== */
+        .summary-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px;
+            background: #f8fafc;
+        }
+
+        .summary-box h6 {
+            font-size: 0.92rem;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-badge {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
             width: 100%;
+            -webkit-overflow-scrolling: touch;
         }
 
-        #toastContainer {
-            right: 10px !important;
-            left: 10px !important;
-            top: 10px !important;
+        .visit-table {
+            width: 100%;
+            min-width: 950px;
+            margin-bottom: 0;
         }
 
-        .toast-custom {
-            min-width: auto !important;
-            max-width: none !important;
+        .visit-table thead th {
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            color: #475569;
+            font-size: 0.84rem;
+            font-weight: 700;
+            padding: 16px;
+            white-space: nowrap;
         }
-    }
-</style>
+
+        .visit-table tbody td {
+            padding: 16px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .visit-table tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        /* ===== BADGES ===== */
+        .custom-badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        .badge-after {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .badge-before {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        /* ===== TOGGLE ===== */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+
+        .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            inset: 0;
+            background: #dbe2ea;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .toggle-slider::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 3px;
+            top: 3px;
+            border-radius: 50%;
+            background: #fff;
+            transition: 0.2s ease;
+        }
+
+        .toggle-input:checked+.toggle-slider {
+            background: #16a34a;
+        }
+
+        .toggle-input:checked+.toggle-slider::before {
+            transform: translateX(22px);
+        }
+
+        /* ===== EMPTY ===== */
+        .empty-box {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-box i {
+            font-size: 3rem;
+            opacity: 0.25;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .lab-document-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        /* ===== MODAL ===== */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            padding: 22px 24px 0;
+        }
+
+        .modal-body {
+            padding: 22px 24px;
+        }
+
+        .modal-footer {
+            padding: 0 24px 24px;
+        }
+
+        /* ===== SEARCH RESULT ===== */
+        .med-result-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #fff;
+            transition: 0.2s ease;
+        }
+
+        .med-result-item:hover {
+            border-color: #bfdbfe;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.08);
+        }
+
+        .variant-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .v-chip {
+            padding: 7px 14px;
+            background: #f8fafc;
+            border: 1px solid #dbe2ea;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .v-chip:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .v-chip.selected {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+
+        /* ===== BEAUTIFUL TOAST ANIMATIONS ===== */
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        .animate-slide-in {
+            animation: slideInRight 0.4s cubic-bezier(0.23, 1, 0.320, 1) !important;
+        }
+
+        .animate-slide-out {
+            animation: slideOutRight 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.4rem;
+            }
+
+            .visit-card-header,
+            .visit-card-body {
+                padding: 18px;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .visit-btn {
+                width: 100%;
+            }
+
+            #toastContainer {
+                right: 10px !important;
+                left: 10px !important;
+                top: 10px !important;
+            }
+
+            .toast-custom {
+                min-width: auto !important;
+                max-width: none !important;
+            }
+        }
+    </style>
 
     <!-- ===== Toast Notification Container ===== -->
     <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container-custom position-fixed" style="top: 20px; right: 20px; z-index: 9999;"></div>
+    <div id="toastContainer" class="toast-container-custom position-fixed"
+        style="top: 20px; right: 20px; z-index: 9999;"></div>
 
     <!-- ===== SCRIPTS ===== -->
     <script>
@@ -852,7 +863,7 @@
         function showToast(message, type = 'info', duration = 3000) {
             const toastContainer = document.getElementById('toastContainer');
             const toastId = `toast-${Date.now()}`;
-            
+
             // Define toast styles based on type
             const toastStyles = {
                 'success': {
@@ -939,17 +950,17 @@
                     </button>
                 </div>
             `;
-            
+
             toastContainer.insertAdjacentHTML('beforeend', toastHtml);
             const toastEl = document.getElementById(toastId);
-            
+
             // Close button functionality
             const closeBtn = toastEl.querySelector('.toast-close');
             closeBtn.addEventListener('click', () => {
                 toastEl.classList.add('animate-slide-out');
                 setTimeout(() => toastEl.remove(), 300);
             });
-            
+
             // Auto-hide after duration
             const hideTimeout = setTimeout(() => {
                 if (toastEl.parentElement) {
@@ -957,7 +968,7 @@
                     setTimeout(() => toastEl.remove(), 300);
                 }
             }, duration);
-            
+
             // Cancel auto-hide if manually closed
             closeBtn.addEventListener('click', () => clearTimeout(hideTimeout));
         }
@@ -1021,12 +1032,12 @@
                 document.getElementById('modalSearchInput').value = '';
                 document.getElementById('modalSearchResults').innerHTML =
                     '<div class="text-center py-4 text-muted border rounded-3 border-dashed"><p class="mb-0 small">Type to search medicines...</p></div>';
-                
+
                 const infoBox = document.getElementById('selectedMedicineInfo');
                 if (infoBox) {
                     infoBox.style.setProperty('display', 'none', 'important');
                 }
-                
+
                 document.getElementById('modal_morning').value = 0;
                 document.getElementById('modal_afternoon').value = 0;
                 document.getElementById('modal_evening').value = 0;
@@ -1034,7 +1045,7 @@
                 document.getElementById('modal_days').value = 7;
                 document.getElementById('modal_meal').value = 'after_food';
                 document.getElementById('modal_medicine_notes').value = '';
-                
+
                 document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('selected'));
             } catch (e) {
                 console.error("Error in resetModalForm:", e);
@@ -1195,7 +1206,7 @@
             document.getElementById('emptyMessage').style.display = 'none';
             currentPage = Math.max(1, Math.ceil(document.getElementById('medicineList').children.length / rowsPerPage));
             updateCounts();
-            
+
             // Show success toast
             showToast(`${selectedMedicineName} added successfully!`, 'success', 2000);
 

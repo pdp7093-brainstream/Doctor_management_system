@@ -13,6 +13,7 @@ cuda-bindings==13.2.0
 cuda-pathfinder==1.5.4
 cuda-toolkit==13.0.2
 Django==6.0.4
+django-cleanup==9.0.0
 djlint==1.36.4
 dnspython==2.8.0
 dotenv==0.9.9
@@ -104,4 +105,3 @@ typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.7.0
 uvicorn==0.46.0
-django-cleanup==9.0.0

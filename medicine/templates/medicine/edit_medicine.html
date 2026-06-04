@@ -40,10 +40,9 @@
                         <select id="medicine-type" name="medicine_type" class="patient-input" required>
                             <option value="" disabled>Select type...</option>
                             {% for value, label in medicine_types %}
-                                <option value="{{ value }}"
-                                    {% if medicine.medicine_type == value %}selected{% endif %}>
-                                    {{ label }}
-                                </option>
+                            <option value="{{ value }}" {% if medicine.medicine_type==value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
                             {% endfor %}
                         </select>
                     </div>
@@ -57,15 +56,14 @@
                 <!-- Description -->
                 <div class="patient-field">
                     <label class="patient-label" for="medicine-desc">Description</label>
-                    <textarea id="medicine-desc" name="description" class="patient-input"
-                        rows="2" placeholder="Optional notes...">{{ medicine.description }}</textarea>
+                    <textarea id="medicine-desc" name="description" class="patient-input" rows="2"
+                        placeholder="Optional notes...">{{ medicine.description }}</textarea>
                 </div>
 
                 <!-- Is Active -->
                 <div class="patient-field" style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" id="medicine-active" name="is_active"
-                        {% if medicine.is_active %}checked{% endif %}
-                        style="width:18px; height:18px; cursor:pointer;">
+                    <input type="checkbox" id="medicine-active" name="is_active" {% if medicine.is_active %}checked{%
+                        endif %} style="width:18px; height:18px; cursor:pointer;">
                     <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">
                         Active (available in store)
                     </label>
@@ -88,13 +86,15 @@
 
                     <div id="variantsContainer">
                         {% for variant in medicine.variants.all %}
-                        <div class="variant-row" style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <div class="variant-row"
+                            style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
                             <input type="hidden" name="variant_id[]" value="{{ variant.pk }}">
-                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
+                            <div
+                                style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                                    <input type="text" name="power[]" class="patient-input"
-                                        value="{{ variant.power }}" required>
+                                    <input type="text" name="power[]" class="patient-input" value="{{ variant.power }}"
+                                        required>
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
@@ -112,7 +112,8 @@
                                     <input type="number" name="total_strips[]" class="patient-input strip-input"
                                         value="{{ variant.stock_breakdown.strips }}" min="0">
                                     <!-- Hidden computed field sent to the view -->
-                                    <input type="hidden" name="stock[]" class="stock-hidden" value="{{ variant.stock }}">
+                                    <input type="hidden" name="stock[]" class="stock-hidden"
+                                        value="{{ variant.stock }}">
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
@@ -125,10 +126,9 @@
                                     <label class="patient-label" style="font-size:0.78rem;">Unit</label>
                                     <select name="unit[]" class="patient-input">
                                         {% for value, label in unit_choices %}
-                                            <option value="{{ value }}"
-                                                {% if variant.unit == value %}selected{% endif %}>
-                                                {{ label }}
-                                            </option>
+                                        <option value="{{ value }}" {% if variant.unit==value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -156,26 +156,21 @@
                             </div>
 
                             <!-- Live stock preview badge (JS-driven) -->
-                            <div class="stock-preview" style="
-                                display:none;
-                                align-items:center;
-                                margin-top:10px;
-                                padding:7px 12px;
-                                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);
-                                border:1px solid #c7dff7;
-                                border-radius:8px;
-                                font-size:0.8rem;
-                                color:#2c5282;
-                            ">
+                            <div class="stock-preview" style="display:none;
+                                align-items:center;margin-top:10px;padding:7px 12px;
+                                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);border:1px solid #c7dff7;
+                                border-radius:8px;font-size:0.8rem;color:#2c5282;">
                                 <i class="bi bi-calculator" style="color:#3182ce;"></i>
                                 &nbsp;<strong>Calculated stock:</strong>
                                 &nbsp;<span class="preview-text">—</span>
-                                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in DB)</span>
+                                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in
+                                    DB)</span>
                             </div>
 
                         </div>
                         {% empty %}
-                        <div class="variant-row" style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <div class="variant-row"
+                            style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
                             <input type="hidden" name="variant_id[]" value="">
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
                                 <div>
@@ -184,20 +179,24 @@
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
-                                    <input type="number" name="cost_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01">
+                                    <input type="number" name="cost_price[]" class="patient-input" placeholder="0.00"
+                                        min="0" step="0.01">
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
-                                    <input type="number" name="selling_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01">
+                                    <input type="number" name="selling_price[]" class="patient-input" placeholder="0.00"
+                                        min="0" step="0.01">
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Total Strips</label>
-                                    <input type="number" name="total_strips[]" class="patient-input strip-input" placeholder="e.g., 20" min="0">
+                                    <input type="number" name="total_strips[]" class="patient-input strip-input"
+                                        placeholder="e.g., 20" min="0">
                                     <input type="hidden" name="stock[]" class="stock-hidden" value="0">
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                                    <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
+                                    <input type="number" name="low_stock_alert[]" class="patient-input" value="10"
+                                        min="0">
                                 </div>
                             </div>
                             <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end;">
@@ -205,13 +204,14 @@
                                     <label class="patient-label" style="font-size:0.78rem;">Unit</label>
                                     <select name="unit[]" class="patient-input">
                                         {% for value, label in unit_choices %}
-                                            <option value="{{ value }}">{{ label }}</option>
+                                        <option value="{{ value }}">{{ label }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Unit / Strip</label>
-                                    <input type="number" name="unit_per_strip[]" class="patient-input ups-input" placeholder="e.g., 10" min="1">
+                                    <input type="number" name="unit_per_strip[]" class="patient-input ups-input"
+                                        placeholder="e.g., 10" min="1">
                                 </div>
                                 <div>
                                     <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
@@ -229,21 +229,15 @@
                                 </div>
                             </div>
                             <!-- Live stock preview badge for empty-row fallback -->
-                            <div class="stock-preview" style="
-                                display:none;
-                                align-items:center;
-                                margin-top:10px;
-                                padding:7px 12px;
-                                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);
-                                border:1px solid #c7dff7;
-                                border-radius:8px;
-                                font-size:0.8rem;
-                                color:#2c5282;
-                            ">
+                            <div class="stock-preview" style="display:none;
+                                align-items:center;margin-top:10px;padding:7px 12px;
+                                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);border:1px solid #c7dff7;
+                                border-radius:8px;font-size:0.8rem;color:#2c5282;">
                                 <i class="bi bi-calculator" style="color:#3182ce;"></i>
                                 &nbsp;<strong>Calculated stock:</strong>
                                 &nbsp;<span class="preview-text">—</span>
-                                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in DB)</span>
+                                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in
+                                    DB)</span>
                             </div>
                         </div>
                         {% endfor %}
@@ -264,25 +258,25 @@
 
 <script>
     const variantsContainer = document.getElementById('variantsContainer');
-    const addVariantBtn     = document.getElementById('addVariantBtn');
+    const addVariantBtn = document.getElementById('addVariantBtn');
 
     const unitOptions = `{% for value, label in unit_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}`;
 
     /* ── Core: recalculate hidden stock[] for one row ── */
     function recalcStock(row) {
-        const stripInput  = row.querySelector('.strip-input');
-        const upsInput    = row.querySelector('.ups-input');
+        const stripInput = row.querySelector('.strip-input');
+        const upsInput = row.querySelector('.ups-input');
         const hiddenStock = row.querySelector('.stock-hidden');
-        const preview     = row.querySelector('.stock-preview');
+        const preview = row.querySelector('.stock-preview');
         const previewText = row.querySelector('.preview-text');
 
         if (!stripInput || !upsInput || !hiddenStock) return;
 
         const strips = parseInt(stripInput.value, 10);
-        const ups    = parseInt(upsInput.value,   10);
+        const ups = parseInt(upsInput.value, 10);
 
         const validStrips = !isNaN(strips) && strips >= 0;
-        const validUps    = !isNaN(ups)    && ups    >  0;
+        const validUps = !isNaN(ups) && ups > 0;
 
         if (validStrips && validUps) {
             const computed = strips * ups;
@@ -304,9 +298,9 @@
     /* ── Attach all listeners to a row ── */
     function attachRowListeners(row) {
         const stripInput = row.querySelector('.strip-input');
-        const upsInput   = row.querySelector('.ups-input');
+        const upsInput = row.querySelector('.ups-input');
         if (stripInput) stripInput.addEventListener('input', () => recalcStock(row));
-        if (upsInput)   upsInput.addEventListener('input',   () => recalcStock(row));
+        if (upsInput) upsInput.addEventListener('input', () => recalcStock(row));
 
         row.querySelector('.remove-variant-btn').addEventListener('click', function () {
             row.remove();

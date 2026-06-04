@@ -5,13 +5,18 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Departments - Clinic Bootstrap Template</title>
+  <title>Departments - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
   <!-- Favicons -->
+  {% if clinic and clinic.logo %}
   <link href="{{ clinic.logo.url }}" rel="icon">
-  <link href="{% static 'assets/img/apple-touch-icon.png'%}" rel="apple-touch-icon">
+  <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
+  {% else %}
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
+  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+  {% endif %}
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -54,10 +59,7 @@
             <div class="col-lg-8">
               <h1 class="heading-title">Departments</h1>
               <p class="mb-0">
-                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
-                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
-                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
-                ipsum dolorem.
+                Explore our specialized medical departments equipped with advanced technology and staffed by expert specialists ready to provide comprehensive care.
               </p>
             </div>
           </div>

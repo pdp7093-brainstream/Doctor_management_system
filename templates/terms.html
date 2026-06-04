@@ -5,13 +5,18 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Terms - Clinic Bootstrap Template</title>
+  <title>Terms - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}</title>
   <meta name="description" content="">
   <meta name="keywords" content="">
 
   <!-- Favicons -->
+  {% if clinic and clinic.logo %}
   <link href="{{ clinic.logo.url }}" rel="icon">
+  <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
+  {% else %}
+  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
   <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+  {% endif %}
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -56,10 +61,7 @@
             <div class="col-lg-8">
               <h1 class="heading-title">Terms</h1>
               <p class="mb-0">
-                Odio et unde deleniti. Deserunt numquam exercitationem. Officiis quo
-                odio sint voluptas consequatur ut a odio voluptatem. Sit dolorum
-                debitis veritatis natus dolores. Quasi ratione sint. Sit quaerat
-                ipsum dolorem.
+                Please review our terms and privacy policy carefully to understand how we protect your information and govern the use of our services.
               </p>
             </div>
           </div>
@@ -68,7 +70,7 @@
       <nav class="breadcrumbs">
         <div class="container">
           <ol>
-            <li><a href="index.html">Home</a></li>
+            <li><a href="{% url 'index' %}">Home</a></li>
             <li class="current">Terms</li>
           </ol>
         </div>

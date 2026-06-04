@@ -187,14 +187,10 @@
                     <div class="info-box">
                         <div class="label">Doctor Name</div>
                         <div class="value">
-                            {% if appointment.doctor and appointment.doctor.user %}
-                                Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}
+                            {% if doctor and doctor.user %}
+                                Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}
                             {% else %}
-                                {% if super_user %}
-                                    Dr. {{ super_user.username }}
-                                {% else %}
-                                    —
-                                {% endif %}
+                                —
                             {% endif %}
                         </div>
                     </div>

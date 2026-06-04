@@ -145,6 +145,7 @@ STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media Files Configuration
 MEDIA_URL = 'media/'
@@ -157,3 +158,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://sanctity-litter-machinist.ngrok-free.dev",
     'https://manmade-chevy-untying.ngrok-free.dev',
 ]
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

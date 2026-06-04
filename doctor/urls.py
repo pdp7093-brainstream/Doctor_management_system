@@ -26,7 +26,6 @@ urlpatterns = [
     path('staff/',views.staff_view,name='staff'), 
     path('staff/add/',views.add_staff,name='add_staff'),
     path('staff/edit/<int:member_id>/',views.edit_staff,name='edit_staff'),
-    path("staff/<int:pk>/delete/", views.delete_staff, name="delete_staff"),
     path('staff/delete/<int:member_id>/',views.delete_staff,name='delete_staff'),
     path('staff/reset-password/<int:member_id>/', views.reset_staff_password, name='reset_staff_password'),
 
@@ -36,5 +35,8 @@ urlpatterns = [
     path('settings/', RedirectView.as_view(pattern_name='clinic:settings', permanent=False), name='settings'),
     path('old-data/', views.old_data_upload, name='old_data_upload'),
     path('old-data/delete/<str:hid>/', views.delete_old_document, name='delete_old_document'),
+
+    path('feedback/', views.feedback_list, name='feedback_list'),
+    path('feedback/<int:pk>/delete/', views.delete_feedback, name='delete_feedback'),
 
 ]

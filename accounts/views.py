@@ -33,8 +33,38 @@ def services(request):
 def terms(request):
     return render(request, 'terms.html')
 
-def contact(request):
-    return render(request, 'contact.html')
+def feedback(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        rating = request.POST.get('rating', '5')
+        message = request.POST.get('message', '').strip()
+
+        if not name or not message:
+            messages.error(request, 'Name and feedback message are required.')
+            return redirect('feedback')
+
+        try:
+            rating = int(rating)
+            if rating < 1 or rating > 5:
+                rating = 5
+        except (ValueError, TypeError):
+            rating = 5
+
+        from .models import PatientFeedback
+        PatientFeedback.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            name=name,
+            email=email,
+            phone=phone,
+            rating=rating,
+            message=message,
+        )
+        messages.success(request, 'Thank you for your feedback! We truly appreciate it.')
+        return redirect('feedback')
+
+    return render(request, 'feedback.html')
 
 def login(request):
     return render(request, 'authentication/login.html')
@@ -302,14 +332,17 @@ class LoginView(View):
         # Generate OTP
         import random
         otp = random.randint(100000, 999999)
-        print(f"=============================\nOTP for Login ({patient.phone}): {otp}\n=============================")
+        
+        from django.conf import settings
+        if settings.DEBUG:
+            print(f"=============================\nOTP for Login ({patient.phone}): {otp}\n=============================")
         
         request.session['login_otp'] = str(otp)
         request.session['login_user_id'] = patient.user.id
 
         if is_ajax:
-            return JsonResponse({'success': True, 'debug_otp': otp})
-        return render(request, self.template_name, {'show_otp': True, 'debug_otp': otp})
+            return JsonResponse({'success': True})
+        return render(request, self.template_name, {'show_otp': True})
 
 def logout_view(request):
     """Logout user"""
@@ -324,6 +357,8 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard(request):
     """Patient dashboard"""
+    patient = Patient.objects.get(user=request.user)
+    
     base_appointments = Appointment.objects.filter(
         patient__user=request.user,
         is_archived=False
@@ -394,7 +429,9 @@ def dashboard(request):
     query_params = request.GET.copy()
     query_params.pop('page', None)
 
-    total_spent = 0
+    from django.db.models import Sum
+    from billing.models import Bill
+    total_spent = Bill.objects.filter(visit__patient=patient, payment_status='paid').aggregate(total=Sum('total'))['total'] or 0
 
     context = {
         'appointments': page_obj,
