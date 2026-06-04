@@ -920,6 +920,7 @@ def appointment_detail(request, hid):
         'prescription'      : prescription,
         'prescription_items': prescription_items,
         'default_doctor'    : default_doctor,
+        'doctor'            : appointment.doctor or default_doctor,
     })
 
 # ─────────────────────────────────────────

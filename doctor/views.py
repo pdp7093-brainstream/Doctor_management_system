@@ -337,7 +337,10 @@ def edit_patient(request, hid):
             })
 
         #  UPDATE USER
-        patient.user.first_name = name or patient.user.first_name
+        if name:
+            name_parts = name.split(' ', 1)
+            patient.user.first_name = name_parts[0]
+            patient.user.last_name = name_parts[1] if len(name_parts) > 1 else ''
         patient.user.email      = email or patient.user.email
         patient.user.username   = email or patient.user.username
         patient.user.save()

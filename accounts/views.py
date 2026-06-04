@@ -357,6 +357,8 @@ def logout_view(request):
 @login_required(login_url='login')
 def dashboard(request):
     """Patient dashboard"""
+    patient = Patient.objects.get(user=request.user)
+    
     base_appointments = Appointment.objects.filter(
         patient__user=request.user,
         is_archived=False
