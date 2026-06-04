@@ -217,6 +217,7 @@
                                                 <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
                                                     title="ON = Complete visit pe stock minus hoga. OFF = Skip hoga."></i>
                                             </th>
+                                            <th class="text-center border-0">Stock Status</th>
                                             <th class="text-center border-0">Action</th>
                                         </tr>
                                     </thead>
@@ -275,10 +276,18 @@
                                                         onchange="updateDeductCount()">
                                                     <span class="toggle-slider"></span>
                                                 </label>
-                                                {% if item.was_deducted and not item.should_deduct %}
-                                                <div class="small text-muted mt-1" style="font-size:0.7rem;">
-                                                    <i class="bi bi-check-circle-fill text-success"></i> Deducted
-                                                </div>
+                                            </td>
+
+                                            <!-- ✅ Stock Status Column -->
+                                            <td class="text-center">
+                                                {% if item.was_deducted %}
+                                                    <span class="badge bg-success-subtle text-success rounded-pill">
+                                                        <i class="bi bi-check-circle-fill me-1"></i>Stock Deducted
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge bg-light text-muted rounded-pill">
+                                                        <i class="bi bi-clock me-1"></i>Pending
+                                                    </span>
                                                 {% endif %}
                                             </td>
 
@@ -766,6 +775,37 @@
         color: #fff;
     }
 
+    /* ===== BEAUTIFUL TOAST ANIMATIONS ===== */
+    @keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    .animate-slide-in {
+        animation: slideInRight 0.4s cubic-bezier(0.23, 1, 0.320, 1) !important;
+    }
+
+    .animate-slide-out {
+        animation: slideOutRight 0.3s cubic-bezier(0.645, 0.045, 0.355, 1) !important;
+    }
+
     /* ===== MOBILE ===== */
     @media (max-width: 768px) {
         .page-title {
@@ -785,13 +825,179 @@
         .visit-btn {
             width: 100%;
         }
+
+        #toastContainer {
+            right: 10px !important;
+            left: 10px !important;
+            top: 10px !important;
+        }
+
+        .toast-custom {
+            min-width: auto !important;
+            max-width: none !important;
+        }
     }
 </style>
+
+    <!-- ===== Toast Notification Container ===== -->
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container-custom position-fixed" style="top: 20px; right: 20px; z-index: 9999;"></div>
 
     <!-- ===== SCRIPTS ===== -->
     <script>
         let selectedVariantId = null;
         let selectedMedicineName = '';
+
+        // ===== Beautiful Toast Notification System =====
+        function showToast(message, type = 'info', duration = 3000) {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = `toast-${Date.now()}`;
+            
+            // Define toast styles based on type
+            const toastStyles = {
+                'success': {
+                    bgColor: '#10b981',
+                    borderColor: '#059669',
+                    icon: 'check-circle-fill',
+                    emoji: '✓'
+                },
+                'danger': {
+                    bgColor: '#ef4444',
+                    borderColor: '#dc2626',
+                    icon: 'exclamation-circle-fill',
+                    emoji: '✕'
+                },
+                'warning': {
+                    bgColor: '#f59e0b',
+                    borderColor: '#d97706',
+                    icon: 'exclamation-triangle-fill',
+                    emoji: '!'
+                },
+                'info': {
+                    bgColor: '#3b82f6',
+                    borderColor: '#1d4ed8',
+                    icon: 'info-circle-fill',
+                    emoji: 'ℹ'
+                }
+            };
+
+            const style = toastStyles[type] || toastStyles['info'];
+
+            const toastHtml = `
+                <div id="${toastId}" class="toast-custom animate-slide-in" style="
+                    background: linear-gradient(135deg, ${style.bgColor} 0%, ${style.bgColor}dd 100%);
+                    border-left: 4px solid ${style.borderColor};
+                    border-radius: 8px;
+                    padding: 14px 16px;
+                    margin-bottom: 12px;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    min-width: 280px;
+                    max-width: 380px;
+                    color: white;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+                    position: relative;
+                ">
+                    <div class="toast-icon" style="
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.2);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                        font-weight: bold;
+                        font-size: 16px;
+                    ">
+                        ${style.emoji}
+                    </div>
+                    <div class="toast-content" style="flex: 1;">
+                        ${message}
+                    </div>
+                    <button type="button" class="toast-close" style="
+                        background: none;
+                        border: none;
+                        color: rgba(255, 255, 255, 0.7);
+                        cursor: pointer;
+                        padding: 0;
+                        font-size: 16px;
+                        width: 20px;
+                        height: 20px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                        transition: color 0.2s;
+                    " onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.7)'">
+                        ×
+                    </button>
+                </div>
+            `;
+            
+            toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+            const toastEl = document.getElementById(toastId);
+            
+            // Close button functionality
+            const closeBtn = toastEl.querySelector('.toast-close');
+            closeBtn.addEventListener('click', () => {
+                toastEl.classList.add('animate-slide-out');
+                setTimeout(() => toastEl.remove(), 300);
+            });
+            
+            // Auto-hide after duration
+            const hideTimeout = setTimeout(() => {
+                if (toastEl.parentElement) {
+                    toastEl.classList.add('animate-slide-out');
+                    setTimeout(() => toastEl.remove(), 300);
+                }
+            }, duration);
+            
+            // Cancel auto-hide if manually closed
+            closeBtn.addEventListener('click', () => clearTimeout(hideTimeout));
+        }
+
+        // ===== Medicine Form Validation =====
+        function validateMedicineForm() {
+            // Check if medicine is selected
+            if (!selectedVariantId) {
+                showToast('Please select a medicine first', 'warning');
+                return false;
+            }
+
+            // Get timing values
+            const morning = parseInt(document.getElementById('modal_morning').value) || 0;
+            const afternoon = parseInt(document.getElementById('modal_afternoon').value) || 0;
+            const evening = parseInt(document.getElementById('modal_evening').value) || 0;
+            const night = parseInt(document.getElementById('modal_night').value) || 0;
+
+            // Check if at least one timing is selected
+            if (morning === 0 && afternoon === 0 && evening === 0 && night === 0) {
+                showToast('Please select at least one timing (Morning, Afternoon, Evening, or Night)', 'warning');
+                return false;
+            }
+
+            // Check if meal timing is selected (should have a value)
+            const meal = document.getElementById('modal_meal').value;
+            if (!meal || meal.trim() === '') {
+                showToast('Please select meal timing (Before or After Food)', 'warning');
+                return false;
+            }
+
+            // Check duration
+            const days = parseInt(document.getElementById('modal_days').value) || 0;
+            if (days <= 0) {
+                showToast('Please enter a valid duration (greater than 0)', 'warning');
+                return false;
+            }
+
+            return true;
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             updateCounts();
@@ -921,7 +1127,10 @@
         }
 
         function saveMedicine(close) {
-            if (!selectedVariantId) { alert('Select a medicine first'); return; }
+            // Validate form before saving
+            if (!validateMedicineForm()) {
+                return;
+            }
 
             const days = document.getElementById('modal_days').value;
             const m = document.getElementById('modal_morning').value;
@@ -971,6 +1180,11 @@
                         </label>
                     </td>
                     <td class="text-center">
+                        <span class="badge bg-light text-muted rounded-pill">
+                            <i class="bi bi-clock me-1"></i>Pending
+                        </span>
+                    </td>
+                    <td class="text-center">
                         <button type="button" class="btn btn-link text-danger p-0" onclick="removeMedicineRow(this)">
                             <i class="bi bi-trash3 fs-5"></i>
                         </button>
@@ -981,6 +1195,9 @@
             document.getElementById('emptyMessage').style.display = 'none';
             currentPage = Math.max(1, Math.ceil(document.getElementById('medicineList').children.length / rowsPerPage));
             updateCounts();
+            
+            // Show success toast
+            showToast(`${selectedMedicineName} added successfully!`, 'success', 2000);
 
             if (close) {
                 const modalEl = document.getElementById('medicineModal');
