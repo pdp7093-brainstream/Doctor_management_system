@@ -15,9 +15,11 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.db.models import Avg, Count, Q
 from django.core.paginator import Paginator
 from accounts.models import FamilyMember
+from appointment.file_validation import validate_uploaded_document
 
 def login_view(request):
     if request.method == 'POST':
@@ -790,7 +792,12 @@ def old_data_upload(request):
         if not patient_id or not file:
             messages.error(request, 'Patient and document are required.')
             return redirect('doctor:old_data_upload')
-            
+        try:
+            original_name = validate_uploaded_document(file)
+        except ValidationError as e:
+            messages.error(request, '; '.join(e.messages))
+            return redirect('doctor:old_data_upload')
+
         try:
             if patient_id == 'family_only' and family_member_id:
                 family_member = get_object_or_404(FamilyMember, id=family_member_id)
@@ -803,7 +810,7 @@ def old_data_upload(request):
                 patient=patient,
                 family_member=family_member,
                 file=file,
-                original_name=file.name,
+                original_name=original_name,
                 uploaded_by=request.user
             )
             messages.success(request, 'Old data document uploaded successfully.')
@@ -911,4 +918,3 @@ def delete_feedback(request, pk):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
-

@@ -180,6 +180,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Media Files Configuration
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+DOCUMENT_UPLOAD_MAX_SIZE = 10 * 1024 * 1024
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'

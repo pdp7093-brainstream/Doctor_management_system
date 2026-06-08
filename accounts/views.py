@@ -13,10 +13,12 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument
 from doctor.models import InnerMember
+from django.core.exceptions import ValidationError
 from django.db import OperationalError, ProgrammingError
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date, parse_time
+from appointment.file_validation import validate_uploaded_document
 
 def home(request):
     return render(request, 'index.html')
@@ -492,6 +494,11 @@ def upload_profile_document(request):
     if not uploaded_file:
         messages.error(request, 'Please choose a document to upload.')
         return redirect('profile')
+    try:
+        original_name = validate_uploaded_document(uploaded_file)
+    except ValidationError as exc:
+        messages.error(request, '; '.join(exc.messages))
+        return redirect('profile')
 
     family_member = None
     if family_member_id:
@@ -508,7 +515,7 @@ def upload_profile_document(request):
             patient=patient,
             family_member=family_member,
             file=uploaded_file,
-            original_name=uploaded_file.name,
+            original_name=original_name,
             uploaded_by=request.user,
         )
     except (ProgrammingError, OperationalError):
