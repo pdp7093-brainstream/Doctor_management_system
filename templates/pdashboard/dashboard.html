@@ -105,48 +105,46 @@
             </div>
             <div class="card-body">
                 <form method="get" action="{% url 'dashboard' %}" class="appointment-filter-form mb-3" id="appointmentFilterForm">
-                    
-                    <div class="row g-2 align-items-end">
-                        <div class="col-lg-4 col-md-12">
-                           
-                            <div class="filter-search-box">
-                              
-                                <input type="search" name="search" class="form-control"
-                                   placeholder="Patient, doctor, phone..."
-                                   value="{{ filters.search }}">
+                    <div class="filter-toolbar">
+                        <div class="filter-toolbar__head">
+                            <div>
+                                <h5 class="filter-toolbar__title">Appointment filters</h5>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-md-3">
-                            <label class="form-label small fw-semibold">Date From</label>
-                            <input type="date" name="date_from" class="form-control"
-                                   value="{{ filters.date_from }}">
-                        </div>
-                        <div class="col-lg-2 col-md-3">
-                            <label class="form-label small fw-semibold">Date To</label>
-                            <input type="date" name="date_to" class="form-control"
-                                   value="{{ filters.date_to }}">
-                        </div>
-                        <div class="col-lg-2 col-md-3">
-                            <label class="form-label small fw-semibold">Time From</label>
-                            <input type="time" name="time_from" class="form-control"
-                                   value="{{ filters.time_from }}">
-                        </div>
-                        <div class="col-lg-2 col-md-3">
-                            <label class="form-label small fw-semibold">Time To</label>
-                            <input type="time" name="time_to" class="form-control"
-                                   value="{{ filters.time_to }}">
-                        </div>
-                        <div class="col-lg-2 col-md-3">
-                            <label class="form-label small fw-semibold">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="">All</option>
-                                {% for value, label in status_choices %}
-                                    <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-12 d-flex gap-2 justify-content-end">
-                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm" id="resetAppointmentFilters">Reset</a>
+
+                        <div class="row g-2 align-items-end">
+                            <div class="col-lg-4 col-md-6">
+                                <label class="form-label small fw-semibold">Search</label>
+                                <input type="search" name="search" class="form-control"
+                                   placeholder="Patient, doctor or phone"
+                                   value="{{ filters.search }}"
+                                   aria-label="Search appointments"
+                                   autocomplete="off">
+                            </div>
+                            <div class="col-lg-2 col-md-6">
+                                <label class="form-label small fw-semibold">Date From</label>
+                                <input type="date" name="date_from" class="form-control"
+                                       value="{{ filters.date_from }}">
+                            </div>
+                            <div class="col-lg-2 col-md-6">
+                                <label class="form-label small fw-semibold">Date To</label>
+                                <input type="date" name="date_to" class="form-control"
+                                       value="{{ filters.date_to }}">
+                            </div>
+                            <div class="col-lg-4 col-md-12">
+                                <div class="d-flex flex-wrap align-items-end gap-2 filter-action-row">
+                                    <div class="flex-grow-1 min-w-0">
+                                        <label class="form-label small fw-semibold">Status</label>
+                                        <select name="status" class="form-select">
+                                            <option value="">All</option>
+                                            {% for value, label in status_choices %}
+                                                <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm flex-shrink-0" id="resetAppointmentFilters">Clear all</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </form>
