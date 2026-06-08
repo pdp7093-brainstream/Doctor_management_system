@@ -14,16 +14,19 @@
             position: relative;
         }
 
-        .password-toggle-wrapper .form-control {
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-input-wrapper .form-control {
             padding-right: 3rem;
         }
 
         .password-toggle {
             position: absolute;
             right: 0.85rem;
-            top: 0;
-            bottom: 0;
-            margin: auto 0;
+            top: 50%;
+            transform: translateY(-50%);
             background: transparent;
             border: none;
             color: #0d6efd;
@@ -99,15 +102,17 @@
                         <label for="password" class="form-label fw-semibold d-block mb-1 small">
                             <i class="bi bi-lock-fill me-2"></i>Password
                         </label>
-                        <input type="password" class="form-control form-control-sm" id="password" name="password"
-                            placeholder="Enter password" required
-                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
-                        <button type="button" class="password-toggle" aria-label="Toggle password visibility">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor">
-                                <path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/>
-                                <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
-                            </svg>
-                        </button>
+                        <div class="password-input-wrapper">
+                            <input type="password" class="form-control form-control-sm" id="password" name="password"
+                                placeholder="Enter password" required
+                                style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true">
+                                    <path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/>
+                                    <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Forgot Password Link -->
@@ -153,21 +158,19 @@
             });
         });
 
-        const eyeOpenSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';
-        const eyeSlashSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M13.359 11.238l1.287 1.287a.5.5 0 0 1-.708.708l-1.26-1.26A7.488 7.488 0 0 1 8 13.5C4.5 13.5 1.8 10.1 1 8a7.506 7.506 0 0 1 2.22-2.912L1.854 3.5a.5.5 0 1 1 .708-.708l1.285 1.285A7.485 7.485 0 0 1 8 2.5c3.5 0 6.2 3.4 7 5.5a7.485 7.485 0 0 1-1.641 3.238z"/><path d="M10.478 11.178A3.998 3.998 0 0 1 4.822 6.522l.738.738a3 3 0 0 0 4.125 4.125l.793.793zm.7-2.017L6.04 5.023A3 3 0 0 1 10.478 9.16z"/></svg>';
-
         document.querySelectorAll('.password-toggle-wrapper').forEach(function(wrapper) {
-            var input = wrapper.querySelector('input[type="password"]');
-            var button = wrapper.querySelector('.password-toggle');
-            if (!input || !button) return;
+            var inputWrapper = wrapper.querySelector('.password-input-wrapper');
+            var input = inputWrapper ? inputWrapper.querySelector('input[type="password"], input[type="text"]') : null;
+            var button = inputWrapper ? inputWrapper.querySelector('.password-toggle') : null;
+            var icon = button ? button.querySelector('.password-toggle-icon') : null;
+            if (!input || !button || !icon) return;
             button.addEventListener('click', function() {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    button.innerHTML = eyeSlashSVG;
-                } else {
-                    input.type = 'password';
-                    button.innerHTML = eyeOpenSVG;
-                }
+                var isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                icon.innerHTML = isHidden
+                    ? '<path d="M13.359 11.238l1.287 1.287a.5.5 0 0 1-.708.708l-1.26-1.26A7.488 7.488 0 0 1 8 13.5C4.5 13.5 1.8 10.1 1 8a7.506 7.506 0 0 1 2.22-2.912L1.854 3.5a.5.5 0 1 1 .708-.708l1.285 1.285A7.485 7.485 0 0 1 8 2.5c3.5 0 6.2 3.4 7 5.5a7.485 7.485 0 0 1-1.641 3.238z"/><path d="M10.478 11.178A3.998 3.998 0 0 1 4.822 6.522l.738.738a3 3 0 0 0 4.125 4.125l.793.793zm.7-2.017L6.04 5.023A3 3 0 0 1 10.478 9.16z"/>'
+                    : '<path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>';
+                button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
             });
         });
     </script>

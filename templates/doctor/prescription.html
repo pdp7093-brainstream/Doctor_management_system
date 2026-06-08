@@ -52,9 +52,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Appointment Date</label>
-                                    <input type="text" class="form-control form-control-lg bg-secondary-subtle"
-                                        value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}"
-                                        readonly>
+                                    <input type="text" class="form-control form-control-lg bg-secondary-subtle" value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}" readonly>
                                 </div>
                             </div>
                         </div>
@@ -260,8 +258,11 @@
                                             <td>
                                                 <span
                                                     class="badge {% if item.parsed_meal == 'after_food' %}bg-info-subtle text-info{% else %}bg-warning-subtle text-warning{% endif %}">
-                                                    {% if item.parsed_meal == 'after_food' %}After Food{% else %}Before
-                                                    Food{% endif %}
+                                                    {% if item.parsed_meal == 'after_food' %}
+                                                        After Food
+                                                    {% else %}
+                                                        Before Food
+                                                    {% endif %}
                                                 </span>
                                                 <input type="hidden" name="meal" value="{{ item.parsed_meal }}">
                                             </td>
@@ -273,10 +274,7 @@
                                             <!-- ✅ TOGGLE COLUMN — existing items -->
                                             <td class="text-center">
                                                 <label class="toggle-switch">
-                                                    <input type="checkbox" name="should_deduct[]"
-                                                        value="{{ forloop.counter0 }}" class="toggle-input" {% if
-                                                        item.should_deduct %}checked{% endif %}
-                                                        onchange="updateDeductCount()">
+                                                    <input type="checkbox" name="should_deduct[]" value="{{ forloop.counter0 }}" class="toggle-input" {% if item.should_deduct %}checked{% endif %} onchange="updateDeductCount()">
                                                     <span class="toggle-slider"></span>
                                                 </label>
                                             </td>
@@ -304,8 +302,7 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                                <div id="emptyMessage" class="text-center py-5 text-muted" {% if item
-                                    %}style="display:none;" {% endif %}>
+                                <div id="emptyMessage" class="text-center py-5 text-muted" {% if item %}style="display:none;" {% endif %}>
                                     <i class="bi bi-capsule-pill d-block mb-3" style="font-size:3rem; opacity:0.2;"></i>
                                     <p class="mb-0">No medicines added to prescription yet.</p>
                                 </div>
