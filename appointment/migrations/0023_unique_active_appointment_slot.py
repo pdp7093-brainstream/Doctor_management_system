@@ -14,6 +14,7 @@ def validate_unique_active_slots(apps, schema_editor):
         .values('doctor_id', 'appointment_date', 'time_slot')
         .annotate(slot_count=Count('id'))
         .filter(slot_count__gt=1)
+        .order_by('appointment_date', 'time_slot')
         .first()
     )
 
