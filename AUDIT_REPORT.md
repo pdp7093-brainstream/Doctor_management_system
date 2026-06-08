@@ -21,100 +21,6 @@ This is a Django-based clinic management system with appointment booking, billin
 
 ## 🔴 CRITICAL ISSUES (Must Fix Before Production)
 
-<!-- ### 1. Race Condition in Bill Number Generation ⚠️ ACCOUNTING NIGHTMARE
-
-**File:** [`billing/models.py`](billing/models.py#L53-L62)  
-**Severity:** 🔴 CRITICAL
-
-**Problem:**
-```python
-def save(self, *args, **kwargs):
-    if not self.bill_number:
-        with transaction.atomic():
-            last = Bill.objects.select_for_update().order_by('-id').first()
-            next_id = (last.id + 1) if last else 1  # ← BUG HERE
-            self.bill_number = f'BILL-{next_id:04d}'
-```
-
-**Issues:**
-1. Uses `id` instead of `COUNT()` - if bill ID#5 is deleted, next bill gets ID=5 again
-2. `next_id = (last.id + 1)` can create duplicate bill numbers if billing gaps exist
-3. Example: Bills 1,2,3,4 → delete 3,4 → Bill 5 created → next bill tries to get ID=6 but gets 4 because `order_by('-id').first()` gets bill 2
-4. **Result:** Same bill number assigned twice → accounting chaos
-
-**Fix Required:**
-```python
-def save(self, *args, **kwargs):
-    if not self.bill_number:
-        with transaction.atomic():
-            # Count total bills instead of using max ID
-            count = Bill.objects.count() + 1
-            self.bill_number = f'BILL-{count:04d}'
-```
-
-**Impact:** 🔴
-- Duplicate bill numbers in accounting
-- Payment reconciliation failures
-- Audit trail breaks
-- Tax reporting errors
-
---- -->
-
-
-<!-- ### 2. Double Booking Race Condition (Concurrent Requests)
-
-**File:** [`appointment/views.py`](appointment/views.py#L440-L450)  
-**Severity:** 🔴 CRITICAL (Multi-user)
-
-**Problem:**
-```python
-# Check if slot booked
-if Appointment.booked_slots().filter(
-    appointment_date=appointment_date_obj,
-    time_slot=time_slot
-).exists():
-    return "Slot already booked"
-
-# ← RACE CONDITION: Slot could be booked here by another request
-
-# Create appointment
-Appointment.objects.create(...)  # Both create same appointment!
-```
-
-**Scenario:**
-1. Request A: Checks slot 10:00 AM - available ✓
-2. Request B: Checks slot 10:00 AM - available ✓
-3. Request A: Creates appointment at 10:00 AM
-4. Request B: Creates appointment at 10:00 AM (DUPLICATE)
-
-**Fix Required:**
-```python
-# Option 1: Use select_for_update with unique constraint
-with transaction.atomic():
-    Appointment.objects.select_for_update().filter(
-        appointment_date=appointment_date_obj,
-        time_slot=time_slot,
-        status__in=['pending', 'confirmed']
-    ).exists()  # Lock the table
-
-# Option 2: Add unique constraint to model
-class Meta:
-    constraints = [
-        UniqueConstraint(
-            fields=['appointment_date', 'time_slot', 'doctor'],
-            condition=Q(is_archived=False, status__in=['pending', 'confirmed']),
-            name='unique_appointment_slot'
-        )
-    ]
-```
-
-**Impact:** 🔴
-- Multiple patients get same appointment slot
-- Doctor overbooking
-- Patient disappointment
-- Operational chaos
-
---- -->
 
 
 ### 3. Patient Signal Handler Not Implemented ⚠️ USER CREATION BROKEN
@@ -192,38 +98,6 @@ class AccountsConfig(AppConfig):
 
 ## 🟠 HIGH-PRIORITY ISSUES
 
-<!-- ### 4. Doctor Leave Filtering - Actually Implemented! ✅
-
-**File:** [`appointment/views.py`](appointment/views.py#L198-L210)  
-**Status:** ✅ ALREADY IMPLEMENTED
-
-**Clarification:**
-The previous audit incorrectly flagged this as incomplete. The `get_slots()` function *does* correctly filter out slots based on `leave.leave_type` (`full_day`, `first_half`, `second_half`) and passes the restricted slots to the frontend.
-
-**Result:**
-- Frontend properly hides slots when the doctor is on leave.
-- User is prevented from booking during leave times correctly.
-- This issue is resolved and working as intended!
-
---- -->
-
-<!-- ### 5. Stock Deduction Not Implemented - Actually Implemented! ✅
-
-**File:** [`appointment/views.py`](appointment/views.py#L730-L760)  
-**Status:** ✅ ALREADY IMPLEMENTED
-
-**Clarification:**
-The previous audit incorrectly claimed stock deduction was missing because it only looked inside `billing/views.py`. However, the deduction logic is perfectly implemented in `appointment/views.py` inside the `reduce_stock()` method of `PrescriptionView`. 
-
-It is even implemented securely using database locks (`select_for_update()`) and atomic transactions (`transaction.atomic()`) to prevent race conditions when updating the `MedicineVariant.stock`.
-
-**Result:**
-- When a prescription is completed, `reduce_stock()` is called.
-- Stock is safely decreased.
-- `was_deducted=True` flag is properly set so it doesn't deduct twice.
-- This issue is resolved and working as intended!
-
---- -->
 
 ### 6. No Transaction Handling in Bill Generation
 
@@ -428,22 +302,7 @@ def validate_dosage(dosage):
 - SECRET_KEY in version control
 - CSRF_TRUSTED_ORIGINS has ngrok URLs
 
-<!-- ---
 
-### 12. No Input Validation on File Uploads
-
-**Locations:**
-- `appointment/models.py:LabDocument`
-- `appointment/models.py:PatientUploadedDocument`
-- `doctor/views.py:upload_document()`
-
-**Missing:**
-- File size validation
-- File type validation (allow PDF, block EXE)
-- Path traversal protection
-- Virus scanning
-
---- -->
 
 ## ⚠️ WORKFLOW ANALYSIS
 
