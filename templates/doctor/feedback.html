@@ -13,9 +13,7 @@
         position: relative;
     }
 
-    .feedback-card:hover {
-        box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
-    }
+    .feedback-card:hover { box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);}
 
     .feedback-card.unread {
         border-left: 4px solid var(--primary-color);
@@ -170,8 +168,14 @@
     <div class="stat-pills">
         <div class="stat-pill total">
             <i class="bi bi-chat-dots"></i>
-            {{ page_obj.paginator.count }} Total
+            {{ total_count }} Total
         </div>
+        {% if avg_rating %}
+        <div class="stat-pill avg">
+            <i class="bi bi-star-half"></i>
+            {{ avg_rating|floatformat:1 }} Avg
+        </div>
+        {% endif %}
         {% if unread_count > 0 %}
         <div class="stat-pill new">
             <i class="bi bi-envelope-open"></i>
@@ -188,10 +192,10 @@
             <span class="badge bg-light text-primary">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
         </div>
 
-        <div class="card-body" style="padding: 16px;">
+        <div class="card-body" style="padding: 16px;" data-feedback-list>
             {% if feedbacks %}
             {% for fb in feedbacks %}
-            <div class="feedback-card" id="fb-{{ fb.id }}">
+            <div class="feedback-card {% if fb.id in unread_ids %}unread{% endif %}" id="fb-{{ fb.id }}">
                 <div class="feedback-header">
                     <div class="feedback-user">
                         <div class="feedback-avatar">
@@ -200,8 +204,8 @@
                         <div>
                             <div class="feedback-name">{{ fb.name }}</div>
                             <div class="feedback-contact">
-                                {% if fb.phone %}📱 {{ fb.phone }}{% endif %}
-                                {% if fb.email %}{% if fb.phone %} · {% endif %}✉️ {{ fb.email }}{% endif %}
+                                {% if fb.phone %}<i class="bi bi-phone me-1"></i>{{ fb.phone }}{% endif %}
+                                {% if fb.email %}{% if fb.phone %}<span class="mx-1">&middot;</span>{% endif %}<i class="bi bi-envelope me-1"></i>{{ fb.email }}{% endif %}
                                 {% if not fb.phone and not fb.email %}No contact info{% endif %}
                             </div>
                         </div>
@@ -218,14 +222,16 @@
                 </div>
 
                 <div class="feedback-message">
-                    "{{ fb.message }}"
+                    {{ fb.message|linebreaksbr }}
                 </div>
 
                 <div class="feedback-footer">
                     <span class="feedback-time">
                         <i class="bi bi-clock me-1"></i> {{ fb.created_at|timesince }} ago
                     </span>
-                    <button class="btn-delete-fb" onclick="deleteFeedback({{ fb.id }}, '{{ fb.name|escapejs }}')">
+                    <button type="button" class="btn-delete-fb js-delete-feedback"
+                        data-url="{% url 'doctor:delete_feedback' fb.id %}"
+                        data-name="{{ fb.name|escape }}">
                         <i class="bi bi-trash3"></i> Delete
                     </button>
                 </div>
@@ -241,10 +247,14 @@
                         <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
                     </li>
                     {% endif %}
-                    {% for num in page_obj.paginator.page_range %}
-                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                    </li>
+                    {% for item in page_range %}
+                    {% if item.is_ellipsis %}
+                    <li class="page-item disabled"><span class="page-link">{{ item.label }}</span></li>
+                    {% elif item.is_current %}
+                    <li class="page-item active"><span class="page-link">{{ item.label }}</span></li>
+                    {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ item.number }}">{{ item.label }}</a></li>
+                    {% endif %}
                     {% endfor %}
                     {% if page_obj.has_next %}
                     <li class="page-item">
@@ -268,44 +278,55 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    const CSRF = '{{ csrf_token }}';
+    const csrfToken = '{{ csrf_token }}';
 
-    function deleteFeedback(id, name) {
-        Swal.fire({
+    document.addEventListener('click', async (event) => {
+        const button = event.target.closest('.js-delete-feedback');
+        if (!button) return;
+
+        const result = await Swal.fire({
             title: 'Delete Feedback?',
-            text: `Remove feedback from "${name}"?`,
+            text: `Remove feedback from "${button.dataset.name}"?`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc2626',
             cancelButtonColor: '#6b7280',
             confirmButtonText: 'Yes, Delete',
             cancelButtonText: 'Cancel',
-        }).then((result) => {
-            if (!result.isConfirmed) return;
-
-            fetch(`{% url 'doctor:delete_feedback' 0 %}`.replace('/0/', `/${id}/`), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById(`fb-${id}`)?.remove();
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: 'Feedback deleted',
-                        showConfirmButton: false,
-                        timer: 2000,
-                    });
-                } else {
-                    Swal.fire('Error', data.error || 'Could not delete.', 'error');
-                }
-            })
-            .catch(() => Swal.fire('Error', 'Network error.', 'error'));
         });
-    }
+
+        if (!result.isConfirmed) return;
+
+        button.disabled = true;
+
+        try {
+            const response = await fetch(button.dataset.url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                throw new Error(data.error || 'Could not delete feedback.');
+            }
+
+            button.closest('.feedback-card')?.remove();
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Feedback deleted',
+                showConfirmButton: false,
+                timer: 1800,
+            });
+        } catch (error) {
+            button.disabled = false;
+            Swal.fire('Error', error.message || 'Network error.', 'error');
+        }
+    });
 </script>
 
 {% endblock %}

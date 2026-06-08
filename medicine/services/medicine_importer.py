@@ -1,8 +1,17 @@
-from openpyxl import load_workbook
-from medicine.models import Medicine,MedicineVariant
+from decimal import Decimal
+
+from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 
+from medicine.models import Medicine, MedicineVariant
+
 def import_medicines_from_excel(file):
+    try:
+        from openpyxl import load_workbook
+    except ImportError as exc:
+        raise ImproperlyConfigured(
+            "Excel import requires openpyxl. Install project requirements and try again."
+        ) from exc
 
     workbook = load_workbook(file)
     sheet = workbook.active
@@ -35,23 +44,14 @@ def import_medicines_from_excel(file):
                 if not power:
                     raise Exception("Power missing")
 
-                # Medicine type validation 
-                valid_type = [ 
-                    'tablet',
-                    'capsule',
-                    'syrup',
-                    'injection',
-                    'ointment',
-                    'drops',
-                ]
-
-                if medicine_type not in valid_type:
+                valid_types = {choice[0] for choice in Medicine.MEDICINE_TYPE}
+                if medicine_type not in valid_types:
                     raise Exception(f"Invalid medicine type: {medicine_type}")
 
-                unit_per_strip = int(row[5] or 1 )
+                unit_per_strip = int(row[5] or 1)
 
-                cost_price = float(row[6] or 0)
-                selling_price = int(row[7] or 0)
+                cost_price = Decimal(str(row[6] or 0))
+                selling_price = Decimal(str(row[7] or 0))
 
                 stock_strips = int(row[8] or 0)
                 

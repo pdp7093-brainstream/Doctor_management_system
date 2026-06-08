@@ -15,7 +15,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
-from django.db.models import Count, Q
+from django.db.models import Avg, Count, Q
 from django.core.paginator import Paginator
 from accounts.models import FamilyMember
 
@@ -850,19 +850,54 @@ from accounts.models import PatientFeedback
 @never_cache
 @role_required('doctor')
 def feedback_list(request):
-    feedbacks = PatientFeedback.objects.all()
+    feedbacks = PatientFeedback.objects.only(
+        'id',
+        'name',
+        'email',
+        'phone',
+        'rating',
+        'message',
+        'is_read',
+        'created_at',
+    )
 
-    # Mark all unread as read when doctor opens the page
-    unread_count = feedbacks.filter(is_read=False).count()
-    feedbacks.filter(is_read=False).update(is_read=True)
+    stats = feedbacks.aggregate(
+        total_count=Count('id'),
+        unread_count=Count('id', filter=Q(is_read=False)),
+        avg_rating=Avg('rating'),
+    )
+    unread_ids = list(
+        feedbacks.filter(is_read=False).values_list('id', flat=True)
+    )
+
+    if unread_ids:
+        PatientFeedback.objects.filter(id__in=unread_ids).update(is_read=True)
 
     paginator = Paginator(feedbacks, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
+    page_range = [
+        {
+            'label': page_number,
+            'number': page_number if isinstance(page_number, int) else None,
+            'is_current': page_number == page_obj.number,
+            'is_ellipsis': page_number == paginator.ELLIPSIS,
+        }
+        for page_number in paginator.get_elided_page_range(
+            number=page_obj.number,
+            on_each_side=1,
+            on_ends=1,
+        )
+    ]
+
     return render(request, 'doctor/feedback.html', {
         'feedbacks': page_obj,
         'page_obj': page_obj,
-        'unread_count': unread_count,
+        'page_range': page_range,
+        'total_count': stats['total_count'],
+        'unread_count': stats['unread_count'],
+        'avg_rating': stats['avg_rating'],
+        'unread_ids': unread_ids,
     })
 
 
