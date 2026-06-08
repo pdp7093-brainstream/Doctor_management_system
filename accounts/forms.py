@@ -31,8 +31,9 @@ class RegistrationForm(forms.Form):
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
             'class': 'form-control', 
-            'placeholder': 'Password (Min 8 chars with A-Z, a-z, 0-9, special char)',
-            'required': 'required'
+            'placeholder': 'Password',
+            'required': 'required',
+            'autocomplete': 'new-password'
         })
     )
 
@@ -82,7 +83,7 @@ class RegistrationForm(forms.Form):
         if len(cleaned_phone) < 10:
             raise ValidationError("Phone number must be at least 10 digits.")
         
-        # ✅ UNIQUE CHECK IN PATIENT TABLE ONLY
+        #  UNIQUE CHECK IN PATIENT TABLE ONLY
         from accounts.models import Patient
         if Patient.objects.filter(phone=cleaned_phone).exists():
             raise ValidationError("This phone number is already registered!")
