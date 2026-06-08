@@ -13,11 +13,14 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.http import JsonResponse
 from django.contrib import messages
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Q
 from django.core.paginator import Paginator
 from datetime import datetime, time, timedelta
 from billing.views import generate_bill_from_visit
 from clinic.models import ClinicSettings
+from .file_validation import validate_uploaded_document
 import json
 import re
 
@@ -436,6 +439,7 @@ class Add_appointment(View):
 
         if Appointment.booked_slots().filter(
             is_archived=False,
+            doctor=doctor,
             appointment_date=appointment_date_obj,
             time_slot=time_slot
         ).exists():
@@ -459,15 +463,19 @@ class Add_appointment(View):
                 return redirect('appointment:add_appointment')
 
         # Create appointment
-        Appointment.objects.create(
-            patient          = patient,
-            family_member    = family_member,
-            doctor           = doctor,
-            appointment_date = appointment_date_obj,
-            time_slot        = time_slot,
-            notes            = notes,
-            booked_by        = request.user,
-        )
+        try:
+            Appointment.objects.create(
+                patient          = patient,
+                family_member    = family_member,
+                doctor           = doctor,
+                appointment_date = appointment_date_obj,
+                time_slot        = time_slot,
+                notes            = notes,
+                booked_by        = request.user,
+            )
+        except IntegrityError:
+            messages.error(request, "This slot is already booked")
+            return redirect('appointment:add_appointment')
 
        
         return redirect('appointment:manage_appointments')
@@ -535,6 +543,7 @@ class Book_appointment(View):
         # Double booking prevention
         if Appointment.booked_slots().filter(
             is_archived=False,
+            doctor=doctor,
             appointment_date=appointment_date,
             time_slot=time_24
         ).exists():
@@ -579,22 +588,26 @@ class Book_appointment(View):
                 family_member = None
 
 
-        Appointment.objects.create(
+        try:
+            Appointment.objects.create(
 
-            patient=patient,
-            family_member=family_member,
-            doctor=doctor,
+                patient=patient,
+                family_member=family_member,
+                doctor=doctor,
 
-            # WHO BOOKED
-            booked_by=request.user,
+                # WHO BOOKED
+                booked_by=request.user,
 
-            appointment_date=appointment_date,
+                appointment_date=appointment_date,
 
-            # IMPORTANT
-            time_slot=time_24,
+                # IMPORTANT
+                time_slot=time_24,
 
-            notes=notes,
-        )
+                notes=notes,
+            )
+        except IntegrityError:
+            messages.error(request, "This slot is already booked")
+            return redirect('appointment:appointment')
 
         return redirect('appointment:appointment')
 
@@ -751,6 +764,20 @@ class PrescriptionView(View):
     def post(self, request, hid):
         visit_id = resolve_hid(hid)
         visit = get_object_or_404(Visit, id=visit_id)
+        was_already_completed = (
+            visit.visted_status == "completed"
+            or visit.appointment.status == "completed"
+        )
+        uploaded_documents = request.FILES.getlist("lab_documents")
+        valid_uploaded_documents = []
+        for document in uploaded_documents:
+            try:
+                original_name = validate_uploaded_document(document)
+            except ValidationError as exc:
+                messages.error(request, f"{document.name}: {'; '.join(exc.messages)}")
+                return redirect('appointment:prescription', hid=hid)
+            valid_uploaded_documents.append((document, original_name))
+
         visit.symptoms = request.POST.get("symptoms")
         visit.diagnosis = request.POST.get("diagnosis")
         visit.notes = request.POST.get("notes")
@@ -812,17 +839,16 @@ class PrescriptionView(View):
         if items_to_delete:
             PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
 
-        uploaded_documents = request.FILES.getlist("lab_documents")
-        for document in uploaded_documents:
+        for document, original_name in valid_uploaded_documents:
             LabDocument.objects.create(
                 visit=visit,
                 file=document,
-                original_name=document.name,
+                original_name=original_name,
                 uploaded_by=request.user,
             )
 
-        if uploaded_documents:
-            messages.success(request, f"{len(uploaded_documents)} lab document(s) uploaded successfully.")
+        if valid_uploaded_documents:
+            messages.success(request, f"{len(valid_uploaded_documents)} lab document(s) uploaded successfully.")
 
         if is_completing:
             stock_errors = self.reduce_stock(prescription)
@@ -838,6 +864,12 @@ class PrescriptionView(View):
         else:
             new_bill_generated = False
             try:
+                if was_already_completed:
+                    stock_errors = self.reduce_stock(prescription)
+                    if stock_errors:
+                        for err in stock_errors:
+                            messages.warning(request, f"Low stock: {err}")
+
                 new_bill = generate_bill_from_visit(visit)
                 if new_bill and new_bill.is_addon:
                     new_bill_generated = True

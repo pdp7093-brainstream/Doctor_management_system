@@ -3,6 +3,7 @@ from doctor.models import InnerMember
 from accounts.models import *
 from django.contrib.auth.models import User
 from accounts.models import Patient, FamilyMember
+from .file_validation import clean_original_filename, validate_uploaded_document
 
 class Appointment(models.Model):
     BOOKED_STATUSES = ('pending', 'confirmed', 'completed')
@@ -54,6 +55,16 @@ class Appointment(models.Model):
             models.Index(fields=['appointment_date', 'status'], name='appt_date_status_idx'),
             models.Index(fields=['status'], name='appt_status_idx'),
             models.Index(fields=['doctor', 'appointment_date'], name='appt_doctor_date_idx'),
+        ]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['doctor', 'appointment_date', 'time_slot'],
+                condition=models.Q(
+                    is_archived=False,
+                    status__in=['pending', 'confirmed', 'completed'],
+                ),
+                name='unique_active_appointment_slot',
+            ),
         ]
 
     def __str__(self):
@@ -108,6 +119,12 @@ class LabDocument(models.Model):
     class Meta:
         ordering = ['-uploaded_at']
 
+    def clean(self):
+        super().clean()
+        if self.file:
+            self.original_name = clean_original_filename(self.original_name or self.file.name)
+            validate_uploaded_document(self.file)
+
     def __str__(self):
         return f"{self.original_name} - {self.visit.patient.user.username}"
 
@@ -122,6 +139,12 @@ class PatientUploadedDocument(models.Model):
 
     class Meta:
         ordering = ['-uploaded_at']
+
+    def clean(self):
+        super().clean()
+        if self.file:
+            self.original_name = clean_original_filename(self.original_name or self.file.name)
+            validate_uploaded_document(self.file)
 
     def __str__(self):
         owner = self.family_member.name if self.family_member else (self.patient.user.get_full_name() or self.patient.user.username)
@@ -159,6 +182,12 @@ class PatientOldDocument(models.Model):
 
     class Meta:
         ordering = ['-uploaded_at']
+
+    def clean(self):
+        super().clean()
+        if self.file:
+            self.original_name = clean_original_filename(self.original_name or self.file.name)
+            validate_uploaded_document(self.file)
 
     def __str__(self):
         owner = self.family_member.name if self.family_member else (self.patient.user.get_full_name() or self.patient.user.username)

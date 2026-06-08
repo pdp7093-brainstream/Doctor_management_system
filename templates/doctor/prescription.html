@@ -274,9 +274,9 @@
                                             <td class="text-center">
                                                 <label class="toggle-switch">
                                                     <input type="checkbox" name="should_deduct[]"
-                                                        value="{{ forloop.counter0 }}" class="toggle-input" {% if
-                                                        item.should_deduct %}checked{% endif %}
-                                                        onchange="updateDeductCount()">
+                                                        value="{{ forloop.counter0 }}" class="toggle-input"
+                                                        {% if item.should_deduct %}checked{% endif %}
+                                                        onchange="updateCounts()">
                                                     <span class="toggle-slider"></span>
                                                 </label>
                                             </td>
@@ -304,8 +304,7 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
-                                <div id="emptyMessage" class="text-center py-5 text-muted" {% if item
-                                    %}style="display:none;" {% endif %}>
+                                <div id="emptyMessage" class="text-center py-5 text-muted" {% if items %}style="display:none;"{% endif %}>
                                     <i class="bi bi-capsule-pill d-block mb-3" style="font-size:3rem; opacity:0.2;"></i>
                                     <p class="mb-0">No medicines added to prescription yet.</p>
                                 </div>

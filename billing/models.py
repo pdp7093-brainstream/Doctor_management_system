@@ -3,6 +3,28 @@ from appointment.models import Visit
 from medicine.models import MedicineVariant
 
 
+class BillSequence(models.Model):
+    name = models.CharField(max_length=32, primary_key=True)
+    last_number = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    @classmethod
+    def next_bill_number(cls):
+        from django.db import transaction
+
+        with transaction.atomic():
+            sequence, _ = cls.objects.select_for_update().get_or_create(
+                name='bill_numbers',
+                defaults={'last_number': 0},
+            )
+            sequence.last_number += 1
+            sequence.save(update_fields=['last_number', 'updated_at'])
+            return f'BILL-{sequence.last_number:04d}'
+
+    def __str__(self):
+        return f'{self.name}: {self.last_number}'
+
+
 class Bill(models.Model):
 
     PAYMENT_METHOD = [
@@ -56,21 +78,15 @@ class Bill(models.Model):
 
     def save(self, *args, **kwargs):
         from decimal import Decimal
-        from django.db import transaction
         
         # GST + Total calculate
         self.gst_amount = (self.subtotal * self.gst_percent) / Decimal('100')
         self.total = self.consultation_fee + self.subtotal + self.gst_amount - self.discount
 
-        # Bill number auto generate with transaction lock to prevent race condition
+        # Bill number auto generate with a locked sequence row.
         if not self.bill_number:
-            with transaction.atomic():
-                last = Bill.objects.select_for_update().order_by('-id').first()
-                next_id = (last.id + 1) if last else 1
-                self.bill_number = f'BILL-{next_id:04d}'
-                super().save(*args, **kwargs)
-        else:
-            super().save(*args, **kwargs)
+            self.bill_number = BillSequence.next_bill_number()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.bill_number} - {self.visit.patient.user.get_full_name()}"

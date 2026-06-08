@@ -39,7 +39,7 @@
                             Full Name <span class="text-danger">*</span>
                         </label>
                         <input id="patient-name" type="text" name="name" class="form-control"
-                               value="{{ patient.user.get_full_name|default:patient.user.username }}" required>
+                               value="{{ patient.user.first_name }} {{ patient.user.last_name }}" required>
                     </div>
 
                     <div class="col-md-6">
