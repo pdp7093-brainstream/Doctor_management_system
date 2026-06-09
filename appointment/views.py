@@ -1,57 +1,62 @@
-from medicine.models import *
-from .models import *
+import logging
+import json
+import re
+from datetime import datetime, time, timedelta
+
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.template.loader import render_to_string
 from django.views import View
-from doctor.decorators import role_required
-from accounts.models import Patient, FamilyMember  # ← MAKE SURE THIS IS HERE
-from doctor.models import InnerMember
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
-from django.http import JsonResponse
 from django.contrib import messages
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Q
 from django.core.paginator import Paginator
-from datetime import datetime, time, timedelta
+
+from medicine.models import *
+from .models import *
+from doctor.decorators import role_required
+from accounts.models import Patient, FamilyMember
+from doctor.models import InnerMember
 from billing.views import generate_bill_from_visit
 from clinic.models import ClinicSettings
 from .file_validation import validate_uploaded_document
-import json
-import re
+
+logger = logging.getLogger(__name__)
 
 
 def resolve_hid(hid):
     """Resolve a path id that is a hashid.
     Returns integer id or None.
+    Logs a warning when decoding fails instead of failing silently.
     """
     if not hid:
         return None
     try:
         from doctor import hashid as _hashid
         return _hashid.decode_hash(str(hid))
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.warning("Hashid decode failed for value %r: %s", hid, exc)
 
-    # fallback just in case
+    # Numeric ID fallback (e.g. during development or admin access)
     if isinstance(hid, str) and hid.isdigit():
         try:
             return int(hid)
         except Exception:
             pass
+
+    logger.warning("resolve_hid: could not resolve %r to a valid integer id", hid)
     return None
 
 
 @role_required('doctor')
 def search_patients(request):
-    """Search for patients (main user or family member) - WORKING VERSION"""
+    """Search for patients (main user or family member)."""
     query = request.GET.get('q', '').strip()
-
-    print(f" Searching for: '{query}'")
 
     if not query or len(query) < 2:
         return JsonResponse({'results': []})
@@ -60,7 +65,6 @@ def search_patients(request):
         results = []
 
         # Search main patients
-        print("  → Searching patients...")
         patients = Patient.objects.filter(
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
@@ -69,8 +73,6 @@ def search_patients(request):
         ).select_related('user').values(
             'id', 'user__first_name', 'user__last_name', 'phone', 'user__email'
         )[:10]
-
-        print(f" ✓ Found {patients.count()} patients")
 
         for p in patients:
             full_name = f"{p['user__first_name']} {p['user__last_name']}".strip() or p['user__email']
@@ -82,16 +84,13 @@ def search_patients(request):
                 'display': f"{full_name} (Main Patient) - {p['phone'] or 'No Phone'}"
             })
 
-        #  Search family members
-        print("  → Searching family members...")
+        # Search family members
         family_members = FamilyMember.objects.filter(
             Q(name__icontains=query) |
             Q(phone__icontains=query)
         ).select_related('patient__user').values(
             'id', 'name', 'relation', 'phone'
         )[:10]
-
-        print(f"  ✓ Found {family_members.count()} family members")
 
         for fm in family_members:
             results.append({
@@ -102,14 +101,12 @@ def search_patients(request):
                 'display': f"{fm['name']} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
             })
 
-        print(f"Total results: {len(results)}")
+        logger.debug("search_patients: query=%r returned %d results", query, len(results))
         return JsonResponse({'results': results})
 
-    except Exception as e:
-        print(f" Error in search_patients: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return JsonResponse({'error': f'Search error: {str(e)}'}, status=500)
+    except Exception as exc:
+        logger.exception("search_patients: unexpected error for query %r: %s", query, exc)
+        return JsonResponse({'error': 'Search error. Please try again.'}, status=500)
 
 
 def generate_slots(selected_date=None):
@@ -316,15 +313,18 @@ def delete_appointment(request, hid):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
-        doctor = InnerMember.objects.get(user=request.user)
+        # Scope to the currently authenticated doctor — prevents data leakage
+        # between doctors in multi-doctor setups.
+        doctor = get_object_or_404(InnerMember, user=request.user)
 
         search           = request.GET.get('search', '')
         appointment_date = request.GET.get('appointment_date', '')
         status           = request.GET.get('status', 'all')
 
         appointments = Appointment.objects.filter(
-    is_archived=False
-)
+            is_archived=False,
+            doctor=doctor,  # Only this doctor's appointments
+        )
 
         if search:
             appointments = appointments.filter(
@@ -343,8 +343,8 @@ class Manage_appointments(View):
 
         appointments = appointments.order_by('-appointment_date', '-time_slot')
 
-        paginator  = Paginator(appointments, 10)
-        page_obj   = paginator.get_page(request.GET.get('page'))
+        paginator = Paginator(appointments, 10)
+        page_obj  = paginator.get_page(request.GET.get('page'))
 
         context = {
             'appointments'    : page_obj,

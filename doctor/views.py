@@ -1,9 +1,11 @@
 import json
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError, ProgrammingError, transaction
 from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User 
+from django.contrib.auth.models import User
 from django.views.decorators.cache import never_cache
 from django.views import View
 from .decorators import role_required
@@ -20,6 +22,8 @@ from django.db.models import Avg, Count, Q
 from django.core.paginator import Paginator
 from accounts.models import FamilyMember
 from appointment.file_validation import validate_uploaded_document
+
+logger = logging.getLogger(__name__)
 
 def login_view(request):
     if request.method == 'POST':
@@ -462,8 +466,9 @@ def add_patient(request):
 
             return redirect('doctor:manage_patients')
 
-        except Exception as e:
-          
+        except Exception as exc:
+            logger.exception("add_patient failed for name=%r phone=%r by user=%s: %s", name, phone, request.user.username, exc)
+            messages.error(request, 'Failed to create patient. Please try again.')
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
     return render(request, 'doctor/add_patient.html', {'patients': all_patients})
@@ -563,10 +568,11 @@ def add_staff(request):
             'error': 'Invalid JSON data.'
         }, status=400)
 
-    except Exception as e:
+    except Exception as exc:
+        logger.exception("add_staff failed: %s", exc)
         return JsonResponse({
             'success': False,
-            'error': str(e)
+            'error': 'An unexpected error occurred. Please try again.'
         }, status=500)
 
 # ─────────────────────────────────────────
@@ -607,8 +613,9 @@ def edit_staff(request, member_id):
 
         return JsonResponse({'success': True})
 
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as exc:
+        logger.exception("edit_staff id=%s failed: %s", member_id, exc)
+        return JsonResponse({'success': False, 'error': 'An unexpected error occurred.'})
 
 
 # ─────────────────────────────────────────
@@ -635,8 +642,9 @@ def reset_staff_password(request, member_id):
 
         return JsonResponse({'success': True})
 
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as exc:
+        logger.exception("reset_staff_password id=%s failed: %s", member_id, exc)
+        return JsonResponse({'success': False, 'error': 'An unexpected error occurred.'})
 
 
 # ─────────────────────────────────────────
@@ -654,8 +662,9 @@ def delete_staff(request, member_id):
         member.user.delete()   # cascades → InnerMember will also be deleted
         return JsonResponse({'success': True})
 
-    except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+    except Exception as exc:
+        logger.exception("delete_staff id=%s failed: %s", member_id, exc)
+        return JsonResponse({'success': False, 'error': 'An unexpected error occurred.'})
 
 @never_cache
 @role_required('doctor')

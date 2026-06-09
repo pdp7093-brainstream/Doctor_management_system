@@ -1,4 +1,6 @@
 # expenses/views.py
+import logging
+
 from django.views import View
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -11,6 +13,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.db import IntegrityError
+
+logger = logging.getLogger(__name__)
 
 @never_cache
 @login_required(login_url='doctor:login')
@@ -105,8 +109,8 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
             # Duplicate category name
             messages.error(request, 'A category with this name already exists.')
             return redirect('expenses:category_list')
-        except Exception as e:
-            print("Category Create Error:", e)
+        except Exception as exc:
+            logger.exception("Category Create Error for name=%r: %s", name, exc)
             messages.error(request, 'Failed to create category.')
             return redirect('expenses:category_list')
 
@@ -161,10 +165,9 @@ class AddExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
             return redirect('expenses:expense_list')
 
-        except Exception as e:
-
-            print("Expense Create Error:", e)
-
+        except Exception as exc:
+            logger.exception("Expense Create Error by user=%s: %s", request.user.username, exc)
+            messages.error(request, 'Failed to create expense. Please check your inputs.')
             return redirect('expenses:add_expense')
 
 
@@ -220,7 +223,8 @@ class DeleteCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
         try:
             category.delete()
             messages.success(request, 'Category deleted successfully.')
-        except Exception as e:
+        except Exception as exc:
+            logger.exception("Category Delete Error for id=%s: %s", pk if 'pk' in dir() else '?', exc)
             messages.error(request, 'Failed to delete category. It might be in use.')
         
         return redirect('expenses:category_list')
@@ -359,8 +363,8 @@ class EditExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
             messages.success(request, 'Expense updated successfully.')
             return redirect('expenses:expense_detail', hid=pk)
 
-        except Exception as e:
-            print("Expense Edit Error:", e)
+        except Exception as exc:
+            logger.exception("Expense Edit Error for id=%s by user=%s: %s", pk, request.user.username, exc)
             messages.error(request, 'Failed to update expense. Please check your inputs.')
             return redirect('expenses:edit_expense', hid=pk)
 
@@ -395,7 +399,8 @@ class DeleteExpenseView(LoginRequiredMixin, ExpenseAccessMixin, View):
         try:
             expense.delete()
             messages.success(request, 'Expense deleted successfully.')
-        except Exception as e:
+        except Exception as exc:
+            logger.exception("Expense Delete Error for id=%s: %s", pk, exc)
             messages.error(request, 'Failed to delete expense.')
             
         return redirect('expenses:expense_list')

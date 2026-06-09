@@ -1,10 +1,14 @@
+import logging
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
+from django.db import transaction
 from decimal import Decimal
+
+logger = logging.getLogger(__name__)
 from .models import Bill, BillItem
 from appointment.models import Visit, Appointment, Prescription, PrescriptionItem
 from django.contrib.auth.models import User
@@ -47,28 +51,32 @@ def get_bill_summary(visit):
 
 def generate_bill_from_visit(visit):
     """
-    Automatically generate bill when visit is completed
-    Create BillItems from Prescription items
-    
-    Will also create Addon bills if new medicines are added
+    Automatically generate bill when visit is completed.
+    Creates BillItems from unbilled Prescription items.
+    Will also create Addon bills if new medicines are added after the first bill.
+
+    The entire operation is wrapped in transaction.atomic() so that any
+    failure during BillItem creation rolls back the whole bill, preventing
+    partial/incomplete bills.
     """
     from django.utils import timezone
-    
+
     prescription = getattr(visit, 'prescription', None)
 
     if not prescription:
         return None
 
     # All items that haven't been billed yet
-    new_items = prescription.items.select_related(
-        'medicine_variant__medicine'
-    ).filter(billed_on__isnull=True)
+    new_items = list(
+        prescription.items.select_related(
+            'medicine_variant__medicine'
+        ).filter(billed_on__isnull=True)
+    )
 
     # Check if a bill already exists
     existing_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
-    
+
     clinic = ClinicSettings.get()
-    subtotal = Decimal('0')
 
     # Determine consultation fee based on appointment consultation_type if available
     consultation_fee = clinic.default_consultation_fee
@@ -79,77 +87,97 @@ def generate_bill_from_visit(visit):
     elif appt_type == 'video':
         consultation_fee = getattr(clinic, 'video_consultation_fee', clinic.default_consultation_fee)
 
-    if not new_items.exists():
+    if not new_items:
         if not existing_bill:
-            # Create Original bill (only consultation fee)
-            bill = Bill.objects.create(
-                visit=visit,
-                subtotal=0,
-                gst_percent=clinic.default_gst,
-                consultation_fee=consultation_fee,
-                is_addon=False
-            )
+            # No prescription items — create a consultation-only bill
+            with transaction.atomic():
+                bill = Bill.objects.create(
+                    visit=visit,
+                    subtotal=0,
+                    gst_percent=clinic.default_gst,
+                    consultation_fee=consultation_fee,
+                    is_addon=False,
+                )
             return bill
         else:
             return visit.bills.filter(is_archived=False).order_by('-created_at').first()
 
-    if existing_bill:
-        # Create Addon bill
-        bill = Bill.objects.create(
-            visit=visit,
-            subtotal=0,
-            gst_percent=clinic.default_gst,
-            consultation_fee=0,  # No consultation fee in Addon
-            is_addon=True,
-            parent_bill=existing_bill,
-            notes="Prescription amendment/addon"
+    try:
+        with transaction.atomic():
+            if existing_bill:
+                # Create Addon bill — no consultation fee on amendments
+                bill = Bill.objects.create(
+                    visit=visit,
+                    subtotal=0,
+                    gst_percent=clinic.default_gst,
+                    consultation_fee=0,
+                    is_addon=True,
+                    parent_bill=existing_bill,
+                    notes="Prescription amendment/addon",
+                )
+            else:
+                # Create original bill
+                bill = Bill.objects.create(
+                    visit=visit,
+                    subtotal=0,
+                    gst_percent=clinic.default_gst,
+                    consultation_fee=consultation_fee,
+                    is_addon=False,
+                )
+
+            subtotal = Decimal('0')
+
+            for item in new_items:
+                variant = item.medicine_variant
+
+                if not variant:
+                    logger.warning(
+                        "PrescriptionItem id=%s has no medicine_variant — skipping.",
+                        item.pk,
+                    )
+                    continue
+
+                # Parse dosage (expected format: "1-2" or "1-2 (mg)")
+                try:
+                    parts = item.dosage.split(' (')
+                    dose_parts = [int(p) for p in parts[0].split('-')]
+                except Exception as exc:
+                    logger.warning(
+                        "Could not parse dosage '%s' for PrescriptionItem id=%s: %s — qty set to 0.",
+                        item.dosage, item.pk, exc,
+                    )
+                    dose_parts = []
+
+                qty = sum(dose_parts) * item.days
+                unit_price = variant.selling_price
+                total = qty * unit_price
+
+                BillItem.objects.create(
+                    bill=bill,
+                    medicine_variant=variant,
+                    medicine_name=variant.medicine.name,
+                    power=variant.power,
+                    quantity=qty,
+                    unit_price=unit_price,
+                    total_price=total,
+                )
+
+                subtotal += total
+
+                # Mark the item as billed
+                item.billed_on = timezone.now()
+                item.bill_id = bill.id
+                item.save(update_fields=['billed_on', 'bill_id', 'updated_at'])
+
+            bill.subtotal = subtotal
+            bill.save()
+
+    except Exception as exc:
+        logger.error(
+            "generate_bill_from_visit failed for visit id=%s: %s",
+            visit.pk, exc, exc_info=True,
         )
-    else:
-        # Create Original bill
-        bill = Bill.objects.create(
-            visit=visit,
-            subtotal=0,
-            gst_percent=clinic.default_gst,
-            consultation_fee=consultation_fee,
-            is_addon=False
-        )
-
-    for item in new_items:
-        variant = item.medicine_variant
-
-        if not variant:
-            continue
-
-        try:
-            parts = item.dosage.split(' (')
-            dose_parts = [int(part) for part in parts[0].split('-')]
-        except Exception:
-            dose_parts = []
-
-        qty = sum(dose_parts) * item.days
-
-        unit_price = variant.selling_price
-        total = qty * unit_price
-
-        BillItem.objects.create(
-            bill=bill,
-            medicine_variant=variant,
-            medicine_name=variant.medicine.name,
-            power=variant.power,
-            quantity=qty,
-            unit_price=unit_price,
-            total_price=total,
-        )
-
-        subtotal += total
-        
-        # Mark the item as added to a bill
-        item.billed_on = timezone.now()
-        item.bill_id = bill.id
-        item.save()
-
-    bill.subtotal = subtotal
-    bill.save()
+        raise
 
     return bill
 
