@@ -232,6 +232,7 @@ h6 {
 ------------------------------*/
 .scrolled .header {
   --background-color: #ffffff;
+  background-color: #ffffff !important;
 }
 
 /*--------------------------------------------------------------
