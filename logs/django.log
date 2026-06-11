@@ -1,10 +1,501 @@
-[2026-06-11 17:07:01,420] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:07:01,874] WARNING django.request Not Found: /favicon.ico
-[2026-06-11 17:07:01,876] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9009
-[2026-06-11 17:07:59,224] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:08:02,417] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:08:05,128] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:08:17,592] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:09:18,229] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:09:25,974] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
-[2026-06-11 17:12:51,982] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-09 15:39:18,161] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-09 15:39:20,171] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 15:39:20,172] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-09 15:39:49,183] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 15:39:49,184] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-09 15:42:41,171] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-09 15:42:42,764] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 15:42:42,765] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-09 15:43:06,506] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 15:43:06,507] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-09 15:43:35,964] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 15:43:35,964] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-09 17:55:27,429] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 17:55:27,430] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-09 18:22:59,303] WARNING django.request Not Found: /service-worker.js
+[2026-06-09 18:22:59,304] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-10 11:11:04,733] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-10 11:11:04,824] WARNING django.request Not Found: /favicon.ico
+[2026-06-10 11:11:04,825] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9009
+[2026-06-10 11:54:27,386] ERROR django.request Internal Server Error: /medicine/low-stock-count/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/medicine/views.py", line 382, in low_stock_count
+    ).count()
+      ^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/query.py", line 610, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 656, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 638, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+[2026-06-10 11:54:27,436] ERROR django.server "GET /medicine/low-stock-count/ HTTP/1.1" 500 177968
+[2026-06-10 11:55:27,205] ERROR django.request Internal Server Error: /medicine/low-stock-count/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/medicine/views.py", line 382, in low_stock_count
+    ).count()
+      ^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/query.py", line 610, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 656, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 638, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+[2026-06-10 11:55:27,208] ERROR django.server "GET /medicine/low-stock-count/ HTTP/1.1" 500 177968
+[2026-06-10 11:56:27,904] ERROR django.request Internal Server Error: /medicine/low-stock-count/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/medicine/views.py", line 382, in low_stock_count
+    ).count()
+      ^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/query.py", line 610, in count
+    return self.query.get_count(using=self.db)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 656, in get_count
+    return obj.get_aggregation(using, {"__count": Count("*")})["__count"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/query.py", line 638, in get_aggregation
+    result = compiler.execute_sql(SINGLE)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1622, in execute_sql
+    cursor = self.connection.cursor()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 320, in cursor
+    return self._cursor()
+           ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 296, in _cursor
+    self.ensure_connection()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 278, in ensure_connection
+    with self.wrap_database_errors:
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/utils.py", line 94, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 279, in ensure_connection
+    self.connect()
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/base/base.py", line 256, in connect
+    self.connection = self.get_new_connection(conn_params)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/asyncio.py", line 26, in inner
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/db/backends/postgresql/base.py", line 333, in get_new_connection
+    connection = self.Database.connect(**conn_params)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/psycopg2/__init__.py", line 122, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.OperationalError: connection to server at "localhost" (127.0.0.1), port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+[2026-06-10 11:56:27,908] ERROR django.server "GET /medicine/low-stock-count/ HTTP/1.1" 500 177968
+[2026-06-10 14:08:24,376] WARNING django.request Not Found: /service-worker.js
+[2026-06-10 14:08:24,389] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-10 14:54:12,207] WARNING django.request Not Found: /service-worker.js
+[2026-06-10 14:54:12,208] WARNING django.server "GET /service-worker.js HTTP/1.1" 404 9027
+[2026-06-11 12:44:46,121] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 12:44:46,202] WARNING django.request Not Found: /favicon.ico
+[2026-06-11 12:44:46,202] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9009
+[2026-06-11 12:44:50,092] ERROR django.request Internal Server Error: /doctor/dashboard/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 577, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'static'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/decorators/cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/doctor/decorators.py", line 28, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/doctor/views.py", line 88, in get
+    return render(request, 'doctor/dashboard.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 585, in parse
+    raise self.error(token, e)
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 583, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 307, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 585, in parse
+    raise self.error(token, e)
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 583, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 235, in do_block
+    nodelist = parser.parse(("endblock",))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 579, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 634, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Template: /home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/templates/doctor/dashboard.html, Invalid block tag on line 176: 'static', expected 'endblock'. Did you forget to register or load this tag?
+[2026-06-11 12:44:50,096] ERROR django.server "GET /doctor/dashboard/ HTTP/1.1" 500 220921
+[2026-06-11 12:45:25,657] ERROR django.request Internal Server Error: /doctor/dashboard/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 577, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'static'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/decorators/cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/doctor/decorators.py", line 28, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/doctor/views.py", line 88, in get
+    return render(request, 'doctor/dashboard.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 585, in parse
+    raise self.error(token, e)
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 583, in parse
+    compiled_result = compile_func(self, token)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader_tags.py", line 307, in do_extends
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 579, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 644, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Template: /home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/templates/doctor/dashboard.html, Invalid block tag on line 178: 'static'. Did you forget to register or load this tag?
+[2026-06-11 12:45:25,660] ERROR django.server "GET /doctor/dashboard/ HTTP/1.1" 500 204547
+[2026-06-11 12:45:49,386] ERROR django.request Internal Server Error: /doctor/dashboard/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 106, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/utils/decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/decorators/cache.py", line 80, in _view_wrapper
+    response = view_func(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/doctor/decorators.py", line 28, in wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 145, in dispatch
+    return handler(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/doctor/views.py", line 88, in get
+    return render(request, 'doctor/dashboard.html', context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 586, in parse
+    self.extend_nodelist(nodelist, compiled_result, token)
+  File "/home/brainstream/Documents/online_doctor_appointment_system/venv/lib/python3.12/site-packages/django/template/base.py", line 607, in extend_nodelist
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Template: /home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/templates/doctor/dashboard.html, {% extends "doctor/main.html" %} must be the first tag in 'doctor/dashboard.html'.
+[2026-06-11 12:45:49,389] ERROR django.server "GET /doctor/dashboard/ HTTP/1.1" 500 181727
