@@ -60,15 +60,7 @@
             margin: 0 auto 18px;
         }
 
-        .profile-page-shell .card {
-            max-width: 1100px !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-        }
 
-        .profile-page-shell .card.mb-4:last-of-type {
-            margin-bottom: 0 !important;
-        }
 
         @media (max-width: 991px) {
             .profile-page-shell {
@@ -120,7 +112,7 @@
         .patient-hero__subtext {
             color: var(--muted);
             margin: 0;
-            max-width: 60ch;
+            max-width: 70ch;
         }
 
         .patient-actions {
@@ -166,10 +158,9 @@
 
 <body>
     {% include 'header.html' %}
-
     
     <main class="profile-page-shell">
-
+        <div class="container">
           <section class="patient-hero">
             <div class="row align-items-center g-3">
                 <div class="col-lg-8">
@@ -193,7 +184,7 @@
             </div>
         </section>
         
-        <div class="main-content">
+        <div class="main-content mb-5">
 
             <!-- ── FIX 2: Row with g-3 spacing, no h-100, no inline styles ── -->
             <div class="row g-3">
@@ -338,19 +329,22 @@
                                             <td>{{ member.bld_grop|default:"—" }}</td>
                                             <td>{{ member.phone|default:"—" }}</td>
                                             <td>
-                                                <button class="btn-icon btn-edit-fm" data-id="{{ member.id|hid }}"
-                                                    data-name="{{ member.name }}" data-relation="{{ member.relation }}"
-                                                    data-gender="{{ member.gender }}"
-                                                    data-dob="{% if member.dob %}{{ member.dob|date:'Y-m-d' }}{% endif %}"
-                                                    data-bldgrop="{{ member.bld_grop }}" data-phone="{{ member.phone }}"
-                                                    title="Edit">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-icon btn-delete-fm ms-1"
-                                                    data-id="{{ member.id|hid }}" data-name="{{ member.name }}"
-                                                    title="Delete">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <div class="d-inline-flex align-items-center gap-2">
+                                                    <button class="btn-icon btn-edit-fm" data-id="{{ member.id|hid }}"
+                                                        data-name="{{ member.name }}" data-relation="{{ member.relation }}"
+                                                        data-gender="{{ member.gender }}"
+                                                        data-dob="{% if member.dob %}{{ member.dob|date:'Y-m-d' }}{% endif %}"
+                                                        data-bldgrop="{{ member.bld_grop }}" data-phone="{{ member.phone }}"
+                                                        title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+
+                                                    <button class="btn-icon btn-delete-fm"
+                                                        data-id="{{ member.id|hid }}" data-name="{{ member.name }}"
+                                                        title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -552,7 +546,8 @@
             </div>
         </div>
         </div>
-
+        </div> <!-- Close container -->
+    </main> <!-- Close main -->
         <script>
             // CSRF helper
             function getCookie(name) {
