@@ -54,7 +54,7 @@
           {% if user.is_authenticated %}
           <li class="dropdown profile-nav">
             <a href="#" class="profile-nav-trigger" aria-expanded="false">
-              <div class="profile-avatar">
+              <div class="profile-avatar" {% if user.patient.profile_picture and user.patient.profile_picture.name != 'profile_pictures/default-avatar.png' %}style="background-color: #ffffff;"{% endif %}>
                 {% if user.patient.profile_picture and user.patient.profile_picture.name != 'profile_pictures/default-avatar.png' %}
                     <img src="{{ user.patient.profile_picture.url }}" alt="Profile" class="profile-avatar-img">
                 {% else %}
@@ -65,6 +65,7 @@
             </a>
             <ul>
               <li><a href="{% url 'profile' %}">My Profile</a></li>
+              <li><a href="{% url 'dashboard' %}">My Appointments</a></li>
               <li><a href="{% url 'resetpass' %}">Password</a></li>
               <li>
                 <hr style="margin: 5px 0; opacity: 0.1;">
