@@ -901,3 +901,83 @@ django.template.exceptions.TemplateSyntaxError: Template: /home/brainstream/Docu
 [2026-06-11 13:50:05,833] WARNING django.server "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 9120
 [2026-06-11 13:56:17,076] WARNING django.request Not Found: /.well-known/appspecific/com.chrome.devtools.json
 [2026-06-11 13:56:17,084] WARNING django.server "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 9120
+[2026-06-11 13:58:15,950] ERROR django.request Internal Server Error: /user-profile/
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/base.py", line 577, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'else'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/contrib/auth/decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/Doctor_management_system/accounts/views.py", line 479, in profile
+    return render(request, 'pdashboard/profile.html', {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/loader.py", line 61, in render_to_string
+    template = get_template(template_name, using=using)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/loader.py", line 15, in get_template
+    return engine.get_template(template_name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/backends/django.py", line 79, in get_template
+    return Template(self.engine.get_template(template_name), self)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/engine.py", line 186, in get_template
+    template, origin = self.find_template(template_name)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/loaders/cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/loaders/base.py", line 28, in get_template
+    return Template(
+           ^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/base.py", line 157, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/base.py", line 199, in compile_nodelist
+    nodelist = parser.parse()
+               ^^^^^^^^^^^^^^
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/base.py", line 579, in parse
+    self.invalid_block_tag(token, command, parse_until)
+  File "/home/brainstream/Documents/doctor_appointment/venv/lib/python3.12/site-packages/django/template/base.py", line 644, in invalid_block_tag
+    raise self.error(
+django.template.exceptions.TemplateSyntaxError: Template: /home/brainstream/Documents/doctor_appointment/Doctor_management_system/templates/pdashboard/profile.html, Invalid block tag on line 94: 'else'. Did you forget to register or load this tag?
+[2026-06-11 13:58:15,981] ERROR django.server "GET /user-profile/ HTTP/1.1" 500 198651
+[2026-06-11 14:00:16,925] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 14:00:22,056] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 14:00:36,573] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 14:05:10,147] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 14:14:26,432] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 14:14:27,475] WARNING django.request Not Found: /favicon.ico
+[2026-06-11 14:14:27,484] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9009
+[2026-06-11 14:42:10,574] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 14:45:55,785] WARNING django.request Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-06-11 14:45:55,789] WARNING django.server "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 9120
+[2026-06-11 14:46:39,086] WARNING django.request Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-06-11 14:46:39,088] WARNING django.server "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 9120
+[2026-06-11 15:07:06,258] WARNING django.request Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-06-11 15:07:06,278] WARNING django.server "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 9120
+[2026-06-11 15:10:41,484] WARNING django.request Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[2026-06-11 15:10:41,491] WARNING django.server "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 9120
+[2026-06-11 15:11:33,760] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 15:11:45,720] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 15:12:14,244] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 15:12:55,945] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 15:13:05,809] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-11 15:13:13,438] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068

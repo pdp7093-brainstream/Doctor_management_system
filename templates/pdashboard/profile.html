@@ -23,6 +23,22 @@
     <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}?v=3">
     <style>
+        /* ── FIX 1: Header always solid, never transparent ── */
+        #header,
+        .header {
+            --background-color: #ffffff !important;
+            background-color: #ffffff !important;
+            box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        #header.scrolled,
+        .header.scrolled,
+        .scrolled #header,
+        .scrolled .header {
+            --background-color: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+
         body {
             background:
                 radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 32%),
@@ -34,6 +50,8 @@
         }
 
         .profile-page-shell .main-content {
+            margin-left: 0;
+            padding: 0;
             min-height: auto;
         }
 
@@ -69,15 +87,13 @@
 <body>
     {% include 'header.html' %}
     <main class="profile-page-shell">
-        <div class="main-content container">
-            <!-- <div class="header d-flex justify-content-between align-items-center mb-4">
-                <h3><i class="fas fa-id-card"></i> Patient Profile</h3>
-            </div> -->
+        <div class="main-content">
 
-            <div class="row g-4">
+            <!-- ── FIX 2: Row with g-3 spacing, no h-100, no inline styles ── -->
+            <div class="row g-3">
                 <div class="col-lg-6">
                     <!-- ── My Profile Card ── -->
-                    <div class="card h-100" style="width:100%;margin-left:0;">
+                    <div class="card mb-0">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-user"></i> My Profile</h4>
                             <button class="btn btn-primary btn-sm" id="openEditProfile">
@@ -110,7 +126,7 @@
                                         <td class="info-value">
                                             {{ request.user.first_name }} {{ request.user.last_name }}
                                             {% if not request.user.first_name %}
-                                            <span class="info-empty">Notset</span>
+                                            <span class="info-empty">Not set</span>
                                             {% endif %}
                                         </td>
                                     </tr>
@@ -178,7 +194,7 @@
 
                 <div class="col-lg-6">
                     <!-- ── Family Members Card ── -->
-                    <div class="card h-100" style="width:100%;margin-left:0;">
+                    <div class="card mb-0">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-users"></i> Family Members</h4>
                             <div class="d-flex align-items-center gap-2">
@@ -245,9 +261,12 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="row g-3 mt-0">
                 <div class="col-lg-6">
                     <!-- ── Lab Documents Card ── -->
-                    <div class="card h-100" style="width:100%;margin-left:0;">
+                    <div class="card mb-0">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-file-medical"></i> Lab Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
@@ -326,7 +345,7 @@
 
                 <div class="col-lg-6">
                     <!-- ── Upload Documents Card ── -->
-                    <div class="card h-100" style="width:100%;margin-left:0;">
+                    <div class="card mb-0">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-upload"></i> Upload Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
@@ -566,7 +585,7 @@
                             <option value="O+" {% if request.user.patient.bld_grop == 'O+' %}selected{% endif %}>O+
                             </option>
                             <option value="O-" {% if request.user.patient.bld_grop == 'O-' %}selected{% endif %}>O-
-                            </option>   
+                            </option>
                             <option value="AB+" {% if request.user.patient.bld_grop == 'AB+' %}selected{% endif %}>AB+
                             </option>
                             <option value="AB-" {% if request.user.patient.bld_grop == 'AB-' %}selected{% endif %}>AB-
@@ -670,8 +689,8 @@
         </div>
 
         <!-- ══════════════════════════════════
-     Edit Family Member Modal
-══════════════════════════════════ -->
+            Edit Family Member Modal
+        ══════════════════════════════════ -->
         <div class="modal-overlay" id="editMemberModal">
             <div class="modal-box">
                 <h5><i class="fas fa-user-edit"></i> Edit Family Member</h5>
@@ -682,7 +701,7 @@
                     <input type="text" id="editName">
                 </div>
                 <div class="modal-field">
-                    <label>Relation <span style="color: red;"></span>*</span></label>
+                    <label>Relation <span style="color: red;">*</span></label>
                     <select id="editRelation">
                         <option value="">Select Relation</option>
                         <option value="Wife">Wife</option>
@@ -902,7 +921,6 @@
                     const maskPhone = (p) => p ? p.replace(/\d(?=\d{4})/g, '•') : 'Not set';
                     const masked = maskPhone(currentPhone);
 
-                    // Step 1: Confirmation to change number
                     const { isConfirmed } = await Swal.fire({
                         title: 'Change Phone Number?',
                         html: `Your current number: <strong>${masked}</strong><br><br>We'll send an OTP to verify the change.`,
@@ -915,7 +933,6 @@
 
                     if (!isConfirmed) return;
 
-                    // Step 2: Ask for new phone number first (validate format before OTP)
                     let newPhone = '';
                     let isValidPhone = false;
 
@@ -941,13 +958,12 @@
                             }
                         });
 
-                        if (isDismissed) return; // User cancelled
+                        if (isDismissed) return;
 
                         newPhone = inputPhone;
                         isValidPhone = true;
                     }
 
-                    // Step 3: Send OTP
                     const otp = String(Math.floor(100000 + Math.random() * 900000));
                     await Swal.fire({
                         title: '✓ OTP Sent',
@@ -957,7 +973,6 @@
                         allowOutsideClick: false
                     });
 
-                    // Step 4: Verify OTP
                     let otpVerified = false;
                     let attempts = 0;
                     const maxAttempts = 3;
@@ -983,7 +998,7 @@
                             }
                         });
 
-                        if (isDismissed) return; // User cancelled
+                        if (isDismissed) return;
 
                         if (enteredOtp === otp) {
                             otpVerified = true;
@@ -1010,7 +1025,6 @@
 
                     if (!otpVerified) return;
 
-                    // Step 5: Confirmation before saving
                     const { isConfirmed: confirmSave } = await Swal.fire({
                         title: 'Confirm New Number',
                         html: `<strong>New Phone Number:</strong> ${newPhone.slice(0, 3)}•••••${newPhone.slice(-3)}`,
@@ -1023,7 +1037,6 @@
 
                     if (!confirmSave) return;
 
-                    // Step 6: Save to backend
                     Swal.fire({
                         title: 'Saving...',
                         html: 'Please wait while we update your phone number.',
@@ -1045,7 +1058,6 @@
                                 const data = await res.json();
 
                                 if (res.ok && data.success) {
-                                    // Update UI
                                     const phoneEl = document.getElementById('profilePhone');
                                     if (phoneEl) phoneEl.textContent = newPhone;
                                     btn.dataset.phone = newPhone;
@@ -1073,3 +1085,7 @@
                 });
             });
         </script>
+
+        {% include 'footer.html' %} 
+</body>
+</html>
