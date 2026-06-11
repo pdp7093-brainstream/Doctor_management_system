@@ -81,19 +81,125 @@
                 padding-top: 96px;
             }
         }
+
+        /* --------------------------- */
+
+        .patient-page-shell {
+            padding: 118px 0 48px;
+        }
+
+        .patient-hero {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(226, 234, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+            margin-bottom: 22px;
+            backdrop-filter: blur(10px);
+        }
+
+        .patient-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .patient-hero__title {
+            font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 8px;
+        }
+
+        .patient-hero__subtext {
+            color: var(--muted);
+            margin: 0;
+            max-width: 60ch;
+        }
+
+        .patient-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100%;
+        }
+
+        .page-card {
+            margin-bottom: 22px;
+        }
+
+        .page-card .card-header {
+            padding: 18px 20px;
+        }
+
+        .btn-book-appointment {
+            background: linear-gradient(135deg, var(--primary), #5b42ff);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 10px 18px rgba(91, 66, 255, 0.18);
+        }
+
+        .btn-book-appointment:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(0, 109, 252, 0.24);
+        }
+
     </style>
 </head>
 
 <body>
     {% include 'header.html' %}
+
+    
     <main class="profile-page-shell">
+
+          <section class="patient-hero">
+            <div class="row align-items-center g-3">
+                <div class="col-lg-8">
+                    <div class="patient-hero__eyebrow">
+                        <i class="fa-solid fa-circle-user"></i>
+                        Patient Portal
+                    </div>
+                    <h1 class="patient-hero__title">Welcome, {{ request.user.first_name|default:request.user.username }}</h1>
+                    <p class="patient-hero__subtext">
+                        Review your appointment activity, check pending visits, and keep everything in one clean place.
+                    </p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="patient-actions">
+                        <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                            Book Appointment
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
         <div class="main-content">
 
             <!-- ── FIX 2: Row with g-3 spacing, no h-100, no inline styles ── -->
             <div class="row g-3">
                 <div class="col-lg-6">
                     <!-- ── My Profile Card ── -->
-                    <div class="card mb-0">
+                    <div class="card mb-0 h-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-user"></i> My Profile</h4>
                             <button class="btn btn-primary btn-sm" id="openEditProfile">
@@ -194,7 +300,7 @@
 
                 <div class="col-lg-6">
                     <!-- ── Family Members Card ── -->
-                    <div class="card mb-0">
+                    <div class="card mb-0 h-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-users"></i> Family Members</h4>
                             <div class="d-flex align-items-center gap-2">
@@ -207,9 +313,9 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="card-body p-0" id="familyMembersBody">
+                        <div class="card-body p-0 position-relative" id="familyMembersBody">
                             {% if family_members %}
-                            <div class="table-responsive">
+                            <div class="table-responsive position-absolute w-100 h-100" style="top: 0; left: 0; overflow-y: auto;">
                                 <table class="fm-table">
                                     <thead>
                                         <tr>
@@ -252,7 +358,7 @@
                                 </table>
                             </div>
                             {% else %}
-                            <div class="empty-fm">
+                            <div class="empty-fm position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="top: 0; left: 0;">
                                 <i class="fas fa-users"
                                     style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
                                 No family members added yet. Add one while booking an appointment.
@@ -266,16 +372,16 @@
             <div class="row g-3 mt-0">
                 <div class="col-lg-6">
                     <!-- ── Lab Documents Card ── -->
-                    <div class="card mb-0">
+                    <div class="card mb-0 h-100" style="min-height: 350px;">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-file-medical"></i> Lab Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
                                 {{ lab_documents|length }} file{% if lab_documents|length != 1 %}s{% endif %}
                             </span>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="card-body p-0 position-relative">
                             {% if lab_documents %}
-                            <div class="table-responsive">
+                            <div class="table-responsive position-absolute w-100 h-100" style="top: 0; left: 0; overflow-y: auto;">
                                 <table class="fm-table">
                                     <thead>
                                         <tr>
@@ -333,7 +439,7 @@
                                 </table>
                             </div>
                             {% else %}
-                            <div class="empty-fm">
+                            <div class="empty-fm position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="top: 0; left: 0;">
                                 <i class="fas fa-file-medical"
                                     style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
                                 No lab documents uploaded yet.
@@ -345,14 +451,14 @@
 
                 <div class="col-lg-6">
                     <!-- ── Upload Documents Card ── -->
-                    <div class="card mb-0">
+                    <div class="card mb-0 h-100 d-flex flex-column" style="min-height: 350px;">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-upload"></i> Upload Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
                                 {{ uploaded_documents|length }} file{% if uploaded_documents|length != 1 %}s{% endif %}
                             </span>
                         </div>
-                        <div class="card-body">
+                        <div class="card-body d-flex flex-column">
                             <form method="POST" action="{% url 'upload_profile_document' %}"
                                 enctype="multipart/form-data" class="mb-3">
                                 {% csrf_token %}
@@ -381,7 +487,8 @@
                             </form>
 
                             {% if uploaded_documents %}
-                            <div class="table-responsive">
+                            <div class="position-relative flex-grow-1">
+                                <div class="table-responsive position-absolute w-100 h-100" style="top: 0; left: 0; overflow-y: auto;">
                                 <table class="fm-table">
                                     <thead>
                                         <tr>
@@ -428,12 +535,15 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                             {% else %}
-                            <div class="empty-fm">
-                                <i class="fas fa-upload"
-                                    style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
-                                No uploaded documents yet.
+                            <div class="position-relative flex-grow-1">
+                                <div class="empty-fm position-absolute w-100 h-100 d-flex flex-column align-items-center justify-content-center" style="top: 0; left: 0;">
+                                    <i class="fas fa-upload"
+                                        style="font-size:2rem;color:var(--border);display:block;margin-bottom:8px;"></i>
+                                    No uploaded documents yet.
+                                </div>
                             </div>
                             {% endif %}
                         </div>
@@ -581,8 +691,8 @@
                             <option value="B+" {% if request.user.patient.bld_grop == 'B+' %}selected{% endif %}>B+
                             </option>
                             <option value="B-" {% if request.user.patient.bld_grop == 'B-' %}selected{% endif %}>B-
-                            </option>
-                            <option value="O+" {% if request.user.patient.bld_grop == 'O+' %}selected{% endif %}>O+
+                            </option>   
+                            <option value="O+" {% if request.user.patient.bld_grop ==   'O+' %}selected{% endif %}>O+
                             </option>
                             <option value="O-" {% if request.user.patient.bld_grop == 'O-' %}selected{% endif %}>O-
                             </option>
@@ -1086,6 +1196,7 @@
             });
         </script>
 
-        {% include 'footer.html' %} 
+        {% include 'footer.html' %}
 </body>
+
 </html>
