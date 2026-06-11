@@ -1,17 +1,17 @@
-
 const variantsContainer = document.getElementById('variantsContainer');
 const addVariantBtn = document.getElementById('addVariantBtn');
 
-// Unit choices from Django (for dynamically added rows)
 const unitOptions = `{% for value, label in unit_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}`;
 
-/* ── Core: recalculate stock for one variant row ── */
+/* ── Core: recalculate hidden stock[] for one row ── */
 function recalcStock(row) {
     const stripInput = row.querySelector('.strip-input');
     const upsInput = row.querySelector('.ups-input');
     const hiddenStock = row.querySelector('.stock-hidden');
     const preview = row.querySelector('.stock-preview');
     const previewText = row.querySelector('.preview-text');
+
+    if (!stripInput || !upsInput || !hiddenStock) return;
 
     const strips = parseInt(stripInput.value, 10);
     const ups = parseInt(upsInput.value, 10);
@@ -26,7 +26,6 @@ function recalcStock(row) {
         preview.style.display = 'flex';
         preview.style.alignItems = 'center';
     } else if (validStrips && !validUps) {
-        // No unit_per_strip set → treat strips field as raw units
         hiddenStock.value = strips;
         previewText.textContent = `${strips} units (no strip size set)`;
         preview.style.display = 'flex';
@@ -37,13 +36,13 @@ function recalcStock(row) {
     }
 }
 
-/* ── Attach listeners to a row ── */
+/* ── Attach all listeners to a row ── */
 function attachRowListeners(row) {
-    // Strip / UPS → recalculate
-    row.querySelector('.strip-input').addEventListener('input', () => recalcStock(row));
-    row.querySelector('.ups-input').addEventListener('input', () => recalcStock(row));
+    const stripInput = row.querySelector('.strip-input');
+    const upsInput = row.querySelector('.ups-input');
+    if (stripInput) stripInput.addEventListener('input', () => recalcStock(row));
+    if (upsInput) upsInput.addEventListener('input', () => recalcStock(row));
 
-    // Remove button
     row.querySelector('.remove-variant-btn').addEventListener('click', function () {
         row.remove();
         updateRemoveBtns();
@@ -60,7 +59,7 @@ function updateRemoveBtns() {
 /* ── Init existing rows ── */
 variantsContainer.querySelectorAll('.variant-row').forEach(row => {
     attachRowListeners(row);
-    recalcStock(row);
+    recalcStock(row);   // show initial preview if values already set
 });
 updateRemoveBtns();
 
@@ -70,6 +69,7 @@ addVariantBtn.addEventListener('click', function () {
     row.className = 'variant-row';
     row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
     row.innerHTML = `
+            <input type="hidden" name="variant_id[]" value="">
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
                 <div>
                     <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
@@ -118,6 +118,7 @@ addVariantBtn.addEventListener('click', function () {
             </div>
             <div class="stock-preview" style="
                 display:none;
+                align-items:center;
                 margin-top:10px;
                 padding:7px 12px;
                 background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);
@@ -137,7 +138,7 @@ addVariantBtn.addEventListener('click', function () {
     updateRemoveBtns();
 });
 
-/* ── Guard: make sure hidden stock[] is up-to-date on submit ── */
-document.getElementById('addMedicineForm').addEventListener('submit', function () {
+/* ── Guard: ensure hidden stock[] is up-to-date on submit ── */
+document.querySelector('form').addEventListener('submit', function () {
     variantsContainer.querySelectorAll('.variant-row').forEach(row => recalcStock(row));
 });

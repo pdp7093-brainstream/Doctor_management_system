@@ -151,3 +151,153 @@
 .stat-pill i {
     font-size: 1.1rem;
 }
+
+
+/* ── Star Rating Widget ── */
+.star-rating {
+    display: flex;
+    gap: 6px;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    margin: 8px 0 4px;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    font-size: 2rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.15s;
+    line-height: 1;
+}
+
+.star-rating label:hover,
+.star-rating label:hover~label,
+.star-rating input:checked~label {
+    color: #f59e0b;
+    transform: scale(1.15);
+}
+
+/* ── Feedback Card ── */
+.feedback-form-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 36px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.feedback-form-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a2035;
+    margin-bottom: 4px;
+}
+
+.feedback-form-card .subtitle {
+    color: #888;
+    font-size: 0.92rem;
+    margin-bottom: 24px;
+}
+
+.feedback-form-card .form-control {
+    border: 1.5px solid #e8edf5;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.92rem;
+    background: #fafbfe;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.feedback-form-card .form-control:focus {
+    border-color: #1977cc;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(25, 119, 204, 0.08);
+}
+
+.feedback-form-card textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.btn-submit-feedback {
+    background: linear-gradient(135deg, #1977cc 0%, #1561a8 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 1rem;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-submit-feedback:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(25, 119, 204, 0.3);
+}
+
+/* ── Info Section ── */
+.feedback-info-card {
+    background: linear-gradient(135deg, #1977cc 0%, #0d4f8b 100%);
+    border-radius: 16px;
+    padding: 36px;
+    color: #fff;
+    height: 100%;
+}
+
+.feedback-info-card h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.feedback-info-card p {
+    opacity: 0.85;
+    font-size: 0.92rem;
+    line-height: 1.7;
+}
+
+.feedback-info-card .info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.feedback-info-card .info-item i {
+    font-size: 1.3rem;
+    opacity: 0.9;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.feedback-info-card .info-item h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.feedback-info-card .info-item span {
+    font-size: 0.85rem;
+    opacity: 0.75;
+}
+
+.rating-label-text {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #555;
+    margin-bottom: 0;
+}
+
+.rating-hint {
+    font-size: 0.78rem;
+    color: #999;
+}
