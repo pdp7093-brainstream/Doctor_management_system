@@ -499,3 +499,26 @@ Traceback (most recent call last):
     raise self.error(
 django.template.exceptions.TemplateSyntaxError: Template: /home/brainstream/Documents/online_doctor_appointment_system/doctor_mgmt/templates/doctor/dashboard.html, {% extends "doctor/main.html" %} must be the first tag in 'doctor/dashboard.html'.
 [2026-06-11 12:45:49,389] ERROR django.server "GET /doctor/dashboard/ HTTP/1.1" 500 181727
+[2026-06-12 10:55:27,602] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2090
+[2026-06-12 10:55:28,034] WARNING django.request Not Found: /favicon.ico
+[2026-06-12 10:55:28,046] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9031
+[2026-06-12 10:56:49,898] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2090
+[2026-06-12 10:58:00,551] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2090
+[2026-06-12 11:07:24,234] WARNING django.request Not Found: /favicon.ico
+[2026-06-12 11:07:24,239] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9009
+[2026-06-12 11:17:56,534] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-12 11:17:56,780] WARNING django.request Not Found: /favicon.ico
+[2026-06-12 11:17:56,782] WARNING django.server "GET /favicon.ico HTTP/1.1" 404 9009
+[2026-06-12 11:18:00,423] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-12 11:18:41,927] WARNING django.request Not Found: /billing/visit/11/
+[2026-06-12 11:18:41,929] WARNING django.server "GET /billing/visit/11/ HTTP/1.1" 404 9065
+[2026-06-12 11:19:06,416] WARNING django.request Not Found: /billing/visit/11/
+[2026-06-12 11:19:06,419] WARNING django.server "GET /billing/visit/11/?bill_id=K HTTP/1.1" 404 9075
+[2026-06-12 11:19:24,474] WARNING django.request Not Found: /billing/visit/11/
+[2026-06-12 11:19:24,480] WARNING django.server "GET /billing/visit/11/?bill_id=K HTTP/1.1" 404 9075
+[2026-06-12 11:19:34,377] WARNING django.request Not Found: /billing/visit/11/
+[2026-06-12 11:19:34,379] WARNING django.server "GET /billing/visit/11/?bill_id=K HTTP/1.1" 404 9075
+[2026-06-12 11:40:58,977] WARNING django.request Not Found: /delete-lab-document/f/
+[2026-06-12 11:40:58,981] WARNING django.server "POST /delete-lab-document/f/ HTTP/1.1" 404 52
+[2026-06-12 11:53:40,574] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068
+[2026-06-12 11:53:43,416] WARNING django.server "GET /static/assets/bootstrap-icons/font/bootstrap-icons.css HTTP/1.1" 404 2068

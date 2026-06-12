@@ -541,7 +541,7 @@
         </div>
 
             <!-- Doctor Info -->
-            <div class="detail-section mb-0">
+            <div class="detail-section">
                 <div class="section-title"><i class="fas fa-user-md"></i> Doctor</div>
                 <div class="info-grid">
                     <div class="info-box">
@@ -556,11 +556,9 @@
                     </div>
                 </div>
             </div>
-        </div>
 
         <!-- ── Card 2: Visit Details ── -->
         {% if visit %}
-        <div class="card">
             <div class="detail-section">
                 <div class="section-title"><i class="fas fa-stethoscope"></i> Visit Details</div>
                 <div class="info-grid">
@@ -598,12 +596,10 @@
                 </div>
                 {% endif %}
             </div>
-        </div>
         {% endif %}
 
         <!-- ── Card 3: Prescription ── -->
         {% if prescription and prescription_items %}
-        <div class="card">
             <div class="detail-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap;">
                     <div class="section-title" style="margin-bottom: 0;"><i class="fas fa-prescription-bottle-alt"></i> Prescription</div>
@@ -701,9 +697,39 @@
                     Prescribed on: {{ prescription.created_at|date:"d M Y" }}
                 </div>
             </div>
-        </div>
         {% endif %}
-    </div>
+
+        <!-- ── Card 4: Lab Documents ── -->
+        {% if visit and visit.lab_documents.all %}
+            <div class="detail-section">
+                <div class="section-title"><i class="fas fa-file-medical"></i> Lab Documents</div>
+                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid var(--border, #e5e7eb);">
+                    <table class="rx-table">
+                        <thead>
+                            <tr>
+                                <th>Document</th>
+                                <th>Uploaded</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for document in visit.lab_documents.all %}
+                            <tr>
+                                <td style="border-bottom: none;"><strong>{{ document.original_name }}</strong></td>
+                                <td style="border-bottom: none;">{{ document.uploaded_at|date:"d M Y" }}</td>
+                                <td style="border-bottom: none;">
+                                    <a href="{{ document.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm" title="View" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+        </div>
     </main>
 
     {% include 'footer.html' %}

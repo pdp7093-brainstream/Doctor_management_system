@@ -60,8 +60,6 @@
             margin: 0 auto 18px;
         }
 
-
-
         @media (max-width: 991px) {
             .profile-page-shell {
                 padding-top: 104px;
@@ -366,7 +364,7 @@
             <div class="row g-3 mt-0">
                 <div class="col-lg-6">
                     <!-- ── Lab Documents Card ── -->
-                    <div class="card mb-0 h-100" style="min-height: 350px;">
+                    <div class="card mb-0 h-100" style="min-height: 550px;">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-file-medical"></i> Lab Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
@@ -398,25 +396,21 @@
                                                     {{ document.visit.appointment.family_member.relation }}
                                                 </span>
                                                 {% else %}
-                                                {{
-                                                document.visit.patient.user.get_full_name|default:document.visit.patient.user.username
-                                                }}
+                                                {{ document.visit.patient.user.get_full_name|default:document.visit.patient.user.username }}
                                                 {% endif %}
                                             </td>
                                             <td>{{ document.visit.appointment.appointment_date|date:"d M Y" }}</td>
                                             <td>
                                                 {% if document.visit.doctor and document.visit.doctor.user %}
-                                                Dr. {{
-                                                document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username
-                                                }}
+                                                Dr. {{ document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username }}
                                                 {% else %}
                                                 —
                                                 {% endif %}
                                             </td>
                                             <td>{{ document.uploaded_at|date:"d M Y" }}</td>
-                                            <td>
+                                           <td class="d-flex align-items-center gap-2">
                                                 <a href="{{ document.file.url }}" target="_blank"
-                                                    class="btn btn-outline-primary btn-sm me-1" title="View"
+                                                    class="btn btn-primary btn-sm" title="View"
                                                     style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
@@ -445,7 +439,7 @@
 
                 <div class="col-lg-6">
                     <!-- ── Upload Documents Card ── -->
-                    <div class="card mb-0 h-100 d-flex flex-column" style="min-height: 350px;">
+                    <div class="card mb-0 h-100 d-flex flex-column" style="min-height: 550px;">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-upload"></i> Upload Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
@@ -512,18 +506,24 @@
                                                 {% endif %}
                                             </td>
                                             <td>{{ document.uploaded_at|date:"d M Y" }}</td>
-                                            <td>
-                                                <a href="{{ document.file.url }}" target="_blank"
-                                                    class="btn btn-outline-primary btn-sm me-1" title="View"
-                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button type="button"
-                                                    class="btn btn-outline-danger btn-sm delete-doc-btn"
-                                                    data-type="profile" data-id="{{ document.id|hid }}" title="Delete"
-                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                            <td style="vertical-align: middle; white-space: nowrap;">
+    
+                                                <span class="d-flex align-items-center justify-content-end gap-2">
+                                                    
+                                                    <a href="{{ document.file.url }}" target="_blank"
+                                                    class="btn btn-primary btn-sm" title="View"
+                                                    style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:0.35rem;">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    
+                                                    <button type="button"
+                                                            class="btn btn-outline-danger btn-sm delete-doc-btn"
+                                                            data-type="profile" data-id="{{ document.id|hid }}" title="Delete"
+                                                            style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:0.35rem;">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    
+                                                </span>
                                             </td>
                                         </tr>
                                         {% endfor %}
