@@ -101,7 +101,7 @@ patientSearch.addEventListener('input', async function () {
                 searchResults.innerHTML = `
                         <div class="search-result-item" style="text-align:center; color:#999; padding:20px;">
                             <div class="mb-2">No results found</div>
-                            <a href="{% url 'doctor:add_patient' %}" class="btn btn-sm btn-primary mt-2" style="font-weight:600;">
+                            <a href="/doctor/add-patient/" class="btn btn-sm btn-primary mt-2" style="font-weight:600;">
                                 <i class="bi bi-person-plus"></i> Add Patient
                             </a>
                         </div>

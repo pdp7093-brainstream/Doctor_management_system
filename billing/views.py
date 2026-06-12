@@ -477,7 +477,8 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
 
         # redirect to prescription page to allow doctor to add prescription and then generate bill
         from django.urls import reverse
-        return redirect(reverse('appointment:prescription', args=[visit.id]))
+        from doctor import hashid as _hashid
+        return redirect(reverse('appointment:prescription', args=[_hashid.encode_id(visit.id)]))
 
 @method_decorator(never_cache, name='dispatch')
 class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):

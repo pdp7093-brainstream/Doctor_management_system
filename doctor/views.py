@@ -455,14 +455,15 @@ def add_patient(request):
                     first_name = first_name,
                     last_name  = last_name,
                 )
-                Patient.objects.create(
-                    user     = user,
-                    phone    = phone,
-                    address  = address,
-                    dob      = dob or None,
-                    gender   = gender or None,
-                    bld_grop = bld_grop or None,
-                )
+                # The Patient object is auto-created via a post_save signal on the User model.
+                # So we fetch it and update it, rather than creating a duplicate.
+                patient = user.patient
+                patient.phone    = phone
+                patient.address  = address
+                patient.dob      = dob or None
+                patient.gender   = gender or None
+                patient.bld_grop = bld_grop or None
+                patient.save()
 
             return redirect('doctor:manage_patients')
 

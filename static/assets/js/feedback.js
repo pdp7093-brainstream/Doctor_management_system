@@ -1,5 +1,8 @@
-
-const csrfToken = '{{ csrf_token }}';
+// Get CSRF token from DOM instead of template tag since this is a static JS file
+function getCsrfToken() {
+    const input = document.querySelector('[name=csrfmiddlewaretoken]');
+    return input ? input.value : '';
+}
 
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('.js-delete-feedback');
@@ -24,7 +27,7 @@ document.addEventListener('click', async (event) => {
         const response = await fetch(button.dataset.url, {
             method: 'POST',
             headers: {
-                'X-CSRFToken': csrfToken,
+                'X-CSRFToken': getCsrfToken(),
                 'X-Requested-With': 'XMLHttpRequest',
             },
         });
@@ -104,9 +107,7 @@ async function bulkDeleteFeedback() {
     try {
         // Need csrf token which might not be set in this JS file depending on how it's loaded. 
         // We'll extract it from the DOM just in case the constant isn't properly evaluated.
-        let token = csrfToken;
-        const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfInput) token = csrfInput.value;
+        let token = getCsrfToken();
 
         const response = await fetch('/doctor/feedback/bulk-delete/', {
             method: 'POST',
