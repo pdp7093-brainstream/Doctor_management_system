@@ -40,7 +40,7 @@
                         <select id="medicine-type" name="medicine_type" class="patient-input" required>
                             <option value="" disabled>Select type...</option>
                             {% for value, label in medicine_types %}
-                            <option value="{{ value }}" {% if medicine.medicine_type==value %}selected{% endif %}>
+                            <option value="{{ value }}" {% if medicine.medicine_type == value %}selected{% endif %}>
                                 {{ label }}
                             </option>
                             {% endfor %}
@@ -62,8 +62,7 @@
 
                 <!-- Is Active -->
                 <div class="patient-field" style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" id="medicine-active" name="is_active" {% if medicine.is_active %}checked{%
-                        endif %} style="width:18px; height:18px; cursor:pointer;">
+                    <input type="checkbox" id="medicine-active" name="is_active" {% if medicine.is_active %}checked{% endif %} style="width:18px; height:18px; cursor:pointer;">
                     <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">
                         Active (available in store)
                     </label>
@@ -126,7 +125,7 @@
                                     <label class="patient-label" style="font-size:0.78rem;">Unit</label>
                                     <select name="unit[]" class="patient-input">
                                         {% for value, label in unit_choices %}
-                                        <option value="{{ value }}" {% if variant.unit==value %}selected{% endif %}>
+                                        <option value="{{ value }}" {% if variant.unit == value %}selected{% endif %}>
                                             {{ label }}
                                         </option>
                                         {% endfor %}
