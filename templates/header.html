@@ -80,7 +80,7 @@
 
 
         </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list" onclick="window.toggleHeaderMobileNav && window.toggleHeaderMobileNav(event)"></i>
       </nav>
 
     </div>
@@ -176,7 +176,9 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  window.hasMobileNavHandler = true;
+
+  function initHeaderNav() {
     const profileTrigger = document.querySelector('.profile-nav .profile-nav-trigger');
     const profileNavItem = document.querySelector('.profile-nav');
 
@@ -246,5 +248,53 @@
 
     }
 
-  });
+    const mobileNavToggleBtn = document.querySelector('.mobile-nav-toggle');
+    const pageBody = document.body;
+
+    function toggleMobileNav() {
+      if (!mobileNavToggleBtn) return;
+      pageBody.classList.toggle('mobile-nav-active');
+      mobileNavToggleBtn.classList.toggle('bi-list');
+      mobileNavToggleBtn.classList.toggle('bi-x');
+    }
+
+    window.toggleHeaderMobileNav = function (e) {
+      if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+      }
+      toggleMobileNav();
+    };
+
+    if (mobileNavToggleBtn) {
+      window.hasMobileNavHandler = true;
+    }
+
+    document.querySelectorAll('#navmenu a').forEach((link) => {
+      link.addEventListener('click', () => {
+        if (pageBody.classList.contains('mobile-nav-active')) {
+          pageBody.classList.remove('mobile-nav-active');
+          if (mobileNavToggleBtn) {
+            mobileNavToggleBtn.classList.add('bi-list');
+            mobileNavToggleBtn.classList.remove('bi-x');
+          }
+        }
+      });
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 1199 && pageBody.classList.contains('mobile-nav-active')) {
+        pageBody.classList.remove('mobile-nav-active');
+        if (mobileNavToggleBtn) {
+          mobileNavToggleBtn.classList.add('bi-list');
+          mobileNavToggleBtn.classList.remove('bi-x');
+        }
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHeaderNav);
+  } else {
+    initHeaderNav();
+  }
 </script>
