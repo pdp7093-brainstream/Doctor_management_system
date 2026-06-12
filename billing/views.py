@@ -20,7 +20,6 @@ from doctor.mixins import BillingAccessMixin
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 
-
 def get_bill_summary(visit):
     """
     Summary of all bills for a visit - original + addon bills
@@ -186,14 +185,9 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, hid):
-        # Prefer numeric IDs when path segment is digits, else decode hashid
-        from doctor import hashid as _hashid
-        try:
-            if isinstance(hid, str) and hid.isdigit():
-                vid = int(hid)
-            else:
-                vid = _hashid.decode_hash(hid)
-        except Exception:
+        from appointment.views import resolve_hid
+        vid = resolve_hid(hid)
+        if vid is None:
             return get_object_or_404(Visit, id=0)
 
         visit = get_object_or_404(Visit, id=vid)
@@ -203,14 +197,9 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
 
         bill_id = request.GET.get('bill_id')
         if bill_id:
-            # bill_id may be a hashid or numeric id; prefer numeric when digits
-            try:
-                if bill_id.isdigit():
-                    bid = int(bill_id)
-                else:
-                    bid = _hashid.decode_hash(bill_id)
-            except Exception:
-                bid = None
+            # bill_id may be a hashid or numeric id
+            from appointment.views import resolve_hid
+            bid = resolve_hid(bill_id)
 
             if bid is None:
                 bill = None
@@ -236,27 +225,17 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
         })
 
     def post(self, request, hid):
-        # Prefer numeric IDs when path segment is digits, else decode hashid
-        from doctor import hashid as _hashid
-        try:
-            if isinstance(hid, str) and hid.isdigit():
-                vid = int(hid)
-            else:
-                vid = _hashid.decode_hash(hid)
-        except Exception:
+        from appointment.views import resolve_hid
+        vid = resolve_hid(hid)
+        if vid is None:
             return get_object_or_404(Visit, id=0)
 
         visit = get_object_or_404(Visit, id=vid)
 
         bill_id = request.POST.get('bill_id')
         if bill_id:
-            try:
-                if bill_id.isdigit():
-                    bid = int(bill_id)
-                else:
-                    bid = _hashid.decode_hash(bill_id)
-            except Exception:
-                bid = None
+            from appointment.views import resolve_hid
+            bid = resolve_hid(bill_id)
 
             if bid is None:
                 bill = None
@@ -486,14 +465,8 @@ class DeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
     
     def post(self, request, hid):
         # Accept numeric id or hashid for bill
-        from doctor import hashid as _hashid
-        try:
-            if isinstance(hid, str) and hid.isdigit():
-                bid = int(hid)
-            else:
-                bid = _hashid.decode_hash(hid)
-        except Exception:
-            bid = None
+        from appointment.views import resolve_hid
+        bid = resolve_hid(hid)
 
         bill = get_object_or_404(Bill, id=bid, is_archived=False)
         bill_number = bill.bill_number
@@ -515,25 +488,16 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
 
     def get(self, request, hid):
         # Visit + Bill fetch karo. Accept numeric or hashid for visit and bill_id.
-        from doctor import hashid as _hashid
-        try:
-            if isinstance(hid, str) and hid.isdigit():
-                vid = int(hid)
-            else:
-                vid = _hashid.decode_hash(hid)
-        except Exception:
+        from appointment.views import resolve_hid
+        vid = resolve_hid(hid)
+        if vid is None:
             return get_object_or_404(Visit, id=0)
 
         visit = get_object_or_404(Visit, id=vid)
         bill_id = request.GET.get('bill_id')
         if bill_id:
-            try:
-                if bill_id.isdigit():
-                    bid = int(bill_id)
-                else:
-                    bid = _hashid.decode_hash(bill_id)
-            except Exception:
-                bid = None
+            from appointment.views import resolve_hid
+            bid = resolve_hid(bill_id)
 
             if bid is None:
                 bill = None
@@ -570,15 +534,10 @@ class BulkDeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
             
             decoded_ids = []
             for hid in bill_ids:
-                try:
-                    if isinstance(hid, str) and hid.isdigit():
-                        bid = int(hid)
-                    else:
-                        bid = _hashid.decode_hash(hid)
-                    if bid:
-                        decoded_ids.append(bid)
-                except Exception:
-                    pass
+                from appointment.views import resolve_hid
+                bid = resolve_hid(hid)
+                if bid:
+                    decoded_ids.append(bid)
             
             if not decoded_ids:
                 return JsonResponse({'success': False, 'error': 'Invalid bill IDs.'})
