@@ -900,3 +900,498 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         .upload-label-sm:hover { opacity:0.88; }
 
         .empty-fm { text-align:center; padding:24px; color:var(--muted); font-size:0.88rem; }
+
+
+
+/* profile.html css */
+
+/* ── FIX 1: Header always solid, never transparent ── */
+        #header,
+        .header {
+            --background-color: #ffffff !important;
+            background-color: #ffffff !important;
+            box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        #header.scrolled,
+        .header.scrolled,
+        .scrolled #header,
+        .scrolled .header {
+            --background-color: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 32%),
+                linear-gradient(180deg, #f6f8ff 0%, #eef3ff 100%);
+        }
+
+        .profile-page-shell {
+            padding: 118px 0 48px;
+        }
+
+        .profile-page-shell .main-content {
+            margin-left: 0;
+            padding: 0;
+            min-height: auto;
+        }
+
+        .profile-page-shell .header {
+            max-width: 1100px;
+            margin: 0 auto 18px;
+        }
+
+        @media (max-width: 991px) {
+            .profile-page-shell {
+                padding-top: 104px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .profile-page-shell {
+                padding-top: 96px;
+            }
+        }
+
+        /* --------------------------- */
+
+        .patient-page-shell {
+            padding: 118px 0 48px;
+        }
+
+        .patient-hero {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(226, 234, 255, 0.9);
+            border-radius: 24px;
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+            padding: 28px;
+            margin-bottom: 22px;
+            backdrop-filter: blur(10px);
+        }
+
+        .patient-hero__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .patient-hero__title {
+            font-size: clamp(1.5rem, 2.2vw, 2.2rem);
+            font-weight: 800;
+            color: var(--text);
+            margin: 0 0 8px;
+        }
+
+        .patient-hero__subtext {
+            color: var(--muted);
+            margin: 0;
+            max-width: 70ch;
+        }
+
+        .patient-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100%;
+        }
+
+        .page-card {
+            margin-bottom: 22px;
+        }
+
+        .page-card .card-header {
+            padding: 18px 20px;
+        }
+
+        .btn-book-appointment {
+            background: linear-gradient(135deg, var(--primary), #5b42ff);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 10px 18px rgba(91, 66, 255, 0.18);
+        }
+
+        .btn-book-appointment:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 24px rgba(0, 109, 252, 0.24);
+        }
+
+
+/* appointment_details.html */
+
+/* ── FIX 1: Header always solid, never transparent ── */
+        #header,
+        .header {
+            --background-color: #ffffff !important;
+            background-color: #ffffff !important;
+            box-shadow: 0px 0 18px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        #header.scrolled,
+        .header.scrolled,
+        .scrolled #header,
+        .scrolled .header {
+            --background-color: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 32%),
+                linear-gradient(180deg, #f6f8ff 0%, #eef3ff 100%);
+            background-attachment: fixed;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        .appointment-page-shell {
+            padding: 130px 15px 48px 15px;
+            max-width: 1100px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        .appointment-page-shell .page-header {
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .appointment-page-shell .page-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark, #1a1a1a);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .appointment-page-shell .page-header i {
+            color: var(--primary, #4F46E5);
+        }
+
+        .appointment-page-shell .card {
+            border: 1px solid var(--border, #e5e7eb);
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .appointment-page-shell .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .appointment-page-shell .detail-section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border, #e5e7eb);
+        }
+
+        .appointment-page-shell .detail-section:last-child {
+            border-bottom: none;
+        }
+
+        .appointment-page-shell .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark, #1a1a1a);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .appointment-page-shell .section-title i {
+            color: var(--primary, #4F46E5);
+            font-size: 18px;
+        }
+
+        .appointment-page-shell .section-tag {
+            display: inline-block;
+            background: var(--primary, #4F46E5);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: capitalize;
+            margin-left: auto;
+        }
+
+        .appointment-page-shell .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .appointment-page-shell .info-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .appointment-page-shell .info-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .appointment-page-shell .info-box .label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted, #6b7280);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .appointment-page-shell .info-box .value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--dark, #1a1a1a);
+            word-break: break-word;
+        }
+
+        .appointment-page-shell .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .appointment-page-shell .status-confirmed {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+
+        .appointment-page-shell .status-completed {
+            background-color: #d1f2eb;
+            color: #0f766e;
+        }
+
+        .appointment-page-shell .status-cancelled {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .appointment-page-shell .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .appointment-page-shell .visit-badge {
+            display: inline-block;
+            background: var(--primary, #4F46E5);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .appointment-page-shell .rx-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .appointment-page-shell .rx-table thead {
+            background-color: var(--light, #f3f4f6);
+            border-bottom: 2px solid var(--border, #e5e7eb);
+        }
+
+        .appointment-page-shell .rx-table th {
+            padding: 12px 16px;
+            font-weight: 700;
+            color: var(--dark, #1a1a1a);
+            text-align: left;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .appointment-page-shell .rx-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border, #e5e7eb);
+            color: var(--dark, #1a1a1a);
+        }
+
+        .appointment-page-shell .rx-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .appointment-page-shell .rx-table tbody tr:hover {
+            background-color: rgba(79, 70, 229, 0.04);
+        }
+
+        .appointment-page-shell .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid var(--border, #e5e7eb);
+            border-radius: 8px;
+            background: white;
+            color: var(--dark, #1a1a1a);
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .appointment-page-shell .btn-back:hover {
+            background: var(--light, #f3f4f6);
+            border-color: var(--primary, #4F46E5);
+            color: var(--primary, #4F46E5);
+        }
+
+        .appointment-page-shell .btn-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border: 1px solid var(--primary, #4F46E5);
+            border-radius: 8px;
+            background: white;
+            color: var(--primary, #4F46E5);
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .appointment-page-shell .btn-print:hover {
+            background: var(--primary, #4F46E5);
+            color: white;
+        }
+
+        @media (max-width: 991px) {
+            .appointment-page-shell {
+                padding: 120px 12px 48px 12px;
+            }
+
+            .appointment-page-shell .page-header h2 {
+                font-size: 24px;
+            }
+
+            .appointment-page-shell .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .appointment-page-shell .detail-section {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .appointment-page-shell {
+                padding: 110px 12px 32px 12px;
+            }
+
+            .appointment-page-shell .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .appointment-page-shell .page-header h2 {
+                font-size: 22px;
+                width: 100%;
+            }
+
+            .appointment-page-shell .detail-section {
+                padding: 16px;
+            }
+
+            .appointment-page-shell .section-title {
+                font-size: 14px;
+                margin-bottom: 16px;
+            }
+
+            .appointment-page-shell .rx-table th,
+            .appointment-page-shell .rx-table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .appointment-page-shell {
+                padding: 100px 10px 24px 10px;
+            }
+
+            .appointment-page-shell .page-header h2 {
+                font-size: 20px;
+            }
+
+            .appointment-page-shell .card {
+                margin-bottom: 16px;
+                border-radius: 10px;
+            }
+
+            .appointment-page-shell .detail-section {
+                padding: 12px;
+            }
+
+            .appointment-page-shell .section-title {
+                font-size: 13px;
+                margin-bottom: 12px;
+            }
+
+            .appointment-page-shell .rx-table {
+                font-size: 12px;
+            }
+
+            .appointment-page-shell .rx-table th,
+            .appointment-page-shell .rx-table td {
+                padding: 8px 6px;
+            }
+        }
+
+        @media print {
+            .page-header .btn-back,
+            .appointment-page-shell .btn-print {
+                display: none;
+            }
+
+            .appointment-page-shell {
+                padding: 20px;
+            }
+
+            .appointment-page-shell .card {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+
