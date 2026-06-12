@@ -1,7 +1,10 @@
 const variantsContainer = document.getElementById('variantsContainer');
 const addVariantBtn = document.getElementById('addVariantBtn');
 
-const unitOptions = `{% for value, label in unit_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}`;
+// Unit choices from Django (injected via HTML)
+const unitOptions = window.UNIT_CHOICES 
+    ? window.UNIT_CHOICES.map(c => `<option value="${c.value}">${c.label}</option>`).join('')
+    : '<option value="piece">Piece</option>';
 
 /* ── Core: recalculate hidden stock[] for one row ── */
 function recalcStock(row) {

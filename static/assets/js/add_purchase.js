@@ -1,7 +1,6 @@
-
 const itemsContainer = document.getElementById('itemsContainer');
 const addItemBtn = document.getElementById('addItemBtn');
-const medicineSearchUrl = "{% url 'medicine:search_medicine' %}";
+const medicineSearchUrl = "/medicine/search/";
 const autocompleteTimers = new WeakMap();
 
 function updateRemoveBtns() {

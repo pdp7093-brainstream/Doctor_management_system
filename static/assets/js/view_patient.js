@@ -77,7 +77,7 @@ function deleteOldDocument(docId, btnElement) {
         fetch(`/doctor/old-data/delete/${docId}/`, {
             method: "POST",
             headers: {
-                "X-CSRFToken": "{{ csrf_token }}",
+                "X-CSRFToken": getCookie('csrftoken'),
                 "Content-Type": "application/json"
             }
         })

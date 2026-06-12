@@ -1,5 +1,9 @@
 
-const CSRF = '{{ csrf_token }}';
+// Get CSRF token from DOM instead of template tag since this is a static JS file
+function getCsrfToken() {
+    const input = document.querySelector('[name=csrfmiddlewaretoken]');
+    return input ? input.value : '';
+}
 
 // ── Password toggle ──────────────────────────────────────
 function togglePwd(inputId, icon) {
@@ -53,9 +57,9 @@ document.getElementById('saveAddStaff').addEventListener('click', function () {
 
     this.disabled = true; this.textContent = 'Adding...';
 
-    fetch("{% url 'doctor:add_staff' %}", {
+    fetch("/doctor/staff/add/", {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         body: JSON.stringify({ name, phone, username, email, password }),
     })
         .then(r => r.json())
@@ -94,9 +98,9 @@ document.getElementById('saveEditStaff').addEventListener('click', function () {
 
     this.disabled = true; this.textContent = 'Saving...';
 
-    fetch(`{% url 'doctor:edit_staff' 0 %}`.replace('/0/', `/${id}/`), {
+    fetch(`/doctor/staff/edit/${id}/`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         body: JSON.stringify({ name, email, phone, is_active }),
     })
         .then(r => r.json())
@@ -147,11 +151,11 @@ document.getElementById('saveResetPwd').addEventListener('click', function () {
         Resetting...
     `;
 
-    fetch(`{% url 'doctor:reset_staff_password' 0 %}`.replace('/0/', `/${id}/`), {
+    fetch(`/doctor/staff/reset-password/${id}/`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRFToken': CSRF
+            'X-CSRFToken': getCsrfToken()
         },
         body: JSON.stringify({ password }),
     })
@@ -221,9 +225,9 @@ document.querySelectorAll('.btn-delete-staff').forEach(btn => {
 
         if (!result.isConfirmed) return;
 
-        fetch(`{% url 'doctor:delete_staff' 0 %}`.replace('/0/', `/${id}/`), {
+        fetch(`/doctor/staff/delete/${id}/`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
         })
             .then(r => r.json())
             .then(data => {

@@ -46,7 +46,7 @@
             page: page,
         });
 
-        fetch(`{% url 'doctor:manage_patients' %}?${params.toString()}`, {
+        fetch(`/doctor/patients/?${params.toString()}`, {
             headers: { 'x-requested-with': 'XMLHttpRequest' }
         })
         .then(res => res.text())

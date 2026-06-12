@@ -182,5 +182,12 @@
     </div>
 </main>
 
-<script src="{% static 'assets/js/add_medicine.js' %}"></script>
+<script>
+    const UNIT_CHOICES = [
+        {% for value, label in unit_choices %}
+            { value: "{{ value }}", label: "{{ label }}" }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+</script>
+<script src="{% static 'assets/js/add_medicine.js' %}?v={% now 'U' %}"></script>
 {% endblock %}
