@@ -294,8 +294,8 @@ class LoginView(View):
                     if 'login_user_id' in request.session:
                         del request.session['login_user_id']
                         
-                    if is_ajax: return JsonResponse({'success': True, 'redirect_url': reverse('dashboard')})
-                    return redirect('dashboard')
+                    if is_ajax: return JsonResponse({'success': True, 'redirect_url': reverse('profile')})
+                    return redirect('profile')
                 except User.DoesNotExist:
                     if is_ajax: return JsonResponse({'success': False, 'error': 'User not found. Please try again.'})
                     return render(request, self.template_name, {'error': 'User not found. Please try again.'})

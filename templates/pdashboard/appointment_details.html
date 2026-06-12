@@ -206,8 +206,7 @@
                 <div class="info-grid">
                     <div class="info-box">
                         <div class="label">Visit Status</div>
-                        <div class="value"><span class="status-badge status-completed">{{ visit.visted_status|capfirst
-                                }}</span></div>
+                        <div class="value"><span class="status-badge status-completed">{{ visit.visted_status|capfirst }}</span></div>
                     </div>
                     <div class="info-box">
                         <div class="label">Visit Date</div>
@@ -270,13 +269,9 @@
                                 data-bs-target="#dosage-{{ forloop.counter }}" aria-expanded="false"
                                 aria-controls="dosage-{{ forloop.counter }}">
                                 <td style="border-bottom: none;">{{ forloop.counter }}</td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{
-                                    item.medicine_variant.medicine.name }}{% else %}—{% endif %}</td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{
-                                    item.medicine_variant.medicine.get_medicine_type_display }}{% else %}—{% endif %}
-                                </td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{
-                                    item.medicine_variant.power }}{% else %}—{% endif %}</td>
+                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.name }}{% else %}—{% endif %}</td>
+                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.get_medicine_type_display }}{% else %}—{% endif %}</td>
+                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.power }}{% else %}—{% endif %}</td>
                                 <td style="border-bottom: none;">{{ item.dosage }}</td>
                                 <td style="border-bottom: none;">{{ item.days }} days</td>
                             </tr>
@@ -339,8 +334,7 @@
                                             </div>
                                             {% if item.notes %}
                                             <div class="mt-2 text-muted" style="font-size: 0.8rem;">
-                                                <strong><i class="fas fa-info-circle me-1"></i> Notes:</strong> {{
-                                                item.notes }}
+                                                <strong><i class="fas fa-info-circle me-1"></i> Notes:</strong> {{ item.notes }}
                                             </div>
                                             {% endif %}
                                         </div>
