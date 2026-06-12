@@ -197,16 +197,24 @@
                         <div
                             class="card-header bg-white border-0 px-4 py-3 d-flex justify-content-between align-items-center border-bottom">
                             <h5 class="card-title mb-0 fw-semibold text-dark">Prescription List</h5>
-                            <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal"
-                                data-bs-target="#medicineModal">
-                                <i class="bi bi-plus-lg me-2"></i>Add Medicine
-                            </button>
+                            <div class="d-flex align-items-center gap-2">
+                                <button type="button" id="bulkDeletePrescriptionBtn" class="btn btn-danger d-none rounded-pill px-3" onclick="bulkRemoveMedicineRows()">
+                                    <i class="bi bi-trash"></i> Delete Selected
+                                </button>
+                                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal"
+                                    data-bs-target="#medicineModal">
+                                    <i class="bi bi-plus-lg me-2"></i>Add Medicine
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="bg-light">
                                         <tr>
+                                            <th style="width: 40px; text-align: center; border-bottom: 0;">
+                                                <input type="checkbox" class="form-check-input" id="selectAllPrescriptions" onchange="toggleAllPrescriptions(this)">
+                                            </th>
                                             <th class="px-4 py-3 border-0">Medicine & Strength</th>
                                             <th class="text-center border-0">Morn.</th>
                                             <th class="text-center border-0">Aft.</th>
@@ -226,6 +234,9 @@
                                     <tbody id="medicineList">
             </style>                                {% for item in items %}
                                         <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" class="form-check-input prescription-checkbox" onchange="updatePrescriptionBulkDeleteBtn()">
+                                            </td>
                                             <td class="px-4">
                                                 <div class="fw-bold text-dark">{{ item.medicine_variant.medicine.name }}
                                                 </div>
@@ -446,6 +457,6 @@
         style="top: 20px; right: 20px; z-index: 9999;"></div>
 
     <!-- ===== SCRIPTS ===== -->
-    <script src="{% static 'assets/js/prescription.js' %}"></script>
+    <script src="{% static 'assets/js/prescription.js' %}?v={% now 'U' %}"></script>
 </main>
 {% endblock %}

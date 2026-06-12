@@ -304,6 +304,9 @@ function saveMedicine(close) {
 
     const row = `
                 <tr>
+                    <td class="text-center">
+                        <input type="checkbox" class="form-check-input prescription-checkbox" onchange="updatePrescriptionBulkDeleteBtn()">
+                    </td>
                     <td class="px-4">
                         <div class="fw-bold text-dark">${selectedMedicineName}</div>
                         ${medicineNotes ? `<div class="small text-muted mt-1"><i class="bi bi-journal-text me-1"></i>${escapeHtml(medicineNotes)}</div>` : ''}
@@ -442,4 +445,64 @@ function updateCounts() {
     const deductEl = document.getElementById('deductCount');
     if (deductEl) deductEl.textContent = deductCount;
     showPage(currentPage);
+}
+
+// Bulk Delete for Prescriptions
+function updatePrescriptionBulkDeleteBtn() {
+    const checkboxes = document.querySelectorAll('.prescription-checkbox:checked');
+    const btn = document.getElementById('bulkDeletePrescriptionBtn');
+    if (!btn) return;
+    if (checkboxes.length > 0) {
+        btn.classList.remove('d-none');
+    } else {
+        btn.classList.add('d-none');
+    }
+    
+    const allCheckboxes = document.querySelectorAll('.prescription-checkbox');
+    const selectAll = document.getElementById('selectAllPrescriptions');
+    if (selectAll) {
+        selectAll.checked = allCheckboxes.length > 0 && allCheckboxes.length === checkboxes.length;
+    }
+}
+
+function toggleAllPrescriptions(source) {
+    const isChecked = source.checked;
+    document.querySelectorAll('.prescription-checkbox').forEach(cb => {
+        // Only select rows that are currently visible
+        if (cb.closest('tr').style.display !== 'none') {
+            cb.checked = isChecked;
+        }
+    });
+    updatePrescriptionBulkDeleteBtn();
+}
+
+function bulkRemoveMedicineRows() {
+    const checkboxes = document.querySelectorAll('.prescription-checkbox:checked');
+    if (checkboxes.length === 0) return;
+    
+    Swal.fire({
+        title: 'Remove selected medicines?',
+        text: "These medicines will be removed from the current prescription.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, remove them!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            checkboxes.forEach(cb => {
+                cb.closest('tr').remove();
+            });
+            
+            updateCounts();
+            updatePrescriptionBulkDeleteBtn();
+            
+            const selectAll = document.getElementById('selectAllPrescriptions');
+            if (selectAll) selectAll.checked = false;
+            
+            if (!document.getElementById('medicineList').children.length) {
+                document.getElementById('emptyMessage').style.display = 'block';
+            }
+        }
+    });
 }

@@ -37,6 +37,9 @@ function fetchBills(paramName = null, paramValue = null) {
 
             if (newContainer && oldContainer) {
                 oldContainer.replaceWith(newContainer);
+                const selectAll = document.getElementById('selectAllBills');
+                if (selectAll) selectAll.checked = false;
+                if (typeof updateBulkDeleteBtn === 'function') updateBulkDeleteBtn();
                 bindPaginationLinks();
             }
         })
@@ -239,3 +242,93 @@ document.addEventListener('click', function (e) {
 })();
 
 // remove item-related handlers (modal simplified)
+
+// Bulk Delete Logic
+function updateBulkDeleteBtn() {
+    const checkboxes = document.querySelectorAll('.bill-checkbox:checked');
+    const btn = document.getElementById('bulkDeleteBtn');
+    const countSpan = document.getElementById('selectedCount');
+    if (!btn) return;
+    if (checkboxes.length > 0) {
+        btn.classList.remove('d-none');
+        if (countSpan) countSpan.textContent = checkboxes.length;
+    } else {
+        btn.classList.add('d-none');
+        if (countSpan) countSpan.textContent = '0';
+    }
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target.id === 'selectAllBills') {
+        const isChecked = e.target.checked;
+        document.querySelectorAll('.bill-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateBulkDeleteBtn();
+    } else if (e.target.classList.contains('bill-checkbox')) {
+        updateBulkDeleteBtn();
+        const allCheckboxes = document.querySelectorAll('.bill-checkbox');
+        const allChecked = document.querySelectorAll('.bill-checkbox:checked');
+        const selectAll = document.getElementById('selectAllBills');
+        if (selectAll) {
+            selectAll.checked = allCheckboxes.length > 0 && allCheckboxes.length === allChecked.length;
+        }
+    }
+});
+
+function bulkDeleteBills() {
+    const checkboxes = document.querySelectorAll('.bill-checkbox:checked');
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (ids.length === 0) return;
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `You are about to permanently delete ${ids.length} bill(s) and their associated appointments.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete them!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/billing/bulk-delete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ bill_ids: ids })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Deleted!', data.message, 'success').then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to delete bills.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'An unexpected error occurred.', 'error');
+            });
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

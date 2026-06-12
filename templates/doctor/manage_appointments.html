@@ -96,8 +96,9 @@
                         </select>
                     </div>
                 </div>
-                <div class="col-md-2 d-grid">
-                    <button id="clearBtn" class="btn btn-outline-primary">
+                <div class="col-md-2">
+                    <label class="form-label d-none d-md-block" style="font-size:0.85rem;">&nbsp;</label>
+                    <button id="clearBtn" class="btn btn-outline-primary w-100">
                         <i class="bi me-1"></i>Clear
                     </button>
                 </div>
@@ -111,9 +112,14 @@
             <div class="d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
                 <i class="bi bi-calendar-check-fill"></i> Appointments
             </div>
-            {% if page_obj %}
-            <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
-            {% endif %}
+            <div class="d-flex align-items-center gap-3">
+                <button id="bulkDeleteBtn" class="btn btn-sm btn-danger d-none" onclick="bulkDeleteAppointments()">
+                    <i class="bi bi-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+                </button>
+                {% if page_obj %}
+                <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
+                {% endif %}
+            </div>
         </div>
 
         <div class="card-body p-0">
@@ -121,6 +127,9 @@
                 <table class="table table-hover mb-0" style="min-width:820px; width:100%;">
                     <thead>
                         <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" class="form-check-input" id="selectAllAppointments">
+                            </th>
                             <th>Patient</th>
                             <th>Relation</th>
                             <th>Booked By</th>
@@ -133,7 +142,9 @@
                     <tbody id="tableBody">
                         {% for appointment in appointments %}
                         <tr>
-
+                            <td class="text-center">
+                                <input type="checkbox" class="form-check-input appointment-checkbox" value="{{ appointment.id|hid }}">
+                            </td>
                             <!-- Patient Name -->
                             <td>
                                 <span style="font-weight:600; color:var(--dark-text);">
@@ -212,7 +223,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
+                            <td colspan="8" class="text-center text-muted py-5">
                                 <i class="bi bi-calendar-x"
                                     style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
                                 No appointments found.
@@ -261,7 +272,7 @@
 
 </main>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static 'assets/js/manage_appointment.js' %}"></script>
+<script src="{% static 'assets/js/manage_appointment.js' %}?v={% now 'U' %}"></script>
 
 
 {% endblock %}

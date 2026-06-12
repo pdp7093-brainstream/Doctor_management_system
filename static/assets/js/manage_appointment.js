@@ -30,6 +30,11 @@ function fetchAppointments(page = 1) {
             if (newPag && oldPag) oldPag.replaceWith(newPag);
             else if (newPag) document.getElementById('paginationContainer').appendChild(newPag);
 
+            // Uncheck select all when page changes
+            const selectAll = document.getElementById('selectAllAppointments');
+            if (selectAll) selectAll.checked = false;
+            updateBulkDeleteBtn();
+
             bindPaginationLinks();
         })
         .catch(err => console.error('Fetch error:', err));
@@ -82,3 +87,93 @@ document.addEventListener('click', function (e) {
         });
     }
 });
+
+// Bulk Delete Logic
+function updateBulkDeleteBtn() {
+    const checkboxes = document.querySelectorAll('.appointment-checkbox:checked');
+    const btn = document.getElementById('bulkDeleteBtn');
+    const countSpan = document.getElementById('selectedCount');
+    if (!btn) return;
+    if (checkboxes.length > 0) {
+        btn.classList.remove('d-none');
+        if (countSpan) countSpan.textContent = checkboxes.length;
+    } else {
+        btn.classList.add('d-none');
+        if (countSpan) countSpan.textContent = '0';
+    }
+}
+
+document.addEventListener('change', function(e) {
+    if (e.target.id === 'selectAllAppointments') {
+        const isChecked = e.target.checked;
+        document.querySelectorAll('.appointment-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+        });
+        updateBulkDeleteBtn();
+    } else if (e.target.classList.contains('appointment-checkbox')) {
+        updateBulkDeleteBtn();
+        const allCheckboxes = document.querySelectorAll('.appointment-checkbox');
+        const allChecked = document.querySelectorAll('.appointment-checkbox:checked');
+        const selectAll = document.getElementById('selectAllAppointments');
+        if (selectAll) {
+            selectAll.checked = allCheckboxes.length > 0 && allCheckboxes.length === allChecked.length;
+        }
+    }
+});
+
+function bulkDeleteAppointments() {
+    const checkboxes = document.querySelectorAll('.appointment-checkbox:checked');
+    const ids = Array.from(checkboxes).map(cb => cb.value);
+    
+    if (ids.length === 0) return;
+    
+    Swal.fire({
+        title: 'Are you sure?',
+        text: `You are about to permanently delete ${ids.length} appointment(s).`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete them!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/appointment/bulk-delete-appointments/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ appointment_ids: ids })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire('Deleted!', data.message, 'success').then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to delete appointments.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'An unexpected error occurred.', 'error');
+            });
+        }
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

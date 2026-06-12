@@ -550,3 +550,51 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
             'clinic': settings,
             'settings': settings,
         })
+
+@method_decorator(never_cache, name='dispatch')
+class BulkDeleteBillView(LoginRequiredMixin, BillingAccessMixin, View):
+    login_url = 'doctor:login'
+    
+    def post(self, request):
+        import json
+        from django.http import JsonResponse
+        from doctor import hashid as _hashid
+        
+        try:
+            data = json.loads(request.body)
+            bill_ids = data.get('bill_ids', [])
+            
+            if not bill_ids:
+                return JsonResponse({'success': False, 'error': 'No bills selected.'})
+            
+            decoded_ids = []
+            for hid in bill_ids:
+                try:
+                    if isinstance(hid, str) and hid.isdigit():
+                        bid = int(hid)
+                    else:
+                        bid = _hashid.decode_hash(hid)
+                    if bid:
+                        decoded_ids.append(bid)
+                except Exception:
+                    pass
+            
+            if not decoded_ids:
+                return JsonResponse({'success': False, 'error': 'Invalid bill IDs.'})
+            
+            bills = Bill.objects.filter(id__in=decoded_ids, is_archived=False)
+            appointments_to_delete = []
+            for b in bills:
+                if b.visit and b.visit.appointment:
+                    appointments_to_delete.append(b.visit.appointment.id)
+            
+            actual_count = bills.count()
+            bills.delete()
+            if appointments_to_delete:
+                Appointment.objects.filter(id__in=appointments_to_delete).delete()
+                
+            return JsonResponse({'success': True, 'message': f'{actual_count} bill(s) deleted successfully.'})
+            
+        except Exception as e:
+            logger.error(f"Error in bulk delete bills: {e}")
+            return JsonResponse({'success': False, 'error': 'An error occurred during deletion.'})

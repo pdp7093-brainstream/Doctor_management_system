@@ -988,3 +988,34 @@ def print_prescription(request, hid):
         'clinic': settings,
         'default_doctor': default_doctor,
     })
+
+@login_required
+@role_required('doctor')
+def bulk_delete_appointments(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            appointment_ids = data.get('appointment_ids', [])
+            if not appointment_ids:
+                return JsonResponse({'success': False, 'error': 'No appointments selected.'})
+            
+            # Resolve hashids if necessary, or assume they are raw DB ids if the frontend sends the DB IDs. 
+            # In manage_appointments.html, appointment.id|hid is used. Let's assume the frontend sends hashids.
+            decoded_ids = []
+            for hid in appointment_ids:
+                app_id = resolve_hid(hid)
+                if app_id:
+                    decoded_ids.append(app_id)
+            
+            if not decoded_ids:
+                return JsonResponse({'success': False, 'error': 'Invalid appointment IDs.'})
+
+            # Delete the appointments
+            appointments = Appointment.objects.filter(id__in=decoded_ids, is_archived=False)
+            actual_count = appointments.count()
+            appointments.delete()
+            return JsonResponse({'success': True, 'message': f'{actual_count} appointment(s) deleted successfully.'})
+        except Exception as e:
+            logger.error(f"Error in bulk delete appointments: {e}")
+            return JsonResponse({'success': False, 'error': 'An error occurred during deletion.'})
+    return JsonResponse({'success': False, 'error': 'Invalid request method.'}, status=405)

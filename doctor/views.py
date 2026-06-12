@@ -927,3 +927,22 @@ def delete_feedback(request, pk):
         return JsonResponse({'success': True})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+@never_cache
+@require_POST
+@role_required('doctor')
+def bulk_delete_feedback(request):
+    try:
+        data = json.loads(request.body)
+        feedback_ids = data.get('feedback_ids', [])
+        if not feedback_ids:
+            return JsonResponse({'success': False, 'error': 'No feedback selected.'})
+            
+        feedbacks = PatientFeedback.objects.filter(id__in=feedback_ids)
+        actual_count = feedbacks.count()
+        feedbacks.delete()
+        
+        return JsonResponse({'success': True, 'message': f'{actual_count} feedback(s) deleted successfully.'})
+    except Exception as e:
+        logger.error(f"Error in bulk delete feedback: {e}")
+        return JsonResponse({'success': False, 'error': 'An error occurred during deletion.'})

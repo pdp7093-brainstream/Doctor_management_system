@@ -37,7 +37,16 @@
             <div class="d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
                 <i class="bi bi-chat-heart"></i> All Feedback
             </div>
-            <span class="badge bg-light text-primary">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            <div class="d-flex align-items-center gap-3">
+                <button id="bulkDeleteBtn" class="btn btn-danger btn-sm d-none" onclick="bulkDeleteFeedback()">
+                    <i class="bi bi-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
+                </button>
+                <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="selectAllFeedback">
+                    <label class="form-check-label small fw-bold" for="selectAllFeedback">Select All</label>
+                </div>
+                <span class="badge bg-light text-primary">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </div>
         </div>
 
         <div class="card-body" style="padding: 16px;" data-feedback-list>
@@ -45,8 +54,10 @@
             {% for fb in feedbacks %}
             <div class="feedback-card {% if fb.id in unread_ids %}unread{% endif %}" id="fb-{{ fb.id }}">
                 <div class="feedback-header">
-                    <div class="feedback-user">
-                        <div class="feedback-avatar">
+                    <div class="d-flex align-items-center gap-3">
+                        <input type="checkbox" class="form-check-input feedback-checkbox" value="{{ fb.id }}">
+                        <div class="feedback-user">
+                            <div class="feedback-avatar">
                             {{ fb.name|slice:":1"|upper }}
                         </div>
                         <div>
@@ -55,6 +66,8 @@
                                 {% if fb.phone %}<i class="bi bi-phone me-1"></i>{{ fb.phone }}{% endif %}
                                 {% if fb.email %}{% if fb.phone %}<span class="mx-1">&middot;</span>{% endif %}<i class="bi bi-envelope me-1"></i>{{ fb.email }}{% endif %}
                                 {% if not fb.phone and not fb.email %}No contact info{% endif %}
+                            </div>
+                        </div>
                             </div>
                         </div>
                     </div>
@@ -125,6 +138,6 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static 'assets/js/feedback.js' %}"></script>
+<script src="{% static 'assets/js/feedback.js' %}?v={% now 'U' %}"></script>
 
 {% endblock %}

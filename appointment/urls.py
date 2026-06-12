@@ -13,6 +13,7 @@ urlpatterns = [
     path('add-appointment/', Add_appointment.as_view(), name='add_appointment'),   
     path('cancel-appointment/<str:hid>/',views.cancel_appointment,name='cancel_appointment'),
     path('delete-appointment/<str:hid>/',views.delete_appointment,name='delete_appointment'),
+    path('bulk-delete-appointments/', views.bulk_delete_appointments, name='bulk_delete_appointments'),
     
     # Prescription Url 
     path('start-visit/<str:hid>/',StartVisitView.as_view(),name='start_visit'),

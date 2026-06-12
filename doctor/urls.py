@@ -37,6 +37,7 @@ urlpatterns = [
     path('old-data/delete/<str:hid>/', views.delete_old_document, name='delete_old_document'),
 
     path('feedback/', views.feedback_list, name='feedback_list'),
+    path('feedback/bulk-delete/', views.bulk_delete_feedback, name='bulk_delete_feedback'),
     path('feedback/<int:pk>/delete/', views.delete_feedback, name='delete_feedback'),
 
 ]
