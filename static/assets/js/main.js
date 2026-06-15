@@ -23,39 +23,6 @@
   window.addEventListener('load', toggleScrolled);
 
   /**
-   * Mobile nav toggle
-   */
-  function setupMobileNav() {
-    const mobileNavToggleBtn = document.querySelector('.mobile-nav-toggle');
-    const mobileNavBody = document.querySelector('body');
-
-    function mobileNavToogle() {
-      if (!mobileNavToggleBtn || !mobileNavBody) return;
-      mobileNavBody.classList.toggle('mobile-nav-active');
-      mobileNavToggleBtn.classList.toggle('bi-list');
-      mobileNavToggleBtn.classList.toggle('bi-x');
-    }
-
-    if (!window.hasMobileNavHandler && mobileNavToggleBtn) {
-      mobileNavToggleBtn.addEventListener('click', mobileNavToogle);
-    }
-
-    document.querySelectorAll('#navmenu a').forEach(navmenu => {
-      navmenu.addEventListener('click', () => {
-        if (document.querySelector('.mobile-nav-active')) {
-          mobileNavToogle();
-        }
-      });
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setupMobileNav);
-  } else {
-    setupMobileNav();
-  }
-
-  /**
    * Toggle mobile nav dropdowns
    */
   document.querySelectorAll('.navmenu .toggle-dropdown').forEach(navmenu => {
@@ -96,10 +63,10 @@
         behavior: 'smooth'
       });
     });
-  }
 
-  window.addEventListener('load', toggleScrollTop);
-  document.addEventListener('scroll', toggleScrollTop);
+    window.addEventListener('load', toggleScrollTop);
+    document.addEventListener('scroll', toggleScrollTop);
+  }
 
   /**
    * Animation on scroll function and init
@@ -139,7 +106,6 @@
     if (typeof Swiper === 'undefined') {
       return;
     }
-
     document.querySelectorAll(".init-swiper").forEach(function(swiperElement) {
       let config = JSON.parse(
         swiperElement.querySelector(".swiper-config").innerHTML.trim()

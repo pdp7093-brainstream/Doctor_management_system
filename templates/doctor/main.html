@@ -414,11 +414,12 @@
             const overlay = document.getElementById('sidebarOverlay');
 
             if (toggleBtn && sidebar && overlay) {
-                // Open sidebar
+                // Toggle sidebar
                 toggleBtn.addEventListener('click', function () {
-                    sidebar.classList.add('show');
-                    overlay.classList.add('show');
-                    this.setAttribute('aria-expanded', 'true');
+                    sidebar.classList.toggle('show');
+                    overlay.classList.toggle('show');
+                    const isShown = sidebar.classList.contains('show');
+                    this.setAttribute('aria-expanded', isShown ? 'true' : 'false');
                 });
 
                 // Close sidebar when clicking on overlay
