@@ -33,50 +33,41 @@
         <div class="col-12">
             <label for="clinic_name" class="form-label fw-semibold small">Clinic Name <span class="text-danger">*</span></label>
             <input type="text" class="form-control form-control-sm" id="clinic_name" name="clinic_name"
-                   placeholder="e.g. PDP Clinic, Al-Noor Medical Centre"
-                   value="{{ prefill.clinic_name|default:'' }}" required autocomplete="off">
+                   placeholder="e.g. PDP Clinic, Al-Noor Medical Centre" value="{{ prefill.clinic_name|default:'' }}" required autocomplete="off">
         </div>
         <div class="col-12">
             <label for="tagline" class="form-label fw-semibold small">Tagline / Slogan <span class="text-muted fw-normal">(optional)</span></label>
-            <input type="text" class="form-control form-control-sm" id="tagline" name="tagline"
-                   placeholder="e.g. Your Health is Our Priority"
-                   value="{{ prefill.tagline|default:'' }}">
+            <input type="text" class="form-control form-control-sm" id="tagline" name="tagline" placeholder="e.g. Your Health is Our Priority" value="{{ prefill.tagline|default:'' }}">
         </div>
         <div class="col-12">
             <label for="address" class="form-label fw-semibold small">Address</label>
             <input type="text" class="form-control form-control-sm" id="address" name="address"
-                   placeholder="Street / Area / Locality"
-                   value="{{ prefill.address|default:'' }}">
+                   placeholder="Street / Area / Locality" value="{{ prefill.address|default:'' }}">
         </div>
         <div class="col-md-6">
             <label for="city" class="form-label fw-semibold small">City</label>
             <input type="text" class="form-control form-control-sm" id="city" name="city"
-                   placeholder="e.g. Ahmedabad"
-                   value="{{ prefill.city|default:'' }}">
+                   placeholder="e.g. Ahmedabad" value="{{ prefill.city|default:'' }}">
         </div>
         <div class="col-md-6">
             <label for="state" class="form-label fw-semibold small">State</label>
             <input type="text" class="form-control form-control-sm" id="state" name="state"
-                   placeholder="e.g. Gujarat"
-                   value="{{ prefill.state|default:'' }}">
+                   placeholder="e.g. Gujarat" value="{{ prefill.state|default:'' }}">
         </div>
         <div class="col-md-6">
             <label for="pincode" class="form-label fw-semibold small">Pincode</label>
             <input type="text" class="form-control form-control-sm" id="pincode" name="pincode"
-                   placeholder="e.g. 382405"
-                   value="{{ prefill.pincode|default:'' }}" maxlength="6">
+                   placeholder="e.g. 382405" value="{{ prefill.pincode|default:'' }}" maxlength="6">
         </div>
         <div class="col-md-6">
             <label for="phone" class="form-label fw-semibold small">Phone</label>
             <input type="tel" class="form-control form-control-sm" id="phone" name="phone"
-                   placeholder="e.g. 9876543210"
-                   value="{{ prefill.phone|default:'' }}" maxlength="15">
+                   placeholder="e.g. 9876543210" value="{{ prefill.phone|default:'' }}" maxlength="15">
         </div>
         <div class="col-12">
             <label for="email" class="form-label fw-semibold small">Email</label>
             <input type="email" class="form-control form-control-sm" id="email" name="email"
-                   placeholder="clinic@example.com"
-                   value="{{ prefill.email|default:'' }}">
+                   placeholder="clinic@example.com" value="{{ prefill.email|default:'' }}">
         </div>
     </div>
 
