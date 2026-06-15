@@ -255,7 +255,12 @@ class LoginView(View):
     template_name = 'authentication/login.html'
 
     def get(self, request):
-        return render(request, self.template_name)
+        from django.views.decorators.csrf import ensure_csrf_cookie
+        response = render(request, self.template_name)
+        # Ensure CSRF cookie is always set so AJAX requests can read it
+        from django.middleware.csrf import get_token
+        get_token(request)
+        return response
 
     def post(self, request):
         from django.urls import reverse

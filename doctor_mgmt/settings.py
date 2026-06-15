@@ -58,6 +58,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'clinic.middleware.SetupRequiredMiddleware',  # First-time setup wizard
 ]
 
 ROOT_URLCONF = 'doctor_mgmt.urls'

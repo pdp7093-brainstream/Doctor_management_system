@@ -80,7 +80,7 @@
 
 
         </ul>
-        <i class="mobile-nav-toggle d-xl-none bi bi-list" onclick="window.toggleHeaderMobileNav && window.toggleHeaderMobileNav(event)"></i>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list" id="mobileNavToggleBtn"></i>
       </nav>
 
     </div>
@@ -174,6 +174,48 @@
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Self-contained mobile nav toggle — works on all patient pages
+  document.addEventListener('DOMContentLoaded', function () {
+    var btn = document.getElementById('mobileNavToggleBtn');
+    if (!btn) {
+      // fallback: try class selector
+      btn = document.querySelector('.mobile-nav-toggle');
+    }
+    if (!btn) return;
+
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      document.body.classList.toggle('mobile-nav-active');
+      btn.classList.toggle('bi-list');
+      btn.classList.toggle('bi-x');
+    });
+
+    // Close nav when overlay (body background) is clicked
+    document.addEventListener('click', function (e) {
+      if (document.body.classList.contains('mobile-nav-active')) {
+        var navmenu = document.getElementById('navmenu');
+        if (navmenu && !navmenu.contains(e.target) && e.target !== btn) {
+          document.body.classList.remove('mobile-nav-active');
+          btn.classList.add('bi-list');
+          btn.classList.remove('bi-x');
+        }
+      }
+    });
+
+    // Close nav when a menu link is clicked
+    document.querySelectorAll('#navmenu a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (document.body.classList.contains('mobile-nav-active')) {
+          document.body.classList.remove('mobile-nav-active');
+          btn.classList.add('bi-list');
+          btn.classList.remove('bi-x');
+        }
+      });
+    });
+  });
+</script>
 
 <script>
   window.hasMobileNavHandler = true;

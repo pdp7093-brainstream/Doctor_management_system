@@ -10,6 +10,7 @@ class InnerMember(models.Model):
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
+    is_owner = models.BooleanField(default=False, help_text='Clinic ka owner/main doctor — sirf inhe hi Clinic Settings dikhegi')
     phone  = models.CharField(max_length=15, blank=True, default='') 
 
     doctor = models.ForeignKey(

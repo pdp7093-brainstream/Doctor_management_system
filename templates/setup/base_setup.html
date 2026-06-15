@@ -1,0 +1,184 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Clinic Setup{% endblock %} — First Time Setup</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/font/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/doctor.css' %}">
+    <style>
+        .setup-progress {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .step-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .85rem;
+            flex-shrink: 0;
+            transition: all .3s ease;
+        }
+
+        .step-dot.active {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            box-shadow: 0 0 0 4px rgba(13, 110, 253, .25);
+            color: #fff;
+        }
+
+        .step-dot.done {
+            background: #198754;
+            color: #fff;
+        }
+
+        .step-dot.pending {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            color: #6c757d;
+        }
+
+        .step-label {
+            font-size: .85rem;
+            font-weight: 600;
+            margin-left: .5rem;
+            white-space: nowrap;
+        }
+
+        .step-label.active {
+            color: #0d6efd;
+        }
+
+        .step-label.done {
+            color: #198754;
+        }
+
+        .step-label.pending {
+            color: #6c757d;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: #dee2e6;
+            margin: 0 .75rem;
+        }
+
+        .step-line.done {
+            background: #198754;
+        }
+
+        .password-toggle-wrapper {
+            position: relative;
+        }
+
+        .password-input-wrapper {
+            position: relative;
+        }
+
+        .password-input-wrapper .form-control {
+            padding-right: 3rem;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            color: #0d6efd;
+            cursor: pointer;
+            padding: 0.35rem;
+            font-size: 1rem;
+            line-height: 1;
+            height: 1.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle:hover {
+            color: #084298;
+        }
+
+        .password-toggle:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: #f8f9fa; padding: 2rem 1rem;">
+    <div style="width: 100%; max-width: 640px;">
+        
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <div class="mb-3 d-inline-flex align-items-center justify-content-center text-white rounded-3 shadow-sm" style="width: 64px; height: 64px; background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+                <i class="bi bi-hospital" style="font-size: 2rem;"></i>
+            </div>
+            <h1 class="fw-bold h3 mb-1 text-dark">Clinic Setup Wizard</h1>
+            <p class="text-muted small">Sirf 2 steps mein apni clinic ready karein</p>
+        </div>
+
+        <!-- Progress -->
+        <div class="setup-progress">
+            {% block step1_dot %}
+            <div class="step-item">
+                <div class="step-dot pending">1</div>
+                <span class="step-label pending">Clinic Info</span>
+            </div>
+            {% endblock %}
+            <div class="step-line {% block line_class %}{% endblock %}"></div>
+            {% block step2_dot %}
+            <div class="step-item">
+                <div class="step-dot pending">2</div>
+                <span class="step-label pending">Owner Account</span>
+            </div>
+            {% endblock %}
+        </div>
+
+        <!-- Card -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-body p-4 p-md-5">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        // Password visibility toggle logic
+        document.querySelectorAll('.password-toggle-wrapper').forEach(function(wrapper) {
+            var inputWrapper = wrapper.querySelector('.password-input-wrapper');
+            var input = inputWrapper ? inputWrapper.querySelector('input[type="password"], input[type="text"]') : null;
+            var button = inputWrapper ? inputWrapper.querySelector('.password-toggle') : null;
+            var icon = button ? button.querySelector('.password-toggle-icon') : null;
+            if (!input || !button || !icon) return;
+            button.addEventListener('click', function() {
+                var isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                icon.innerHTML = isHidden
+                    ? '<path d="M13.359 11.238l1.287 1.287a.5.5 0 0 1-.708.708l-1.26-1.26A7.488 7.488 0 0 1 8 13.5C4.5 13.5 1.8 10.1 1 8a7.506 7.506 0 0 1 2.22-2.912L1.854 3.5a.5.5 0 1 1 .708-.708l1.285 1.285A7.485 7.485 0 0 1 8 2.5c3.5 0 6.2 3.4 7 5.5a7.485 7.485 0 0 1-1.641 3.238z"/><path d="M10.478 11.178A3.998 3.998 0 0 1 4.822 6.522l.738.738a3 3 0 0 0 4.125 4.125l.793.793zm.7-2.017L6.04 5.023A3 3 0 0 1 10.478 9.16z"/>'
+                    : '<path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>';
+                button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,167 @@
+{% extends "setup/base_setup.html" %}
+
+{% block title %}Step 2 — Owner Account{% endblock %}
+
+{% block step1_dot %}
+<div class="step-item">
+    <div class="step-dot done"><i class="bi bi-check-lg"></i></div>
+    <span class="step-label done">Clinic Info</span>
+</div>
+{% endblock %}
+
+{% block line_class %}done{% endblock %}
+
+{% block step2_dot %}
+<div class="step-item">
+    <div class="step-dot active">2</div>
+    <span class="step-label active">Owner Account</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="alert alert-warning d-flex align-items-center mb-4 small" role="alert">
+    <i class="bi bi-shield-lock-fill me-2 fs-5 flex-shrink-0"></i>
+    <div>
+        Yeh account <strong>clinic owner</strong> ka hoga. Isse hi Clinic Settings aur sari administrative cheezein access hongi.
+    </div>
+</div>
+
+<form method="POST" novalidate>
+    {% csrf_token %}
+
+    <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-person-badge me-2"></i>Owner Details</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label for="first_name" class="form-label fw-semibold small">First Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm {% if errors.first_name %}is-invalid{% endif %}" id="first_name" name="first_name"
+                   placeholder="e.g. Deepak" value="{{ prefill.first_name|default:'' }}" required>
+            {% if errors.first_name %}
+            <div class="invalid-feedback"><i class="bi bi-exclamation-circle me-1"></i>{{ errors.first_name }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <label for="last_name" class="form-label fw-semibold small">Last Name</label>
+            <input type="text" class="form-control form-control-sm" id="last_name" name="last_name"
+                   placeholder="e.g. Prasad" value="{{ prefill.last_name|default:'' }}">
+        </div>
+    </div>
+
+    <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-mortarboard me-2"></i>Professional Information</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <label for="doctor_name" class="form-label fw-semibold small">Doctor Name <span class="text-muted fw-normal">(bills/prescriptions pe print hoga)</span></label>
+            <input type="text" class="form-control form-control-sm" id="doctor_name" name="doctor_name"
+                   placeholder="e.g. Dr. Deepak Prasad" value="{{ prefill.doctor_name|default:'' }}">
+        </div>
+        <div class="col-md-6">
+            <label for="specialization" class="form-label fw-semibold small">Specialization</label>
+            <input type="text" class="form-control form-control-sm" id="specialization" name="specialization"
+                   placeholder="e.g. General Physician" value="{{ prefill.specialization|default:'' }}">
+        </div>
+        <div class="col-md-6">
+            <label for="qualification" class="form-label fw-semibold small">Qualification</label>
+            <input type="text" class="form-control form-control-sm" id="qualification" name="qualification"
+                   placeholder="e.g. MBBS, MD" value="{{ prefill.qualification|default:'' }}">
+        </div>
+        <div class="col-12">
+            <label for="registration_no" class="form-label fw-semibold small">Medical Registration No.</label>
+            <input type="text" class="form-control form-control-sm" id="registration_no" name="registration_no"
+                   placeholder="e.g. GUJ-74474854120" value="{{ prefill.registration_no|default:'' }}">
+        </div>
+    </div>
+
+    <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-key me-2"></i>Login Credentials</h5>
+    <div class="row g-3 mb-4">
+        <div class="col-12">
+            <label for="username" class="form-label fw-semibold small">Username <span class="text-danger">*</span></label>
+            <input type="text" class="form-control form-control-sm {% if errors.username %}is-invalid{% endif %}" id="username" name="username"
+                   placeholder="e.g. doctor@clinic.com or drdeepak" value="{{ prefill.username|default:'' }}"
+                   autocomplete="username" required>
+            {% if errors.username %}
+            <div class="invalid-feedback"><i class="bi bi-exclamation-circle me-1"></i>{{ errors.username }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <label for="password" class="form-label fw-semibold small">Password <span class="text-danger">*</span></label>
+            <div class="password-toggle-wrapper">
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-control form-control-sm {% if errors.password %}is-invalid{% endif %}" id="password" name="password"
+                           placeholder="Min. 8 chars" autocomplete="new-password" required>
+                    <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                        <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true">
+                            <path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/>
+                            <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            {% if errors.password %}
+            <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ errors.password }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <label for="password2" class="form-label fw-semibold small">Confirm Password <span class="text-danger">*</span></label>
+            <div class="password-toggle-wrapper">
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-control form-control-sm {% if errors.password2 %}is-invalid{% endif %}" id="password2" name="password2"
+                           placeholder="Repeat password" autocomplete="new-password" required>
+                    <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                        <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true">
+                            <path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/>
+                            <path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            {% if errors.password2 %}
+            <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ errors.password2 }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+        <a href="{% url 'clinic:setup_clinic' %}" class="btn btn-outline-secondary fw-bold">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <button type="submit" class="btn btn-primary fw-bold" id="submitBtn">
+            <i class="bi bi-rocket-takeoff me-1"></i> Complete Setup
+        </button>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const btn = document.getElementById('submitBtn');
+        const pw  = document.getElementById('password').value;
+        const pw2 = document.getElementById('password2').value;
+        const fn  = document.getElementById('first_name').value.trim();
+        const un  = document.getElementById('username').value.trim();
+
+        let hasError = false;
+
+        if (!fn) {
+            document.getElementById('first_name').classList.add('is-invalid');
+            hasError = true;
+        }
+        if (!un) {
+            document.getElementById('username').classList.add('is-invalid');
+            hasError = true;
+        }
+        if (pw.length < 8) {
+            document.getElementById('password').classList.add('is-invalid');
+            hasError = true;
+        }
+        if (pw !== pw2) {
+            document.getElementById('password2').classList.add('is-invalid');
+            hasError = true;
+        }
+
+        if (hasError) { e.preventDefault(); return; }
+
+        btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Setting up...';
+        btn.classList.add('disabled');
+    });
+</script>
+{% endblock %}

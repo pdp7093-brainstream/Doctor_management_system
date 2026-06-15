@@ -53,7 +53,7 @@
                     <tbody id="tableBody">
                         {% for p in patients %}
                         <tr>
-                            <td class="text-muted fw-semibold">{{ forloop.counter }}</td>
+                            <td class="text-muted fw-semibold">{{ page_obj.start_index|add:forloop.counter0 }}</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="user-avatar" style="width:30px; height:30px; font-size:0.82rem; flex-shrink:0;">
