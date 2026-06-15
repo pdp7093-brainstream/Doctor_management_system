@@ -11,6 +11,8 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument
 from doctor.models import InnerMember
 from django.core.exceptions import ValidationError
@@ -250,6 +252,7 @@ class SignupView(View):
         return render(request, 'authentication/register.html', {'form': form})
 
 
+@method_decorator(never_cache, name='dispatch')
 class LoginView(View):
 
     template_name = 'authentication/login.html'
@@ -361,6 +364,7 @@ def logout_view(request):
 # PROFILE VIEWS
 # ═════════════════════════════════════════════════════════════
 
+@never_cache
 @login_required(login_url='login')
 def dashboard(request):
     """Patient dashboard"""
@@ -460,6 +464,7 @@ def dashboard(request):
     return render(request, 'pdashboard/dashboard.html', context)
 
 
+@never_cache
 @login_required(login_url='login')
 def profile(request):
     """Patient profile page"""
@@ -603,6 +608,7 @@ def delete_profile_document(request, hid):
     return JsonResponse({'success': True})
 
 
+@never_cache
 @login_required
 def profile_settings(request):
     """Update patient profile - Form-based (Traditional POST)"""

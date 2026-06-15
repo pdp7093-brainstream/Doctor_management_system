@@ -111,7 +111,9 @@
    * Initiate glightbox
    */
   if (typeof GLightbox !== 'undefined') {
-    GLightbox({ selector: '.glightbox' });
+    GLightbox({
+      selector: '.glightbox'
+    });
   }
 
   /**
@@ -125,16 +127,16 @@
    * Init swiper sliders
    */
   function initSwiper() {
-    if (typeof Swiper === 'undefined') return;
+    if (typeof Swiper === 'undefined') {
+      return;
+    }
     document.querySelectorAll(".init-swiper").forEach(function(swiperElement) {
       let config = JSON.parse(
         swiperElement.querySelector(".swiper-config").innerHTML.trim()
       );
 
       if (swiperElement.classList.contains("swiper-tab")) {
-        if (typeof initSwiperWithCustomPagination !== 'undefined') {
-          initSwiperWithCustomPagination(swiperElement, config);
-        }
+        initSwiperWithCustomPagination(swiperElement, config);
       } else {
         new Swiper(swiperElement, config);
       }
