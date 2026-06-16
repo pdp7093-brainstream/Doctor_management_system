@@ -823,6 +823,10 @@ textarea.form-control { min-height: 90px; resize: vertical; }
             background:rgba(0,0,0,0.45); z-index:9999;
             align-items:center; justify-content:center;
         }
+        
+        .swal2-container {
+            z-index: 10000 !important;
+        }
         .modal-overlay.active { display:flex; }
         .modal-box {
             background:#fff; border-radius:14px; padding:28px;

@@ -186,17 +186,10 @@
                 <!-- Step 1: Phone -->
                 <div id="step-phone">
                     <div class="mb-3">
-                        <label class="form-label" for="phone">Phone Number</label> <span class="helper-text">Format: 1234567890 </span>
-                        <input 
-                            type="tel" 
-                            id="phone"
-                            name="phone" 
-                            class="form-control" 
-                            placeholder="9876543210"
-                            pattern="[0-9\s\-\+\(\)]+"
-                            required
-                            autocomplete="tel"
-                        >
+                        <label class="form-label" for="phone">Phone Number</label> <span class="helper-text">Format:
+                            1234567890 </span>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="9876543210"
+                            pattern="[0-9\s\-\+\(\)]+" required autocomplete="tel">
                     </div>
                     <button type="button" id="btn-get-otp" class="btn btn-login shadow-sm">
                         Get OTP
@@ -205,28 +198,23 @@
 
                 <!-- Step 2: OTP (Hidden initially) -->
                 <div id="step-otp" style="display: none;">
-                    <div id="otp-alert" class="alert alert-success py-2 text-center" style="background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 15px; display: none;">
+                    <div id="otp-alert" class="alert alert-success py-2 text-center"
+                        style="background-color: #d4edda; color: #155724; border-radius: 5px; margin-bottom: 15px; display: none;">
                         OTP has been generated: <strong id="debug-otp-display"></strong><br>
                         <small>Please enter it below.</small>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label class="form-label" for="otp">Enter OTP</label>
-                        <input 
-                            type="text" 
-                            id="otp"
-                            name="otp" 
-                            class="form-control" 
-                            placeholder="6-digit OTP" 
-                            maxlength="6"
-                            autocomplete="off"
-                        >
+                        <input type="text" id="otp" name="otp" class="form-control" placeholder="6-digit OTP"
+                            maxlength="6" autocomplete="off">
                     </div>
                     <button type="button" id="btn-verify-otp" class="btn btn-login shadow-sm" style="display: none;">
                         Verify OTP
                     </button>
                     <div class="text-center mt-3">
-                        <a href="#" id="btn-back" style="font-size: 0.85rem; color: #4183ff; text-decoration: none;">Change Phone Number</a>
+                        <a href="#" id="btn-back"
+                            style="font-size: 0.85rem; color: #4183ff; text-decoration: none;">Change Phone Number</a>
                     </div>
                 </div>
 
@@ -245,126 +233,134 @@
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const btnGetOtp = document.getElementById('btn-get-otp');
-        const phoneInput = document.getElementById('phone');
-        const stepPhone = document.getElementById('step-phone');
-        const stepOtp = document.getElementById('step-otp');
-        const otpInput = document.getElementById('otp');
-        const alertContainer = document.getElementById('alert-container');
-        const debugOtpDisplay = document.getElementById('debug-otp-display');
-        const otpAlert = document.getElementById('otp-alert');
-        const btnBack = document.getElementById('btn-back');
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnGetOtp = document.getElementById('btn-get-otp');
+            const phoneInput = document.getElementById('phone');
+            const stepPhone = document.getElementById('step-phone');
+            const stepOtp = document.getElementById('step-otp');
+            const otpInput = document.getElementById('otp');
+            const alertContainer = document.getElementById('alert-container');
+            const debugOtpDisplay = document.getElementById('debug-otp-display');
+            const otpAlert = document.getElementById('otp-alert');
+            const btnBack = document.getElementById('btn-back');
 
-        function showAlert(message, type='danger') {
-            alertContainer.innerHTML = `<div class="error-message" style="background: ${type === 'danger' ? '#fee' : '#d4edda'}; color: ${type === 'danger' ? '#c33' : '#155724'}; border-left-color: ${type === 'danger' ? '#c33' : '#155724'}; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid;">${message}</div>`;
-        }
-
-        function clearAlert() {
-            alertContainer.innerHTML = '';
-        }
-
-        btnGetOtp.addEventListener('click', function() {
-            const phone = phoneInput.value.trim();
-            if (!phone) {
-                showAlert('Please enter your phone number.');
-                return;
+            function showAlert(message, type = 'danger') {
+                alertContainer.innerHTML = `<div class="error-message" style="background: ${type === 'danger' ? '#fee' : '#d4edda'}; color: ${type === 'danger' ? '#c33' : '#155724'}; border-left-color: ${type === 'danger' ? '#c33' : '#155724'}; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid;">${message}</div>`;
             }
 
-            clearAlert();
-            btnGetOtp.disabled = true;
-            btnGetOtp.innerText = 'Sending...';
+            function clearAlert() {
+                alertContainer.innerHTML = '';
+            }
 
-            fetch('{% url "login" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ phone: phone })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Server returned ' + response.status + '. Please refresh the page and try again.');
+            btnGetOtp.addEventListener('click', function () {
+                const phone = phoneInput.value.trim();
+                if (!phone) {
+                    showAlert('Please enter your phone number.');
+                    return;
                 }
-                return response.json();
-            })
-            .then(data => {
-                btnGetOtp.disabled = false;
-                btnGetOtp.innerText = 'Get OTP';
 
-                if (data.success) {
-                    stepPhone.style.display = 'none';
-                    stepOtp.style.display = 'block';
-                    otpInput.value = '';
-                    otpInput.focus();
+                clearAlert();
+                btnGetOtp.disabled = true;
+                btnGetOtp.innerText = 'Sending...';
 
-                    if (data.debug_otp) {
-                        debugOtpDisplay.innerText = data.debug_otp;
-                        otpAlert.style.display = 'block';
-                    }
-                } else {
-                    showAlert(data.error || 'Failed to generate OTP.');
+                fetch('{% url "login" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ phone: phone })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Server returned ' + response.status + '. Please refresh the page and try again.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        btnGetOtp.disabled = false;
+                        btnGetOtp.innerText = 'Get OTP';
+
+                        if (data.success) {
+                            stepPhone.style.display = 'none';
+                            stepOtp.style.display = 'block';
+                            otpInput.value = '';
+                            otpInput.focus();
+
+                            if (data.debug_otp) {
+                                debugOtpDisplay.innerText = data.debug_otp;
+                                otpAlert.style.display = 'block';
+                            }
+                        } else {
+                            showAlert(data.error || 'Failed to generate OTP.');
+                        }
+                    })
+                    .catch(err => {
+                        btnGetOtp.disabled = false;
+                        btnGetOtp.innerText = 'Get OTP';
+                        showAlert(err.message || 'A network error occurred. Please refresh and try again.');
+                    });
+            });
+
+            otpInput.addEventListener('input', function () {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value.length === 6) {
+                    verifyOtp(this.value);
                 }
-            })
-            .catch(err => {
-                btnGetOtp.disabled = false;
-                btnGetOtp.innerText = 'Get OTP';
-                showAlert(err.message || 'A network error occurred. Please refresh and try again.');
+            });
+
+            function verifyOtp(otp) {
+                clearAlert();
+                otpInput.disabled = true;
+
+                fetch('{% url "login" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ otp: otp })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Server returned ' + response.status + '. Please refresh the page and try again.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = data.redirect_url;
+                        } else {
+                            otpInput.disabled = false;
+                            showAlert(data.error || 'Invalid OTP.');
+                            otpInput.value = '';
+                            otpInput.focus();
+                        }
+                    })
+                    .catch(err => {
+                        otpInput.disabled = false;
+                        showAlert(err.message || 'A network error occurred. Please refresh and try again.');
+                    });
+            }
+
+            btnBack.addEventListener('click', function (e) {
+                e.preventDefault();
+                stepOtp.style.display = 'none';
+                stepPhone.style.display = 'block';
+                clearAlert();
+                otpInput.value = '';
             });
         });
 
-        otpInput.addEventListener('input', function() {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            if (this.value.length === 6) {
-                verifyOtp(this.value);
-            }
-        });
-
-        function verifyOtp(otp) {
-            clearAlert();
-            otpInput.disabled = true;
-
-            fetch('{% url "login" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ otp: otp })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Server returned ' + response.status + '. Please refresh the page and try again.');
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    otpInput.disabled = false;
-                    showAlert(data.error || 'Invalid OTP.');
-                    otpInput.value = '';
-                    otpInput.focus();
-                }
-            })
-            .catch(err => {
-                otpInput.disabled = false;
-                showAlert(err.message || 'A network error occurred. Please refresh and try again.');
-            });
+        // Prevent going back to authenticated pages after logout
+        if (window.history && window.history.pushState) {
+            window.history.pushState(null, null, window.location.href);
+            window.onpopstate = function () {
+                window.location.href = "{% url 'index' %}";
+            };
         }
-
-        btnBack.addEventListener('click', function(e) {
-            e.preventDefault();
-            stepOtp.style.display = 'none';
-            stepPhone.style.display = 'block';
-            clearAlert();
-            otpInput.value = '';
-        });
-    });
     </script>
 
 </body>

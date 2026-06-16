@@ -665,7 +665,15 @@ def profile_settings(request):
         patient.bld_grop = bld_grop
         
         # Handle profile picture
-        if 'profile_picture' in request.FILES:
+        remove_photo = request.POST.get('remove_photo') == 'true'
+        if remove_photo:
+            if patient.profile_picture and patient.profile_picture.name != 'profile_pictures/default-avatar.png':
+                try:
+                    patient.profile_picture.delete(save=False)
+                except Exception:
+                    pass
+            patient.profile_picture = 'profile_pictures/default-avatar.png'
+        elif 'profile_picture' in request.FILES:
             patient.profile_picture = request.FILES['profile_picture']
         
         patient.save()
@@ -674,6 +682,19 @@ def profile_settings(request):
 
     return render(request, 'pdashboard/profile.html')
 
+@login_required
+def remove_profile_picture(request):
+    if request.method == 'POST':
+        patient, _ = Patient.objects.get_or_create(user=request.user)
+        if patient.profile_picture and patient.profile_picture.name != 'profile_pictures/default-avatar.png':
+            try:
+                patient.profile_picture.delete(save=False)
+            except Exception:
+                pass
+        patient.profile_picture = 'profile_pictures/default-avatar.png'
+        patient.save()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
 class ChangePasswordView(LoginRequiredMixin, View):
     """Change password view"""

@@ -34,19 +34,132 @@ document.getElementById('modalPhotoUpload').addEventListener('change', function 
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-        // Replace initials div with img if needed
         let preview = document.getElementById('modalPreview');
         const initials = document.getElementById('modalInitials');
+        
         if (!preview) {
             preview = document.createElement('img');
             preview.id = 'modalPreview';
             preview.className = 'modal-avatar';
-            if (initials) initials.replaceWith(preview);
+            if (initials) {
+                initials.parentNode.insertBefore(preview, initials);
+            }
         }
         preview.src = reader.result;
+        preview.style.display = 'block';
+        if (initials) initials.style.display = 'none';
+        
+        const removeInput = document.getElementById('removePhotoInput');
+        if (removeInput) removeInput.value = 'false';
     };
     reader.readAsDataURL(file);
 });
+
+// Remove photo button
+const removePhotoBtn = document.getElementById('removePhotoBtn');
+if (removePhotoBtn) {
+    removePhotoBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const preview = document.getElementById('modalPreview');
+        const fileInput = document.getElementById('modalPhotoUpload');
+        
+        if ((!preview || preview.style.display === 'none') && (!fileInput || !fileInput.value)) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Already Removed',
+                    text: 'Your profile picture has already been removed!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                alert('Your profile picture has already been removed!');
+            }
+            return;
+        }
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Remove Profile Picture?',
+                text: "Your photo will be removed and replaced by your initials.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, remove it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    executePhotoRemovalBackend();
+                }
+            });
+        } else {
+            if (confirm("Are you sure you want to remove your profile picture?")) {
+                executePhotoRemovalBackend();
+            }
+        }
+    });
+}
+
+function executePhotoRemovalBackend() {
+    fetch('/remove-profile-picture/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken') || (typeof csrfToken !== 'undefined' ? csrfToken : ''),
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if(data.success) {
+            executePhotoRemoval();
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed!',
+                    text: 'Profile picture has been successfully removed.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload(); 
+                });
+            } else {
+                location.reload();
+            }
+        } else {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error', data.error || 'Failed to remove picture', 'error');
+            } else {
+                alert(data.error || 'Failed to remove picture');
+            }
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (typeof Swal !== 'undefined') {
+            Swal.fire('Error', 'Network error while removing picture', 'error');
+        } else {
+            alert('Network error while removing picture');
+        }
+    });
+}
+
+function executePhotoRemoval() {
+    document.getElementById('modalPhotoUpload').value = '';
+    const preview = document.getElementById('modalPreview');
+    if (preview) {
+        preview.style.display = 'none';
+        preview.src = '';
+    }
+    const initials = document.getElementById('modalInitials');
+    if (initials) {
+        initials.style.display = 'flex';
+    }
+    const removeInput = document.getElementById('removePhotoInput');
+    if (removeInput) {
+        removeInput.value = 'true';
+    }
+}
 
 
 // ── Edit Family Member Modal ────────────────────────────

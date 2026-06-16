@@ -54,10 +54,12 @@
 
                   <div class="col-12 col-lg-7">
                     <div class="d-flex align-items-center flex-wrap gap-2 text-muted small mb-1">
-                      <span class="fw-bold text-dark fs-6 me-1"><i class="bi bi-person-fill text-muted me-1"></i>{{
-                        feedback.name }}</span>
-                        {% if feedback.phone %}<span>| <i class="bi bi-telephone me-1"></i>{{ feedback.phone }}</span>{% endif %}
-                        {% if feedback.email %}<span>| <i class="bi bi-envelope me-1"></i>{{ feedback.email }}</span>{% endif %}
+                      <span class="fw-bold text-dark fs-6 me-1"><i class="bi bi-person-fill text-muted me-1"></i>{{ feedback.name }}</span>
+                      {% if feedback.phone %}<span>| <i class="bi bi-telephone me-1"></i>{{ feedback.phone }}</span>{% endif %}
+                      {% if feedback.email %}<span>| <i class="bi bi-envelope me-1"></i>{{ feedback.email }}</span>{% endif %}
+                    </div>
+
+                    <div class="text-secondary small text-truncate" style="max-width: 100%;">
                       {{ feedback.message }}
                     </div>
                   </div>

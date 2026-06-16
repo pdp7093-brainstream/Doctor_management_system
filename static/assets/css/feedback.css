@@ -35,7 +35,7 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), #0d4f8b);
+    background: linear-gradient(135deg, var(--primary-color), #0083fe);
     color: #fff;
     display: flex;
     align-items: center;
@@ -135,7 +135,7 @@
 
 .stat-pill.total {
     background: #e0f2fe;
-    color: #0369a1;
+    color: #0089d2;
 }
 
 .stat-pill.avg {
@@ -212,7 +212,7 @@
 }
 
 .feedback-form-card .form-control:focus {
-    border-color: #1977cc;
+    border-color: #0088ff;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(25, 119, 204, 0.08);
 }
@@ -246,7 +246,7 @@
 
 /* ── Info Section ── */
 .feedback-info-card {
-    background: linear-gradient(135deg, #1977cc 0%, #0d4f8b 100%);
+    background: linear-gradient(135deg, #1977cc 0%, #017ff6 100%);
     border-radius: 16px;
     padding: 36px;
     color: #fff;

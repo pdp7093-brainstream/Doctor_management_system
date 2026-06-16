@@ -503,19 +503,28 @@
                     <!-- Avatar + Photo Upload -->
                     <div class="modal-avatar-row">
                         {% if request.user.patient.profile_picture and request.user.patient.profile_picture.name != 'profile_pictures/default-avatar.png' %}
-                        <img id="modalPreview" src="{{ request.user.patient.profile_picture.url }}"
-                            class="modal-avatar">
+                        <img id="modalPreview" src="{{ request.user.patient.profile_picture.url }}" class="modal-avatar">
+                        <div class="modal-avatar-initials" id="modalInitials" style="display:none;">
+                            {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
+                        </div>
                         {% else %}
+                        <img id="modalPreview" src="" class="modal-avatar" style="display:none;">
                         <div class="modal-avatar-initials" id="modalInitials">
                             {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
                         </div>
                         {% endif %}
                         <div>
-                            <input type="file" id="modalPhotoUpload" name="profile_picture" accept="image/*"
-                                style="display:none;">
-                            <label for="modalPhotoUpload" class="upload-label-sm">
-                                <i class="fas fa-camera"></i> Change Photo
-                            </label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="file" id="modalPhotoUpload" name="profile_picture" accept="image/*"
+                                    style="display:none;">
+                                <label for="modalPhotoUpload" class="upload-label-sm mb-0">
+                                    <i class="fas fa-camera"></i> Change Photo
+                                </label>
+                                <button type="button" id="removePhotoBtn" class="btn btn-outline-danger btn-sm" style="border-radius: 6px; padding: 0.35rem 0.75rem; display: flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; font-weight: 500;">
+                                    <i class="fas fa-trash"></i> Remove
+                                </button>
+                                <input type="hidden" name="remove_photo" id="removePhotoInput" value="false">
+                            </div>
                             <div style="font-size:0.78rem;color:var(--muted);margin-top:4px;">JPG, PNG supported</div>
                         </div>
                     </div>
