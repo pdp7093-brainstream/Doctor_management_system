@@ -1,144 +1,187 @@
 {% extends "doctor/main.html" %}
-{% block title %}Patient Feedback{% endblock %}
-{% block content %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'assets/css/feedback.css' %}">
+{% load hashid_tags %}
 
+{% block title %}Patient Feedback{% endblock %}
+
+{% block content %}
 <main class="main-content" id="mainContent">
-    {% csrf_token %}
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
-        <div>
-            <h2 class="page-title mb-1">Patient Feedback</h2>
-            <p class="text-muted small mb-0">View and manage feedback from patients.</p>
+  {% csrf_token %}
+  <div class="container-fluid py-4">
+
+    <div class="row align-items-center mb-4 g-3">
+      <div class="col-12 col-sm-7 d-flex align-items-center flex-wrap gap-3">
+        <h2 class="h3 fw-bold text-dark m-0" style="letter-spacing: -0.5px;">Patient Feedback</h2>
+
+        <div class="form-check m-0 bg-white border px-3 py-2 rounded shadow-sm d-flex align-items-center gap-2">
+          <input class="form-check-input m-0" type="checkbox" id="selectAllFeedback"
+            style="width: 19px; height: 19px; cursor: pointer;">
+          <label class="form-check-label text-secondary small fw-medium m-0" for="selectAllFeedback"
+            style="cursor:pointer; user-select: none;">Select All</label>
         </div>
+
+        <button id="bulkDeleteBtn" onclick="bulkDeleteFeedback()" class="btn btn-sm btn-danger d-none px-3 shadow-sm">
+          <i class="bi bi-trash3 me-1"></i> Delete Selected (<span id="selectedCount">0</span>)
+        </button>
+      </div>
+
+      <div class="col-12 col-sm-5 text-sm-end">
+        <span class="badge bg-primary px-3 py-2 fs-6 rounded-pill shadow-sm">
+          {{ feedbacks|length }} Total Records
+        </span>
+      </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stat-pills">
-        <div class="stat-pill total">
-            <i class="bi bi-chat-dots"></i>
-            {{ total_count }} Total
-        </div>
-        {% if avg_rating %}
-        <div class="stat-pill avg">
-            <i class="bi bi-star-half"></i>
-            {{ avg_rating|floatformat:1 }} Avg
-        </div>
-        {% endif %}
-        {% if unread_count > 0 %}
-        <div class="stat-pill new">
-            <i class="bi bi-envelope-open"></i>
-            {{ unread_count }} New
-        </div>
-        {% endif %}
-    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm p-3 p-md-4" style="border-radius: 12px; background: #ffffff;">
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
-                <i class="bi bi-chat-heart"></i> All Feedback
-            </div>
-            <div class="d-flex align-items-center gap-3">
-                <button id="bulkDeleteBtn" class="btn btn-danger btn-sm d-none" onclick="bulkDeleteFeedback()">
-                    <i class="bi bi-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
-                </button>
-                <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" id="selectAllFeedback">
-                    <label class="form-check-label small fw-bold" for="selectAllFeedback">Select All</label>
-                </div>
-                <span class="badge bg-light text-primary">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-            </div>
-        </div>
+          <div class="d-flex flex-column gap-3" style="max-height: 660px; overflow-y: auto; padding-right: 4px;">
 
-        <div class="card-body" style="padding: 16px;" data-feedback-list>
             {% if feedbacks %}
-            {% for fb in feedbacks %}
-            <div class="feedback-card {% if fb.id in unread_ids %}unread{% endif %}" id="fb-{{ fb.id }}">
-                <div class="feedback-header">
-                    <div class="d-flex align-items-center gap-3">
-                        <input type="checkbox" class="form-check-input feedback-checkbox" value="{{ fb.id }}">
-                        <div class="feedback-user">
-                            <div class="feedback-avatar">
-                            {{ fb.name|slice:":1"|upper }}
-                        </div>
-                        <div>
-                            <div class="feedback-name">{{ fb.name }}</div>
-                            <div class="feedback-contact">
-                                {% if fb.phone %}<i class="bi bi-phone me-1"></i>{{ fb.phone }}{% endif %}
-                                {% if fb.email %}{% if fb.phone %}<span class="mx-1">&middot;</span>{% endif %}<i class="bi bi-envelope me-1"></i>{{ fb.email }}{% endif %}
-                                {% if not fb.phone and not fb.email %}No contact info{% endif %}
-                            </div>
-                        </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="feedback-stars">
-                        {% for i in "12345" %}
-                            {% if forloop.counter <= fb.rating %}
-                                <i class="bi bi-star-fill"></i>
-                            {% else %}
-                                <i class="bi bi-star-fill empty"></i>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                </div>
+            {% for feedback in feedbacks %}
 
-                <div class="feedback-message">
-                    {{ fb.message|linebreaksbr }}
-                </div>
+            <div class="d-flex align-items-center gap-3 w-100 feedback-card">
 
-                <div class="feedback-footer">
-                    <span class="feedback-time">
-                        <i class="bi bi-clock me-1"></i> {{ fb.created_at|timesince }} ago
-                    </span>
-                    <button type="button" class="btn-delete-fb js-delete-feedback"
-                        data-url="{% url 'doctor:delete_feedback' fb.id %}"
-                        data-name="{{ fb.name|escape }}">
-                        <i class="bi bi-trash3"></i> Delete
-                    </button>
+              <input class="form-check-input feedback-checkbox flex-shrink-0 m-0" type="checkbox"
+                value="{{ feedback.id }}" style="width: 18px; height: 18px; cursor: pointer;">
+
+              <div class="card flex-grow-1 border-start border-4 shadow-none p-3"
+                onclick="if(!event.target.closest('.js-delete-feedback')){ new bootstrap.Modal(document.getElementById('feedbackModal{{ feedback.id }}')).show(); }"
+                style="border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; background: #ffffff;">
+
+                <div class="row align-items-center g-3">
+
+                  <div class="col-12 col-lg-7">
+                    <div class="d-flex align-items-center flex-wrap gap-2 text-muted small mb-1">
+                      <span class="fw-bold text-dark fs-6 me-1"><i class="bi bi-person-fill text-muted me-1"></i>{{
+                        feedback.name }}</span>
+                      {% if feedback.phone %}<span>| <i class="bi bi-telephone me-1"></i>{{ feedback.phone }}</span>{%
+                      endif %}
+                      {% if feedback.email %}<span>| <i class="bi bi-envelope me-1"></i>{{ feedback.email }}</span>{%
+                      endif %}
+                    </div>
+
+                    <div class="text-secondary small text-truncate" style="max-width: 100%;">
+                      {{ feedback.message }}
+                    </div>
+                  </div>
+
+                  <div
+                    class="col-12 col-lg-5 d-flex align-items-center justify-content-lg-end justify-content-between flex-wrap gap-3">
+
+                    <div class="text-warning d-flex gap-1" style="font-size: 0.95rem;">
+                      {% if feedback.rating|slugify == "1" %}
+                      <i class="bi bi-star-fill"></i><i class="bi bi-star" style="color: #e2e8f0;"></i><i
+                        class="bi bi-star" style="color: #e2e8f0;"></i><i class="bi bi-star"
+                        style="color: #e2e8f0;"></i><i class="bi bi-star" style="color: #e2e8f0;"></i>
+                      {% elif feedback.rating|slugify == "2" %}
+                      <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star"
+                        style="color: #e2e8f0;"></i><i class="bi bi-star" style="color: #e2e8f0;"></i><i
+                        class="bi bi-star" style="color: #e2e8f0;"></i>
+                      {% elif feedback.rating|slugify == "3" %}
+                      <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                        class="bi bi-star" style="color: #e2e8f0;"></i><i class="bi bi-star"
+                        style="color: #e2e8f0;"></i>
+                      {% elif feedback.rating|slugify == "4" %}
+                      <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                        class="bi bi-star-fill"></i><i class="bi bi-star" style="color: #e2e8f0;"></i>
+                      {% elif feedback.rating|slugify == "5" %}
+                      <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                        class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
+                      {% else %}
+                      <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i
+                        class="bi bi-star-fill"></i><i class="bi bi-star" style="color: #e2e8f0;"></i>
+                      {% endif %}
+                    </div>
+
+                    <div class="text-muted small text-nowrap">
+                      <i class="bi bi-clock me-1"></i> {{ feedback.created_at|timesince }} ago
+                    </div>
+
+                    <div>
+                      <button class="btn btn-sm btn-outline-danger px-3 js-delete-feedback"
+                        data-url="{% url 'doctor:delete_feedback' feedback.id %}" data-name="{{ feedback.name }}">
+                        <i class="bi bi-trash3 me-1"></i>Delete
+                      </button>
+                    </div>
+
+                  </div>
+
                 </div>
+              </div>
+
             </div>
+
+            <div class="modal fade" id="feedbackModal{{ feedback.id }}" tabindex="-1" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">
+                  <div class="modal-header bg-light py-3 border-0">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                      <i class="bi bi-person-vcard-fill" style="color: #511edb;"></i> Patient Identity Details
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+
+                  <div class="modal-body pt-2">
+                    <div class="p-3 mb-3 border rounded bg-light" style="border-radius: 8px !important;">
+                      <div class="row g-2">
+                        <div class="col-6">
+                          <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.75rem;">Patient
+                            Name</div>
+                          <div class="fw-bold text-dark" style="color: #511edb !important;">{{ feedback.name }}</div>
+                        </div>
+                        <div class="col-6">
+                          <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.75rem;">Contact
+                            Number</div>
+                          <div class="fw-semibold text-secondary">{{ feedback.phone|default:"—" }}</div>
+                        </div>
+                        <div class="col-12 border-top pt-2 mt-2">
+                          <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.75rem;">Email
+                            Address</div>
+                          <div class="text-secondary m-0">{{ feedback.email|default:"—" }}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mb-2">
+                      <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size: 0.75rem;">
+                        Statement
+                        Context</div>
+                      <div class="p-3 bg-white border rounded shadow-sm text-dark"
+                        style="white-space: pre-wrap; max-height: 180px; overflow-y: auto; font-size: 0.95rem;">
+                        {{ feedback.message }}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="modal-footer bg-light border-0 py-2">
+                    <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {% endfor %}
-
-            <!-- Pagination -->
-            {% if page_obj.has_other_pages %}
-            <nav class="mt-3">
-                <ul class="pagination justify-content-center mb-0">
-                    {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
-                    </li>
-                    {% endif %}
-                    {% for item in page_range %}
-                    {% if item.is_ellipsis %}
-                    <li class="page-item disabled"><span class="page-link">{{ item.label }}</span></li>
-                    {% elif item.is_current %}
-                    <li class="page-item active"><span class="page-link">{{ item.label }}</span></li>
-                    {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ item.number }}">{{ item.label }}</a></li>
-                    {% endif %}
-                    {% endfor %}
-                    {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            {% endif %}
-
             {% else %}
-            <div class="empty-feedback">
-                <i class="bi bi-chat-square-heart"></i>
-                <p>No feedback received yet.</p>
-                <p class="small">When patients submit feedback, it will appear here.</p>
+
+            <div class="text-center py-5">
+              <i class="bi bi-chat-square-text text-muted display-4"></i>
+              <p class="text-secondary mt-3 fw-medium">No system patient feedback logs registered under your profile
+                yet.
+              </p>
             </div>
+
             {% endif %}
+
+          </div>
         </div>
+      </div>
     </div>
+
+  </div>
+
 </main>
-
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static 'assets/js/feedback.js' %}?v={% now 'U' %}"></script>
-
+<script src="{% static 'assets/js/feedback.js' %}"></script>
 {% endblock %}

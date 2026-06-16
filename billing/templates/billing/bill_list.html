@@ -24,38 +24,53 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="row g-3 mb-4">
+    <!-- Compact Stats Cards -->
+    <div class="row g-2 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div class="text-primary fw-bold" style="font-size:1.8rem;">
-                    {{ total_bills_count }}
+            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
+                    <i class="bi bi-receipt" style="font-size:1.1rem;"></i>
                 </div>
-                <div class="text-muted small">Total Bills</div>
+                <div>
+                    <div class="fs-6 fw-bold text-primary">{{ total_bills_count }}</div>
+                    <div class="small text-muted">Total Bills</div>
+                </div>
             </div>
         </div>
+
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div class="fw-bold" style="font-size:1.8rem;">
-                    {{ this_month_count }}
+            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
+                    <i class="bi bi-calendar-week" style="font-size:1.1rem;"></i>
                 </div>
-                <div class="text-muted small">This Month</div>
+                <div>
+                    <div class="fs-6 fw-bold text-primary">{{ this_month_count }}</div>
+                    <div class="small text-muted">This Month</div>
+                </div>
             </div>
         </div>
+
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div class="text-danger fw-bold" style="font-size:1.8rem;" id="unpaidCount">
-                    {{ total_unpaid }}
+            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
+                    <i class="bi bi-exclamation-circle" style="font-size:1.1rem;"></i>
                 </div>
-                <div class="text-muted small">Unpaid</div>
+                <div>
+                    <div class="fs-6 fw-bold text-primary" id="unpaidCount">{{ total_unpaid }}</div>
+                    <div class="small text-muted">Unpaid</div>
+                </div>
             </div>
         </div>
+
         <div class="col-6 col-md-3">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div class="text-warning fw-bold" style="font-size:1.8rem;" id="partialCount">
-                    {{ total_partial }}
+            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
+                    <i class="bi bi-clock" style="font-size:1.1rem;"></i>
                 </div>
-                <div class="text-muted small">Partial</div>
+                <div>
+                    <div class="fs-6 fw-bold text-primary" id="partialCount">{{ total_partial }}</div>
+                    <div class="small text-muted">Partial</div>
+                </div>
             </div>
         </div>
     </div>
@@ -109,7 +124,7 @@
 
             <div class="col-md-2">
                 <label class="form-label d-none d-md-block">&nbsp;</label>
-                <button id="clearBtn" class="btn btn-outline-primary w-100">
+                <button id="clearBtn" class="btn btn-outline-primary w-100" style="border: 1px solid #0d6efd !important;">
                     <i class="bi me-1"></i>Clear
                 </button>
             </div>
@@ -214,7 +229,7 @@
                                             <i class="bi bi-check-circle me-1"></i>Paid
                                         </span>
                                     {% elif bill.payment_status == 'partial' %}
-                                        <span class="badge bg-warning text-dark rounded-pill px-3">
+                                        <span class="badge bg-warning text-primary rounded-pill px-3">
                                             <i class="bi bi-clock me-1"></i>Partial
                                         </span>
                                     {% else %}

@@ -46,7 +46,8 @@
             page: page,
         });
 
-        fetch(`/doctor/patients/?${params.toString()}`, {
+        // Use the same route as the server view for manage patients
+        fetch(`/doctor/manage-patients/?${params.toString()}`, {
             headers: { 'x-requested-with': 'XMLHttpRequest' }
         })
         .then(res => res.text())
