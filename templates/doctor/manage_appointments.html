@@ -90,7 +90,6 @@
                         <select id="appointmentStatus" class="form-select">
                             <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
                             <option value="pending" {% if status == 'pending' %}selected{% endif %}>Pending</option>
-                            <option value="confirmed" {% if status == 'confirmed' %}selected{% endif %}>Confirmed</option>
                             <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Cancelled</option>
                             <option value="completed" {% if status == 'completed' %}selected{% endif %}>Completed</option>
                         </select>
@@ -98,7 +97,7 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label d-none d-md-block" style="font-size:0.85rem;">&nbsp;</label>
-                    <button id="clearBtn" class="btn btn-outline-primary w-100">
+                    <button id="clearBtn" class="btn btn-outline-primary w-100" style="border: 1px solid #0d6efd !important;">
                         <i class="bi me-1"></i>Clear
                     </button>
                 </div>
