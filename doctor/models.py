@@ -12,6 +12,7 @@ class InnerMember(models.Model):
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     is_owner = models.BooleanField(default=False, help_text='Clinic ka owner/main doctor — sirf inhe hi Clinic Settings dikhegi')
     phone  = models.CharField(max_length=15, blank=True, default='') 
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
     doctor = models.ForeignKey(
         User,

@@ -86,6 +86,22 @@
                 /* Hide 'Logout' text, keep only icon */
             }
         }
+
+        /* Desktop Sidebar Collapse */
+        @media (min-width: 992px) {
+            body.sidebar-collapsed .sidebar {
+                transform: translateX(-100%) !important;
+            }
+            body.sidebar-collapsed .main-content,
+            body.sidebar-collapsed .staff-card {
+                margin-left: 0 !important;
+                width: 100% !important;
+            }
+            body.sidebar-collapsed .navbar-custom {
+                left: 0 !important;
+                width: 100% !important;
+            }
+        }
     </style>
 </head>
 
@@ -364,12 +380,31 @@
         </div>
 
         <div class="navbar-right">
-            {% if request.user.innermember.role == 'doctor' %}
-            <div class="user-info">
-                <div class="user-avatar">DR</div>
-                <span class="user-name">{{ request.user.first_name }}</span>
+            <!-- User Profile Dropdown (For all staff) -->
+            <div class="dropdown me-3">
+                <div class="user-info dropdown-toggle" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                    <div class="user-avatar overflow-hidden rounded-circle d-flex align-items-center justify-content-center" 
+                    style="width: 40px; height: 40px; background: linear-gradient(135deg, #0d6efd, #0a58ca); color: white; font-weight: bold;">
+                        {% if request.user.innermember.profile_picture %}
+                            <img src="{{ request.user.innermember.profile_picture.url }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            {{ request.user.first_name|default:request.user.username|slice:":2"|upper }}
+                        {% endif %}
+                    </div>
+                    <span class="user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+                </div>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 mt-2" aria-labelledby="profileDropdown">
+                    <li><h6 class="dropdown-header text-uppercase text-muted small">{{ request.user.innermember.get_role_display }}</h6></li>
+                    <li><a class="dropdown-item py-2" href="{% url 'doctor:my_profile' %}"><i class="bi bi-person-badge me-2 text-primary"></i>My Profile</a></li>
+                    {% if request.user.innermember.is_owner %}
+                    <li><a class="dropdown-item py-2" href="{% url 'clinic:settings' %}"><i class="bi bi-gear me-2 text-primary"></i>Clinic Settings</a></li>
+                    {% endif %}
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2 text-danger" href="{% url 'doctor:logout' %}" id="logoutBtn"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
             </div>
 
+            {% if request.user.innermember.role == 'doctor' %}
             <!-- Bell Notification - Only for Doctor -->
 
             <div class="position-relative me-3" style="display:inline-block;">
@@ -396,9 +431,6 @@
             </div>
             {% endif %}
 
-            <a href="{% url 'doctor:logout' %}" id="logoutBtn"><button class="logout-btn">
-                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                </button></a>
         </div>
     </nav>
 
@@ -418,10 +450,16 @@
             if (toggleBtn && sidebar && overlay) {
                 // Toggle sidebar
                 toggleBtn.addEventListener('click', function () {
-                    sidebar.classList.toggle('show');
-                    overlay.classList.toggle('show');
-                    const isShown = sidebar.classList.contains('show');
-                    this.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+                    if (window.innerWidth <= 991.98) {
+                        // Mobile: show sidebar
+                        sidebar.classList.toggle('show');
+                        overlay.classList.toggle('show');
+                        const isShown = sidebar.classList.contains('show');
+                        this.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+                    } else {
+                        // Desktop: collapse sidebar
+                        document.body.classList.toggle('sidebar-collapsed');
+                    }
                 });
 
                 // Close sidebar when clicking on overlay
@@ -431,12 +469,14 @@
                     toggleBtn.setAttribute('aria-expanded', 'false');
                 });
 
-                // Optional: Close sidebar if window resized to desktop size
+                // Window resize handler
                 window.addEventListener('resize', function () {
-                    if (window.innerWidth > 991) {
+                    if (window.innerWidth > 991.98) {
                         sidebar.classList.remove('show');
                         overlay.classList.remove('show');
                         toggleBtn.setAttribute('aria-expanded', 'false');
+                    } else {
+                        document.body.classList.remove('sidebar-collapsed');
                     }
                 });
             }

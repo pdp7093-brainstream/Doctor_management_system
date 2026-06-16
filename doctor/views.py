@@ -947,3 +947,60 @@ def bulk_delete_feedback(request):
     except Exception as e:
         logger.error(f"Error in bulk delete feedback: {e}")
         return JsonResponse({'success': False, 'error': 'An error occurred during deletion.'})
+
+@never_cache
+@login_required(login_url='doctor:login')
+def my_profile(request):
+    member = get_object_or_404(InnerMember, user=request.user)
+    
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            username = request.POST.get('username', '').strip()
+            email = request.POST.get('email', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            
+            # Check for unique username and email
+            if username and User.objects.filter(username=username).exclude(pk=request.user.pk).exists():
+                messages.error(request, 'Username already exists.')
+                return redirect('doctor:my_profile')
+                
+            if email and User.objects.filter(email=email).exclude(pk=request.user.pk).exists():
+                messages.error(request, 'Email already exists.')
+                return redirect('doctor:my_profile')
+            
+            request.user.username = username
+            request.user.email = email
+            request.user.first_name = first_name
+            request.user.last_name = last_name
+            request.user.save()
+            
+            member.phone = phone
+            if 'profile_picture' in request.FILES:
+                member.profile_picture = request.FILES['profile_picture']
+            member.save()
+            
+            messages.success(request, 'Profile updated successfully.')
+            return redirect('doctor:my_profile')
+            
+        elif 'change_password' in request.POST:
+            current_password = request.POST.get('current_password', '')
+            new_password = request.POST.get('new_password', '')
+            confirm_password = request.POST.get('confirm_password', '')
+            
+            if not request.user.check_password(current_password):
+                messages.error(request, 'Incorrect current password.')
+            elif new_password != confirm_password:
+                messages.error(request, 'New passwords do not match.')
+            elif len(new_password) < 6:
+                messages.error(request, 'Password must be at least 6 characters.')
+            else:
+                request.user.set_password(new_password)
+                request.user.save()
+                from django.contrib.auth import update_session_auth_hash
+                update_session_auth_hash(request, request.user)
+                messages.success(request, 'Password changed successfully.')
+            return redirect('doctor:my_profile')
+            
+    return render(request, 'doctor/my_profile.html', {'member': member})

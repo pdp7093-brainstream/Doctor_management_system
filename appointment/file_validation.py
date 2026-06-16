@@ -6,14 +6,7 @@ from django.utils.text import get_valid_filename
 
 
 ALLOWED_DOCUMENT_EXTENSIONS = {
-    ".pdf",
-    ".jpg",
-    ".jpeg",
-    ".png",
-    ".gif",
-    ".webp",
-    ".doc",
-    ".docx",
+    ".pdf", ".jpg", ".jpeg", ".png", ".gif", ".webp", ".doc", ".docx",
 }
 
 MAX_DOCUMENT_UPLOAD_SIZE = getattr(

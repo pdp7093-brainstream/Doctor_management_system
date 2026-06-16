@@ -10,6 +10,7 @@ urlpatterns = [
     path('', RedirectView.as_view(pattern_name='doctor:dashboard', permanent=False), name='doctor_root'),
     path('login/',views.login_view,name='login'),  
     path('logout/',views.logout_view,name='logout'),
+    path('profile/', views.my_profile, name='my_profile'),
     path('dashboard/',DashboardView.as_view(),name='dashboard'),
     path('manage-patients/',views.manage_patients,name='manage_patients'),
 
