@@ -10,7 +10,7 @@ class InnerMember(models.Model):
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    is_owner = models.BooleanField(default=False, help_text='Clinic ka owner/main doctor — sirf inhe hi Clinic Settings dikhegi')
+    is_owner = models.BooleanField(default=False, help_text='Clinic owner / main doctor — only they can view Clinic Settings')
     phone  = models.CharField(max_length=15, blank=True, default='') 
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
@@ -45,4 +45,34 @@ class DoctorLeave(models.Model):
     def __str__(self):
         return f"{self.doctor.user.first_name} - {self.date} ({self.get_leave_type_display()})"
     
+
+# When an InnerMember is deleted we usually want to remove the related auth `User` as
+# well (so there are no leftover accounts). Add a post_delete signal that deletes
+# the `User` only if it still exists — this avoids trying to delete the `User` when
+# the deletion originated from the `User` itself (which would already have removed
+# the InnerMember via cascade).
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
+
+@receiver(post_delete, sender=InnerMember)
+def _delete_user_with_inner_member(sender, instance, **kwargs):
+    """Delete the related User when an InnerMember is removed.
+
+    Uses a queryset delete after checking existence to avoid errors when the
+    User has already been removed as part of a parent cascade.
+    """
+    user_id = getattr(instance, 'user_id', None)
+    if not user_id:
+        return
+    from django.contrib.auth import get_user_model
+    UserModel = get_user_model()
+    try:
+        qs = UserModel.objects.filter(pk=user_id)
+        if qs.exists():
+            qs.delete()
+    except Exception:
+        # Be defensive: do not let signal failures break the deletion flow.
+        pass
+
 

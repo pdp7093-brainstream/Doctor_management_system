@@ -124,7 +124,7 @@
         <ul class="sidebar-menu">
             <!-- Doctor only -->
             {% if request.user.innermember.role == 'doctor' %}
-            <!-- Dashboard (dono ke liye) -->
+            <!-- Dashboard (for both roles) -->
             <li>
                 <a href="{% url 'doctor:dashboard' %}" class="{% if '/dashboard' in request.path %}active{% endif %}">
                     <i class="bi bi-house-fill"></i>
@@ -334,7 +334,7 @@
 
                 </ul>
             </li>
-            <!-- Billing (dono ke liye) -->
+            <!-- Billing (for both roles) -->
             <li>
                 <a href="{% url 'billing:bill_list' %}" class="{% if 'billing' in request.path %}active{% endif %}">
                     <i class="bi bi-receipt"></i>

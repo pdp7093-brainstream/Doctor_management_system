@@ -5,14 +5,17 @@
 .setup-progress {
     display: flex;
     align-items: center;
-    gap: 0;
+    justify-content: center;
+    gap: 0.5rem;
     margin-bottom: 2rem;
+    padding: 0 0.5rem;
 }
 
 .step-item {
     display: flex;
     align-items: center;
     flex: 1;
+    min-width: 0;
 }
 
 .step-dot {

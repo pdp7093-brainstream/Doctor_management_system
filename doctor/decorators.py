@@ -33,8 +33,8 @@ def role_required(required_role):
 
 def owner_required(view_func):
     """
-    Sirf clinic owner (is_owner=True) ko access deta hai.
-    Baki sab — chahe doctor ho ya biller — redirect ho jaate hain.
+    Allows access only to the clinic owner (member.is_owner == True).
+    All other roles (doctor, biller) are redirected.
     """
     def wrapper(request, *args, **kwargs):
 
@@ -49,7 +49,7 @@ def owner_required(view_func):
             return redirect('doctor:login')
 
         if not member.is_owner:
-            messages.error(request, "Aapke paas yeh page access karne ki permission nahi hai.")
+            messages.error(request, "You do not have permission to access this page.")
             if member.role == 'biller':
                 return redirect('billing:bill_list')
             return redirect('doctor:dashboard')

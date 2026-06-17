@@ -88,7 +88,7 @@ class SetupClinicView(View):
     def get(self, request):
         if self._already_setup():
             return redirect('doctor:login')
-        # Session mein pehle se data ho toh pre-fill karo
+        # Pre-fill the form if session already contains the setup data
         prefill = request.session.get('setup_clinic', {})
         return render(request, 'setup/clinic_info.html', {'prefill': prefill})
 
@@ -98,7 +98,7 @@ class SetupClinicView(View):
 
         clinic_name = request.POST.get('clinic_name', '').strip()
         if not clinic_name:
-            messages.error(request, 'Clinic ka naam zaroori hai.')
+            messages.error(request, 'Clinic name is required.')
             return render(request, 'setup/clinic_info.html', {'prefill': request.POST})
 
         # Step 1 ka data session mein rakh do
@@ -128,16 +128,21 @@ class SetupOwnerView(View):
     def get(self, request):
         if self._already_setup():
             return redirect('doctor:login')
-        # Agar Step 1 skip kiya toh wapas bhejo
+        # If step 1 was skipped, redirect back
         if 'setup_clinic' not in request.session:
             return redirect('clinic:setup_clinic')
-        return render(request, 'setup/owner_info.html', {'prefill': {}})
+        clinic_data = request.session.get('setup_clinic', {})
+        return render(request, 'setup/owner_info.html', {
+            'prefill': {},
+            'clinic_data': clinic_data,
+        })
 
     def post(self, request):
         if self._already_setup():
             return redirect('doctor:login')
         if 'setup_clinic' not in request.session:
             return redirect('clinic:setup_clinic')
+        clinic_data = request.session.get('setup_clinic', {})
 
         # ── Validate ──────────────────────────────────────────────────────
         first_name   = request.POST.get('first_name', '').strip()
@@ -151,25 +156,22 @@ class SetupOwnerView(View):
         registration_no = request.POST.get('registration_no', '').strip()
 
         errors = {}
-        if not first_name:
-            errors['first_name'] = 'Pehla naam zaroori hai.'
         if not username:
-            errors['username'] = 'Username zaroori hai.'
+            errors['username'] = 'Username is required.'
         elif User.objects.filter(username=username).exists():
-            errors['username'] = 'Yeh username pehle se le liya gaya hai.'
+            errors['username'] = 'This username is already taken.'
         if len(password) < 8:
-            errors['password'] = 'Password kam se kam 8 characters ka hona chahiye.'
+            errors['password'] = 'Password must be at least 8 characters.'
         elif password != password2:
-            errors['password2'] = 'Dono passwords match nahi kar rahe.'
+            errors['password2'] = 'Passwords do not match.'
 
         if errors:
             return render(request, 'setup/owner_info.html', {
                 'prefill': request.POST,
                 'errors': errors,
+                'clinic_data': clinic_data,
             })
 
-        # ── Create everything in one transaction ──────────────────────────
-        clinic_data = request.session['setup_clinic']
         try:
             with transaction.atomic():
                 # 1. ClinicSettings
@@ -205,11 +207,15 @@ class SetupOwnerView(View):
                 )
 
         except Exception as e:
-            messages.error(request, f'Setup mein koi error aa gayi: {e}')
-            return render(request, 'setup/owner_info.html', {'prefill': request.POST, 'errors': {}})
+            messages.error(request, f'Setup error: {e}')
+            return render(request, 'setup/owner_info.html', {
+                'prefill': request.POST,
+                'errors': {},
+                'clinic_data': clinic_data,
+            })
 
         # ── Cleanup session & auto-login ───────────────────────────────────
         del request.session['setup_clinic']
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        messages.success(request, f'Welcome, Dr. {first_name}! Aapka clinic setup ho gaya hai. 🎉')
+        messages.success(request, f'Welcome, Dr. {first_name}! Your clinic has been set up. 🎉')
         return redirect('doctor:dashboard')

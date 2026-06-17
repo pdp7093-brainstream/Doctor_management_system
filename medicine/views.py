@@ -256,7 +256,7 @@ class MedicineSearchView(LoginRequiredMixin, View):
                 {
                     "id": v.id,
                     "power": v.power,
-                    "price": str(v.selling_price),  # ← selling_price use karo
+                    "price": str(v.selling_price),  # ← use selling_price
                     "stock": v.stock,
                     "is_low_stock": v.is_low_stock,
                     "is_expired": v.is_expired,

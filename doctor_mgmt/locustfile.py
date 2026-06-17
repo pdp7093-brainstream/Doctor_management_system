@@ -54,9 +54,9 @@ class RealUserClinicJourney(HttpUser):
         }
         
         with self.client.post("/appointment/", data=appointment_payload, headers={"Referer": f"{self.host}/appointment/"}, catch_response=True) as response:
-            # Agar Django redirect (302) karta hai ya response me success text aata hai toh pass karo
+            # If Django redirects (302) or response shows success text, mark as pass
             if response.status_code == 302 or (response.status_code == 200 and "appointment" in response.url and "error" not in response.text.lower()):
                 response.success()
             else:
-                # Agar wapas wahi page load ho jaye validation error ke saath, toh failure catch karo
+                # If the same page reloads with validation errors, mark as failure
                 response.failure(f"Form validation failed or user unauthorized. Status: {response.status_code}")

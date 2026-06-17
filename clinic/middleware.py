@@ -8,27 +8,27 @@ EXEMPT_PREFIXES = ('/static/', '/media/', '/admin/')
 
 class SetupRequiredMiddleware:
     """
-    Har request pe check karta hai ki clinic owner exist karta hai ya nahi.
-    Agar nahi, toh setup wizard pe redirect karta hai.
-    Jab ek baar setup complete ho jaye toh yeh middleware transparent ho jata hai.
+    Checks on each request whether a clinic owner exists.
+    If not, redirects to the setup wizard.
+    Once setup is complete this middleware becomes transparent.
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
-        self._setup_done = None  # Cache taaki har request pe DB hit na ho
+        self._setup_done = None  # Cache to avoid DB hits on every request
 
     def __call__(self, request):
         path = request.path
 
-        # Static/media/admin files ko bypass karo
+        # Bypass static/media/admin files
         if any(path.startswith(p) for p in EXEMPT_PREFIXES):
             return self.get_response(request)
 
-        # Setup pages khud bypass hongi (prefix-based check)
+        # Bypass setup pages (prefix-based check)
         if path.startswith(SETUP_URL_PREFIX):
             return self.get_response(request)
 
-        # Cache check — agar already setup hua hai toh skip
+        # Cache check — skip if setup already completed
         if self._setup_done:
             return self.get_response(request)
 
@@ -37,13 +37,13 @@ class SetupRequiredMiddleware:
             from doctor.models import InnerMember
             owner_exists = InnerMember.objects.filter(is_owner=True).exists()
         except Exception:
-            # DB table abhi tak nahi bani (fresh migrate ke pehle) — skip
+            # DB table not created yet (before fresh migrate) — skip
             return self.get_response(request)
 
         if owner_exists:
             self._setup_done = True  # Cache kar lo
             return self.get_response(request)
 
-        # Owner nahi hai → Setup wizard pe bhejo
+        # No owner found → redirect to setup wizard
         setup_url = reverse('clinic:setup_clinic')
         return redirect(setup_url)

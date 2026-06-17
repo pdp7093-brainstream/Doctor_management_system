@@ -22,9 +22,22 @@
 <div class="alert alert-warning d-flex align-items-center mb-4 small" role="alert">
     <i class="bi bi-shield-lock-fill me-2 fs-5 flex-shrink-0"></i>
     <div>
-        Yeh account <strong>clinic owner</strong> ka hoga. Isse hi Clinic Settings aur sari administrative cheezein access hongi.
+        This account belongs to the <strong>clinic owner</strong>. It will be used to manage Clinic Settings and all administrative access.
     </div>
 </div>
+
+{% if clinic_data %}
+<div class="alert alert-info small border rounded-3 mb-4">
+    <strong>Clinic details entered in Step 1:</strong>
+    <div class="mt-2">
+        <div><strong>Clinic Name:</strong> {{ clinic_data.clinic_name|default:'-' }}</div>
+        <div><strong>Tagline:</strong> {{ clinic_data.tagline|default:'-' }}</div>
+        <div><strong>Address:</strong> {{ clinic_data.address|default:'-' }}</div>
+        <div><strong>City:</strong> {{ clinic_data.city|default:'-' }}, <strong>State:</strong> {{ clinic_data.state|default:'-' }}, <strong>Pincode:</strong> {{ clinic_data.pincode|default:'-' }}</div>
+        <div><strong>Phone:</strong> {{ clinic_data.phone|default:'-' }}, <strong>Email:</strong> {{ clinic_data.email|default:'-' }}</div>
+    </div>
+</div>
+{% endif %}
 
 <form method="POST" novalidate>
     {% csrf_token %}
@@ -49,7 +62,7 @@
     <h5 class="fw-bold mb-3 text-primary border-bottom pb-2"><i class="bi bi-mortarboard me-2"></i>Professional Information</h5>
     <div class="row g-3 mb-4">
         <div class="col-12">
-            <label for="doctor_name" class="form-label fw-semibold small">Doctor Name <span class="text-muted fw-normal">(bills/prescriptions pe print hoga)</span></label>
+            <label for="doctor_name" class="form-label fw-semibold small">Doctor Name <span class="text-muted fw-normal">(this will print on bills and prescriptions)</span></label>
             <input type="text" class="form-control form-control-sm" id="doctor_name" name="doctor_name"
                    placeholder="e.g. Dr. Deepak Prasad" value="{{ prefill.doctor_name|default:'' }}">
         </div>

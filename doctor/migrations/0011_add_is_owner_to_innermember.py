@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='innermember',
             name='is_owner',
-            field=models.BooleanField(default=False, help_text='Clinic ka owner/main doctor — sirf inhe hi Clinic Settings dikhegi'),
+            field=models.BooleanField(default=False, help_text='Clinic owner / main doctor — only they can view Clinic Settings'),
         ),
     ]

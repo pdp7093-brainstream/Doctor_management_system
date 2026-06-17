@@ -271,7 +271,7 @@ function escapeAttr(value) {
 
 // ✅ Row index tracker — existing items se start hoga
 function getNextIndex() {
-    // Sabse bade index value ko find karo existing checkboxes se
+    // Find the highest index value from existing checkboxes
     let max = -1;
     document.querySelectorAll('input[name="should_deduct[]"]').forEach(cb => {
         const val = parseInt(cb.value);

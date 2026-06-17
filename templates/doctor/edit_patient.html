@@ -46,16 +46,14 @@
                         <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="patient-email">
                             Email
                         </label>
-                        <input id="patient-email" type="email" name="email" class="form-control"
-                               value="{{ patient.user.email }}">
+                        <input id="patient-email" type="email" name="email" class="form-control" value="{{ patient.user.email }}">
                     </div>
 
                     <div class="col-md-6">
                         <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="patient-dob">
                             Date of Birth
                         </label>
-                        <input id="patient-dob" type="date" name="dob" class="form-control"
-                               value="{{ patient.dob|date:'Y-m-d' }}">
+                        <input id="patient-dob" type="date" name="dob" class="form-control" value="{{ patient.dob|date:'Y-m-d' }}">
                     </div>
 
                     <div class="col-md-6">

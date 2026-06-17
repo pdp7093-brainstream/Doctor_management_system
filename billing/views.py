@@ -487,7 +487,7 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
     login_url = 'doctor:login'
 
     def get(self, request, hid):
-        # Visit + Bill fetch karo. Accept numeric or hashid for visit and bill_id.
+        # Fetch Visit + Bill. Accept numeric or hashid for visit and bill_id.
         from appointment.views import resolve_hid
         vid = resolve_hid(hid)
         if vid is None:

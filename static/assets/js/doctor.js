@@ -154,7 +154,7 @@ function toggleBellDropdown() {
     }
 }
 
-// Bahar click karne pe close
+// Close when clicking outside
 document.addEventListener('click', function(e) {
     const bell = document.getElementById('bellBtn');
     const dropdown = document.getElementById('bellDropdown');
@@ -163,7 +163,7 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Low stock count fetch karo
+// Fetch low stock count
 function fetchLowStockCount() {
     fetch('/medicine/low-stock-count/')
         .then(res => res.json())
@@ -191,7 +191,7 @@ function fetchLowStockCount() {
         });
 }
 
-// Bell dropdown alerts load karo
+// Load bell dropdown alerts
 function loadBellAlerts() {
     fetch('/medicine/low-stock-list/')
         .then(res => res.json())
