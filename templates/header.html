@@ -178,12 +178,15 @@
 <script>
   // Self-contained mobile nav toggle — works on all patient pages
   document.addEventListener('DOMContentLoaded', function () {
-    var btn = document.getElementById('mobileNavToggleBtn');
-    if (!btn) {
-      // fallback: try class selector
-      btn = document.querySelector('.mobile-nav-toggle');
+    var oldBtn = document.getElementById('mobileNavToggleBtn');
+    if (!oldBtn) {
+      oldBtn = document.querySelector('.mobile-nav-toggle');
     }
-    if (!btn) return;
+    if (!oldBtn) return;
+
+    // Clone the button to wipe out duplicate event listeners (e.g. from main.js)
+    var btn = oldBtn.cloneNode(true);
+    oldBtn.parentNode.replaceChild(btn, oldBtn);
 
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
@@ -196,7 +199,7 @@
     document.addEventListener('click', function (e) {
       if (document.body.classList.contains('mobile-nav-active')) {
         var navmenu = document.getElementById('navmenu');
-        if (navmenu && !navmenu.contains(e.target) && e.target !== btn) {
+        if (navmenu && !navmenu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
           document.body.classList.remove('mobile-nav-active');
           btn.classList.add('bi-list');
           btn.classList.remove('bi-x');
