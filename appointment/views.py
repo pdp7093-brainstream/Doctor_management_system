@@ -53,6 +53,7 @@ def resolve_hid(hid):
     return None
 
 
+
 @role_required('doctor')
 def search_patients(request):
     """Search for patients (main user or family member)."""
@@ -207,6 +208,7 @@ def get_slots(request):
 
     booked_slots = Appointment.booked_slots().filter(
         appointment_date=selected_date,
+        doctor=doctor,
         is_archived=False
     ).values_list('time_slot', flat=True)
 
@@ -437,6 +439,28 @@ class Add_appointment(View):
             messages.error(request, "Invalid appointment date")
             return redirect('appointment:add_appointment')
 
+        today = timezone.localdate()
+        if appointment_date_obj < today:
+            messages.error(request, "Past date booking is not allowed")
+            return redirect('appointment:add_appointment')
+
+        if appointment_date_obj > today + timedelta(days=30):
+            messages.error(request, "Booking allowed only for next 30 days")
+            return redirect('appointment:add_appointment')
+
+        clinic = ClinicSettings.get()
+        day_map = {
+            0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu',
+            4: 'fri', 5: 'sat', 6: 'sun',
+        }
+        if not clinic.is_working_day(day_map[appointment_date_obj.weekday()]):
+            messages.error(request, "Clinic is closed on this day")
+            return redirect('appointment:add_appointment')
+
+        if appointment_date_obj == today and time_slot <= timezone.localtime().time():
+            messages.error(request, "Past time slot booking is not allowed")
+            return redirect('appointment:add_appointment')
+
         if Appointment.booked_slots().filter(
             is_archived=False,
             doctor=doctor,
@@ -448,8 +472,6 @@ class Add_appointment(View):
 
         # Doctor Leave Check
         from doctor.models import DoctorLeave
-        from clinic.models import ClinicSettings
-        clinic = ClinicSettings.get()
         leave = DoctorLeave.objects.filter(doctor=doctor, date=appointment_date_obj).first()
         if leave:
             if leave.leave_type == 'full_day':
@@ -1010,7 +1032,7 @@ def bulk_delete_appointments(request):
             if not decoded_ids:
                 return JsonResponse({'success': False, 'error': 'Invalid appointment IDs.'})
 
-            # Delete the appointments
+            # Single-doctor clinic: delete the selected active appointments.
             appointments = Appointment.objects.filter(id__in=decoded_ids, is_archived=False)
             actual_count = appointments.count()
             appointments.delete()
