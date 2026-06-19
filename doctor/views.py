@@ -954,6 +954,17 @@ def my_profile(request):
     member = get_object_or_404(InnerMember, user=request.user)
     
     if request.method == 'POST':
+        if 'remove_profile_picture' in request.POST:
+            if member.profile_picture:
+                try:
+                    member.profile_picture.delete(save=False)
+                except Exception:
+                    logger.warning("Failed to delete profile picture file for member %s", member.pk)
+            member.profile_picture = None
+            member.save(update_fields=['profile_picture'])
+            messages.success(request, 'Profile picture removed successfully.')
+            return redirect('doctor:my_profile')
+
         if 'update_profile' in request.POST:
             first_name = request.POST.get('first_name', '').strip()
             last_name = request.POST.get('last_name', '').strip()
@@ -977,7 +988,13 @@ def my_profile(request):
             request.user.save()
             
             member.phone = phone
+            old_picture = member.profile_picture
             if 'profile_picture' in request.FILES:
+                if old_picture:
+                    try:
+                        old_picture.delete(save=False)
+                    except Exception:
+                        logger.warning("Failed to delete previous profile picture file for member %s", member.pk)
                 member.profile_picture = request.FILES['profile_picture']
             member.save()
             
