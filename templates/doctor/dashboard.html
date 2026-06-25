@@ -141,11 +141,11 @@
                             <div class="d-flex gap-2 flex-wrap">
                                 {% if appointment.status == 'pending' %}
                                 <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-primary btn-sm btn-start-visit">
-                                    <i class="bi bi-play-circle me-1"></i>Start Visit
+                                    <i class="bi me-1"></i>Start Visit
                                 </a>
                                 <button type="button" class="btn btn-danger btn-sm btn-cancel-appointment"
                                     data-url="{% url 'doctor:cancel_appointment' appointment.id|hid %}">
-                                    <i class="bi bi-x-circle me-1"></i>Cancel
+                                    <i class="bi me-1"></i>Cancel
                                 </button>
                                 {% elif appointment.status == 'completed' %}
                                 <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm"
