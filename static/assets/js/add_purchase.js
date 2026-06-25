@@ -29,9 +29,8 @@ addItemBtn.addEventListener('click', function () {
     row.className = 'purchase-item-row';
     row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
     row.innerHTML = `
-            <div style="display:grid; grid-template-columns:2fr 1fr 1fr auto;
-                        gap:10px; align-items:end;">
-                <div style="position:relative;">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-5" style="position:relative;">
                     <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
                     <input type="text" class="patient-input medicine-search"
                         placeholder="Name, short name, or company..." autocomplete="off">
@@ -46,18 +45,18 @@ addItemBtn.addEventListener('click', function () {
                                z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,0.12);">
                     </div>
                 </div>
-                <div>
+                <div class="col-6 col-md-3">
                     <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
                     <input type="number" name="quantity_strips[]"
                         class="patient-input" placeholder="e.g. 10" min="1" required>
                 </div>
-                <div>
+                <div class="col-6 col-md-3">
                     <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
                     <input type="number" name="unit_per_strip[]"
                         class="patient-input" placeholder="e.g. 10" min="1" required>
                 </div>
-                <div style="padding-bottom:2px;">
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn"
+                <div class="col-12 col-md-1 mt-2 mt-md-0 pb-md-1 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn w-100"
                         style="border-radius:8px;">
                         <i class="bi bi-trash"></i>
                     </button>

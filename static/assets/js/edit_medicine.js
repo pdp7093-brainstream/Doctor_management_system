@@ -73,48 +73,48 @@ addVariantBtn.addEventListener('click', function () {
     row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
     row.innerHTML = `
             <input type="hidden" name="variant_id[]" value="">
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr 1fr; gap:10px; margin-bottom:10px;">
-                <div>
+            <div class="row g-2 mb-2">
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
                     <input type="text" name="power[]" class="patient-input" placeholder="e.g., 250mg" required>
                 </div>
-                <div>
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
                     <input type="number" name="cost_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
                 </div>
-                <div>
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
                     <input type="number" name="selling_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
                 </div>
-                <div>
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Total Strips</label>
                     <input type="number" name="total_strips[]" class="patient-input strip-input" placeholder="e.g., 20" min="0">
                     <input type="hidden" name="stock[]" class="stock-hidden" value="0">
                 </div>
-                <div>
+                <div class="col-12 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
                     <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
                 </div>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:10px; align-items:end;">
-                <div>
+            <div class="row g-2 align-items-end">
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Unit</label>
                     <select name="unit[]" class="patient-input">${unitOptions}</select>
                 </div>
-                <div>
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Unit / Strip</label>
                     <input type="number" name="unit_per_strip[]" class="patient-input ups-input" placeholder="e.g., 10" min="1">
                 </div>
-                <div>
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
                     <input type="date" name="mfg_date[]" class="patient-input">
                 </div>
-                <div>
+                <div class="col-6 col-md">
                     <label class="patient-label" style="font-size:0.78rem;">Exp Date</label>
                     <input type="date" name="exp_date[]" class="patient-input">
                 </div>
-                <div style="padding-bottom:2px;">
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn" style="border-radius:8px;">
+                <div class="col-12 col-md-auto mt-2 mt-md-0 pb-md-1 text-end">
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn w-100" style="border-radius:8px;">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>

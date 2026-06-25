@@ -321,7 +321,7 @@ def edit_patient(request, hid):
     if request.method == 'POST':
 
         name      = request.POST.get('name', '').strip()
-        email     = request.POST.get('email', '').strip()
+        email     = request.POST.get('email', '').strip().lower()
         dob       = request.POST.get('dob')
         gender    = request.POST.get('gender')
         phone     = request.POST.get('phone', '').strip()
@@ -329,7 +329,7 @@ def edit_patient(request, hid):
         address   = request.POST.get('address')
 
         # EMAIL DUPLICATE CHECK
-        if email and User.objects.filter(email=email).exclude(pk=patient.user.pk).exists():
+        if email and User.objects.filter(email__iexact=email).exclude(pk=patient.user.pk).exists():
 
             return render(request, 'doctor/edit_patient.html', {
                 'patient': patient
@@ -506,7 +506,7 @@ def add_staff(request):
         name     = data.get('name', '').strip()
         username = data.get('username', '').strip()
         phone    = data.get('phone', '').strip()
-        email    = data.get('email', '').strip()
+        email    = data.get('email', '').strip().lower()
         password = data.get('password', '').strip()
 
         # Validation
@@ -522,7 +522,7 @@ def add_staff(request):
                 'error': 'Username already taken.'
             }, status=400)
 
-        if email and User.objects.filter(email=email).exists():
+        if email and User.objects.filter(email__iexact=email).exists():
             return JsonResponse({
                 'success': False,
                 'error': 'Email already in use.'
@@ -969,7 +969,7 @@ def my_profile(request):
             first_name = request.POST.get('first_name', '').strip()
             last_name = request.POST.get('last_name', '').strip()
             username = request.POST.get('username', '').strip()
-            email = request.POST.get('email', '').strip()
+            email = request.POST.get('email', '').strip().lower()
             phone = request.POST.get('phone', '').strip()
             
             # Check for unique username and email
@@ -977,7 +977,7 @@ def my_profile(request):
                 messages.error(request, 'Username already exists.')
                 return redirect('doctor:my_profile')
                 
-            if email and User.objects.filter(email=email).exclude(pk=request.user.pk).exists():
+            if email and User.objects.filter(email__iexact=email).exclude(pk=request.user.pk).exists():
                 messages.error(request, 'Email already exists.')
                 return redirect('doctor:my_profile')
             

@@ -56,8 +56,8 @@ class RegistrationForm(forms.Form):
         if not email:
             raise ValidationError("Email is required.")
         
-        # Check if email already exists in User table
-        if User.objects.filter(email=email).exists():
+        # Check if email already exists in User table (case-insensitive)
+        if User.objects.filter(email__iexact=email).exists():
             raise ValidationError("This email is already registered!")
         
         return email
@@ -293,8 +293,8 @@ class ProfileUpdateForm(forms.Form):
         
         email = email.lower()
         
-        # Check if email exists (excluding current user)
-        if User.objects.filter(email=email).exclude(id=self.user_id).exists():
+        # Check if email exists (excluding current user, case-insensitive)
+        if User.objects.filter(email__iexact=email).exclude(id=self.user_id).exists():
             raise ValidationError("This email is already in use!")
         
         return email
