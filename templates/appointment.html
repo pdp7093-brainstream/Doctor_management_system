@@ -148,14 +148,6 @@
           </div>
         </div>
       </div>
-      <nav class="breadcrumbs">
-        <div class="container">
-          <ol>
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li class="current">Appointment</li>
-          </ol>
-        </div>
-      </nav>
     </div>
 
     <!-- Appointment Section -->
@@ -223,7 +215,7 @@
 
                     <!-- ── Patient Selector ── -->
                     <div class="col-12">
-                      <span class="patient-selector-label">Booking For</span>
+                      <label for="forWhomSelect" class="patient-selector-label">Booking For</label>
                       <div class="patient-selector-wrapper">
                         <select name="for_whom" id="forWhomSelect" class="form-control" required>
                           <!-- Myself -->
@@ -248,27 +240,32 @@
                       <input type="hidden" name="family_member_id" id="hiddenFamilyMemberId">
                     </div>
 
-                    <!-- Email -->
+                    <!-- Email --> 
                     <div class="col-md-12">
-                      <input type="email" name="email" class="form-control" placeholder="Email Address"
+                      <label for="appointmentEmail" class="patient-selector-label">Email Address</label>
+                      <input type="email" name="email" id="appointmentEmail" class="form-control"
+                        placeholder="Email Address"
                         value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
                     </div>
 
                     <!-- Date -->
                     <div class="col-md-12">
+                      <label for="appointment_date" class="patient-selector-label">Appointment Date</label>
                       <input type="date" name="date" id="appointment_date" class="form-control" required>
                     </div>
 
                     <!-- Time Slots -->
                     <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
-                      <label><strong>Select Preferred Time:</strong></label>
+                      <label for="selected_time" class="patient-selector-label">Select Preferred Time</label>
                       <div class="row g-2 row-cols-3 row-cols-md-6" id="time_buttons_container"></div>
                     </div>
                     <input type="hidden" name="time_slot" id="selected_time">
 
                     <!-- Notes -->
                     <div class="col-12">
-                      <textarea name="message" class="form-control" rows="4" placeholder="Notes (optional)"></textarea>
+                      <label for="appointmentNotes" class="patient-selector-label">Notes</label>
+                      <textarea name="message" id="appointmentNotes" class="form-control" rows="4"
+                        placeholder="Notes (optional)"></textarea>
                     </div>
 
                     <button type="button" id="submitBtn" class="btn btn-primary btn-lg w-100">
@@ -380,6 +377,7 @@
     const hiddenName = document.getElementById('hiddenName');
     const hiddenPhone = document.getElementById('hiddenPhone');
     const hiddenFamilyMember = document.getElementById('hiddenFamilyMemberId');
+    const emailInput = document.getElementById('appointmentEmail');
 
     const selfName = "{{ request.user.get_full_name|default:request.user.username }}";
     const selfPhone = "{{ request.user.patient.phone }}";
@@ -552,8 +550,19 @@
     // ── Submit with SweetAlert confirm ───────────────────
     document.getElementById('submitBtn').addEventListener('click', function () {
       const name = hiddenName.value;
+      const email = emailInput.value.trim();
       const date = document.getElementById('appointment_date').value;
       const time = document.getElementById('selected_time').value;
+
+      const emailValid = email && emailInput.checkValidity();
+
+      if (!emailValid) {
+        emailInput.setCustomValidity('Please enter a valid email address.');
+        emailInput.reportValidity();
+        emailInput.setCustomValidity('');
+        Swal.fire({ icon: 'warning', title: 'Invalid Email', text: 'Please enter a valid email address.' });
+        return;
+      }
 
       if (!name || !date || !time) {
         Swal.fire({ icon: 'warning', title: 'Missing Info', text: 'Please fill all fields and select a time slot!' });

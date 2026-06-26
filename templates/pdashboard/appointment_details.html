@@ -53,6 +53,16 @@
                         <div class="value">{{ appointment.time_slot }}</div>
                     </div>
                     <div class="info-box">
+                        <div class="label">Appointment Slot</div>
+                        <div class="value">
+                            {% if appointment.time_slot %}
+                            <span class="status-badge status-confirmed">{{ appointment.time_slot }}</span>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-box">
                         <div class="label">Status</div>
                         <div class="value">
                             {% if appointment.status == 'confirmed' %}
