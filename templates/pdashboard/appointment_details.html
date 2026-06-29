@@ -45,14 +45,19 @@
 
                 <div class="info-grid">
                     <div class="info-box">
-                        <div class="label">Date</div>
-                        <div class="value">{{ appointment.appointment_date }}</div>
+                        <div class="label">Date/Time</div>
+                        <div class="value">{{ appointment.appointment_date }}
+                            {% if appointment.time_slot %}
+                            <span class="status-badge status-confirmed">{{ appointment.time_slot }}</span>
+                            {% else %}
+                            —
+                            {% endif %}</div>
                     </div>
-                    <div class="info-box">
+                    <!-- <div class="info-box">
                         <div class="label">Time</div>
                         <div class="value">{{ appointment.time_slot }}</div>
-                    </div>
-                    <div class="info-box">
+                    </div> -->
+                    <!-- <div class="info-box">
                         <div class="label">Appointment Slot</div>
                         <div class="value">
                             {% if appointment.time_slot %}
@@ -61,7 +66,7 @@
                             —
                             {% endif %}
                         </div>
-                    </div>
+                    </div> -->
                     <div class="info-box">
                         <div class="label">Status</div>
                         <div class="value">
@@ -169,6 +174,10 @@
                         <div class="label">Phone</div>
                         <div class="value">{{ appointment.patient.phone|default:"—" }}</div>
                     </div>
+                    <div class="info-box">
+                        <div class="label">Email</div>
+                        <div class="value">{{ request.user.email }}</div>
+                    </div>
                     {% if appointment.patient.dob %}
                     <div class="info-box">
                         <div class="label">Date of Birth</div>
@@ -200,7 +209,7 @@
                         <div class="label">Doctor Name</div>
                         <div class="value">
                             {% if doctor and doctor.user %}
-                            Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}
+                                Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}
                             {% else %}
                             —
                             {% endif %}
@@ -265,12 +274,12 @@
                     <table class="rx-table">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th>Medicine</th>
-                                <th>Type</th>
-                                <th>Power</th>
-                                <th>Dosage</th>
-                                <th>Days</th>
+                                <th style="color: white;">#</th>
+                                <th style="color: white;">Medicine</th>
+                                <th style="color: white;">Type</th>
+                                <th style="color: white;">Power</th>
+                                <th style="color: white;">Dosage</th>
+                                <th style="color: white;">Days</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -369,9 +378,9 @@
                     <table class="rx-table">
                         <thead>
                             <tr>
-                                <th>Document</th>
-                                <th>Uploaded</th>
-                                <th>Action</th>
+                                <th style="color: white;">Document</th>
+                                <th style="color: white;">Uploaded</th>
+                                <th style="color: white;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -381,7 +390,7 @@
                                 <td style="border-bottom: none;">{{ document.uploaded_at|date:"d M Y" }}</td>
                                 <td style="border-bottom: none;">
                                     <a href="{{ document.file.url }}" target="_blank"
-                                        class="btn btn-outline-primary btn-sm" title="View"
+                                        class="btn btn-primary btn-sm" title="View"
                                         style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
                                         <i class="fas fa-eye"></i>
                                     </a>
