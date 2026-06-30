@@ -57,12 +57,16 @@ class ExportDataView(DoctorRequiredMixin, View):
 
         total_appointments = Appointment.objects.filter(is_archived=False).count()
         total_bills = Bill.objects.filter(is_archived=False).count()
-        total_revenue = Bill.objects.filter(is_archived=False, payment_status='paid').aggregate(Sum('total'))['total__sum'] or 0
+        # Total revenue = sum of ALL billed amounts (regardless of payment status)
+        total_revenue = Bill.objects.filter(is_archived=False).aggregate(Sum('total'))['total__sum'] or 0
+        # Total collected = only fully paid bills
+        total_collected = Bill.objects.filter(is_archived=False, payment_status='paid').aggregate(Sum('total'))['total__sum'] or 0
 
         context = {
             'total_appointments': total_appointments,
             'total_bills': total_bills,
             'total_revenue': total_revenue,
+            'total_collected': total_collected,
         }
 
         return render(request,'reports_archive/export_data.html',context)
