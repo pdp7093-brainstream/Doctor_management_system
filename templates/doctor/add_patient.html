@@ -78,7 +78,9 @@
                             Phone * <small class="fw-normal text-muted" id="phoneHint">(used as login username)</small>
                         </label>
                         <input type="tel" name="phone" id="phoneInput" class="form-control"
-                               placeholder="e.g. 9876543210" maxlength="15">
+                               placeholder="e.g. 9876543210" maxlength="15"
+                               inputmode="numeric" pattern="[0-9]{7,15}"
+                               title="Phone number must contain only digits (7–15 digits)">
                     </div>
 
                     <div class="col-md-6">
@@ -136,5 +138,21 @@
 </main>
 
 <script src="{% static 'assets/js/add_patinet.js' %}"></script>
+<script>
+(function(){
+    var ph = document.getElementById('phoneInput');
+    if (!ph) return;
+    ph.addEventListener('keydown', function(e){
+        var allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
+        if (allowed.includes(e.key)) return;
+        if (/^[0-9]$/.test(e.key)) return;
+        e.preventDefault();
+    });
+    ph.addEventListener('paste', function(e){
+        var pasted = (e.clipboardData || window.clipboardData).getData('text');
+        if (!/^[0-9]+$/.test(pasted)) e.preventDefault();
+    });
+})();
+</script>
 
 {% endblock %}

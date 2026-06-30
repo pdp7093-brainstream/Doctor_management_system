@@ -99,14 +99,23 @@ class AddCategoryView(LoginRequiredMixin, ExpenseAccessMixin, View):
 
     def post(self, request):
 
-        name = request.POST.get('name')
+        name = request.POST.get('name', '').strip()
         is_active = request.POST.get('is_active') == 'on'
+
+        if not name:
+            messages.error(request, 'Category name cannot be empty.')
+            return redirect('expenses:category_list')
+
+        # Case-insensitive duplicate check
+        if ExpenseCategory.objects.filter(name__iexact=name).exists():
+            messages.error(request, f'A category named "{name}" already exists (names are case-insensitive).')
+            return redirect('expenses:category_list')
+
         try:
             ExpenseCategory.objects.create(name=name, is_active=is_active)
             messages.success(request, 'Category created successfully.')
             return redirect('expenses:category_list')
         except IntegrityError:
-            # Duplicate category name
             messages.error(request, 'A category with this name already exists.')
             return redirect('expenses:category_list')
         except Exception as exc:
@@ -189,15 +198,25 @@ class EditCategoryView(LoginRequiredMixin, ExpenseAccessMixin,View):
 
         return render(request, 'expenses/edit_category.html',context)
 
-    def post(self,request, pk):
+    def post(self, request, pk):
         pk = pk
         category = get_object_or_404(ExpenseCategory, id=pk)
 
-        category.name = request.POST.get('name')
+        new_name = request.POST.get('name', '').strip()
+
+        if not new_name:
+            messages.error(request, 'Category name cannot be empty.')
+            return redirect('expenses:category_list')
+
+        # Case-insensitive duplicate check (exclude the current category itself)
+        if ExpenseCategory.objects.filter(name__iexact=new_name).exclude(id=pk).exists():
+            messages.error(request, f'A category named "{new_name}" already exists (names are case-insensitive).')
+            return redirect('expenses:category_list')
+
+        category.name = new_name
         category.is_active = request.POST.get('is_active') == 'on'
-
         category.save()
-
+        messages.success(request, 'Category updated successfully.')
         return redirect('expenses:category_list')
 
 

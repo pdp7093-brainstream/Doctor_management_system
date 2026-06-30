@@ -136,64 +136,78 @@
     <div id="monthsContainer" class="table-section">
         {% for month_info in month_data %}
         <div class="card mb-4 border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+            <div class="card-header bg-white border-0 pt-4 pb-3 px-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <h4 class="fw-bold mb-0 text-primary">{{ month_info.month_name }}</h4>
-                    <div class="d-flex gap-4">
-                        <div class="text-center">
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Total Amount</small>
-                            <div class="fw-bold fs-5">₹{{ month_info.total_amount|floatformat:2 }}</div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-2">
+                            <i class="bi bi-calendar2-week text-primary" style="font-size:1.2rem;"></i>
                         </div>
-                        <div class="text-center">
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Paid</small>
-                            <div class="fw-bold fs-5 text-success">₹{{ month_info.paid_amount|floatformat:2 }}</div>
+                        <h5 class="fw-bold mb-0 text-primary">{{ month_info.month_name }}</h5>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:#f8f9fa; border:1px solid #e9ecef;">
+                            <i class="bi bi-wallet2 text-secondary" style="font-size:0.9rem;"></i>
+                            <div>
+                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; color:#6c757d; font-weight:600;">Total</div>
+                                <div class="fw-bold" style="font-size:0.95rem; line-height:1.2;">₹{{ month_info.total_amount|floatformat:2 }}</div>
+                            </div>
                         </div>
-                        <div class="text-center">
-                            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.75rem;">Unpaid</small>
-                            <div class="fw-bold fs-5 text-danger">₹{{ month_info.unpaid_amount|floatformat:2 }}</div>
+                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                            <i class="bi bi-check-circle-fill text-success" style="font-size:0.9rem;"></i>
+                            <div>
+                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; color:#16a34a; font-weight:600;">Paid</div>
+                                <div class="fw-bold text-success" style="font-size:0.95rem; line-height:1.2;">₹{{ month_info.paid_amount|floatformat:2 }}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:#fff5f5; border:1px solid #fecaca;">
+                            <i class="bi bi-x-circle-fill text-danger" style="font-size:0.9rem;"></i>
+                            <div>
+                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; color:#dc2626; font-weight:600;">Unpaid</div>
+                                <div class="fw-bold text-danger" style="font-size:0.95rem; line-height:1.2;">₹{{ month_info.unpaid_amount|floatformat:2 }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div style="height:1px; background:linear-gradient(to right, #e9ecef, transparent);"></div>
             <div class="card-body px-4 py-3">
                 <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-                    <table class="table table-custom table-hover align-middle mb-0" style="min-width:800px;">
+                    <table class="table table-hover align-middle mb-0" style="min-width:780px; border-collapse:separate; border-spacing:0;">
                         <thead>
-                            <tr>
-                                <th style="width: 40px; text-align: center;">
+                            <tr style="background:#f8faff;">
+                                <th style="width:40px; text-align:center; padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.75rem; color:#94a3b8; font-weight:600;">
                                     <input type="checkbox" class="form-check-input" id="selectAllBills">
                                 </th>
-                                <th>#</th>
-                                <th>Bill No.</th>
-                                <th>Patient</th>
-                                <th>Date</th>
-                                <th>Total</th>
-                                <th>Method</th>
-                                <th>Status</th>
-                                <th class="text-center">Action</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">#</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Bill No.</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Patient</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700; white-space:nowrap;">Date</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Total</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Method</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Status</th>
+                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700; text-align:center;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for bill in month_info.bills %}
-                            <tr>
-                                <td class="text-center">
+                            <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s;">
+                                <td style="padding:12px; text-align:center; vertical-align:middle;">
                                     <input type="checkbox" class="form-check-input bill-checkbox" value="{{ bill.id|hid }}">
                                 </td>
-                                <td class="text-muted fw-semibold">
-                                    {{ forloop.counter|add:month_info.bills.start_index|add:"-1" }}
+                                <td style="padding:12px; vertical-align:middle;">
+                                    <span class="text-muted" style="font-size:0.82rem; font-weight:600;">{{ forloop.counter }}</span>
                                 </td>
-                                <td>
-                                    <span class="badge bg-light text-dark border fw-bold px-3 py-2">
-                                        <i class="bi bi-hash text-primary"></i>{{ bill.bill_number }}
+                                <td style="padding:12px; vertical-align:middle;">
+                                    <span style="display:inline-flex; align-items:center; gap:4px; background:#eef2ff; color:#4f46e5; font-weight:700; font-size:0.82rem; padding:4px 10px; border-radius:6px; white-space:nowrap;">
+                                        <i class="bi bi-hash" style="font-size:0.75rem;"></i>{{ bill.bill_number }}
                                     </span>
                                 </td>
-                                <td class="patient-name">
+                                <td style="padding:12px; vertical-align:middle;">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold"
-                                            style="width:34px; height:34px; font-size:0.85rem; flex-shrink:0;">
+                                        <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">
                                             {{ bill.visit.patient.user.get_full_name|first|upper }}
                                         </div>
-                                        <span class="fw-semibold">
+                                        <span style="font-weight:600; font-size:0.9rem; white-space:nowrap;">
                                             {% if bill.visit.appointment.family_member %}
                                                 {{ bill.visit.appointment.family_member.name }}
                                             {% else %}
@@ -202,59 +216,65 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td class="patient-info">
-                                    <i class="bi bi-calendar3 me-1 text-muted"></i>
-                                    {{ bill.bill_date|date:"d M, Y" }}
+                                <td style="padding:12px; vertical-align:middle; white-space:nowrap;">
+                                    <div style="display:inline-flex; align-items:center; gap:6px; background:#f8faff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 10px;">
+                                        <i class="bi bi-calendar3" style="color:#94a3b8; font-size:0.8rem;"></i>
+                                        <span style="font-size:0.85rem; font-weight:500; color:#374151;">{{ bill.bill_date|date:"d M Y" }}</span>
+                                    </div>
                                 </td>
-                                <td>
-                                    <span class="fw-bold text-success" style="font-size:1rem;">
-                                        ₹{{ bill.total|floatformat:2 }}
-                                    </span>
+                                <td style="padding:12px; vertical-align:middle; white-space:nowrap;">
+                                    <span style="font-weight:700; font-size:0.95rem; color:#059669;">₹{{ bill.total|floatformat:2 }}</span>
                                 </td>
-                                <td class="patient-info">
-                                    {% if bill.payment_method == 'cash' %}
-                                        <i class="bi bi-cash me-1 text-success"></i>
-                                    {% elif bill.payment_method == 'card' %}
-                                        <i class="bi bi-credit-card me-1 text-primary"></i>
-                                    {% elif bill.payment_method == 'upi' %}
-                                        <i class="bi bi-phone me-1 text-info"></i>
-                                    {% else %}
-                                        <i class="bi bi-globe me-1 text-warning"></i>
-                                    {% endif %}
-                                    {{ bill.get_payment_method_display }}
+                                <td style="padding:12px; vertical-align:middle; white-space:nowrap;">
+                                    <div style="display:inline-flex; align-items:center; gap:5px; font-size:0.85rem; color:#475569;">
+                                        {% if bill.payment_method == 'cash' %}
+                                            <i class="bi bi-cash" style="color:#059669;"></i>
+                                        {% elif bill.payment_method == 'card' %}
+                                            <i class="bi bi-credit-card" style="color:#3b82f6;"></i>
+                                        {% elif bill.payment_method == 'upi' %}
+                                            <i class="bi bi-phone" style="color:#06b6d4;"></i>
+                                        {% else %}
+                                            <i class="bi bi-globe" style="color:#f59e0b;"></i>
+                                        {% endif %}
+                                        {{ bill.get_payment_method_display }}
+                                    </div>
                                 </td>
-                                <td>
+                                <td style="padding:12px; vertical-align:middle;">
                                     {% if bill.payment_status == 'paid' %}
-                                        <span class="badge bg-success rounded-pill px-3">
-                                            <i class="bi bi-check-circle me-1"></i>Paid
+                                        <span style="display:inline-flex; align-items:center; gap:4px; background:#dcfce7; color:#166534; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;">
+                                            <i class="bi bi-check-circle-fill" style="font-size:0.7rem;"></i>Paid
                                         </span>
                                     {% elif bill.payment_status == 'partial' %}
-                                        <span class="badge bg-warning text-primary rounded-pill px-3">
-                                            <i class="bi bi-clock me-1"></i>Partial
+                                        <span style="display:inline-flex; align-items:center; gap:4px; background:#fef9c3; color:#854d0e; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;">
+                                            <i class="bi bi-clock-fill" style="font-size:0.7rem;"></i>Partial
                                         </span>
                                     {% else %}
-                                        <span class="badge bg-danger rounded-pill px-3">
-                                            <i class="bi bi-x-circle me-1"></i>Unpaid
+                                        <span style="display:inline-flex; align-items:center; gap:4px; background:#fee2e2; color:#991b1b; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;">
+                                            <i class="bi bi-x-circle-fill" style="font-size:0.7rem;"></i>Unpaid
                                         </span>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <div class="action-buttons d-flex gap-1 justify-content-center align-items-center">
+                                <td style="padding:12px; vertical-align:middle;">
+                                    <div class="d-flex gap-1 justify-content-center align-items-center">
                                         <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}"
-                                            class="action-btn btn btn-primary btn-sm"
+                                            class="btn btn-sm"
+                                            style="background:#eef2ff; color:#4f46e5; border:none; width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"
                                             title="View Bill">
-                                            <i class="bi bi-eye"></i>
+                                            <i class="bi bi-eye" style="font-size:0.85rem;"></i>
                                         </a>
                                         <a href="{% url 'billing:print_bill' bill.visit.id|hid %}"
                                             target="_blank"
-                                            class="action-btn btn btn-success btn-sm"
+                                            class="btn btn-sm"
+                                            style="background:#dcfce7; color:#166534; border:none; width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"
                                             title="Print Bill">
-                                            <i class="bi bi-printer"></i>
+                                            <i class="bi bi-printer" style="font-size:0.85rem;"></i>
                                         </a>
                                         <form action="{% url 'billing:delete_bill' bill.id|hid %}" method="POST" class="m-0">
                                             {% csrf_token %}
-                                            <button type="button" class="action-btn btn btn-danger btn-sm delete-btn" title="Delete Bill">
-                                                <i class="bi bi-trash"></i>
+                                            <button type="button" class="btn btn-sm delete-btn"
+                                                style="background:#fee2e2; color:#991b1b; border:none; width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"
+                                                title="Delete Bill">
+                                                <i class="bi bi-trash" style="font-size:0.85rem;"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -262,7 +282,8 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="9" class="text-center py-4 text-muted">
+                                <td colspan="9" style="text-align:center; padding:40px 12px; color:#94a3b8;">
+                                    <i class="bi bi-inbox d-block mb-2" style="font-size:2rem; opacity:0.4;"></i>
                                     No bills found for this month
                                 </td>
                             </tr>
