@@ -239,10 +239,10 @@ class SignupView(View):
                 user = authenticate(request, username=email, password=password)
                 if user is not None:
                     auth_login(request, user)
-                    
-                    return redirect('login')
+                    messages.success(request, 'Account created successfully! Welcome.')
+                    return redirect('profile')
                 else:
-                   
+                    messages.success(request, 'Account created successfully! Please log in.')
                     return redirect('login')
 
             except Exception as e:
