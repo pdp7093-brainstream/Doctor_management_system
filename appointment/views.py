@@ -199,12 +199,7 @@ def get_slots(request):
     if doctor:
         leave = DoctorLeave.objects.filter(doctor=doctor, date=selected_date).first()
         if leave:
-            if leave.leave_type == 'full_day':
-                slots = []
-            elif leave.leave_type == 'first_half' and lunch_start:
-                slots = [s for s in slots if s >= lunch_start]
-            elif leave.leave_type == 'second_half' and lunch_start:
-                slots = [s for s in slots if s < lunch_start]
+            slots = [s for s in slots if not leave.covers_time_slot(s)]
 
     booked_slots = Appointment.booked_slots().filter(
         appointment_date=selected_date,
@@ -473,16 +468,9 @@ class Add_appointment(View):
         # Doctor Leave Check
         from doctor.models import DoctorLeave
         leave = DoctorLeave.objects.filter(doctor=doctor, date=appointment_date_obj).first()
-        if leave:
-            if leave.leave_type == 'full_day':
-                messages.error(request, "Doctor is on leave on this date.")
-                return redirect('appointment:add_appointment')
-            elif leave.leave_type == 'first_half' and clinic.lunch_start and time_slot < clinic.lunch_start:
-                messages.error(request, "Doctor is on leave during this time.")
-                return redirect('appointment:add_appointment')
-            elif leave.leave_type == 'second_half' and clinic.lunch_start and time_slot >= clinic.lunch_start:
-                messages.error(request, "Doctor is on leave during this time.")
-                return redirect('appointment:add_appointment')
+        if leave and leave.covers_time_slot(time_slot):
+            messages.error(request, leave.get_error_message())
+            return redirect('appointment:add_appointment')
 
         # Create appointment
         try:
@@ -579,19 +567,10 @@ class Book_appointment(View):
 
         # Doctor Leave Check
         from doctor.models import DoctorLeave
-        from clinic.models import ClinicSettings
-        clinic = ClinicSettings.get()
         leave = DoctorLeave.objects.filter(doctor=doctor, date=appointment_date).first()
-        if leave:
-            if leave.leave_type == 'full_day':
-                messages.error(request, "Doctor is on leave on this date.")
-                return redirect('appointment:appointment')
-            elif leave.leave_type == 'first_half' and clinic.lunch_start and time_24 < clinic.lunch_start:
-                messages.error(request, "Doctor is on leave during this time.")
-                return redirect('appointment:appointment')
-            elif leave.leave_type == 'second_half' and clinic.lunch_start and time_24 >= clinic.lunch_start:
-                messages.error(request, "Doctor is on leave during this time.")
-                return redirect('appointment:appointment')
+        if leave and leave.covers_time_slot(time_24):
+            messages.error(request, leave.get_error_message())
+            return redirect('appointment:appointment')
 
         # Family member resolve
         family_member = None
