@@ -44,6 +44,22 @@ class DoctorLeave(models.Model):
 
     def __str__(self):
         return f"{self.doctor.user.first_name} - {self.date} ({self.get_leave_type_display()})"
+
+    def covers_time_slot(self, time_slot):
+        from clinic.models import ClinicSettings
+        clinic = ClinicSettings.get()
+        if self.leave_type == 'full_day':
+            return True
+        if self.leave_type == 'first_half' and clinic.lunch_start and time_slot < clinic.lunch_start:
+            return True
+        if self.leave_type == 'second_half' and clinic.lunch_start and time_slot >= clinic.lunch_start:
+            return True
+        return False
+
+    def get_error_message(self):
+        if self.leave_type == 'full_day':
+            return "Doctor is on leave on this date."
+        return "Doctor is on leave during this time."
     
 
 # When an InnerMember is deleted we usually want to remove the related auth `User` as
