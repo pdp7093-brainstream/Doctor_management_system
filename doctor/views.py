@@ -1,11 +1,15 @@
 import json
 import logging
+import random
+import re
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError, ProgrammingError, transaction
 from django.contrib.auth import authenticate, login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.conf import settings
 from django.views.decorators.cache import never_cache
 from django.views import View
 from .decorators import role_required
@@ -42,7 +46,6 @@ def login_view(request):
             except InnerMember.DoesNotExist:
                 return render(request, 'doctor/login.html', {'error': 'Role not assigned'})
 
-            # YAHAN CHANGE
             if role == 'doctor':
                 return redirect('doctor:dashboard')
             else:
@@ -52,6 +55,108 @@ def login_view(request):
             return render(request, 'doctor/login.html', {'error': 'Invalid credentials'})
 
     return render(request, 'doctor/login.html')
+
+@never_cache
+def forgot_password(request):
+    username = request.POST.get('username', '').strip() if request.method == 'POST' else ''
+    error = None
+    success = None
+    show_otp_form = False
+
+    if request.method == 'POST':
+        otp = request.POST.get('otp', '').strip()
+        new_password = request.POST.get('new_password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        if otp or new_password or confirm_password:
+            # OTP validation + password reset stage
+            session_otp = request.session.get('doctor_reset_otp')
+            user_id = request.session.get('doctor_reset_user_id')
+
+            if not username:
+                error = 'Username is required.'
+                show_otp_form = True
+            elif not session_otp or not user_id:
+                error = 'OTP session expired. Request a new OTP.'
+            elif not otp:
+                error = 'OTP is required.'
+                show_otp_form = True
+            elif otp != str(session_otp):
+                error = 'Invalid OTP. Please try again.'
+                show_otp_form = True
+            elif not new_password or not confirm_password:
+                error = 'New password and confirm password are required.'
+                show_otp_form = True
+            elif new_password != confirm_password:
+                error = 'Passwords do not match.'
+                show_otp_form = True
+            else:
+                if len(new_password) < 8:
+                    error = 'Password must be at least 8 characters long.'
+                    show_otp_form = True
+                elif not re.search(r'[A-Z]', new_password):
+                    error = 'Password must contain at least one uppercase letter.'
+                    show_otp_form = True
+                elif not re.search(r'[a-z]', new_password):
+                    error = 'Password must contain at least one lowercase letter.'
+                    show_otp_form = True
+                elif not re.search(r'[0-9]', new_password):
+                    error = 'Password must contain at least one number.'
+                    show_otp_form = True
+                elif not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+                    error = 'Password must contain at least one special character.'
+                    show_otp_form = True
+                else:
+                    try:
+                        user = User.objects.get(id=user_id)
+                        user.set_password(new_password)
+                        user.save()
+                        request.session.pop('doctor_reset_otp', None)
+                        request.session.pop('doctor_reset_user_id', None)
+                        success = 'Password reset successful. Please login with your new password.'
+                    except User.DoesNotExist:
+                        error = 'Account no longer exists.'
+        else:
+            # Request OTP stage
+            if not username:
+                error = 'Username is required.'
+            else:
+                try:
+                    user = User.objects.get(username=username)
+                    InnerMember.objects.get(user=user)
+
+                    if not user.email:
+                        error = 'User does not have an email address. Contact admin.'
+                    else:
+                        otp = str(random.randint(100000, 999999))
+                        request.session['doctor_reset_otp'] = otp
+                        request.session['doctor_reset_user_id'] = user.id
+                        show_otp_form = True
+
+                        send_mail(
+                            subject='Clinic Password Reset OTP',
+                            message=f'Your password reset OTP is {otp}. Use this to reset your password.',
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[user.email],
+                            fail_silently=False,
+                        )
+
+                        success = 'OTP has been sent to your registered email address. Check your inbox.'
+
+                except User.DoesNotExist:
+                    error = 'Invalid username.'
+                except InnerMember.DoesNotExist:
+                    error = 'Account is not a clinic doctor/staff.'
+                except Exception as exc:
+                    logger.exception('forgot_password email send failed: %s', exc)
+                    error = 'Unable to send OTP email. Please try again later.'
+
+    return render(request, 'doctor/forgot_password.html', {
+        'error': error,
+        'success': success,
+        'show_otp_form': show_otp_form,
+        'username': username,
+    })
 
 # Logout 
 def logout_view(request):
