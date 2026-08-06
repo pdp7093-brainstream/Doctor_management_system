@@ -204,6 +204,11 @@
                         <small>Please enter it below.</small>
                     </div>
 
+                    <div class="mb-3 d-flex justify-content-between align-items-center">
+                        <small id="otp-timer" class="text-muted">Time remaining: 1:00</small>
+                        <button type="button" id="btn-resend-otp" class="btn btn-link p-0" style="display: none; font-size: 0.9rem; color: #4183ff;">Resend OTP</button>
+                    </div>
+
                     <div class="mb-3">
                         <label class="form-label" for="otp">Enter OTP</label>
                         <input type="text" id="otp" name="otp" class="form-control" placeholder="6-digit OTP"
@@ -243,6 +248,13 @@
             const debugOtpDisplay = document.getElementById('debug-otp-display');
             const otpAlert = document.getElementById('otp-alert');
             const btnBack = document.getElementById('btn-back');
+            const otpTimer = document.getElementById('otp-timer');
+            const btnResendOtp = document.getElementById('btn-resend-otp');
+
+            let otpCountdown = null;
+            let remainingSeconds = 60;
+            let currentPhone = '';
+            let otpExpired = false;
 
             function showAlert(message, type = 'danger') {
                 alertContainer.innerHTML = `<div class="error-message" style="background: ${type === 'danger' ? '#fee' : '#d4edda'}; color: ${type === 'danger' ? '#c33' : '#155724'}; border-left-color: ${type === 'danger' ? '#c33' : '#155724'}; padding: 10px 15px; border-radius: 4px; margin-bottom: 20px; font-size: 0.9rem; border-left: 4px solid;">${message}</div>`;
@@ -252,18 +264,52 @@
                 alertContainer.innerHTML = '';
             }
 
-            btnGetOtp.addEventListener('click', function () {
-                const phone = phoneInput.value.trim();
-                if (!phone) {
-                    showAlert('Please enter your phone number.');
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            function updateOtpTimer() {
+                if (otpExpired) {
+                    otpTimer.textContent = 'OTP expired. You can resend now.';
+                    btnResendOtp.style.display = 'inline-block';
                     return;
                 }
 
+                otpTimer.textContent = `Time remaining: ${formatTime(remainingSeconds)}`;
+            }
+
+            function stopOtpTimer() {
+                if (otpCountdown) {
+                    clearInterval(otpCountdown);
+                    otpCountdown = null;
+                }
+            }
+
+            function startOtpTimer() {
+                stopOtpTimer();
+                remainingSeconds = 150;
+                otpExpired = false;
+                btnResendOtp.style.display = 'none';
+                updateOtpTimer();
+
+                otpCountdown = setInterval(() => {
+                    remainingSeconds -= 1;
+                    if (remainingSeconds <= 0) {
+                        otpExpired = true;
+                        stopOtpTimer();
+                    }
+                    updateOtpTimer();
+                }, 1000);
+            }
+
+            function requestOtp(phone) {
                 clearAlert();
                 btnGetOtp.disabled = true;
                 btnGetOtp.innerText = 'Sending...';
 
-                fetch('{% url "login" %}', {
+                return fetch('{% url "login" %}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -283,14 +329,20 @@
                         btnGetOtp.innerText = 'Get OTP';
 
                         if (data.success) {
+                            currentPhone = phone;
                             stepPhone.style.display = 'none';
                             stepOtp.style.display = 'block';
                             otpInput.value = '';
+                            otpInput.disabled = false;
                             otpInput.focus();
+                            otpExpired = false;
+                            startOtpTimer();
 
                             if (data.debug_otp) {
                                 debugOtpDisplay.innerText = data.debug_otp;
                                 otpAlert.style.display = 'block';
+                            } else {
+                                otpAlert.style.display = 'none';
                             }
                         } else {
                             showAlert(data.error || 'Failed to generate OTP.');
@@ -301,11 +353,24 @@
                         btnGetOtp.innerText = 'Get OTP';
                         showAlert(err.message || 'A network error occurred. Please refresh and try again.');
                     });
+            }
+
+            btnGetOtp.addEventListener('click', function () {
+                const phone = phoneInput.value.trim();
+                if (!phone) {
+                    showAlert('Please enter your phone number.');
+                    return;
+                }
+                requestOtp(phone);
             });
 
             otpInput.addEventListener('input', function () {
                 this.value = this.value.replace(/[^0-9]/g, '');
                 if (this.value.length === 6) {
+                    if (otpExpired) {
+                        showAlert('The OTP has expired. Please resend to get a new code.');
+                        return;
+                    }
                     verifyOtp(this.value);
                 }
             });
@@ -337,6 +402,11 @@
                             showAlert(data.error || 'Invalid OTP.');
                             otpInput.value = '';
                             otpInput.focus();
+                            if (data.error && data.error.toLowerCase().includes('expired')) {
+                                otpExpired = true;
+                                stopOtpTimer();
+                                updateOtpTimer();
+                            }
                         }
                     })
                     .catch(err => {
@@ -345,12 +415,24 @@
                     });
             }
 
+            btnResendOtp.addEventListener('click', function () {
+                if (!currentPhone) {
+                    showAlert('Unable to resend OTP. Please enter your phone number again.');
+                    return;
+                }
+                requestOtp(currentPhone);
+            });
+
             btnBack.addEventListener('click', function (e) {
                 e.preventDefault();
                 stepOtp.style.display = 'none';
                 stepPhone.style.display = 'block';
                 clearAlert();
                 otpInput.value = '';
+                stopOtpTimer();
+                otpExpired = false;
+                btnResendOtp.style.display = 'none';
+                otpTimer.textContent = 'Time remaining: 1:00';
             });
         });
 

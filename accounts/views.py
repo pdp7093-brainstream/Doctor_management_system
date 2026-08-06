@@ -20,6 +20,7 @@ from django.db import OperationalError, ProgrammingError
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date, parse_time
+from django.utils import timezone
 from appointment.file_validation import validate_uploaded_document
 
 def home(request):
@@ -282,26 +283,40 @@ class LoginView(View):
 
         if 'otp' in data:
             session_otp = request.session.get('login_otp')
+            otp_timestamp = request.session.get('login_otp_ts')
             submitted_otp = str(data.get('otp', '')).strip()
-            
+
+            if not session_otp or otp_timestamp is None:
+                if is_ajax: return JsonResponse({'success': False, 'error': 'OTP expired. Please resend and try again.'})
+                return render(request, self.template_name, {'show_otp': True, 'error': 'OTP expired. Please resend and try again.'})
+
+            elapsed_seconds = timezone.now().timestamp() - float(otp_timestamp)
+            if elapsed_seconds > 200:
+                request.session.pop('login_otp', None)
+                request.session.pop('login_otp_ts', None)
+                if is_ajax: return JsonResponse({'success': False, 'error': 'OTP expired. Please resend and try again.'})
+                return render(request, self.template_name, {'show_otp': True, 'error': 'OTP expired. Please resend and try again.'})
+
             if session_otp and str(session_otp) == submitted_otp:
                 # OTP is correct, log in user
                 user_id = request.session.get('login_user_id')
                 if not user_id:
                     if is_ajax: return JsonResponse({'success': False, 'error': 'Session expired. Please try again.'})
                     return render(request, self.template_name, {'error': 'Session expired. Please try again.'})
-                
+
                 try:
                     user = User.objects.get(id=user_id)
                     # When manually logging a user in without authenticate(), we must specify the backend
                     # if multiple authentication backends are configured.
                     auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                    
+
                     if 'login_otp' in request.session:
                         del request.session['login_otp']
+                    if 'login_otp_ts' in request.session:
+                        del request.session['login_otp_ts']
                     if 'login_user_id' in request.session:
                         del request.session['login_user_id']
-                        
+
                     if is_ajax: return JsonResponse({'success': True, 'redirect_url': reverse('profile')})
                     return redirect('profile')
                 except User.DoesNotExist:
@@ -349,9 +364,14 @@ class LoginView(View):
         
         request.session['login_otp'] = str(otp)
         request.session['login_user_id'] = patient.user.id
+        request.session['login_otp_ts'] = timezone.now().timestamp()
+
+        response_data = {'success': True}
+        if settings.DEBUG:
+            response_data['debug_otp'] = str(otp)
 
         if is_ajax:
-            return JsonResponse({'success': True})
+            return JsonResponse(response_data)
         return render(request, self.template_name, {'show_otp': True})
 
 def logout_view(request):
