@@ -94,8 +94,8 @@
   .profile-avatar {
     width: 40px;
     height: 40px;
-    background-color: #1977cc;
-    /* Clinic theme blue */
+    background-color: var(--brand-green, #117A15);
+    /* Brand green */
     color: #fff;
     border-radius: 50%;
     display: flex;
@@ -103,7 +103,7 @@
     justify-content: center;
     font-weight: 600;
     font-size: 14px;
-    border: 2px solid rgba(25, 119, 204, 0.2);
+    border: 2px solid rgba(1, 83, 21, 0.15);
     transition: 0.3s;
     overflow: hidden;
     position: relative;
@@ -117,9 +117,9 @@
   }
 
   .profile-nav:hover .profile-avatar {
-    background-color: #1561a8;
+    background-color: var(--brand-primary, #015315);
     transform: scale(1.08);
-    box-shadow: 0 4px 12px rgba(25, 119, 204, 0.3);
+    box-shadow: 0 4px 12px rgba(1, 83, 21, 0.15);
   }
 
   /* Dropdown Alignment Fix */

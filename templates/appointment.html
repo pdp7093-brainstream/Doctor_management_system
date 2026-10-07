@@ -53,12 +53,12 @@
     .btn-add-member {
       white-space: nowrap;font-size: 0.85rem;font-weight: 600;
       padding: 9px 14px;border-radius: 8px;
-      background: transparent;border: 1.5px solid #007aff;color: #007aff;
+      background: transparent;border: 1.5px solid var(--brand-primary, #015315);color: var(--brand-primary, #015315);
       cursor: pointer;transition: all 0.2s;display: inline-flex;
       align-items: center;gap: 6px;
     }
 
-    .btn-add-member:hover { background: #007aff;color: #fff;}
+    .btn-add-member:hover { background: var(--brand-primary, #015315);color: #fff;}
 
     /* ── Add Member Modal ── */
     .modal-overlay { display: none;position: fixed;
@@ -90,10 +90,10 @@
     }
 
     .modal-box h5 {
-      font-weight: 700; font-size: 1.1rem;margin-bottom: 18px;color: #1a2035;
+      font-weight: 700; font-size: 1.1rem;margin-bottom: 18px;color: var(--heading-color, #14281A);
       display: flex;align-items: center;gap: 8px; }
 
-    .modal-box h5 i {color: #007aff;}
+    .modal-box h5 i {color: var(--brand-primary, #015315);}
     .modal-field { margin-bottom: 14px; }
 
     .modal-field label {
@@ -104,12 +104,12 @@
     .modal-field input,
     .modal-field select {
       width: 100%;
-      padding: 10px 12px; border: 1.5px solid #e2eaff;border-radius: 8px;
-      font-size: 0.92rem;background: #f7f9ff;transition: border-color 0.2s;font-family: inherit;
+      padding: 10px 12px; border: 1.5px solid var(--border-color, #DCEBDC);border-radius: 8px;
+      font-size: 0.92rem;background: var(--bg-tint-2, #F7FAF6);transition: border-color 0.2s;font-family: inherit;
     }
 
     .modal-field input:focus,
-    .modal-field select:focus { border-color: #007aff; outline: none;background: #fff; }
+    .modal-field select:focus { border-color: var(--brand-green, #117A15); outline: none;background: #fff; }
 
     .modal-actions { display: flex; gap: 10px;margin-top: 20px;}
 
@@ -122,11 +122,11 @@
       transition: opacity 0.2s;
     }
 
-    .modal-actions .btn-save {background: #007aff;color: #fff;}
+    .modal-actions .btn-save {background: var(--brand-primary, #015315);color: #fff;}
     .modal-actions .btn-save:hover { opacity: 0.88;}
 
-    .modal-actions .btn-close-modal { background: #f0f4ff;color: #555; border: 1.5px solid #e2eaff;}
-    .modal-actions .btn-close-modal:hover { background: #e2eaff;}
+    .modal-actions .btn-close-modal { background: var(--bg-tint, #F3F8F2);color: #555; border: 1.5px solid var(--border-color, #DCEBDC);}
+    .modal-actions .btn-close-modal:hover { background: var(--border-color, #DCEBDC);}
   </style>
 </head>
 

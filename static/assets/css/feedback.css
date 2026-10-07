@@ -13,8 +13,8 @@
 }
 
 .feedback-card.unread {
-    border-left: 4px solid var(--primary-color);
-    background: #f0f7ff;
+    border-left: 4px solid var(--brand-green, #117A15);
+    background: var(--bg-tint, #F3F8F2);
 }
 
 .feedback-header {
@@ -35,7 +35,7 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-color), #0083fe);
+    background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
     color: #fff;
     display: flex;
     align-items: center;
@@ -72,9 +72,9 @@
     line-height: 1.65;
     margin: 10px 0;
     padding: 12px 16px;
-    background: #f8fafc;
+    background: var(--bg-tint-2, #F7FAF6);
     border-radius: 8px;
-    border-left: 3px solid var(--primary-color);
+    border-left: 3px solid var(--brand-green, #117A15);
 }
 
 .feedback-footer {
@@ -192,7 +192,7 @@
 .feedback-form-card h2 {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #1a2035;
+    color: var(--heading-color, #14281A);
     margin-bottom: 4px;
 }
 
@@ -203,18 +203,18 @@
 }
 
 .feedback-form-card .form-control {
-    border: 1.5px solid #e8edf5;
+    border: 1.5px solid var(--border-color, #DCEBDC);
     border-radius: 10px;
     padding: 12px 16px;
     font-size: 0.92rem;
-    background: #fafbfe;
+    background: var(--bg-tint-2, #F7FAF6);
     transition: border-color 0.2s, background 0.2s;
 }
 
 .feedback-form-card .form-control:focus {
-    border-color: #0088ff;
+    border-color: var(--brand-green, #117A15);
     background: #fff;
-    box-shadow: 0 0 0 3px rgba(25, 119, 204, 0.08);
+    box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
 }
 
 .feedback-form-card textarea.form-control {
@@ -223,7 +223,7 @@
 }
 
 .btn-submit-feedback {
-    background: linear-gradient(135deg, #1977cc 0%, #1561a8 100%);
+    background: linear-gradient(135deg, var(--brand-green, #117A15) 0%, var(--brand-primary, #015315) 100%);
     color: #fff;
     border: none;
     border-radius: 10px;
@@ -241,12 +241,12 @@
 
 .btn-submit-feedback:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(25, 119, 204, 0.3);
+    box-shadow: 0 6px 20px rgba(1, 83, 21, 0.15);
 }
 
 /* ── Info Section ── */
 .feedback-info-card {
-    background: linear-gradient(135deg, #1977cc 0%, #017ff6 100%);
+    background: linear-gradient(135deg, var(--brand-green, #117A15) 0%, var(--brand-primary, #015315) 100%);
     border-radius: 16px;
     padding: 36px;
     color: #fff;

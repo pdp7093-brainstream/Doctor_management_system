@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-    --primary: #007aff;
-    --primary-hover: #0062cc;
-    --bg: #f0f4ff;
+    --primary: var(--brand-primary, #015315);
+    --primary-hover: var(--brand-primary-hover, #013A0F);
+    --bg: var(--bg-tint, #F3F8F2);
     --surface: #ffffff;
-    --text: #1a2035;
+    --text: var(--heading-color, #14281A);
     --muted: #6b7280;
-    --border: #e2eaff;
+    --border: var(--border-color, #DCEBDC);
     --radius: 12px;
     --sidebar-w: 230px;
     --danger: #dc2626;
@@ -70,10 +70,15 @@ body {
     transition: background 0.2s;
 }
 
-.sidebar a:hover,
+.sidebar a:hover {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+}
+
 .sidebar li.active a {
     background: rgba(255,255,255,0.18);
     color: #fff;
+    border-left: 4px solid var(--brand-accent, #FD6801);
 }
 
 .sidebar a i { width: 18px; text-align: center; font-size: 0.95rem; }
@@ -100,8 +105,8 @@ body {
 
 /* ── Stat Cards ───────────────────────── */
 .stats .stat-card {
-    background: linear-gradient(145deg, #ffffff, #f8faff);
-    border: 1px solid rgba(226, 234, 255, 0.8);
+    background: linear-gradient(145deg, #ffffff, var(--bg-tint-2, #F7FAF6));
+    border: 1px solid var(--border);
     border-radius: 16px;
     padding: 24px;
     text-align: center;
@@ -116,7 +121,7 @@ body {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--primary), #6366f1);
+    background: linear-gradient(90deg, var(--brand-primary, #015315), var(--brand-accent, #FD6801));
     opacity: 0;
     transition: opacity 0.3s ease;
 }
@@ -192,7 +197,7 @@ body {
 
 /* ── Appointment Filters ───────────────── */
 .appointment-filter-form {
-    background: linear-gradient(180deg, #fbfdff 0%, #f6f9ff 100%);
+    background: linear-gradient(180deg, var(--bg-tint-2, #F7FAF6) 0%, var(--bg-tint, #F3F8F2) 100%);
     border: 1px solid var(--border);
     border-radius: 14px;
     padding: 14px;
@@ -253,12 +258,12 @@ body {
 .appointment-filter-form .form-control:focus,
 .appointment-filter-form .form-select:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
 }
 
 .appointment-filter-form .form-control:hover,
 .appointment-filter-form .form-select:hover {
-    border-color: #c9d6f3;
+    border-color: var(--border);
 }
 
 .appointment-filter-form .form-control::placeholder {
@@ -281,8 +286,8 @@ body {
 }
 
 .filter-toolbar .btn-outline-secondary:hover {
-    background: #eef4ff;
-    border-color: #c9d6f3;
+    background: var(--bg-tint, #F3F8F2);
+    border-color: var(--border);
     color: var(--primary);
 }
 
@@ -323,7 +328,7 @@ body {
 }
 
 .table thead th {
-    background: #f8faff;
+    background: var(--bg-tint-2, #F7FAF6);
     color: #475569;
     padding: 14px 16px;
     font-weight: 700;
@@ -350,7 +355,7 @@ body {
 }
 
 .table tbody tr:hover { 
-    background: #f8fbff; 
+    background: var(--bg-tint-2, #F7FAF6); 
     transform: scale(1.001);
     box-shadow: 0 2px 8px rgba(0,0,0,0.02);
     position: relative;
@@ -504,7 +509,7 @@ body {
     padding: 10px 12px;
     border-radius: 8px;
     border: 1.5px solid var(--border);
-    background: #f7f9ff;
+    background: var(--bg-tint-2, #F7FAF6);
     font-size: 0.9rem;
     font-family: inherit;
     color: var(--text);
@@ -513,7 +518,7 @@ body {
 
 .form-control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+    box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
     outline: none;
     background: #fff;
 }
@@ -603,7 +608,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 }
 
 .detail-card p {
-    background: #f7f9ff;
+    background: var(--bg-tint, #F3F8F2);
     border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 14px;
@@ -707,7 +712,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
         .info-grid.full { grid-template-columns:1fr; }
         @media (max-width:600px) { .info-grid { grid-template-columns:1fr; } }
-        .info-box { background:#f7f9ff; border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+        .info-box { background:var(--bg-tint, #F3F8F2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
         .info-box .label { font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--muted); margin-bottom:3px; }
         .info-box .value { font-size:0.95rem; font-weight:500; color:var(--text); }
         .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.8rem; font-weight:600; }
@@ -722,7 +727,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         .rx-table thead th { background:var(--primary); color:#fff; padding:10px 12px; text-align:left; font-weight:600; }
         .rx-table tbody td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
         .rx-table tbody tr:last-child td { border-bottom:none; }
-        .rx-table tbody tr:hover { background:#f7f9ff; }
+        .rx-table tbody tr:hover { background:var(--bg-tint, #F3F8F2); }
         .section-tag {
             display:inline-block; font-size:0.7rem; font-weight:700; padding:2px 8px;
             border-radius:20px; background:#e0f2fe; color:#0369a1;
@@ -740,7 +745,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
         .profile-info-table tbody tr:last-child td { border-bottom: none; }
         .profile-info-table tbody tr { transition: all 0.2s ease; }
-        .profile-info-table tbody tr:hover { background: #f8fbff; transform: scale(1.001); }
+        .profile-info-table tbody tr:hover { background: var(--bg-tint-2, #F7FAF6); transform: scale(1.001); }
         .profile-info-table .info-label {
             font-size: 0.78rem;
             font-weight: 700;
@@ -748,7 +753,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
             letter-spacing: 0.05em;
             color: var(--muted);
             width: 160px;
-            background: #f8faff;
+            background: var(--bg-tint-2, #F7FAF6);
         }
         .profile-info-table .info-value {
             font-weight: 600;
@@ -762,7 +767,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
             align-items: center;
             gap: 24px;
             padding: 24px 28px;
-            background: linear-gradient(145deg, #ffffff, #f8faff);
+            background: linear-gradient(145deg, #ffffff, var(--bg-tint-2, #F7FAF6));
             border-bottom: 1px solid var(--border);
         }
         .profile-avatar {
@@ -775,7 +780,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         .profile-avatar-initials {
             width: 80px; height: 80px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
             display: flex; align-items: center; justify-content: center;
             color: #fff; font-size: 2rem; font-weight: 700;
             flex-shrink: 0;
@@ -793,7 +798,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         /* ── Family Members Table ── */
         .fm-table { width:100%; border-collapse: separate; border-spacing: 0; font-size:0.92rem; }
         .fm-table thead th { 
-            background: #f8faff; 
+            background: var(--bg-tint-2, #F7FAF6); 
             color: #475569; 
             padding: 14px 16px; 
             font-weight: 700; 
@@ -806,7 +811,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         .fm-table tbody td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: middle; }
         .fm-table tbody tr:last-child td { border-bottom: none; }
         .fm-table tbody tr { transition: all 0.2s ease; }
-        .fm-table tbody tr:hover { background: #f8fbff; transform: scale(1.001); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .fm-table tbody tr:hover { background: var(--bg-tint-2, #F7FAF6); transform: scale(1.001); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
 
         .btn-icon {
             width:30px; height:30px; border-radius:7px; border:none;
@@ -842,7 +847,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
         .modal-box h5 {
             font-weight:700; font-size:1.05rem; margin-bottom:18px;
-            color:#1a2035; display:flex; align-items:center; gap:8px;
+            color:var(--text); display:flex; align-items:center; gap:8px;
         }
         .modal-box h5 i { color:var(--primary); }
         .modal-field { margin-bottom:13px; }
@@ -853,7 +858,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
         .modal-field input, .modal-field select {
             width:100%; padding:9px 12px; border:1.5px solid var(--border);
-            border-radius:8px; font-size:0.9rem; background:#f7f9ff;
+            border-radius:8px; font-size:0.9rem; background:var(--bg-tint-2, #F7FAF6);
             transition:border-color 0.2s; font-family:inherit;
         }
         .modal-field input:focus, .modal-field select:focus {
@@ -874,10 +879,10 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         .btn-save-modal  { background:var(--primary); color:#fff; }
         .btn-save-modal:hover { opacity:0.88; }
         .btn-close-modal {
-            background:#f0f4ff; color:#555;
+            background:var(--bg-tint, #F3F8F2); color:#555;
             border:1.5px solid var(--border) !important;
         }
-        .btn-close-modal:hover { background:#e2eaff; }
+        .btn-close-modal:hover { background:var(--border); }
         .modal-error { color:#dc2626; font-size:0.83rem; display:none; margin-top:6px; }
 
         /* ── Photo upload in modal ── */
@@ -892,7 +897,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
         .modal-avatar-initials {
             width: 60px; height: 60px; border-radius: 50%;
-            background: linear-gradient(135deg,#6366f1,#818cf8);
+            background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
             display: flex; align-items: center; justify-content: center;
             color:#fff; font-size:1.4rem; font-weight:700;
         }
@@ -927,8 +932,8 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 
         body {
             background:
-                radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 32%),
-                linear-gradient(180deg, #f6f8ff 0%, #eef3ff 100%);
+                radial-gradient(circle at top left, rgba(1, 83, 21, 0.08), transparent 32%),
+                linear-gradient(180deg, var(--bg-tint-2, #F7FAF6) 0%, var(--bg-tint, #F3F8F2) 100%);
         }
 
         .profile-page-shell {
@@ -966,7 +971,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 
         .patient-hero {
             background: rgba(255, 255, 255, 0.7);
-            border: 1px solid rgba(226, 234, 255, 0.9);
+            border: 1px solid var(--border);
             border-radius: 24px;
             box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
             padding: 28px;
@@ -1015,7 +1020,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
 
         .btn-book-appointment {
-            background: linear-gradient(135deg, var(--primary), #5b42ff);
+            background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
             color: #fff;
             border: none;
             border-radius: 10px;
@@ -1028,13 +1033,13 @@ textarea.form-control { min-height: 90px; resize: vertical; }
             align-items: center;
             gap: 8px;
             text-decoration: none;
-            box-shadow: 0 10px 18px rgba(91, 66, 255, 0.18);
+            box-shadow: 0 10px 18px rgba(1, 83, 21, 0.15);
         }
 
         .btn-book-appointment:hover {
             color: #fff;
             transform: translateY(-2px);
-            box-shadow: 0 14px 24px rgba(0, 109, 252, 0.24);
+            box-shadow: 0 14px 24px rgba(1, 83, 21, 0.15);
         }
 
 
@@ -1068,8 +1073,8 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 
         body {
             background:
-                radial-gradient(circle at top left, rgba(79, 70, 229, 0.08), transparent 32%),
-                linear-gradient(180deg, #f6f8ff 0%, #eef3ff 100%);
+                radial-gradient(circle at top left, rgba(1, 83, 21, 0.08), transparent 32%),
+                linear-gradient(180deg, var(--bg-tint-2, #F7FAF6) 0%, var(--bg-tint, #F3F8F2) 100%);
             background-attachment: fixed;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
@@ -1101,7 +1106,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
 
         .appointment-page-shell .page-header i {
-            color: var(--primary, #4F46E5);
+            color: var(--primary);
         }
 
         .appointment-page-shell .card {
@@ -1138,13 +1143,13 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
 
         .appointment-page-shell .section-title i {
-            color: var(--primary, #4F46E5);
+            color: var(--primary);
             font-size: 18px;
         }
 
         .appointment-page-shell .section-tag {
             display: inline-block;
-            background: var(--primary, #4F46E5);
+            background: var(--brand-accent, #FD6801);
             color: white;
             padding: 4px 12px;
             border-radius: 20px;
@@ -1216,7 +1221,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 
         .appointment-page-shell .visit-badge {
             display: inline-block;
-            background: var(--primary, #4F46E5);
+            background: var(--brand-accent, #FD6801);
             color: white;
             padding: 6px 12px;
             border-radius: 6px;
@@ -1256,7 +1261,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
 
         .appointment-page-shell .rx-table tbody tr:hover {
-            background-color: rgba(79, 70, 229, 0.04);
+            background-color: rgba(1, 83, 21, 0.05);
         }
 
         .appointment-page-shell .btn-back {
@@ -1276,8 +1281,8 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 
         .appointment-page-shell .btn-back:hover {
             background: var(--light, #f3f4f6);
-            border-color: var(--primary, #4F46E5);
-            color: var(--primary, #4F46E5);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .appointment-page-shell .btn-print {
@@ -1285,10 +1290,10 @@ textarea.form-control { min-height: 90px; resize: vertical; }
             align-items: center;
             gap: 8px;
             padding: 10px 16px;
-            border: 1px solid var(--primary, #4F46E5);
+            border: 1px solid var(--primary);
             border-radius: 8px;
             background: white;
-            color: var(--primary, #4F46E5);
+            color: var(--primary);
             font-weight: 500;
             font-size: 14px;
             text-decoration: none;
@@ -1296,7 +1301,7 @@ textarea.form-control { min-height: 90px; resize: vertical; }
         }
 
         .appointment-page-shell .btn-print:hover {
-            background: var(--primary, #4F46E5);
+            background: var(--primary);
             color: white;
         }
 

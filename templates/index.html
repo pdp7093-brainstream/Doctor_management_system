@@ -53,91 +53,75 @@
         <div class="row align-items-center">
           <div class="col-lg-6">
             <div class="hero-content">
+
+              <!-- Trust badges -->
               <div class="trust-badges mb-4" data-aos="fade-right" data-aos-delay="200">
                 <div class="badge-item">
-                  <i class="bi bi-shield-check"></i>
-                  <span>Certified Experts</span>
+                  <i class="bi bi-flower1"></i>
+                  <span>100% Herbal</span>
                 </div>
                 <div class="badge-item">
-                  <i class="bi bi-clock"></i>
-                  <span>Zero Wait Time</span>
+                  <i class="bi bi-heart-pulse"></i>
+                  <span>Traditional Ayurveda</span>
                 </div>
                 <div class="badge-item">
-                  <i class="bi bi-star-fill"></i>
-                  <span>Patient First</span>
+                  <i class="bi bi-person-heart"></i>
+                  <span>Personalised Care</span>
                 </div>
               </div>
 
               <h1 data-aos="fade-right" data-aos-delay="300">
-                Modern <span class="highlight">Healthcare</span> With a Personal Touch
+                Ancient Healing for <span class="highlight">Modern Life</span>
               </h1>
 
               <p class="hero-description" data-aos="fade-right" data-aos-delay="400">
-                Book your doctor appointments online, manage your prescriptions, and get expert medical care without the hassle of long queues.
+                Experience authentic Ayurvedic treatment rooted in nature. Book your consultation online and begin your journey to balanced, holistic health.
               </p>
 
-              <div class="hero-stats mb-4" data-aos="fade-right" data-aos-delay="500">
-                <div class="stat-item">
-                  <h3><span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="2"
-                      class="purecounter"></span>+</h3>
-                  <p>Years Experience</p>
+              <!-- Feature points replacing fake counters -->
+              <div class="hero-features mb-4" data-aos="fade-right" data-aos-delay="500">
+                <div class="feature-item">
+                  <i class="bi bi-capsule"></i>
+                  <span>Natural Herbal Medicines</span>
                 </div>
-                <div class="stat-item">
-                  <h3><span data-purecounter-start="0" data-purecounter-end="5000" data-purecounter-duration="2"
-                      class="purecounter"></span>+</h3>
-                  <p>Patients Treated</p>
+                <div class="feature-item">
+                  <i class="bi bi-droplet-half"></i>
+                  <span>Panchakarma Therapies</span>
                 </div>
-                <div class="stat-item">
-                  <h3><span data-purecounter-start="0" data-purecounter-end="15" data-purecounter-duration="2"
-                      class="purecounter"></span>+</h3>
-                  <p>Medical Experts</p>
+                <div class="feature-item">
+                  <i class="bi bi-bullseye"></i>
+                  <span>Root-Cause Treatment</span>
                 </div>
               </div>
 
+              <!-- CTA -->
               <div class="hero-actions" data-aos="fade-right" data-aos-delay="600">
                 <a href="{% url 'appointment:appointment' %}" class="btn btn-primary">Book Appointment</a>
-               
               </div>
 
+              <!-- Clinic phone – only shown when available -->
+              {% if clinic.phone %}
               <div class="emergency-contact" data-aos="fade-right" data-aos-delay="700">
                 <div class="emergency-icon">
                   <i class="bi bi-telephone-fill"></i>
                 </div>
                 <div class="emergency-info">
                   <small>Clinic Reception</small>
-                  <strong>+91 (555) 911-2468</strong>
+                  <strong>{{ clinic.phone }}</strong>
                 </div>
               </div>
+              {% endif %}
+
             </div>
           </div>
 
           <div class="col-lg-6">
             <div class="hero-visual" data-aos="fade-left" data-aos-delay="400">
               <div class="main-image">
-                <img src="{% static 'assets/img/health/staff-10.webp' %}" alt="Modern Healthcare Facility" class="img-fluid">
-                <div class="floating-card appointment-card">
-                  <div class="card-icon">
-                    <i class="bi bi-calendar-check"></i>
-                  </div>
-                  <div class="card-content">
-                    <h6>Next Available</h6>
-                    <p>Today 2:30 PM</p>
-                    <small>Dr. Sarah Johnson</small>
-                  </div>
-                </div>
-                <div class="floating-card rating-card">
-                  <div class="card-content">
-                    <div class="rating-stars">
-                      <i class="bi bi-star-fill"></i>
-                      <i class="bi bi-star-fill"></i>
-                      <i class="bi bi-star-fill"></i>
-                      <i class="bi bi-star-fill"></i>
-                      <i class="bi bi-star-fill"></i>
-                    </div>
-                    <h6>4.9/5</h6>
-                    <small>1,234 Reviews</small>
-                  </div>
-                </div>
+                <img src="{% static 'assets/img/ayurveda/hero.webp' %}"
+                     alt="Ayurvedic herbs and natural treatment"
+                     class="img-fluid">
+                <!-- Fake floating cards removed -->
               </div>
               <div class="background-elements">
                 <div class="element element-1"></div>

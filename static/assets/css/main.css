@@ -19,30 +19,41 @@
   --nav-font: "Lato",  sans-serif;
 }
 
-/* Global Colors - The following color variables are used throughout the website. Updating them here will change the color scheme of the entire website */
-:root { 
+/* Brand Palette Variables */
+:root {
+  --brand-primary: #015315;
+  --brand-primary-hover: #013A0F;
+  --brand-green: #117A15;
+  --brand-accent: #FD6801;
+  --brand-red: #AD0002;
+  --heading-color: #14281A;
+  --bg-tint: #F3F8F2;
+  --bg-tint-2: #F7FAF6;
+  --border-color: #DCEBDC;
+
+  /* Global Colors */
   --background-color: #ffffff; /* Background color for the entire website, including individual sections */
   --default-color: #3c4049; /* Default color used for the majority of the text content across the entire website */
-  --heading-color: #112344; /* Color for headings, subheadings and title throughout the website */
-  --accent-color: #175cdd; /* Accent color that represents your brand on the website. It's used for buttons, links, and other elements that need to stand out */
+  --accent-color: #117A15; /* Accent color – set directly so color-mix() resolves correctly */
+  --accent-color-hover: #015315;
   --surface-color: #ffffff; /* The surface color is used as a background of boxed elements within sections, such as cards, icon boxes, or other elements that require a visual separation from the global background. */
   --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
 }
 
-/* Nav Menu Colors - The following color variables are used specifically for the navigation menu. They are separate from the global colors to allow for more customization options */
+/* Nav Menu Colors */
 :root {
   --nav-color: #3c4049;  /* The default color of the main navmenu links */
-  --nav-hover-color: #175cdd; /* Applied to main navmenu links when they are hovered over or active */
+  --nav-hover-color: var(--brand-green); /* Applied to main navmenu links when they are hovered over or active */
   --nav-mobile-background-color: #ffffff; /* Used as the background color for mobile navigation menu */
   --nav-dropdown-background-color: #ffffff; /* Used as the background color for dropdown items that appear when hovering over primary navigation items */
   --nav-dropdown-color: #3c4049; /* Used for navigation links of the dropdown items in the navigation menu. */
-  --nav-dropdown-hover-color: #175cdd; /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
+  --nav-dropdown-hover-color: var(--brand-green); /* Similar to --nav-hover-color, this color is applied to dropdown navigation links when they are hovered over. */
 }
 
 /* Color Presets - These classes override global colors when applied to any section or element, providing reuse of the sam color scheme. */
 
 .light-background {
-  --background-color: #f4f8ff;
+  --background-color: var(--bg-tint);
   --surface-color: #ffffff;
 }
 
@@ -1124,37 +1135,38 @@ section,
   max-width: 500px;
 }
 
-.hero .hero-content .hero-stats {
+.hero .hero-content .hero-features {
   display: flex;
-  gap: 2rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
 }
 
-.hero .hero-content .hero-stats .stat-item {
-  text-align: left;
-}
-
-.hero .hero-content .hero-stats .stat-item h3 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--accent-color);
-  margin: 0;
-  line-height: 1;
-}
-
-.hero .hero-content .hero-stats .stat-item p {
-  color: color-mix(in srgb, var(--default-color), transparent 30%);
-  margin: 0.25rem 0 0 0;
-  font-size: 0.875rem;
+.hero .hero-content .hero-features .feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 500;
+  color: var(--heading-color);
+}
+
+.hero .hero-content .hero-features .feature-item i {
+  width: 32px;
+  height: 32px;
+  background: color-mix(in srgb, var(--accent-color), transparent 88%);
+  color: var(--accent-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
 }
 
 @media (max-width: 576px) {
-  .hero .hero-content .hero-stats {
-    gap: 1rem;
-  }
-
-  .hero .hero-content .hero-stats .stat-item h3 {
-    font-size: 1.5rem;
+  .hero .hero-content .hero-features {
+    gap: 0.5rem;
   }
 }
 
@@ -1177,12 +1189,14 @@ section,
 }
 
 .hero .hero-content .hero-actions .btn.btn-primary {
-  background: var(--accent-color);
-  color: var(--contrast-color);
+  background: var(--brand-accent, #FD6801);
+  color: #fff;
+  border-color: var(--brand-accent, #FD6801);
 }
 
 .hero .hero-content .hero-actions .btn.btn-primary:hover {
-  background: color-mix(in srgb, var(--accent-color), black 10%);
+  background: var(--brand-primary, #015315);
+  border-color: var(--brand-primary, #015315);
   transform: translateY(-2px);
 }
 
@@ -1397,6 +1411,27 @@ section,
   left: -25px;
   transform: translateY(-50%);
   animation: float3 7s ease-in-out infinite;
+}
+
+/* Decorative leaf shape – CSS only, no image */
+.hero::after {
+  content: "";
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(ellipse at 30% 70%, rgba(17, 122, 21, 0.13) 0%, transparent 70%);
+  border-radius: 60% 40% 70% 30% / 50% 60% 40% 55%;
+  transform: rotate(-30deg);
+  z-index: 0;
+  pointer-events: none;
+  animation: leafFloat 9s ease-in-out infinite;
+}
+
+@keyframes leafFloat {
+  0%, 100% { transform: rotate(-30deg) scale(1); }
+  50%       { transform: rotate(-25deg) scale(1.05); }
 }
 
 @media (max-width: 992px) {
