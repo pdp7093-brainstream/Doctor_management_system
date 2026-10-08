@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    {% block viewport %}<meta name="viewport" content="width=device-width, initial-scale=1.0">{% endblock %}
+    <title>{% block title %}{% endblock %}</title>
+    {% block auth_css %}
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/font/bootstrap-icons.css' %}">
+    <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+    {% endblock %}
+    <link href="{% static 'assets/css/auth.css' %}" rel="stylesheet">
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+    {% block content %}{% endblock %}
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

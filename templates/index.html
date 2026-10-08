@@ -1,52 +1,14 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Dr. Care | Modern Medical Clinic</title>
-  <meta name="description" content="Modern online doctor appointment and clinic management system.">
-  <meta name="keywords" content="doctor, clinic, appointment, health">
-
-  <!-- Favicons -->
-  {% if clinic and clinic.logo %}
-  <link href="{{ clinic.logo.url }}" rel="icon">
-  <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
-  {% else %}
-  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
-  {% endif %}
-
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
-    rel="stylesheet">
-
-  <!-- Vendor CSS Files -->
-
-  <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
-
-  <!-- Main CSS File -->
-  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
-
-</head>
-
-<body class="index-page">
-
-  {% include 'header.html' %}
-
-  <main class="main">
+{% block title %}{{ clinic.clinic_name|default:'Ayurveda Clinic' }} | Authentic Ayurvedic Treatment{% endblock %}
+{% block meta_description %}Modern online doctor appointment and clinic management system.{% endblock %}
+{% block meta_keywords %}doctor, clinic, appointment, health{% endblock %}
+{% block body_class %}index-page{% endblock %}
+{% block content %}
 
     <!-- Hero Section -->
-    <section id="hero" class="hero section">
+    <section id="hero" class="hero section light-background">
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
@@ -101,7 +63,7 @@
 
               <!-- Clinic phone – only shown when available -->
               {% if clinic.phone %}
-              <div class="emergency-contact" data-aos="fade-right" data-aos-delay="700">
+              <div class="emergency-contact mt-4" data-aos="fade-right" data-aos-delay="700">
                 <div class="emergency-icon">
                   <i class="bi bi-telephone-fill"></i>
                 </div>
@@ -144,23 +106,47 @@
         <div class="row align-items-center">
           <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right" data-aos-delay="200">
             <div class="about-content">
-              <h2 class="section-heading">Your Health, Our Priority</h2>
-              <p class="lead-text">We provide a seamless healthcare experience, from online appointment booking to digital prescriptions. Our modern clinic is designed to make your medical visits stress-free and efficient.</p>
 
-              <p>Whether you need a routine checkup or specialized consultation, our expert doctors are here to listen, diagnose, and treat with the utmost care. We utilize modern technology to keep your health records secure and easily accessible.</p>
+              <!-- Decorative mandala label -->
+              <div class="section-label-wrap mb-3" style="position:relative; display:inline-block;">
+                <span class="section-eyebrow" style="font-size:0.85rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--brand-accent); display:inline-flex; align-items:center; gap:0.5rem;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="opacity:0.55;" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4" stroke="#117A15" stroke-width="1.5"/>
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83" stroke="#117A15" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                  About Us
+                </span>
+              </div>
 
-              <div class="stats-grid">
-                <div class="stat-item">
-                  <div class="stat-number purecounter" data-purecounter-start="0" data-purecounter-end="15000"
-                    data-purecounter-duration="1"></div>
-                  <div class="stat-label">Patients Served</div>
+              <h2 class="section-heading">Rooted in Ayurveda, <br>Focused on You</h2>
+              <p class="lead-text">At <strong>{{ clinic.clinic_name }}</strong>, we follow the timeless principles of Ayurveda to treat the root cause of illness, not just the symptoms. Every treatment plan is personalised to your body type (Prakriti), using natural herbs, therapies and lifestyle guidance.</p>
+
+              <!-- 2x2 icon point grid -->
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <div class="about-point d-flex align-items-start gap-2">
+                    <i class="bi bi-person-badge" style="font-size:1.3rem; color:var(--accent-color); flex-shrink:0; margin-top:2px;"></i>
+                    <span style="font-size:0.9rem; font-weight:500; color:var(--heading-color);">Personalised Prakriti Analysis</span>
+                  </div>
                 </div>
-                <div class="stat-item">
-                  <div class="stat-number purecounter" data-purecounter-start="0" data-purecounter-end="25"
-                    data-purecounter-duration="1"></div>
-                  <div class="stat-label">Years of Excellence</div>
+                <div class="col-6">
+                  <div class="about-point d-flex align-items-start gap-2">
+                    <i class="bi bi-flower2" style="font-size:1.3rem; color:var(--accent-color); flex-shrink:0; margin-top:2px;"></i>
+                    <span style="font-size:0.9rem; font-weight:500; color:var(--heading-color);">Authentic Herbal Medicines</span>
+                  </div>
                 </div>
-                
+                <div class="col-6">
+                  <div class="about-point d-flex align-items-start gap-2">
+                    <i class="bi bi-droplet-half" style="font-size:1.3rem; color:var(--accent-color); flex-shrink:0; margin-top:2px;"></i>
+                    <span style="font-size:0.9rem; font-weight:500; color:var(--heading-color);">Traditional Panchakarma Therapies</span>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="about-point d-flex align-items-start gap-2">
+                    <i class="bi bi-journal-text" style="font-size:1.3rem; color:var(--accent-color); flex-shrink:0; margin-top:2px;"></i>
+                    <span style="font-size:0.9rem; font-weight:500; color:var(--heading-color);">Diet &amp; Lifestyle Guidance</span>
+                  </div>
+                </div>
               </div>
 
               <div class="cta-section">
@@ -172,25 +158,21 @@
           <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
             <div class="about-visual">
               <div class="main-image">
-                <img src="{% static 'assets/img/health/facilities-9.webp' %}" alt="Modern medical facility" class="img-fluid">
+                <img src="{% static 'assets/img/ayurveda/about.webp' %}" alt="Ayurvedic treatment room" class="img-fluid">
               </div>
+              <!-- Online booking floating card (updated, no fake data) -->
               <div class="floating-card">
                 <div class="card-content">
                   <div class="icon">
-                    <i class="bi bi-heart-pulse"></i>
+                    <i class="bi bi-calendar2-check"></i>
                   </div>
                   <div class="card-text">
-                    <h4>Quick Appointments</h4>
-                    <p>Book a slot easily from your phone</p>
+                    <h4>Easy Online Booking</h4>
+                    <p>Book your consultation in minutes</p>
                   </div>
                 </div>
               </div>
-              <div class="experience-badge">
-                <div class="badge-content">
-                  <span class="years">25+</span>
-                  <span class="text">Years of Trusted Care</span>
-                </div>
-              </div>
+              <!-- Removed: fake "25+ Years of Trusted Care" badge -->
             </div>
           </div>
         </div>
@@ -199,262 +181,85 @@
 
     </section><!-- /Home About Section -->
 
-    <!-- Featured Departments Section -->
-    <section id="featured-departments" class="featured-departments section">
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Our Specialities</h2>
-        <p>Comprehensive healthcare services tailored to your everyday needs</p>
-      </div><!-- End Section Title -->
 
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row g-5">
-
-          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="100">
-            <div class="specialty-card">
-              <div class="specialty-content">
-                <div class="specialty-meta">
-                  <span class="specialty-label">Specialized Care</span>
-                </div>
-                <h3>General Medicine</h3>
-                <p>Comprehensive health checkups, preventive care, and treatment for everyday illnesses with personalized attention.</p>
-                <div class="specialty-features">
-                  <span><i class="bi bi-check-circle-fill"></i>Routine Checkups</span>
-                  <span><i class="bi bi-check-circle-fill"></i>Digital Prescriptions</span>
-                </div>
-                <a href="{% url 'departments' %}" class="specialty-link">
-                  Consult Doctor <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-              <div class="specialty-visual">
-                <img src="{% static 'assets/img/health/cardiology-1.webp' %}" alt="Cardiovascular Medicine" class="img-fluid">
-                <div class="visual-overlay">
-                  <i class="bi bi-heart-pulse"></i>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Specialty Card -->
-
-          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
-            <div class="specialty-card">
-              <div class="specialty-content">
-                <div class="specialty-meta">
-                  <span class="specialty-label">Expert Care</span>
-                </div>
-                <h3>Dental Care</h3>
-                <p>Expert dental checkups, cleanings, and advanced procedures for a healthy smile in a comfortable environment.</p>
-                <div class="specialty-features">
-                  <span><i class="bi bi-check-circle-fill"></i>Painless Treatments</span>
-                  <span><i class="bi bi-check-circle-fill"></i>Advanced Equipment</span>
-                </div>
-                <a href="{% url 'departments' %}" class="specialty-link">
-                  Book Dentist <i class="bi bi-arrow-right"></i>
-                </a>
-              </div>
-              <div class="specialty-visual">
-                <img src="{% static 'assets/img/health/neurology-4.webp' %}" alt="Neurological Sciences" class="img-fluid">
-                <div class="visual-overlay">
-                  <i class="bi bi-cpu"></i>
-                </div>
-              </div>
-            </div>
-          </div><!-- End Specialty Card -->
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
-            <div class="department-highlight">
-              <div class="highlight-icon">
-                <i class="bi bi-shield-plus"></i>
-              </div>
-              <h4>Orthopedics</h4>
-              <p>Specialized care for bone, joint, and muscle health using modern diagnostic and treatment methods.</p>
-              <ul class="highlight-list">
-                <li>Physiotherapy</li>
-                <li>Joint Pain Relief</li>
-                <li>Sports Injuries</li>
-              </ul>
-              <a href="{% url 'departments' %}" class="highlight-cta">Learn More</a>
-            </div>
-          </div><!-- End Department Highlight -->
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="200">
-            <div class="department-highlight">
-              <div class="highlight-icon">
-                <i class="bi bi-people"></i>
-              </div>
-              <h4>Pediatric Care</h4>
-              <p>Child-centered healthcare services from newborn to adolescence with friendly and gentle approaches.</p>
-              <ul class="highlight-list">
-                <li>Vaccinations</li>
-                <li>Growth Monitoring</li>
-                <li>Fever & Infections</li>
-              </ul>
-              <a href="{% url 'departments' %}" class="highlight-cta">Learn More</a>
-            </div>
-          </div><!-- End Department Highlight -->
-
-          <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
-            <div class="department-highlight">
-              <div class="highlight-icon">
-                <i class="bi bi-activity"></i>
-              </div>
-              <h4>Dermatology</h4>
-              <p>Advanced skincare, acne treatment, and dermatological consultations for all skin types.</p>
-              <ul class="highlight-list">
-                <li>Acne Treatment</li>
-                <li>Hair Fall Control</li>
-                <li>Skin Allergies</li>
-              </ul>
-              <a href="{% url 'departments' %}" class="highlight-cta">Learn More</a>
-            </div>
-          </div><!-- End Department Highlight -->
-
-        </div>
-
-        <div class="emergency-banner" data-aos="fade-up" data-aos-delay="400">
-          <div class="row align-items-center">
-            <div class="col-lg-8">
-              <div class="emergency-content">
-                <h3>Pharmacy & Medicine Management</h3>
-                <p>We maintain an up-to-date medicine inventory. Your doctor's prescriptions are instantly available at our integrated pharmacy counter.</p>
-              </div>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-              <a href="tel:+915551234567" class="emergency-btn">
-                <i class="bi bi-capsule"></i>
-                (555) 123-4567
-              </a>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </section><!-- /Featured Departments Section -->
 
     <!-- Featured Services Section -->
-    <section id="featured-services" class="featured-services section">
+    <section id="featured-services" class="featured-services section light-background">
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <h2>Clinic Services</h2>
-        <p>Modern facilities and services designed for your comfort and care</p>
+      <!-- Section Title with decorative mandala SVG -->
+      <div class="container section-title" data-aos="fade-up" style="position:relative;">
+        <!-- Subtle mandala behind heading -->
+        <svg class="section-mandala-deco" width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute; top:-30px; left:50%; transform:translateX(-50%); opacity:0.06; pointer-events:none;">
+          <circle cx="60" cy="60" r="55" stroke="#117A15" stroke-width="1"/>
+          <circle cx="60" cy="60" r="40" stroke="#117A15" stroke-width="1"/>
+          <circle cx="60" cy="60" r="25" stroke="#117A15" stroke-width="1"/>
+          <circle cx="60" cy="60" r="10" stroke="#117A15" stroke-width="1"/>
+          <line x1="60" y1="5" x2="60" y2="115" stroke="#117A15" stroke-width="0.8"/>
+          <line x1="5" y1="60" x2="115" y2="60" stroke="#117A15" stroke-width="0.8"/>
+          <line x1="21" y1="21" x2="99" y2="99" stroke="#117A15" stroke-width="0.8"/>
+          <line x1="99" y1="21" x2="21" y2="99" stroke="#117A15" stroke-width="0.8"/>
+        </svg>
+        <h2>How We Care for You</h2>
+        <p>A complete Ayurvedic healing journey, from diagnosis to recovery</p>
       </div><!-- End Section Title -->
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="row g-0">
-
-          <div class="col-lg-8" data-aos="fade-right" data-aos-delay="200">
+        <!-- Centered feature block -->
+        <div class="row justify-content-center text-center mb-5">
+          <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200" style="max-width: 720px; margin: 0 auto;">
             <div class="featured-service-main">
-              <div class="service-image-wrapper">
-                <img src="{% static 'assets/img/health/consultation-4.webp' %}" alt="Premier Healthcare Services" class="img-fluid"
-                  loading="lazy">
-                <div class="service-overlay">
-                  <div class="service-badge">
-                    <i class="bi bi-heart-pulse"></i>
-                    <span>Emergency Care</span>
-                  </div>
-                </div>
-              </div>
-              <div class="service-details">
-                <h2>A Seamless Healthcare Experience</h2>
-                <p>From booking your appointment online to getting your medicines from our in-house pharmacy, we ensure a smooth and hassle-free experience for every patient. Say goodbye to long waiting queues.</p>
+              <div class="service-details" style="padding-top: 0;">
+                <h2>A Natural Path to Wellness</h2>
+                <p>Our Ayurvedic physicians begin with a holistic diagnosis — understanding your unique body constitution (Prakriti), lifestyle, and root imbalances. Treatment combines classical herbal formulations, personalised detox therapies, and long-term diet and lifestyle plans, followed by regular follow-up consultations to ensure lasting health.</p>
                 <a href="{% url 'services' %}" class="main-cta">Explore Our Services</a>
               </div>
             </div>
           </div>
-
-          <div class="col-lg-4" data-aos="fade-left" data-aos-delay="300">
-            <div class="services-sidebar">
-
-              <div class="service-item" data-aos="fade-up" data-aos-delay="400">
-                <div class="service-icon-wrapper">
-                  <i class="bi bi-capsule"></i>
-                </div>
-                <div class="service-info">
-                  <h4>Dermatology Clinic</h4>
-                  <p>Expert skin care consultations, acne treatments, and personalized dermatological procedures.</p>
-                  <a href="{% url 'services' %}" class="service-link">Learn More</a>
-                </div>
-              </div>
-
-              <div class="service-item" data-aos="fade-up" data-aos-delay="500">
-                <div class="service-icon-wrapper">
-                  <i class="bi bi-bandaid"></i>
-                </div>
-                <div class="service-info">
-                  <h4>Health Checkups</h4>
-                  <p>Comprehensive full-body health checkup packages to monitor and maintain your wellbeing.</p>
-                  <a href="{% url 'services' %}" class="service-link">Learn More</a>
-                </div>
-              </div>
-
-              <div class="service-item" data-aos="fade-up" data-aos-delay="600">
-                <div class="service-icon-wrapper">
-                  <i class="bi bi-activity"></i>
-                </div>
-                <div class="service-info">
-                  <h4>Diagnostics Lab</h4>
-                  <p>Accurate and quick laboratory testing services with online reports delivered directly to you.</p>
-                  <a href="{% url 'services' %}" class="service-link">Learn More</a>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
         </div>
 
+        <!-- 4 Ayurvedic service icon cards (no photos) -->
         <div class="specialties-grid" data-aos="fade-up" data-aos-delay="300">
-          <div class="row align-items-center">
+          <div class="row g-4">
 
             <div class="col-lg-3 col-md-6">
-              <div class="specialty-card">
-                <div class="specialty-image">
-                  <img src="{% static 'assets/img/health/maternal-2.webp' %}" alt="Maternal Care" class="img-fluid" loading="lazy">
+              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
+                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
+                  <i class="bi bi-broadcast" style="font-size:1.6rem; color:var(--accent-color);"></i>
                 </div>
-                <div class="specialty-content">
-                  <h5>Maternal Care</h5>
-                  <span>Expert pregnancy &amp; delivery support</span>
-                </div>
+                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Nadi Pariksha</h5>
+                <span style="font-size:0.85rem; color:#6b7280;">Traditional pulse diagnosis</span>
               </div>
             </div>
 
             <div class="col-lg-3 col-md-6">
-              <div class="specialty-card">
-                <div class="specialty-image">
-                  <img src="{% static 'assets/img/health/vaccination-3.webp' %}" alt="Vaccination" class="img-fluid" loading="lazy">
+              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
+                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
+                  <i class="bi bi-flower2" style="font-size:1.6rem; color:var(--accent-color);"></i>
                 </div>
-                <div class="specialty-content">
-                  <h5>Vaccination</h5>
-                  <span>Complete immunization programs</span>
-                </div>
+                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Herbal Medicines</h5>
+                <span style="font-size:0.85rem; color:#6b7280;">Pure natural formulations</span>
               </div>
             </div>
 
             <div class="col-lg-3 col-md-6">
-              <div class="specialty-card">
-                <div class="specialty-image">
-                  <img src="{% static 'assets/img/health/emergency-1.webp' %}" alt="Emergency Care" class="img-fluid" loading="lazy">
+              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
+                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
+                  <i class="bi bi-droplet-half" style="font-size:1.6rem; color:var(--accent-color);"></i>
                 </div>
-                <div class="specialty-content">
-                  <h5>Quick Support</h5>
-                  <span>Priority care for urgent needs</span>
-                </div>
+                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Panchakarma Detox</h5>
+                <span style="font-size:0.85rem; color:#6b7280;">Deep cleansing therapies</span>
               </div>
             </div>
 
             <div class="col-lg-3 col-md-6">
-              <div class="specialty-card">
-                <div class="specialty-image">
-                  <img src="{% static 'assets/img/health/facilities-6.webp' %}" alt="Advanced Tech" class="img-fluid" loading="lazy">
+              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
+                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
+                  <i class="bi bi-journal-text" style="font-size:1.6rem; color:var(--accent-color);"></i>
                 </div>
-                <div class="specialty-content">
-                  <h5>Advanced Technology</h5>
-                  <span>State-of-the-art medical equipment</span>
-                </div>
+                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Diet &amp; Lifestyle Plans</h5>
+                <span style="font-size:0.85rem; color:#6b7280;">Personalised long-term guidance</span>
               </div>
             </div>
 
@@ -466,127 +271,71 @@
     </section><!-- /Featured Services Section -->
 
     <!-- Call To Action Section -->
-    <section id="call-to-action" class="call-to-action section light-background">
+    <section id="call-to-action" class="call-to-action section">
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="hero-content">
-          <div class="row align-items-center">
+        <!-- Full-width centered banner -->
+        <div class="cta-banner">
+          <!-- Inline SVG mandala/leaf pattern overlay -->
+          <svg class="cta-pattern" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+            <defs>
+              <pattern id="ctaLeafPattern" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
+                <!-- Mandala ring set -->
+                <circle cx="60" cy="60" r="52" stroke="white" stroke-width="0.8" fill="none"/>
+                <circle cx="60" cy="60" r="38" stroke="white" stroke-width="0.8" fill="none"/>
+                <circle cx="60" cy="60" r="24" stroke="white" stroke-width="0.8" fill="none"/>
+                <circle cx="60" cy="60" r="10" stroke="white" stroke-width="0.8" fill="none"/>
+                <!-- Cardinal spokes -->
+                <line x1="60" y1="8"  x2="60" y2="112" stroke="white" stroke-width="0.6"/>
+                <line x1="8"  y1="60" x2="112" y2="60" stroke="white" stroke-width="0.6"/>
+                <!-- Diagonal spokes -->
+                <line x1="18" y1="18" x2="102" y2="102" stroke="white" stroke-width="0.6"/>
+                <line x1="102" y1="18" x2="18" y2="102" stroke="white" stroke-width="0.6"/>
+                <!-- Leaf petals at cardinal points -->
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(0,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(45,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(90,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(135,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(180,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(225,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(270,60,60)"/>
+                <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(315,60,60)"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#ctaLeafPattern)"/>
+          </svg>
 
-            <div class="col-lg-6">
-              <div class="content-wrapper" data-aos="fade-up" data-aos-delay="200">
-                <h1>Ready to take control of your health?</h1>
-                <p>Book your appointment today and experience modern healthcare delivered by expert professionals in a comfortable setting.</p>
+          <div class="cta-banner-inner" data-aos="fade-up" data-aos-delay="150">
+            <!-- Label -->
+            <span class="cta-label">Start Today</span>
 
-                <div class="cta-wrapper">
-                  <a href="{% url 'appointment:appointment' %}" class="primary-cta">
-                    <span>Schedule Consultation</span>
-                    <i class="bi bi-arrow-right"></i>
-                  </a>
-                  <a href="{% url 'services' %}" class="secondary-cta">
-                    <span>Explore Services</span>
-                    <i class="bi bi-arrow-right"></i>
-                  </a>
-                </div>
-              </div>
+            <!-- Heading -->
+            <h2 class="cta-heading">Begin Your Journey to<br class="d-none d-sm-block"> Natural Healing</h2>
+
+            <!-- Subtext -->
+            <p class="cta-subtext">Consult our Ayurvedic experts and get a treatment plan made just for you.</p>
+
+            <!-- Buttons -->
+            <div class="cta-buttons">
+              <a href="{% url 'appointment:appointment' %}" class="cta-btn-book">
+                Book Appointment &rarr;
+              </a>
+              {% if clinic.phone %}
+              <a href="tel:{{ clinic.phone }}" class="cta-btn-call">
+                <i class="bi bi-telephone-fill"></i>
+                {{ clinic.phone }}
+              </a>
+              {% endif %}
             </div>
-
-            <div class="col-lg-6">
-              <div class="image-container" data-aos="fade-left" data-aos-delay="300">
-                <img src="{% static 'assets/img/health/facilities-9.webp' %}" alt="Medical Excellence" class="img-fluid">
-              </div>
-            </div>
-
           </div>
-        </div>
-
-        <div class="features-section">
-
-          <div class="row g-0">
-
-            <div class="col-lg-4">
-              <div class="feature-block" data-aos="fade-up" data-aos-delay="200">
-                <div class="feature-icon">
-                  <i class="bi bi-shield-check"></i>
-                </div>
-                <h3>Advanced Technology</h3>
-                <p>We use modern digital systems for appointment booking, health records, and swift prescription processing.</p>
-              </div>
-            </div>
-
-            <div class="col-lg-4">
-              <div class="feature-block" data-aos="fade-up" data-aos-delay="300">
-                <div class="feature-icon">
-                  <i class="bi bi-clock"></i>
-                </div>
-                <h3>Flexible Timings</h3>
-                <p>Our clinic operates with convenient hours to accommodate your busy schedule without long waiting times.</p>
-              </div>
-            </div>
-
-            <div class="col-lg-4">
-              <div class="feature-block" data-aos="fade-up" data-aos-delay="400">
-                <div class="feature-icon">
-                  <i class="bi bi-people"></i>
-                </div>
-                <h3>Expert Team</h3>
-                <p>Our experienced doctors and friendly staff are dedicated to providing you with the highest quality of care.</p>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <div class="contact-block">
-          <div class="row">
-
-            <div class="col-lg-8">
-              <div class="contact-content" data-aos="fade-up" data-aos-delay="200">
-                <h2>Have questions about our services?</h2>
-                <p>Our clinic reception is ready to assist you. Call us during business hours for immediate support and guidance.</p>
-              </div>
-            </div>
-
-            <div class="col-lg-4">
-              <div class="contact-actions" data-aos="fade-up" data-aos-delay="300">
-                <a href="tel:5551234567" class="emergency-call">
-                  <i class="bi bi-telephone"></i>
-                  <span>(555) 123-4567</span>
-                </a>
-                <a href="{% url 'feedback' %}" class="contact-link">Find Location</a>
-              </div>
-            </div>
-
-          </div>
-        </div>
+        </div><!-- /cta-banner -->
 
       </div>
 
     </section><!-- /Call To Action Section -->
 
-  </main>
-
-  {% include 'footer.html' %}
-
-  <!-- Scroll Top -->
-  <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
-      class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+  {% endblock %}
+{% block extra_js %}
   <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
-  <script src="{% static 'assets/aos/aos.js' %}"></script>
-  <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
-  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
-
-  <!-- Main JS File -->
-  <script src="{% static 'assets/js/main.js' %}"></script>
-
-</body>
-
-</html>
+{% endblock %}

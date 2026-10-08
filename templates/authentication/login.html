@@ -1,174 +1,9 @@
+{% extends 'authentication/auth_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Clinic</title>
-    <!-- Bootstrap for Utility Classes -->
-    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/font/bootstrap-icons.css' %}">
-    <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
-    <style>
-        body {
-            background-color: var(--bg-tint, #F3F8F2);
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .auth-card {
-            width: 100%;
-            max-width: 400px;
-            background: #fff;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: none;
-        }
-
-        .auth-header {
-            background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
-            color: white;
-            padding: 40px 20px;
-            text-align: center;
-        }
-
-        .auth-header h2 {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .auth-header p {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-
-        .auth-body {
-            padding: 30px;
-        }
-
-        .form-label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--heading-color, #14281A);
-        }
-
-        .form-control {
-            border-radius: 8px;
-            padding: 10px 15px;
-            border: 1px solid var(--border-color, #DCEBDC);
-            margin-bottom: 15px;
-        }
-
-        .form-control:focus {
-            border-color: var(--brand-green, #117A15);
-            box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
-        }
-
-        .btn-login {
-            background: var(--brand-green, #117A15);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            margin-top: 10px;
-            transition: 0.3s;
-        }
-
-        .btn-login:hover {
-            background: var(--brand-primary, #015315);
-            color: #fff;
-        }
-
-        .auth-footer {
-            background: #fdfdfd;
-            border-top: 1px solid #eee;
-            padding: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #666;
-        }
-
-        .auth-footer a {
-            color: var(--brand-green, #117A15);
-            text-decoration: none;
-            font-weight: 700;
-        }
-
-        .signup-link {
-            color: var(--brand-green, #117A15);
-            font-weight: 600;
-            text-decoration: none;
-            margin-left: 5px;
-        }
-
-        .signup-link:hover {
-            text-decoration: underline;
-            color: var(--brand-primary, #015315);
-        }
-
-        .error-message {
-            background: #fee;
-            border-left: 4px solid #c33;
-            color: #c33;
-            padding: 10px 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-        }
-
-        .helper-text {
-            font-size: 0.75rem;
-            color: #999;
-            margin-top: 4px;
-            display: block;
-        }
-
-        .password-toggle-wrapper {
-            position: relative;
-        }
-
-        .password-toggle-wrapper .form-control {
-            padding-right: 3rem;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 0.85rem;
-            top: 0;
-            bottom: 0;
-            margin: auto 0;
-            background: transparent;
-            border: none;
-            color: var(--brand-green, #117A15);
-            cursor: pointer;
-            padding: 0.35rem;
-            font-size: 1rem;
-            line-height: 1;
-            height: 1.9rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .password-toggle:hover {
-            color: var(--brand-primary, #015315);
-        }
-
-        .password-toggle:focus {
-            outline: none;
-            box-shadow: none;
-        }
-    </style>
-</head>
-
-<body>
+{% block title %}Login - Clinic{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block content %}
 
     <div class="auth-card">
         <!-- Header Section -->
@@ -232,7 +67,8 @@
             If you are Doctor, <a href="{% url 'doctor:login' %}">Login</a> here
         </div>
     </div>
-
+{% endblock %}
+{% block extra_js %}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const btnGetOtp = document.getElementById('btn-get-otp');
@@ -364,6 +200,4 @@
         }
     </script>
 
-</body>
-
-</html>
+{% endblock %}

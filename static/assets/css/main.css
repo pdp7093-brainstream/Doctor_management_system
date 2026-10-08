@@ -530,33 +530,31 @@ h6 {
 # Global Footer
 --------------------------------------------------------------*/
 .footer-16 {
-  background: var(--background-color);
-  color: var(--default-color);
+  background: var(--brand-primary, #015315);
+  color: rgba(255,255,255,0.85);
   font-size: 15px;
-  padding: 100px 0 0;
-  border-top: 1px solid color-mix(in srgb, var(--default-color), transparent 92%);
+  padding: 80px 0 0;
+  border-top: none;
 }
 
 .footer-16 .footer-main {
-  margin-bottom: 80px;
+  margin-bottom: 40px;
 }
 
 .footer-16 .brand-section .logo {
   text-decoration: none;
-}
-
-.footer-16 .brand-section .logo .sitename {
+}.footer-16 .brand-section .logo .sitename {
   font-family: var(--heading-font);
   font-size: 32px;
-  font-weight: 300;
-  color: var(--heading-color);
+  font-weight: 600;
+  color: #ffffff;
   letter-spacing: -0.5px;
 }
 
 .footer-16 .brand-section .brand-description {
   font-size: 18px;
   line-height: 1.7;
-  color: color-mix(in srgb, var(--default-color), transparent 25%);
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 300;
   max-width: 380px;
   margin: 0;
@@ -567,12 +565,12 @@ h6 {
   align-items: flex-start;
   margin-bottom: 16px;
   font-size: 15px;
-  color: color-mix(in srgb, var(--default-color), transparent 20%);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .footer-16 .brand-section .contact-info .contact-item i {
   font-size: 16px;
-  color: var(--accent-color);
+  color: var(--brand-accent, #FD6801);
   margin-right: 12px;
   margin-top: 3px;
   flex-shrink: 0;
@@ -589,7 +587,7 @@ h6 {
 @media (max-width: 991px) {
   .footer-16 .footer-nav-wrapper {
     padding-left: 0;
-    margin-top: 50px;
+    margin-top: 40px;
   }
 }
 
@@ -600,8 +598,8 @@ h6 {
 .footer-16 .nav-column h6 {
   font-family: var(--heading-font);
   font-size: 16px;
-  font-weight: 400;
-  color: var(--heading-color);
+  font-weight: 600;
+  color: #ffffff;
   margin-bottom: 24px;
   letter-spacing: 0.3px;
 }
@@ -613,16 +611,16 @@ h6 {
 }
 
 .footer-16 .nav-column .footer-nav a {
-  color: color-mix(in srgb, var(--default-color), transparent 30%);
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-size: 15px;
-  font-weight: 300;
+  font-weight: 400;
   transition: all 0.3s ease;
   line-height: 1.4;
 }
 
 .footer-16 .nav-column .footer-nav a:hover {
-  color: var(--accent-color);
+  color: var(--brand-accent, #FD6801);
   transform: translateX(4px);
 }
 
@@ -704,46 +702,32 @@ h6 {
 }
 
 .footer-16 .footer-bottom {
-  padding: 30px 0;
+  padding: 24px 0 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .footer-16 .footer-bottom .copyright p {
   margin: 0;
   font-size: 14px;
-  color: color-mix(in srgb, var(--default-color), transparent 45%);
+  color: rgba(255, 255, 255, 0.75);
   font-weight: 300;
 }
 
 .footer-16 .footer-bottom .copyright p .sitename {
-  color: var(--heading-color);
+  color: #ffffff;
   font-weight: 400;
 }
 
-.footer-16 .footer-bottom .legal-links {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 24px;
-}
-
-@media (max-width: 991px) {
-  .footer-16 .footer-bottom .legal-links {
-    justify-content: flex-start;
-    margin-top: 20px;
-    flex-wrap: wrap;
-  }
-}
-
-.footer-16 .footer-bottom .legal-links a {
+.footer-16 .footer-bottom .footer-legal-links a {
   font-size: 13px;
-  color: color-mix(in srgb, var(--default-color), transparent 50%);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   font-weight: 300;
   transition: color 0.3s ease;
 }
 
-.footer-16 .footer-bottom .legal-links a:hover {
-  color: var(--accent-color);
+.footer-16 .footer-bottom .footer-legal-links a:hover {
+  color: var(--brand-accent, #FD6801);
 }
 
 .footer-16 .footer-bottom .legal-links .credits {
@@ -983,13 +967,15 @@ section,
 --------------------------------------------------------------*/
 .section-title {
   text-align: center;
-  padding-bottom: 60px;
+  padding-bottom: 48px;
   position: relative;
 }
 
 .section-title h2 {
-  font-size: 32px;
-  font-weight: 500;
+  font-size: 40px;
+  font-weight: 600;
+  font-family: var(--heading-font);
+  color: var(--heading-color);
   margin-bottom: 20px;
   padding-bottom: 20px;
   position: relative;
@@ -1025,6 +1011,13 @@ section,
   margin-bottom: 0;
 }
 
+@media (max-width: 768px) {
+  .section-title h2 {
+    font-size: 28px;
+  }
+}
+
+
 /*--------------------------------------------------------------
 # Hero Section
 --------------------------------------------------------------*/
@@ -1035,6 +1028,7 @@ section,
   align-items: center;
   background: linear-gradient(135deg, var(--surface-color) 0%, color-mix(in srgb, var(--accent-color), transparent 95%) 100%);
   overflow: hidden;
+  padding-top: 120px;
 }
 
 .hero::before {
@@ -1487,14 +1481,16 @@ section,
 
 .home-about .about-content .section-heading {
   font-size: 2.5rem;
-  font-weight: 300;
+  font-weight: 600;
+  font-family: var(--heading-font);
+  color: var(--heading-color);
   line-height: 1.3;
   margin-bottom: 1.5rem;
 }
 
 @media (max-width: 768px) {
   .home-about .about-content .section-heading {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 }
 
@@ -1561,7 +1557,7 @@ section,
 
 .home-about .about-content .cta-section .btn-primary {
   background-color: var(--accent-color);
-  color: var(--contrast-color);
+  color: #ffffff;
   padding: 12px 30px;
   font-size: 1rem;
   font-weight: 400;
@@ -1573,7 +1569,7 @@ section,
 .home-about .about-content .cta-section .btn-primary:hover {
   background-color: color-mix(in srgb, var(--accent-color), black 10%);
   transform: translateY(-2px);
-  color: var(--contrast-color);
+  color: #ffffff;
 }
 
 .home-about .about-content .cta-section .btn-secondary {
@@ -2180,11 +2176,13 @@ section,
 }
 
 .featured-services .service-details h2 {
-  font-size: 32px;
-  font-weight: 300;
+  font-size: 2rem;
+  font-weight: 600;
+  font-family: var(--heading-font);
+  color: var(--heading-color);
   line-height: 1.3;
   margin-bottom: 24px;
-  color: var(--heading-color);
+  text-align: center;
 }
 
 .featured-services .service-details p {
@@ -2308,7 +2306,7 @@ section,
 }
 
 .featured-services .specialties-grid {
-  margin-top: 80px;
+  margin-top: 40px;
 }
 
 .featured-services .specialty-card {
@@ -2791,268 +2789,158 @@ section,
     padding: 1.25rem;
   }
 }
+}
 
 /*--------------------------------------------------------------
 # Call To Action Section
 --------------------------------------------------------------*/
 .call-to-action {
-  padding: 120px 0 100px;
+  padding: 40px 0 60px;
 }
 
-.call-to-action .hero-content {
-  margin-bottom: 120px;
-}
-
-.call-to-action .hero-content .content-wrapper {
-  padding-right: 40px;
-}
-
-@media (max-width: 992px) {
-  .call-to-action .hero-content .content-wrapper {
-    padding-right: 0;
-    margin-bottom: 60px;
-    text-align: center;
-  }
-}
-
-.call-to-action .hero-content h1 {
-  font-size: 3.5rem;
-  font-weight: 300;
-  line-height: 1.2;
-  margin-bottom: 30px;
-  color: var(--heading-color);
-}
-
-@media (max-width: 768px) {
-  .call-to-action .hero-content h1 {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 576px) {
-  .call-to-action .hero-content h1 {
-    font-size: 2rem;
-  }
-}
-
-.call-to-action .hero-content p {
-  font-size: 18px;
-  line-height: 1.8;
-  color: color-mix(in srgb, var(--default-color), transparent 25%);
-  margin-bottom: 50px;
-}
-
-.call-to-action .hero-content .cta-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-@media (max-width: 992px) {
-  .call-to-action .hero-content .cta-wrapper {
-    align-items: center;
-  }
-}
-
-.call-to-action .hero-content .cta-wrapper .primary-cta,
-.call-to-action .hero-content .cta-wrapper .secondary-cta {
-  display: inline-flex;
-  align-items: center;
-  text-decoration: none;
-  font-weight: 400;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  width: fit-content;
-}
-
-.call-to-action .hero-content .cta-wrapper .primary-cta span,
-.call-to-action .hero-content .cta-wrapper .secondary-cta span {
-  margin-right: 8px;
-}
-
-.call-to-action .hero-content .cta-wrapper .primary-cta i,
-.call-to-action .hero-content .cta-wrapper .secondary-cta i {
-  font-size: 14px;
-  transition: transform 0.3s ease;
-}
-
-.call-to-action .hero-content .cta-wrapper .primary-cta:hover i,
-.call-to-action .hero-content .cta-wrapper .secondary-cta:hover i {
-  transform: translateX(4px);
-}
-
-.call-to-action .hero-content .cta-wrapper .primary-cta {
-  color: var(--accent-color);
-  border-bottom: 1px solid var(--accent-color);
-  padding-bottom: 2px;
-}
-
-.call-to-action .hero-content .cta-wrapper .primary-cta:hover {
-  color: color-mix(in srgb, var(--accent-color), black 20%);
-  border-color: color-mix(in srgb, var(--accent-color), black 20%);
-}
-
-.call-to-action .hero-content .cta-wrapper .secondary-cta {
-  color: color-mix(in srgb, var(--default-color), transparent 40%);
-}
-
-.call-to-action .hero-content .cta-wrapper .secondary-cta:hover {
-  color: var(--default-color);
-}
-
-.call-to-action .hero-content .image-container {
+/* ── Banner block ─────────────────────────────────────────── */
+.call-to-action .cta-banner {
   position: relative;
+  overflow: hidden;
+  background-color: var(--brand-primary, #015315);
+  border-radius: 24px;
+  padding: 80px 48px;
+  margin-bottom: 0;
+  text-align: center;
 }
 
-.call-to-action .hero-content .image-container img {
+@media (max-width: 768px) {
+  .call-to-action .cta-banner {
+    padding: 48px 24px;
+    border-radius: 18px;
+  }
+}
+
+/* SVG mandala/leaf pattern overlay */
+.call-to-action .cta-banner .cta-pattern {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  height: 500px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-@media (max-width: 768px) {
-  .call-to-action .hero-content .image-container img {
-    height: 300px;
-  }
-}
-
-.call-to-action .features-section {
-  margin-bottom: 120px;
-}
-
-.call-to-action .features-section .feature-block {
-  padding: 60px 40px;
-  text-align: left;
-  border-right: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
   height: 100%;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 0;
 }
 
-@media (max-width: 992px) {
-  .call-to-action .features-section .feature-block {
-    border-right: none;
-    border-bottom: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
-    text-align: center;
-  }
+/* Inner content above the pattern */
+.call-to-action .cta-banner .cta-banner-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
 }
 
-.call-to-action .features-section .feature-block:last-child {
-  border-right: none;
+/* "Start Today" label */
+.call-to-action .cta-banner .cta-label {
+  display: inline-block;
+  color: var(--brand-accent, #FD6801);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 992px) {
-  .call-to-action .features-section .feature-block:last-child {
-    border-bottom: none;
-  }
-}
-
-.call-to-action .features-section .feature-block .feature-icon {
-  margin-bottom: 30px;
-}
-
-.call-to-action .features-section .feature-block .feature-icon i {
-  font-size: 2.5rem;
-  color: var(--accent-color);
-}
-
-.call-to-action .features-section .feature-block h3 {
-  font-size: 1.4rem;
-  font-weight: 400;
+/* Main heading */
+.call-to-action .cta-banner .cta-heading {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #ffffff;
   margin-bottom: 20px;
-  color: var(--heading-color);
-}
-
-.call-to-action .features-section .feature-block p {
-  font-size: 15px;
-  line-height: 1.7;
-  color: color-mix(in srgb, var(--default-color), transparent 30%);
-  margin-bottom: 0;
-}
-
-.call-to-action .contact-block {
-  background-color: color-mix(in srgb, var(--accent-color), transparent 95%);
-  padding: 60px 40px;
-  border-radius: 4px;
-}
-
-.call-to-action .contact-block .contact-content h2 {
-  font-size: 2rem;
-  font-weight: 300;
-  margin-bottom: 20px;
-  color: var(--heading-color);
 }
 
 @media (max-width: 768px) {
-  .call-to-action .contact-block .contact-content h2 {
-    font-size: 1.6rem;
+  .call-to-action .cta-banner .cta-heading {
+    font-size: 1.9rem;
   }
 }
 
-.call-to-action .contact-block .contact-content p {
-  font-size: 16px;
-  line-height: 1.7;
-  color: color-mix(in srgb, var(--default-color), transparent 25%);
-  margin-bottom: 0;
-}
-
-@media (max-width: 992px) {
-  .call-to-action .contact-block .contact-content p {
-    margin-bottom: 30px;
+@media (max-width: 480px) {
+  .call-to-action .cta-banner .cta-heading {
+    font-size: 1.55rem;
   }
 }
 
-.call-to-action .contact-block .contact-actions {
+/* Subtext */
+.call-to-action .cta-banner .cta-subtext {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  max-width: 600px;
+  margin: 0 auto 36px;
+}
+
+/* Button row */
+.call-to-action .cta-banner .cta-buttons {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
 }
 
-@media (max-width: 992px) {
-  .call-to-action .contact-block .contact-actions {
+@media (max-width: 480px) {
+  .call-to-action .cta-banner .cta-buttons {
+    flex-direction: column;
     align-items: center;
   }
 }
 
-.call-to-action .contact-block .contact-actions .emergency-call {
+/* Book Appointment button — saffron fill */
+.call-to-action .cta-banner .cta-btn-book {
   display: inline-flex;
   align-items: center;
-  background-color: var(--accent-color);
-  color: var(--contrast-color);
-  padding: 15px 25px;
-  border-radius: 4px;
+  gap: 6px;
+  background-color: var(--brand-accent, #FD6801);
+  color: #ffffff !important;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 16px;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: 2px solid var(--brand-accent, #FD6801);
+  transition: background-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
 }
 
-.call-to-action .contact-block .contact-actions .emergency-call i {
-  margin-right: 10px;
-  font-size: 16px;
+.call-to-action .cta-banner .cta-btn-book:hover {
+  background-color: #E25C00;
+  border-color: #E25C00;
+  color: #ffffff !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(253, 104, 1, 0.35);
 }
 
-.call-to-action .contact-block .contact-actions .emergency-call:hover {
-  background-color: color-mix(in srgb, var(--accent-color), black 15%);
-  transform: translateY(-2px);
-}
-
-.call-to-action .contact-block .contact-actions .contact-link {
-  color: color-mix(in srgb, var(--default-color), transparent 40%);
+/* Call button — white outline */
+.call-to-action .cta-banner .cta-btn-call {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: transparent;
+  color: #ffffff !important;
   text-decoration: none;
-  font-size: 14px;
-  transition: color 0.3s ease;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 14px 32px;
+  border-radius: 50px;
+  border: 2px solid #ffffff;
+  transition: background-color 0.25s ease, color 0.25s ease, transform 0.2s ease;
 }
 
-.call-to-action .contact-block .contact-actions .contact-link:hover {
-  color: var(--default-color);
+.call-to-action .cta-banner .cta-btn-call:hover {
+  background-color: #ffffff;
+  color: var(--brand-primary, #015315) !important;
+  transform: translateY(-3px);
 }
 
-@media (max-width: 992px) {
-  .call-to-action .contact-block {
-    text-align: center;
-  }
+.call-to-action .cta-banner .cta-btn-call i {
+  font-size: 0.95rem;
 }
+
 
 /*--------------------------------------------------------------
 # About Section

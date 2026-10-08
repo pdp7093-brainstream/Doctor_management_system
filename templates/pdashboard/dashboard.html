@@ -1,71 +1,25 @@
+{% extends 'base.html' %}
 {% load static %}
 {% load hashid_tags %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Dashboard</title>
 
-    {% if clinic and clinic.logo %}
-    <link href="{{ clinic.logo.url }}" rel="icon">
-    <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
-    {% else %}
-    <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-    <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
-    {% endif %}
-
+{% block charset %}UTF-8{% endblock %}
+{% block title %}Patient Dashboard{% endblock %}
+{% block fonts %}{% endblock %}
+{% block vendor_css %}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'assets/css/main.css' %}">
+{% endblock %}
+{% block extra_css %}
     <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}?v=4">
-    <style>
-        body {
-            background:
-                radial-gradient(circle at top left, rgba(1, 83, 21, 0.08), transparent 32%),
-                linear-gradient(180deg, var(--bg-tint-2, #F7FAF6) 0%, var(--bg-tint, #F3F8F2) 100%);
-        }
-
-        .patient-page-shell {
-            padding: 118px 0 48px;
-        }
-
-
-        .stats .stat-card {
-            min-height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        
-        @media (max-width: 991px) {
-            .patient-page-shell {
-                padding-top: 104px;
-            }
-
-            .patient-actions {
-                justify-content: flex-start;
-                margin-top: 16px;
-            }
-        }
-
-        @media (max-width: 767px) {
-            .patient-page-shell {
-                padding-top: 96px;
-            }
-
-            .patient-hero {
-                padding: 22px 18px;
-            }
-        }
-    </style>
-</head>
-<body>
-{% include 'header.html' %}
-
-<main class="patient-page-shell">
+    <link rel="stylesheet" href="{% static 'assets/css/pdashboard.css' %}">
+{% endblock %}
+{% block main_class %}patient-page-shell{% endblock %}
+{% block after_footer %}{% endblock %}
+{% block vendor_js %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+{% block content %}
     <div class="container">
         <!-- <section class="patient-hero">
             <div class="row align-items-center g-3">
@@ -264,14 +218,8 @@
             </div>
         </div>
     </div>
-</main>
-
-{% include 'footer.html' %}
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="{% static 'assets/js/main.js' %}"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+{% endblock %}
+{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const filterForm = document.getElementById('appointmentFilterForm');
@@ -482,5 +430,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-</body>
-</html>
+{% endblock %}

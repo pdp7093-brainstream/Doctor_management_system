@@ -1,0 +1,39 @@
+body {
+            background:
+                radial-gradient(circle at top left, rgba(1, 83, 21, 0.08), transparent 32%),
+                linear-gradient(180deg, var(--bg-tint-2, #F7FAF6) 0%, var(--bg-tint, #F3F8F2) 100%);
+        }
+
+        .patient-page-shell {
+            padding: 118px 0 48px;
+        }
+
+
+        .stats .stat-card {
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        
+        @media (max-width: 991px) {
+            .patient-page-shell {
+                padding-top: 104px;
+            }
+
+            .patient-actions {
+                justify-content: flex-start;
+                margin-top: 16px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .patient-page-shell {
+                padding-top: 96px;
+            }
+
+            .patient-hero {
+                padding: 22px 18px;
+            }
+        }

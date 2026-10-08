@@ -1,0 +1,81 @@
+/* Profile Avatar Circle */
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--brand-green, #117A15);
+    /* Brand green */
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    border: 2px solid rgba(1, 83, 21, 0.15);
+    transition: 0.3s;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .profile-nav:hover .profile-avatar {
+    background-color: var(--brand-primary, #015315);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(1, 83, 21, 0.15);
+  }
+
+  /* Dropdown Alignment Fix */
+  .navmenu .profile-nav ul {
+    right: 0;
+    left: auto;
+  }
+
+  .navmenu .profile-nav > a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .navmenu .profile-nav > a .toggle-dropdown {
+    width: auto;
+    height: auto;
+    margin-left: 0;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  @media (max-width: 1199px) {
+    .navmenu .profile-nav > a {
+      justify-content: flex-start;
+      white-space: normal;
+    }
+
+    .navmenu .profile-nav > a .profile-avatar {
+      width: 36px;
+      height: 36px;
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+
+    .navmenu .profile-nav > a .toggle-dropdown {
+      margin-left: auto;
+      color: var(--nav-dropdown-color);
+    }
+
+    .mobile-nav-active .navmenu .profile-nav > a .toggle-dropdown {
+      color: var(--nav-dropdown-hover-color);
+    }
+
+    .navmenu .profile-nav.dropdown-active > ul {
+      display: block;
+    }
+  }

@@ -1,92 +1,312 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
+body.login-page {
+            background-color: var(--bg-tint, #F3F8F2);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }body.login-page .auth-card {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+        }body.login-page .auth-header {
+            background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }body.login-page .auth-header h2 {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }body.login-page .auth-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }body.login-page .auth-body {
+            padding: 30px;
+        }body.login-page .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--heading-color, #14281A);
+        }body.login-page .form-control {
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color, #DCEBDC);
+            margin-bottom: 15px;
+        }body.login-page .form-control:focus {
+            border-color: var(--brand-green, #117A15);
+            box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
+        }body.login-page .btn-login {
+            background: var(--brand-green, #117A15);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: 0.3s;
+        }body.login-page .btn-login:hover {
+            background: var(--brand-primary, #015315);
+            color: #fff;
+        }body.login-page .auth-footer {
+            background: #fdfdfd;
+            border-top: 1px solid #eee;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+        }body.login-page .auth-footer a {
+            color: var(--brand-green, #117A15);
+            text-decoration: none;
+            font-weight: 700;
+        }body.login-page .signup-link {
+            color: var(--brand-green, #117A15);
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 5px;
+        }body.login-page .signup-link:hover {
+            text-decoration: underline;
+            color: var(--brand-primary, #015315);
+        }body.login-page .error-message {
+            background: #fee;
+            border-left: 4px solid #c33;
+            color: #c33;
+            padding: 10px 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }body.login-page .helper-text {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 4px;
+            display: block;
+        }body.login-page .password-toggle-wrapper {
+            position: relative;
+        }body.login-page .password-toggle-wrapper .form-control {
+            padding-right: 3rem;
+        }body.login-page .password-toggle {
+            position: absolute;
+            right: 0.85rem;
+            top: 0;
+            bottom: 0;
+            margin: auto 0;
+            background: transparent;
+            border: none;
+            color: var(--brand-green, #117A15);
+            cursor: pointer;
+            padding: 0.35rem;
+            font-size: 1rem;
+            line-height: 1;
+            height: 1.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }body.login-page .password-toggle:hover {
+            color: var(--brand-primary, #015315);
+        }body.login-page .password-toggle:focus {
+            outline: none;
+            box-shadow: none;
+        }
 
-body {
-    height: 100vh;
-    background: linear-gradient(135deg, var(--bg-tint, #F3F8F2), var(--bg-tint-2, #F7FAF6));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+body.register-page {
+        background-color: var(--bg-tint, #F3F8F2);
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }body.register-page .auth-card {
+        width: 100%;
+        max-width: 400px;
+        background: #fff;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }body.register-page .auth-header {
+        background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
+        color: white;
+        padding: 35px 20px;
+        text-align: center;
+    }body.register-page .auth-header h2 {
+        font-weight: 700;
+        margin-bottom: 5px;
+    }body.register-page .auth-header p {
+        font-size: 0.9rem;
+        opacity: 0.85;
+    }body.register-page .auth-body {
+        padding: 25px;
+    }body.register-page .form-control {
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid var(--border-color, #DCEBDC);
+        margin-bottom: 12px;
+    }body.register-page .form-control:focus {
+        border-color: var(--brand-green, #117A15);
+        box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
+    }body.register-page .password-toggle-wrapper {
+        position: relative;
+    }body.register-page .password-toggle-wrapper .form-control {
+        padding-right: 3rem;
+    }body.register-page .password-toggle {
+        position: absolute;
+        right: 0.85rem;
+        top: 0;
+        bottom: 0;
+        margin: auto 0;
+        background: transparent;
+        border: none;
+        color: var(--brand-green, #117A15);
+        cursor: pointer;
+        padding: 0.35rem;
+        font-size: 1rem;
+        line-height: 1;
+        height: 1.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+    }body.register-page .password-toggle:hover {
+        color: var(--brand-primary, #015315);
+    }body.register-page .btn-auth {
+        background: var(--brand-green, #117A15);
+        color: white;
+        border: none;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-top: 10px;
+        transition: 0.2s;
+    }body.register-page .btn-auth:hover {
+        background: var(--brand-primary, #015315);
+        color: white;
+    }body.register-page .switch {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 0.9rem;
+    }body.register-page .switch a {
+        color: var(--brand-green, #117A15);
+        font-weight: 600;
+        text-decoration: none;
+    }body.register-page .switch a:hover {
+        text-decoration: underline;
+        color: var(--brand-primary, #015315);
+    }
 
-.container {
-    width: 100%;
-    max-width: 400px;
-}
-
-.container-1 {
-    width: 150%;
-    max-width: 400px;
-}
-
-.auth-box {
-    background: #fff;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    text-align: center;
-    overflow: visible !important; /* Dropdown ke liye zaroori */
-}
-
-.auth-box h2 { color: var(--heading-color, #14281A); margin-bottom: 10px; }
-.auth-box p { color: #777; margin-bottom: 30px; }
-
-.input-group {
-    position: relative;
-    margin-bottom: 25px;
-    text-align: left;
-}
-
-.iti { width: 100%; display: block; }
-
-/* Fixing Phone Input Padding */
-#phone_input {
-    padding-left: 95px !important; /* Cursor overlap fix */
-}
-
-.input-group input {
-    width: 100% !important;
-    padding: 12px;
-    border: 1px solid var(--border-color, #DCEBDC);
-    border-radius: 10px;
-    outline: none;
-    transition: 0.3s;
-}
-
-.input-group input:not(#phone_input) {
-    padding-left: 12px !important;
-}
-
-.input-group input:focus {
-    border-color: var(--brand-green, #117A15);
-    box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
-}
-
-/* Button & Switch */
-.btn {
-    width: 100%;
-    padding: 12px;
-    background: var(--brand-green, #117A15);
-    border: none;
-    color: #fff;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.3s;
-}
-
-.btn:hover { background: var(--brand-primary, #015315); }
-
-.switch { margin-top: 20px; font-size: 14px; }
-.switch a { color: var(--brand-green, #117A15); text-decoration: none; font-weight: bold; }
-.switch a:hover { color: var(--brand-primary, #015315); }
-
-/* Country list UI fix */
-.iti__country-list {
-    z-index: 1000 !important;
-    text-align: left;
-}
+body.change-password-page {
+            background-color: var(--bg-tint, #F3F8F2);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }body.change-password-page .auth-card {
+            width: 100%;
+            max-width: 430px;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: none;
+        }body.change-password-page .auth-header {
+            background: linear-gradient(135deg, var(--brand-green, #117A15), var(--brand-primary, #015315));
+            color: white;
+            padding: 35px 25px;
+            text-align: center;
+        }body.change-password-page .auth-header h2 {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }body.change-password-page .auth-header p {
+            font-size: 0.92rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }body.change-password-page .auth-body {
+            padding: 30px;
+        }body.change-password-page .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--heading-color, #14281A);
+            margin-bottom: 6px;
+        }body.change-password-page .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color, #DCEBDC);
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }body.change-password-page .form-control:focus {
+            border-color: var(--brand-green, #117A15);
+            box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.15);
+        }body.change-password-page .btn-update {
+            background: var(--brand-green, #117A15);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: 0.3s ease;
+        }body.change-password-page .btn-update:hover {
+            background: var(--brand-primary, #015315);
+            color: #fff;
+        }body.change-password-page .message-box {
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 18px;
+        }body.change-password-page .message-success {
+            background: #edfdf3;
+            border-left: 4px solid #198754;
+            color: #198754;
+        }body.change-password-page .message-error {
+            background: #fff0f0;
+            border-left: 4px solid #dc3545;
+            color: #dc3545;
+        }body.change-password-page .field-error {
+            font-size: 0.8rem;
+            color: #dc3545;
+            margin-top: -10px;
+            margin-bottom: 12px;
+            display: block;
+        }body.change-password-page .auth-footer {
+            background: #fdfdfd;
+            border-top: 1px solid #eee;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+        }body.change-password-page .auth-footer a {
+            color: var(--brand-green, #117A15);
+            text-decoration: none;
+            font-weight: 600;
+        }body.change-password-page .auth-footer a:hover {
+            color: var(--brand-primary, #015315);
+            text-decoration: underline;
+        }body.change-password-page .password-toggle-wrapper {
+            position: relative;
+        }body.change-password-page .password-toggle-wrapper input {
+            padding-right: 3rem;
+        }body.change-password-page .password-toggle {
+            position: absolute;
+            right: 0.85rem;
+            top: 0;
+            bottom: 0;
+            margin: auto 0;
+            background: transparent;
+            border: none;
+            color: var(--brand-green, #117A15);
+            cursor: pointer;
+            padding: 0.35rem;
+            font-size: 1rem;
+            line-height: 1;
+            height: 1.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }body.change-password-page .password-toggle:hover {
+            color: var(--brand-primary, #015315);
+        }

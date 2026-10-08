@@ -1,140 +1,19 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Appointment - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}</title>
-  <!-- Favicons -->
-  {% if clinic and clinic.logo %}
-  <link href="{{ clinic.logo.url }}" rel="icon">
-  <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
-  {% else %}
-  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
-  {% endif %}
+{% block title %}Appointment - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
+{% block fonts %}
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
     rel="stylesheet">
-  <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
-
-  <style>
-    .time-btn {
-      font-size: 11px !important;
-      padding: 5px 2px !important;
-      white-space: nowrap;
-      margin-bottom: 5px;
-      font-weight: bolder;
-    }
-
-    @media (max-width: 576px) {
-      .row-cols-3>* {
-        flex: 0 0 auto;
-        width: 33.333333%;
-      }
-    }
-
-    /* ── Patient Selector ── */
-    .patient-selector-label {
-      font-weight: 600;font-size: 0.88rem;color: #555;margin-bottom: 6px;display: block; }
-    
-    .patient-selector-wrapper { display: flex;gap: 10px;align-items: center; }
-    .patient-selector-wrapper select { flex: 1; }
-    
-    .btn-add-member {
-      white-space: nowrap;font-size: 0.85rem;font-weight: 600;
-      padding: 9px 14px;border-radius: 8px;
-      background: transparent;border: 1.5px solid var(--brand-primary, #015315);color: var(--brand-primary, #015315);
-      cursor: pointer;transition: all 0.2s;display: inline-flex;
-      align-items: center;gap: 6px;
-    }
-
-    .btn-add-member:hover { background: var(--brand-primary, #015315);color: #fff;}
-
-    /* ── Add Member Modal ── */
-    .modal-overlay { display: none;position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 9999;
-      align-items: center;justify-content: center;
-    }
-    .modal-overlay.active { display: flex;}
-
-    .modal-box {
-      background: #fff; border-radius: 14px;padding: 28px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-      animation: slideUp 0.25s ease;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .modal-box h5 {
-      font-weight: 700; font-size: 1.1rem;margin-bottom: 18px;color: var(--heading-color, #14281A);
-      display: flex;align-items: center;gap: 8px; }
-
-    .modal-box h5 i {color: var(--brand-primary, #015315);}
-    .modal-field { margin-bottom: 14px; }
-
-    .modal-field label {
-      font-size: 0.8rem;font-weight: 600;color: #666;
-      display: block;margin-bottom: 5px;text-transform: uppercase;letter-spacing: 0.04em;
-    }
-
-    .modal-field input,
-    .modal-field select {
-      width: 100%;
-      padding: 10px 12px; border: 1.5px solid var(--border-color, #DCEBDC);border-radius: 8px;
-      font-size: 0.92rem;background: var(--bg-tint-2, #F7FAF6);transition: border-color 0.2s;font-family: inherit;
-    }
-
-    .modal-field input:focus,
-    .modal-field select:focus { border-color: var(--brand-green, #117A15); outline: none;background: #fff; }
-
-    .modal-actions { display: flex; gap: 10px;margin-top: 20px;}
-
-    .modal-actions button {
-      flex: 1; padding: 10px;border-radius: 8px;
-      font-weight: 600;
-      font-size: 0.9rem;
-      border: none;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-
-    .modal-actions .btn-save {background: var(--brand-primary, #015315);color: #fff;}
-    .modal-actions .btn-save:hover { opacity: 0.88;}
-
-    .modal-actions .btn-close-modal { background: var(--bg-tint, #F3F8F2);color: #555; border: 1.5px solid var(--border-color, #DCEBDC);}
-    .modal-actions .btn-close-modal:hover { background: var(--border-color, #DCEBDC);}
-  </style>
-</head>
-
-<body class="appointment-page">
-
-  {% include 'header.html' %}
-
-  <main class="main">
+  {% endblock %}
+{% block body_class %}appointment-page{% endblock %}
+{% block extra_css %}
+  <link href="{% static 'assets/css/appointment.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content %}
 
     <!-- Page Title -->
     <div class="page-title">
@@ -287,14 +166,6 @@
       </div>
     </section>
 
-  </main>
-
-  {% include 'footer.html' %}
-
-  <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center">
-    <i class="bi bi-arrow-up-short"></i>
-  </a>
-
   <!-- ══════════════════════════════════════
         Add Family Member Modal
     ══════════════════════════════════════ -->
@@ -362,16 +233,9 @@
     </div>
   </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'assets/aos/aos.js' %}"></script>
-  <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
-  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
-  <script src="{% static 'assets/js/main.js' %}"></script>
-
-  <script>
+  {% endblock %}
+{% block extra_js %}
+<script>
     // ── Sync hidden fields from dropdown ──────────────────
     const forWhomSelect = document.getElementById('forWhomSelect');
     const hiddenName = document.getElementById('hiddenName');
@@ -590,7 +454,4 @@
       });
     });
   </script>
-
-</body>
-
-</html>
+{% endblock %}

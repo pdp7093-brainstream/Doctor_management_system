@@ -1,49 +1,21 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Feedback - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}</title>
-  <meta name="description" content="Share your experience and help us improve our healthcare services.">
-  <meta name="keywords" content="feedback, patient feedback, clinic review">
-
-  <!-- Favicons -->
-  {% if clinic and clinic.logo %}
-  <link href="{{ clinic.logo.url }}" rel="icon">
-  <link href="{{ clinic.logo.url }}" rel="apple-touch-icon">
-  {% else %}
-  <link href="{% static 'assets/img/favicon.png' %}" rel="icon">
-  <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
-  {% endif %}
-
-  <!-- Fonts -->
+{% block title %}Feedback - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
+{% block meta_description %}Share your experience and help us improve our healthcare services.{% endblock %}
+{% block meta_keywords %}feedback, patient feedback, clinic review{% endblock %}
+{% block fonts %}
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
     rel="stylesheet">
-
-  <!-- Vendor CSS Files -->
-  <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/bootstrap-icons/bootstrap-icons.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/aos/aos.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/glightbox/css/glightbox.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet">
-  <link href="{% static 'assets/vendor/swiper/swiper-bundle.min.css' %}" rel="stylesheet">
-
-  <!-- Main CSS File -->
-  <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
+  {% endblock %}
+{% block body_class %}contact-page{% endblock %}
+{% block extra_css %}
   <link href="{% static 'assets/css/feedback.css' %}" rel="stylesheet">
- 
-</head>
-
-<body class="contact-page">
-
-  {% include 'header.html' %}
-
-  <main class="main">
+{% endblock %}
+{% block content %}
 
     <!-- Page Title -->
     <div class="page-title">
@@ -202,29 +174,8 @@
 
     </section><!-- /Feedback Section -->
 
-  </main>
-
-  {% include 'footer.html' %}
-
-  <!-- Scroll Top -->
-  <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
-      class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
-  <script src="{% static 'assets/aos/aos.js' %}"></script>
-  <script src="{% static 'assets/glightbox/js/glightbox.min.js' %}"></script>
-  <script src="{% static 'assets/vendor/purecounter/purecounter_vanilla.js' %}"></script>
-  <script src="{% static 'assets/vendor/swiper/swiper-bundle.min.js' %}"></script>
-
-  <!-- Main JS File -->
-  <script src="{% static 'assets/js/main.js' %}"></script>
-
-  <!-- SweetAlert for messages -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  {% endblock %}
+{% block extra_js %}
   <script>
     {% if messages %}
     document.addEventListener("DOMContentLoaded", function () {
@@ -242,7 +193,4 @@
     });
     {% endif %}
   </script>
-
-</body>
-
-</html>
+{% endblock %}
