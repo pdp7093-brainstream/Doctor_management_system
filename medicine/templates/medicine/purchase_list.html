@@ -7,51 +7,53 @@
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="page-header d-flex justify-content-between align-items-center">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">Purchase Orders</h2>
-            <p class="text-muted small mb-0">Track all medicine purchases from vendors</p>
+            <h2 class="page-title">Purchase Orders</h2>
+            <p class="page-subtitle">Track all medicine purchases from vendors.</p>
         </div>
-        <a href="{% url 'medicine:add_purchase' %}" class="btn btn-primary add-patient-btn">
+        <a href="{% url 'medicine:add_purchase' %}" class="action-btn">
             <i class="bi bi-plus-lg"></i> Add Purchase
         </a>
     </div>
 
-    <!-- Messages -->
-    
-
     <!-- Stats Cards -->
     <div class="row g-3 mb-4" id="statsContainer">
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div style="font-size:2rem; color:#0066cc; font-weight:700;">{{ total_purchases }}</div>
-                <div class="text-muted small">Total Purchases</div>
+            <div class="stat-card success">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">{{ total_purchases }}</div>
+                    <div class="stat-label">Total Purchases</div>
+                </div>
+                <div class="stat-icon success"><i class="bi bi-cart-check"></i></div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
-                <div style="font-size:2rem; color:#fd7e14; font-weight:700;">
-                    ₹{{ total_spending|floatformat:0 }}
+            <div class="stat-card warning">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">₹{{ total_spending|floatformat:0 }}</div>
+                    <div class="stat-label">Total Spending</div>
                 </div>
-                <div class="text-muted small">Total Spending</div>
+                <div class="stat-icon warning"><i class="bi bi-currency-rupee"></i></div>
             </div>
         </div>
     </div>
 
     <!-- Filters -->
-    <div class="table-section mb-4">
+    <div class="dc-card mb-3">
+        <div class="dc-card-body">
         <div class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label class="form-label fw-semibold">Search</label>
+                <label class="dc-label" for="purchaseSearch">Search</label>
                 <input type="text" id="purchaseSearch" class="form-control" placeholder="Vendor or medicine name..."
                     value="{{ search }}">
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Date</label>
+                <label class="dc-label" for="purchaseDate">Date</label>
                 <input type="date" id="purchaseDate" class="form-control" value="{{ purchase_date }}">
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold">Status</label>
+                <label class="dc-label" for="purchaseStatus">Status</label>
                 <select id="purchaseStatus" class="form-select">
                     <option value="all" {% if status == "all" %}selected{% endif %}>All</option>
                     <option value="ordered" {% if status == "ordered" %}selected{% endif %}>Ordered</option>
@@ -60,51 +62,53 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="button" id="clearBtn" class="btn btn-outline-primary w-100" style="border: 1px solid #0d6efd !important;">Clear</button>
+                <button type="button" id="clearBtn" class="btn-ghost w-100 justify-content-center btn-clear"><i class="bi bi-x-circle"></i> Clear</button>
             </div>
+        </div>
         </div>
     </div>
 
-    <!-- Table Section -->
-    <div class="table-section">
-        <div id="tableContainer" style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
-            <table class="table table-custom" style="min-width: 950px; width: 100%;">
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-receipt"></i> Purchase records</h3>
+        </div>
+        <div id="tableContainer" class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width: 950px;">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="col-num">#</th>
                         <th>Vendor Name</th>
                         <th>Date</th>
                         <th>Items</th>
-                        <th>Total Amount</th>
+                        <th class="text-end">Total Amount</th>
                         <th>Status</th>
-                        <th class="text-center">Action</th>
+                        <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
                     {% for purchase in purchases %}
                     <tr class="purchase-row">
-                        <td class="patient-info fw-semibold">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                        <td class="col-num">{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
-                        <td class="patient-name">
-                            <div class="d-flex align-items-center">
-                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                                    style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
+                        <td>
+                            <div class="dc-person">
+                                <div class="dc-avatar">
                                     {{ purchase.vendor.name|first|upper }}
                                 </div>
-                                <span class="fw-semibold">{{ purchase.vendor.name }}</span>
+                                <span class="dc-name">{{ purchase.vendor.name }}</span>
                             </div>
                         </td>
 
-                        <td class="patient-info">
-                            <i class="bi bi-calendar-event me-2" style="color: #0066cc;"></i>
+                        <td class="dc-mono">
+                            <i class="bi bi-calendar-event me-2 dc-muted"></i>
                             <span>{{ purchase.date|date:"d M, Y" }}</span>
                         </td>
 
-                        <td class="patient-info">
-                            <span class="badge bg-info text-dark rounded-pill px-3">
+                        <td>
+                            <span class="dc-badge grey">
                                 {{ purchase.items.count }} item{{ purchase.items.count|pluralize }}
                             </span>
-                            <div class="text-muted small mt-1">
+                            <div class="dc-muted small mt-1">
                                 {% for item in purchase.items.all %}
                                 <div>
                                     {{ item.medicine_variant.medicine.name }} -
@@ -117,34 +121,34 @@
                             </div>
                         </td>
 
-                        <td class="patient-info">
-                            <div class="fw-bold" style="color: #28a745; font-size: 1.1rem;">
+                        <td class="text-end dc-mono">
+                            <div class="fw-semibold">
                                 ₹{{ purchase.total_amount|floatformat:2 }}
                             </div>
                         </td>
 
                         <td>
                             {% if purchase.status == "received" %}
-                            <span class="badge bg-success">Received</span>
+                            <span class="dc-badge green">Received</span>
                             {% elif purchase.status == "ordered" %}
-                            <span class="badge bg-warning text-dark">Ordered</span>
+                            <span class="dc-badge peach">Ordered</span>
                             {% else %}
-                            <span class="badge bg-secondary">{{ purchase.status|default:"Draft"|capfirst }}</span>
+                            <span class="dc-badge grey">{{ purchase.status|default:"Draft"|capfirst }}</span>
                             {% endif %}
                         </td>
 
-                        <td>
-                            <div class="d-flex align-items-center justify-content-center gap-2">
+                        <td class="col-actions">
+                            <div class="dc-actions">
                                 <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}"
-                                    class="btn btn-primary btn-sm d-flex align-items-center gap-1" title="View Details">
-                                    <i class="bi bi-eye"></i> View
+                                    class="btn-act view" title="View details">
+                                    <i class="bi bi-eye"></i>
                                 </a>
                                 <form method="post" action="{% url 'medicine:delete_purchase' purchase.id|hid %}" class="m-0 deletePurchaseForm">
 
                                     {% csrf_token %}
 
-                                    <button type="submit" class="btn btn-danger btn-sm d-flex align-items-center gap-1" title="Delete Purchase">
-                                        <i class="bi bi-trash"></i> Delete
+                                    <button type="submit" class="btn-act delete" title="Delete purchase">
+                                        <i class="bi bi-trash"></i>
                                     </button>
 
                                 </form>
@@ -153,14 +157,11 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-5">
-                            <div class="empty-state">
-                                <div class="empty-state-icon mb-3">
-                                    <i class="bi bi-inbox" style="font-size: 2.5rem; color: #ccc;"></i>
-                                </div>
-                                <p class="text-muted mb-3">No purchase orders yet</p>
-                                <a href="{% url 'medicine:add_purchase' %}" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-plus-lg me-1"></i> Create First Purchase
+                        <td colspan="7" class="dc-empty purchase-empty">
+                            <i class="bi bi-receipt"></i>
+                            <div class="dc-name mb-2">No purchase orders yet.</div>
+                            <div class="mt-2"><a href="{% url 'medicine:add_purchase' %}" class="btn btn-primary">
+                                    <i class="bi bi-plus-lg"></i> Create Purchase Order
                                 </a>
                             </div>
                         </td>
@@ -170,8 +171,9 @@
             </table>
         </div>
 
+        {% if purchases %}
         <div id="paginationContainer">
-            <div id="paginationWrapper" class="d-flex justify-content-center mt-3">
+            <div id="paginationWrapper" class="dc-card-footer d-flex justify-content-center">
                 {% if page_obj.paginator.num_pages > 1 %}
                 <ul class="pagination">
                     {% if page_obj.has_previous %}
@@ -197,6 +199,7 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
     </div>
 
 </main>

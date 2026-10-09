@@ -5,92 +5,80 @@
 {% block content %}
 
 <main class="main-content" id="mainContent">
-    <div class="patient-form-shell">
-        <div class="page-header patient-form-header">
+    <div class="dc-form-shell">
+        <div class="page-head">
             <div>
-                <h2 class="page-title mb-0">Add Purchase</h2>
+                <h2 class="page-title">Add Purchase</h2>
                 <p class="page-subtitle">Create a new purchase order from vendor.</p>
             </div>
-            <a href="{% url 'medicine:purchase_list' %}" class="patient-link-btn">
-                <i class="bi bi-arrow-left me-2"></i>Purchase List
+            <a href="{% url 'medicine:purchase_list' %}" class="btn-ghost">
+                <i class="bi bi-arrow-left"></i> Purchase List
             </a>
         </div>
 
-        <div class="patient-form-card">
+        <div class="dc-card">
             <form method="POST" action="{% url 'medicine:add_purchase' %}" class="patient-form-grid">
                 {% csrf_token %}
 
-                
+                <div class="dc-card-body pb-0">
+                    <section class="dc-section">
+                        <h3 class="dc-section-title"><i class="bi bi-receipt"></i> Purchase details</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="dc-label" for="vendor">Select Vendor <span class="dc-muted">*</span></label>
+                                <select id="vendor" name="vendor" class="form-select patient-input" required>
+                                    <option value="">-- Select Vendor --</option>
+                                    {% for vendor in vendors %}
+                                        <option value="{{ vendor.pk }}">
+                                            {{ vendor.name }}
+                                            {% if vendor.phone %}({{ vendor.phone }}){% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <small class="dc-hint">Don't have a vendor? <a href="{% url 'medicine:add_vendor' %}" target="_blank">Add Vendor</a></small>
+                            </div>
+                        </div>
+                    </section>
 
-                <!-- Vendor Select -->
-                <div class="patient-field">
-                    <label class="patient-label" for="vendor">
-                        <i class="bi bi-building me-1" style="color:#0066cc;"></i>
-                        Select Vendor <span style="color:#dc3545;">*</span>
-                    </label>
-                    <select id="vendor" name="vendor" class="patient-input" required>
-                        <option value="">-- Select Vendor --</option>
-                        {% for vendor in vendors %}
-                            <option value="{{ vendor.pk }}">
-                                {{ vendor.name }}
-                                {% if vendor.phone %}({{ vendor.phone }}){% endif %}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    <small class="text-muted mt-1 d-block">
-                        Don't have a vendor?
-                        <a href="{% url 'medicine:add_vendor' %}" target="_blank">Add Vendor</a>
-                    </small>
-                </div>
+                    <section class="dc-section">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <h3 class="dc-section-title mb-0"><i class="bi bi-box-seam"></i> Purchase items</h3>
+                            <button type="button" id="addItemBtn" class="btn-ghost">
+                                <i class="bi bi-plus-circle"></i> Add Item
+                            </button>
+                        </div>
 
-                <!-- Purchase Items -->
-                <div style="margin-top:8px;">
-                    <div style="display:flex; justify-content:space-between;
-                                align-items:center; margin-bottom:12px;">
-                        <label class="patient-label mb-0">
-                            <i class="bi bi-box-seam me-1" style="color:#0066cc;"></i>
-                            Purchase Items
-                        </label>
-                        <button type="button" id="addItemBtn"
-                            class="btn btn-sm btn-outline-primary"
-                            style="border-radius:8px; font-size:0.82rem;">
-                            <i class="bi bi-plus-circle"></i> Add Item
-                        </button>
-                    </div>
-
-                    <div id="itemsContainer">
+                        <div id="itemsContainer">
 
                         {% if preselected_variant %}
                         <!-- Pre-selected from Low Stock -->
-                        <div class="purchase-item-row"
-                            style="background:#f8fbff; border:1px solid #c8d8f0;
-                                   border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <div class="purchase-item-row dc-callout mb-2">
 
                             <!-- Low stock badge -->
                             <div class="mb-2">
                                 {% if preselected_variant.stock <= 0 %}
-                                <span class="badge bg-danger text-white">
+                                <span class="dc-badge red">
                                     <i class="bi bi-x-circle me-1"></i>
                                     Out of Stock Order
                                 </span>
                                 {% else %}
-                                <span class="badge bg-warning text-dark">
+                                <span class="dc-badge peach">
                                     <i class="bi bi-exclamation-triangle me-1"></i>
                                     Low Stock Order
                                 </span>
                                 {% endif %}
-                                <span class="ms-2 text-muted small">
-                                    Current Stock: {{ preselected_variant.stock }}
+                                <span class="ms-2 dc-muted small">
+                                    Current Stock: <span class="dc-mono">{{ preselected_variant.stock }}</span>
                                     (Alert at {{ preselected_variant.low_stock_alert }})
                                 </span>
                             </div>
 
-                            <div class="row g-2 align-items-end">
-                                <div class="col-12 col-md-5" style="position:relative;">
-                                    <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
-                                    <input type="text" class="patient-input medicine-search"
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-5 position-relative">
+                                    <label class="dc-label">Medicine <span class="dc-muted">*</span></label>
+                                    <input type="text" class="form-control patient-input medicine-search"
                                         value="{{ preselected_variant.medicine.name }}"
-                                        placeholder="Name, short name, or company..." autocomplete="off">
+                                        placeholder="Name, short name, or company..." autocomplete="off" required>
                                     <input type="hidden" name="variant_id[]" class="variant-id"
                                         value="{{ preselected_variant.pk }}">
                                     <input type="hidden" name="strip_price[]" value="0">
@@ -103,23 +91,23 @@
                                                z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,0.12);">
                                     </div>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
+                                <div class="col-12 col-md-3">
+                                    <label class="dc-label">Qty Strips <span class="dc-muted">*</span></label>
                                     <input type="number" name="quantity_strips[]"
-                                        class="patient-input" placeholder="e.g. 10"
+                                        class="form-control patient-input" placeholder="e.g. 10"
                                         min="1" required>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
+                                <div class="col-12 col-md-3">
+                                    <label class="dc-label">Unit/Strip <span class="dc-muted">*</span></label>
                                     <input type="number" name="unit_per_strip[]"
-                                        class="patient-input"
+                                        class="form-control patient-input"
                                         value="{{ preselected_variant.unit_per_strip|default:10 }}"
                                         min="1" required>
                                 </div>
                                 <div class="col-12 col-md-1 mt-2 mt-md-0 pb-md-1 text-end">
                                     <button type="button"
-                                        class="btn btn-sm btn-outline-danger remove-item-btn w-100"
-                                        style="border-radius:8px;" disabled>
+                                        class="btn-ghost remove-item-btn w-100 justify-content-center btn-act delete"
+                                        title="Remove item" disabled>
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -128,14 +116,12 @@
 
                         {% else %}
                         <!-- Default blank row -->
-                        <div class="purchase-item-row"
-                            style="background:#f8fbff; border:1px solid #e2e8f0;
-                                   border-radius:10px; padding:14px; margin-bottom:12px;">
-                            <div class="row g-2 align-items-end">
-                                <div class="col-12 col-md-5" style="position:relative;">
-                                    <label class="patient-label" style="font-size:0.78rem;">Medicine</label>
-                                    <input type="text" class="patient-input medicine-search"
-                                        placeholder="Name, short name, or company..." autocomplete="off">
+                        <div class="purchase-item-row dc-callout mb-2">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-5 position-relative">
+                                    <label class="dc-label">Medicine <span class="dc-muted">*</span></label>
+                                    <input type="text" class="form-control patient-input medicine-search"
+                                        placeholder="Name, short name, or company..." autocomplete="off" required>
                                     <input type="hidden" name="variant_id[]" class="variant-id">
                                     <input type="hidden" name="strip_price[]" value="0">
                                     <input type="hidden" name="tax_percent[]" value="0">
@@ -147,22 +133,22 @@
                                                z-index:1000; box-shadow:0 4px 8px rgba(0,0,0,0.12);">
                                     </div>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
+                                <div class="col-12 col-md-3">
+                                    <label class="dc-label">Qty Strips <span class="dc-muted">*</span></label>
                                     <input type="number" name="quantity_strips[]"
-                                        class="patient-input" placeholder="e.g. 10"
+                                        class="form-control patient-input" placeholder="e.g. 10"
                                         min="1" required>
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
+                                <div class="col-12 col-md-3">
+                                    <label class="dc-label">Unit/Strip <span class="dc-muted">*</span></label>
                                     <input type="number" name="unit_per_strip[]"
-                                        class="patient-input" placeholder="e.g. 10"
+                                        class="form-control patient-input" placeholder="e.g. 10"
                                         min="1" required>
                                 </div>
                                 <div class="col-12 col-md-1 mt-2 mt-md-0 pb-md-1 text-end">
                                     <button type="button"
-                                        class="btn btn-sm btn-outline-danger remove-item-btn w-100"
-                                        style="border-radius:8px;" disabled>
+                                        class="btn-ghost remove-item-btn w-100 justify-content-center btn-act delete"
+                                        title="Remove item" disabled>
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -170,20 +156,13 @@
                         </div>
                         {% endif %}
 
-                    </div>
+                        </div>
+                    </section>
                 </div>
 
-                <!-- Actions -->
-                <div class="patient-form-actions">
-                    <button type="submit" class="patient-submit-btn me-2    ">
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Save Purchase</span>
-                    </button>
-                    <a href="{% url 'medicine:purchase_list' %}"
-                        class="btn btn-outline-secondary"
-                        style="border-radius:8px; padding:10px 20px; font-weight:600;">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </a>
+                <div class="dc-form-footer">
+                    <a href="{% url 'medicine:purchase_list' %}" class="btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Purchase</button>
                 </div>
 
             </form>

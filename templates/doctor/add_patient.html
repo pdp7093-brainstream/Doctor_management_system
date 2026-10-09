@@ -5,134 +5,132 @@
 {% block content %}
 
 <main class="main-content" id="mainContent">
-    <div class="patient-form-shell">
+    <div class="dc-form-shell">
 
         <!-- Page Header -->
-        <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+        <div class="page-head">
             <div>
-                <h2 class="page-title mb-1">Add Patient</h2>
-                <p class="text-muted small mb-0">Add a new main patient or a family member of an existing patient.</p>
+                <h2 class="page-title">Add Patient</h2>
+                <p class="page-subtitle">Add a new main patient or a family member of an existing patient.</p>
             </div>
-            <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn">
-                <i class="bi bi-people-fill me-1"></i> Manage Patients
+            <a href="{% url 'doctor:manage_patients' %}" class="btn-ghost">
+                <i class="bi bi-people-fill"></i> Manage Patients
             </a>
-        </div>        
-
-        <div class="card">
-            <div class="card-body">
-                <form method="POST" class="row g-3">
-                    {% csrf_token %}
-
-                    <!-- Booking Type -->
-                    <div class="col-12">
-                        <div class="rounded-3 p-3" style="background:#f0f4ff;">
-                            <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color); margin-bottom:12px;">
-                                <i class="bi bi-people"></i> Booking Type
-                            </div>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">
-                                            Parent Patient <small class="fw-normal text-muted">(optional — select to add as family member)</small>
-                                        </label>
-                                        <input type="text" id="parentSearch" class="form-control" placeholder="Search existing patient by name or phone">
-                                        <input type="hidden" name="parent_patient" id="parent_patient_input" value="">
-                                        <div id="parentSuggestions" class="list-group position-absolute w-100 mt-1" style="z-index:1050; display:none;"></div>
-                                </div>
-                                <div class="col-md-6" id="relationField" style="display:none;">
-                                    <label class="form-label" style="font-size:0.85rem; font-weight:600;">Relation *</label>
-                                    <select name="relation" id="relationSelect" class="form-select">
-                                        <option value="">Select Relation</option>
-                                        <option value="Wife">Wife</option>
-                                        <option value="Husband">Husband</option>
-                                        <option value="Son">Son</option>
-                                        <option value="Daughter">Daughter</option>
-                                        <option value="Father">Father</option>
-                                        <option value="Mother">Mother</option>
-                                        <option value="Brother">Brother</option>
-                                        <option value="Sister">Sister</option>
-                                        <option value="Other">Other</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div id="modeHint" class="mt-2" style="font-size:0.82rem; color:#6c757d;">
-                                <i class="bi bi-info-circle"></i>
-                                <span id="modeText">No parent selected — this person will be added as a <strong>main patient</strong> with their own login.</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section label -->
-                    <div class="col-12 mt-1">
-                        <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
-                            <i class="bi bi-person"></i> Personal Info
-                        </div>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Full Name *</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
-                    </div>
-
-                    <div class="col-md-6" id="phoneField">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" id="phoneLabel">
-                            Phone * <small class="fw-normal text-muted" id="phoneHint">(used as login username)</small>
-                        </label>
-                        <input type="tel" name="phone" id="phoneInput" class="form-control"
-                               placeholder="e.g. 9876543210" maxlength="15"
-                               inputmode="numeric" pattern="[0-9]{7,15}"
-                               title="Phone number must contain only digits (7–15 digits)">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Date of Birth</label>
-                        <input type="date" name="dob" class="form-control">
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Gender</label>
-                        <select name="gender" class="form-select">
-                            <option value="">Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Blood Group</label>
-                        <select name="bld_grop" class="form-select">
-                            <option value="">Select Blood Group</option>
-                            <option value="A+">A+</option>
-                            <option value="A-">A-</option>
-                            <option value="B+">B+</option>
-                            <option value="B-">B-</option>
-                            <option value="AB+">AB+</option>
-                            <option value="AB-">AB-</option>
-                            <option value="O+">O+</option>
-                            <option value="O-">O-</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-6" id="emailField">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Email</label>
-                        <input type="email" name="email" class="form-control" placeholder="optional">
-                    </div>
-
-                    <div class="col-12" id="addressField">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;">Address</label>
-                        <textarea name="address" class="form-control" rows="3"
-                                  placeholder="Enter complete address"></textarea>
-                    </div>
-
-                    <div class="col-12 d-flex justify-content-end mt-2">
-                        <button type="submit" class="action-btn" id="submitBtn">
-                            <i class="bi bi-check2-circle me-1"></i>
-                            <span id="submitText">Save Patient</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
         </div>
+
+        <form method="POST" class="dc-card">
+            {% csrf_token %}
+            <div class="dc-card-body">
+
+                <!-- Section 1: Booking type -->
+                <div class="dc-section">
+                    <h3 class="dc-section-title"><i class="bi bi-diagram-3"></i> Booking Type</h3>
+                    <div class="dc-callout">
+                        <div class="row g-3">
+                            <div class="col-md-6 position-relative">
+                                <label class="dc-label" for="parentSearch">
+                                    Parent Patient <small>(optional, to add a family member)</small>
+                                </label>
+                                <input type="text" id="parentSearch" class="form-control" placeholder="Search existing patient by name or phone" autocomplete="off">
+                                <input type="hidden" name="parent_patient" id="parent_patient_input" value="">
+                                <div id="parentSuggestions" class="list-group dc-suggest" style="display:none;"></div>
+                            </div>
+                            <div class="col-md-6" id="relationField" style="display:none;">
+                                <label class="dc-label" for="relationSelect">Relation *</label>
+                                <select name="relation" id="relationSelect" class="form-select">
+                                    <option value="">Select Relation</option>
+                                    <option value="Wife">Wife</option>
+                                    <option value="Husband">Husband</option>
+                                    <option value="Son">Son</option>
+                                    <option value="Daughter">Daughter</option>
+                                    <option value="Father">Father</option>
+                                    <option value="Mother">Mother</option>
+                                    <option value="Brother">Brother</option>
+                                    <option value="Sister">Sister</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="modeHint" class="dc-hint">
+                            <i class="bi bi-info-circle"></i>
+                            <span id="modeText">No parent selected — this person will be added as a <strong>main patient</strong> with their own login.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Personal info -->
+                <div class="dc-section">
+                    <h3 class="dc-section-title"><i class="bi bi-person"></i> Personal &amp; Contact Info</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="dc-label">Full Name *</label>
+                            <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                        </div>
+
+                        <div class="col-md-6" id="phoneField">
+                            <label class="dc-label" id="phoneLabel">
+                                Phone * <small id="phoneHint">(used as login username)</small>
+                            </label>
+                            <input type="tel" name="phone" id="phoneInput" class="form-control"
+                                   placeholder="e.g. 9876543210" maxlength="15"
+                                   inputmode="numeric" pattern="[0-9]{7,15}"
+                                   title="Phone number must contain only digits (7–15 digits)">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="dc-label">Date of Birth</label>
+                            <input type="date" name="dob" class="form-control">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="dc-label">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="dc-label">Blood Group</label>
+                            <select name="bld_grop" class="form-select">
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="emailField">
+                            <label class="dc-label">Email <small>(optional)</small></label>
+                            <input type="email" name="email" class="form-control" placeholder="name@example.com">
+                        </div>
+
+                        <div class="col-12" id="addressField">
+                            <label class="dc-label">Address</label>
+                            <textarea name="address" class="form-control" rows="3"
+                                      placeholder="House no., street, area, city"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer actions -->
+            <div class="dc-form-footer">
+                <a href="{% url 'doctor:manage_patients' %}" class="btn-ghost">Cancel</a>
+                <button type="submit" class="action-btn" id="submitBtn">
+                    <i class="bi bi-check2-circle"></i>
+                    <span id="submitText">Save Patient</span>
+                </button>
+            </div>
+        </form>
 
     </div>
 </main>

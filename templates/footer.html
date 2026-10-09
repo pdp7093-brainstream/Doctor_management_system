@@ -46,8 +46,7 @@
                     <nav class="footer-nav">
                       <a href="{% url 'index' %}">Home</a>
                       <a href="{% url 'about' %}">About Us</a>
-                      <a href="{% url 'services' %}">Our Services</a>
-                      <a href="{% url 'departments' %}">Departments</a>
+                      <a href="{% url 'treatments' %}">Treatments</a>
                     </nav>
                   </div>
                 </div>
@@ -56,10 +55,10 @@
                   <div class="nav-column">
                     <h6>Treatments</h6>
                     <nav class="footer-nav">
-                      <a href="{% url 'services' %}">Nadi Pariksha</a>
-                      <a href="{% url 'services' %}">Panchakarma</a>
-                      <a href="{% url 'services' %}">Herbal Medicines</a>
-                      <a href="{% url 'services' %}">Diet &amp; Lifestyle</a>
+                      <a href="{% url 'treatments' %}#panchakarma">Panchakarma</a>
+                      <a href="{% url 'treatments' %}#purva-karma">Preparatory Therapies</a>
+                      <a href="{% url 'treatments' %}#vishesh-chikitsa">Shirodhara</a>
+                      <a href="{% url 'treatments' %}#sahayak-chikitsa">Acupressure</a>
                     </nav>
                   </div>
                 </div>
@@ -69,12 +68,8 @@
                     <h6>Patient</h6>
                     <nav class="footer-nav">
                       <a href="{% url 'appointment:appointment' %}">Book Appointment</a>
-                      <a href="{% url 'feedback' %}">Contact Us</a>
-                      {% if user.is_authenticated %}
-                      <a href="{% url 'pdashboard:dashboard' %}">My Dashboard</a>
-                      {% else %}
-                      <a href="{% url 'login' %}">Patient Login</a>
-                      {% endif %}
+                      <a href="{% url 'feedback' %}">Feedback</a>
+                      
                     </nav>
                   </div>
                 </div>
@@ -83,8 +78,7 @@
                   <div class="nav-column">
                     <h6>Legal</h6>
                     <nav class="footer-nav">
-                      <a href="{% url 'terms' %}">Terms of Service</a>
-                      <a href="{% url 'feedback' %}">Privacy Policy</a>
+                      <a href="{% url 'terms' %}">Terms &amp; Privacy</a>
                     </nav>
                   </div>
                 </div>
@@ -98,9 +92,9 @@
 
     </div>
 
-    <div class="footer-bottom">
+    <div class="footer-bottom" style="padding-bottom: 24px;">
       <div class="container">
-        <div class="bottom-content" data-aos="fade-up" data-aos-delay="300">
+        <div class="bottom-content">
           <div class="row align-items-center gy-3">
             <div class="col-md-6 text-center text-md-start">
               <p class="mb-0" style="font-size:0.875rem; color:rgba(255,255,255,0.75);">© {% now 'Y' %} {{ clinic.clinic_name }}. All rights reserved.</p>

@@ -5,7 +5,7 @@
     <div class="container position-relative d-flex align-items-center justify-content-between">
       <a href="{% url 'index' %}" class="logo d-flex align-items-center">
         {% if clinic.logo %}
-          <img src="{{ clinic.logo.url }}" alt="Clinic Logo" style="max-height:4.5rem;max-width:160px;object-fit:contain;mix-blend-mode:multiply;">
+          <img src="{{ clinic.logo.url }}" alt="Clinic Logo">
         {% else %}
           <h1 class="sitename">{{clinic.clinic_name}}</h1>
         {% endif %}
@@ -20,21 +20,14 @@
           </li> 
 
           <li>
-            <a href="{% url 'appointment:appointment' %}"
-              class="{% if '/appointment' in request.path %}active{% endif %}">
-              Appointment
+            <a href="{% url 'about' %}" class="{% if '/about' in request.path %}active{% endif %}">
+              About
             </a>
           </li>
 
           <li>
-            <a href="{% url 'services' %}" class="{% if '/services' in request.path %}active{% endif %}">
-              Services
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'departments' %}" class="{% if '/departments' in request.path %}active{% endif %}">
-              Departments
+            <a href="{% url 'treatments' %}" class="{% if '/treatments' in request.path %}active{% endif %}">
+              Treatments
             </a>
           </li>
 
@@ -44,12 +37,11 @@
             </a>
           </li>
 
-          <li>
-            <a href="{% url 'about' %}" class="{% if '/about' in request.path %}active{% endif %}">
-              About
+          <li class="nav-item d-flex align-items-center">
+            <a href="{% url 'appointment:appointment' %}" style="background-color: #FD6801; color: white; border-radius: 50px; font-weight: 500; text-decoration: none; display: inline-block; transition: 0.3s; margin-left: 10px;" onmouseover="this.style.backgroundColor='#E25C00'" onmouseout="this.style.backgroundColor='#FD6801'">
+              Book Appointment
             </a>
           </li>
-          <li><a href="{% url 'terms' %}">Terms & Privacy</a></li>
 
           {% if user.is_authenticated %}
           <li class="dropdown profile-nav">

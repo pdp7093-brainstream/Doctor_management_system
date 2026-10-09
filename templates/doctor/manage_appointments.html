@@ -7,16 +7,16 @@
 <style>
     /* View button — matches staff.html btn-edit-staff style */
     .btn-view-appt {
-        background-color: #dbeafe;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
+        background-color: #F3F8F2;
+        color: #015315;
+        border: 1px solid #DCEBDC;
         padding: 0.375rem 0.75rem;
         font-size: 0.875rem;
     }
 
     .btn-view-appt:hover {
-        background-color: #bfdbfe;
-        color: #1d4ed8;
+        background-color: #E6F1E6;
+        color: #013A0F;
     }
 
     /* Icon inside input */
@@ -38,6 +38,17 @@
     .input-icon-wrap .form-control,
     .input-icon-wrap .form-select {
         padding-left: 30px;
+    }
+
+    a.action-btn {
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    a.action-btn:hover {
+        color: #fff;
     }
 
     @media (max-width: 768px) {
@@ -97,8 +108,8 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label d-none d-md-block" style="font-size:0.85rem;">&nbsp;</label>
-                    <button id="clearBtn" class="btn btn-outline-primary w-100" style="border: 1px solid #0d6efd !important;">
-                        <i class="bi me-1"></i>Clear
+                    <button id="clearBtn" class="btn btn-clear-filter w-100 btn-clear">
+                        <i class="bi bi-x-circle"></i> Clear
                     </button>
                 </div>
             </div>
@@ -224,7 +235,7 @@
                         <tr>
                             <td colspan="8" class="text-center text-muted py-5">
                                 <i class="bi bi-calendar-x"
-                                    style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
+                                    style="font-size:2rem; color:#117A15; opacity:.4; display:block; margin-bottom:8px;"></i>
                                 No appointments found.
                             </td>
                         </tr>

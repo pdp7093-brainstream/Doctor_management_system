@@ -6,28 +6,81 @@
 
 <main class="main-content" id="mainContent">
     {% csrf_token %}
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">Staff Members</h2>
-            <p class="text-muted small mb-0">Manage biller accounts and access status.</p>
+            <h2 class="page-title">Staff Members</h2>
+            <p class="page-subtitle">Manage biller accounts and access status.</p>
         </div>
-        <button class="action-btn" id="openAddStaff">
+        <a href="#" class="action-btn" id="openAddStaff" onclick="return false;">
             <i class="bi bi-plus-lg"></i> Add Staff
-        </button>
+        </a>
     </div>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
-                <i class="bi bi-person-lines-fill"></i> Billers
-            </div>
-            <span class="badge bg-light text-primary">{{ billers|length }} member{{ billers|length|pluralize }}</span>
+    {% if is_owner and pending_doctors %}
+    <div class="dc-card is-pending mb-4">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-person-exclamation"></i> Pending Doctor Approvals</h3>
+            <span class="dc-count">{{ pending_doctors|length }} pending</span>
+        </div>
+        <div class="dc-table-wrap">
+                <table class="table table-hover dc-table" style="min-width:900px;">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for member in pending_doctors %}
+                        <tr id="row-{{ member.id }}">
+                            <td>
+                                <div class="dc-person">
+                                    <div class="dc-avatar">
+                                        {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
+                                    </div>
+                                    <div>
+                                        <div class="dc-name">{{member.user.get_full_name|default:member.user.username }}</div>
+                                        <div class="dc-sub">Doctor (Pending)</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="dc-mono">{{ member.user.username }}</td>
+                            <td>{{ member.user.email|default:"—" }}</td>
+                            <td class="dc-mono">{{ member.phone|default:"—" }}</td>
+                            <td>
+                                <span class="dc-badge peach">Pending</span>
+                            </td>
+                            <td>
+                                <div class="dc-actions">
+                                    <button class="btn-soft success btn-approve-doc" data-id="{{ member.id }}" title="Approve">
+                                        <i class="bi bi-check2-circle"></i> Approve
+                                    </button>
+                                    <button class="btn-soft danger btn-reject-doc" data-id="{{ member.id }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" title="Reject">
+                                        <i class="bi bi-x-circle"></i> Reject
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-person-lines-fill"></i> Billers</h3>
+            <span class="dc-count">{{ billers|length }} member{{ billers|length|pluralize }}</span>
         </div>
 
-        <div class="card-body p-0">
-            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+        <div class="dc-table-wrap">
                 {% if billers %}
-                <table class="table table-hover mb-0" style="min-width:900px; width:100%;">
+                <table class="table table-hover dc-table" style="min-width:900px;">
                     <thead>
                         <tr>
                             <th>Staff</th>
@@ -43,43 +96,43 @@
                         <tr id="row-{{ member.id }}">
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="user-avatar" style="width: 40px; height: 40px; font-size: 0.9rem;">
+                                    <div class="dc-avatar">
                                         {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
                                     </div>
                                     <div>
-                                        <div style="font-weight:600;">
+                                        <div class="dc-name">
                                             {{member.user.get_full_name|default:member.user.username }}</div>
-                                        <div style="font-size:0.78rem;color:#888;">Biller</div>
+                                        <div class="dc-sub">Biller</div>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ member.user.username }}</td>
+                            <td class="dc-mono">{{ member.user.username }}</td>
                             <td>{{ member.user.email|default:"—" }}</td>
-                            <td>{{ member.phone|default:"—" }}</td>
+                            <td class="dc-mono">{{ member.phone|default:"—" }}</td>
                             <td>
                                 {% if member.user.is_active %}
-                                <span class="badge bg-success bg-opacity-25 text-success">Active</span>
+                                <span class="dc-badge green">Active</span>
                                 {% else %}
-                                <span class="badge bg-danger bg-opacity-25 text-danger">Inactive</span>
+                                <span class="dc-badge grey">Inactive</span>
                                 {% endif %}
                             </td>
                             <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <button class="btn btn-sm btn-edit-staff" data-id="{{ member.id }}"
+                                <div class="dc-actions">
+                                    <button class="btn-act edit btn-edit-staff" data-id="{{ member.id }}"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
                                         data-email="{{ member.user.email }}" data-phone="{{ member.phone }}"
                                         data-active="{{ member.user.is_active|lower }}" title="Edit">
-                                        <i class="bi bi-pencil"></i><span>Edit</span>
+                                        <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-reset-pwd" data-id="{{ member.id }}"
+                                    <button class="btn-act edit btn-reset-pwd" data-id="{{ member.id }}"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
                                         title="Reset Password">
-                                        <i class="bi bi-key"></i><span>Password</span>
+                                        <i class="bi bi-key"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-delete-staff" data-id="{{ member.id }}"
+                                    <button class="btn-act delete btn-delete-staff" data-id="{{ member.id }}"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
                                         title="Delete">
-                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </td>
@@ -88,9 +141,12 @@
                     </tbody>
                 </table>
                 {% else %}
-                <div class="text-center py-5 text-muted">
-                    <i class="bi bi-person-x" style="font-size:2rem;color:#cbd5e1;display:block;margin-bottom:8px;"></i>
-                    No staff members found. Add one to get started.
+                <div class="dc-empty">
+                    <i class="bi bi-person-x"></i>
+                    <p class="dc-empty-text">No billers found. Add a staff member to get started.</p>
+                    <a href="#" class="btn btn-primary btn-sm" onclick="document.getElementById('openAddStaff').click(); return false;">
+                        <i class="bi bi-plus-lg"></i> Add Staff
+                    </a>
                 </div>
                 {% endif %}
             </div>
@@ -210,6 +266,48 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="{% static 'assets/js/staff.js' %}?v={% now 'U' %}"></script>
+
+    <script>
+        document.querySelectorAll('.btn-approve-doc').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                fetch(`/doctor/staff/approve/${id}/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+                }).then(r => r.json()).then(res => {
+                    if (res.success) location.reload();
+                    else alert(res.error || 'Approval failed');
+                });
+            });
+        });
+
+        document.querySelectorAll('.btn-reject-doc').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const name = this.dataset.name;
+                Swal.fire({
+                    title: 'Reject Registration?',
+                    text: `Are you sure you want to reject and delete the application for ${name}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc2626',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Yes, reject it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/doctor/staff/reject/${id}/`, {
+                            method: 'POST',
+                            headers: { 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value }
+                        }).then(r => r.json()).then(res => {
+                            if (res.success) location.reload();
+                            else Swal.fire('Error!', res.error || 'Rejection failed', 'error');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
 </main>
 
 {% endblock %}

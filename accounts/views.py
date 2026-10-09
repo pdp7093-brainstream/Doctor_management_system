@@ -12,6 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.cache import never_cache
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument
 from doctor.models import InnerMember
@@ -21,6 +22,7 @@ from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date, parse_time
 from appointment.file_validation import validate_uploaded_document
+from .emails import send_welcome_email
 
 def home(request):
     return render(request, 'index.html')
@@ -28,11 +30,10 @@ def home(request):
 def about(request):
     return render(request, 'about.html')
 
-def departments(request):
-    return render(request, 'departments.html')
+from .treatments_data import TREATMENT_GROUPS
 
-def services(request):
-    return render(request, 'services.html')
+def treatments(request):
+    return render(request, 'treatments.html', {'TREATMENT_GROUPS': TREATMENT_GROUPS})
 
 def terms(request):
     return render(request, 'terms.html')
@@ -234,6 +235,7 @@ class SignupView(View):
                 patient, created = Patient.objects.get_or_create(user=user)
                 patient.phone = phone  #  Phone stored here (Patient table)
                 patient.save()
+                send_welcome_email(request, user, phone=phone, added_by_clinic=False)
 
                 # Auto-login after signup
                 user = authenticate(request, username=email, password=password)
@@ -258,101 +260,51 @@ class LoginView(View):
     template_name = 'authentication/login.html'
 
     def get(self, request):
-        from django.views.decorators.csrf import ensure_csrf_cookie
-        response = render(request, self.template_name)
-        # Ensure CSRF cookie is always set so AJAX requests can read it
-        from django.middleware.csrf import get_token
-        get_token(request)
-        return response
+        return render(request, self.template_name)
 
     def post(self, request):
-        from django.urls import reverse
-        from django.http import JsonResponse
-        import json
-        
-        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.content_type == 'application/json'
-        
-        if request.content_type == 'application/json':
-            try:
-                data = json.loads(request.body)
-            except json.JSONDecodeError:
-                data = {}
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '')
+
+        if not email or not password:
+            return render(request, self.template_name, {
+                'error': 'Invalid email or password.',
+                'email': email,
+            })
+
+        users = list(User.objects.filter(email__iexact=email, patient__isnull=False))
+        if not users:
+            return render(request, self.template_name, {
+                'error': 'Invalid email or password.',
+                'email': email,
+            })
+
+        user = None
+        if len(users) > 1:
+            for u in users:
+                if u.has_usable_password():
+                    user = u
+                    break
         else:
-            data = request.POST
+            user = users[0]
 
-        if 'otp' in data:
-            session_otp = request.session.get('login_otp')
-            submitted_otp = str(data.get('otp', '')).strip()
-            
-            if session_otp and str(session_otp) == submitted_otp:
-                # OTP is correct, log in user
-                user_id = request.session.get('login_user_id')
-                if not user_id:
-                    if is_ajax: return JsonResponse({'success': False, 'error': 'Session expired. Please try again.'})
-                    return render(request, self.template_name, {'error': 'Session expired. Please try again.'})
-                
-                try:
-                    user = User.objects.get(id=user_id)
-                    # When manually logging a user in without authenticate(), we must specify the backend
-                    # if multiple authentication backends are configured.
-                    auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-                    
-                    if 'login_otp' in request.session:
-                        del request.session['login_otp']
-                    if 'login_user_id' in request.session:
-                        del request.session['login_user_id']
-                        
-                    if is_ajax: return JsonResponse({'success': True, 'redirect_url': reverse('profile')})
-                    return redirect('profile')
-                except User.DoesNotExist:
-                    if is_ajax: return JsonResponse({'success': False, 'error': 'User not found. Please try again.'})
-                    return render(request, self.template_name, {'error': 'User not found. Please try again.'})
-            else:
-                if is_ajax: return JsonResponse({'success': False, 'error': 'Invalid OTP. Please try again.'})
-                return render(request, self.template_name, {'show_otp': True, 'error': 'Invalid OTP. Please try again.'})
-
-        # Phone input fetch
-        phone = data.get('phone', '').strip()
-
-        # Validation
-        if not phone:
-            if is_ajax: return JsonResponse({'success': False, 'error': 'Phone number is required.'})
+        if not user or not user.is_active or not user.check_password(password):
             return render(request, self.template_name, {
-                'error': 'Phone number is required.'
+                'error': 'Invalid email or password.',
+                'email': email,
             })
 
-        # Clean phone once
-        cleaned_phone = re.sub(r'\D', '', phone)
+        auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
-        try:
-            # SINGLE OPTIMIZED QUERY
-            patient = (
-                Patient.objects
-                .select_related('user')
-                .only('phone', 'user__id')
-                .get(phone=cleaned_phone)
-            )
+        next_url = request.POST.get('next') or request.GET.get('next')
+        if next_url and url_has_allowed_host_and_scheme(
+            url=next_url,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure()
+        ):
+            return redirect(next_url)
 
-        except Patient.DoesNotExist:
-            if is_ajax: return JsonResponse({'success': False, 'error': 'Phone number not registered. Please Sign Up.'})
-            return render(request, self.template_name, {
-                'error': 'Phone number not registered.Please Sign Up.'
-            })
-
-        # Generate OTP
-        import random
-        otp = random.randint(100000, 999999)
-        
-        from django.conf import settings
-        if settings.DEBUG:
-            print(f"=============================\nOTP for Login ({patient.phone}): {otp}\n=============================")
-        
-        request.session['login_otp'] = str(otp)
-        request.session['login_user_id'] = patient.user.id
-
-        if is_ajax:
-            return JsonResponse({'success': True})
-        return render(request, self.template_name, {'show_otp': True})
+        return redirect('profile')
 
 def logout_view(request):
     """Logout user"""
@@ -432,7 +384,19 @@ def dashboard(request):
     appointment_counts = base_appointments.aggregate(
         total_visits=Count('id'),
         pending_appointments=Count('id', filter=Q(status='pending')),
+        completed_visits=Count('id', filter=Q(status='completed')),
     )
+
+    # Next upcoming appointment (pending/confirmed; later today or a future date)
+    from django.utils import timezone
+    today = timezone.localdate()
+    now_time = timezone.localtime().time()
+    next_appointment = base_appointments.filter(
+        status__in=['pending', 'confirmed']
+    ).filter(
+        Q(appointment_date__gt=today) |
+        Q(appointment_date=today, time_slot__gte=now_time)
+    ).order_by('appointment_date', 'time_slot').first()
 
     paginator = Paginator(appointments, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
@@ -459,6 +423,9 @@ def dashboard(request):
         'status_choices': Appointment.status_choices,
         'total_visits': appointment_counts['total_visits'],
         'pending_appointments': appointment_counts['pending_appointments'],
+        'completed_visits': appointment_counts['completed_visits'],
+        'has_any_appointments': appointment_counts['total_visits'] > 0,
+        'next_appointment': next_appointment,
         'total_spent': total_spent,
     }
     return render(request, 'pdashboard/dashboard.html', context)

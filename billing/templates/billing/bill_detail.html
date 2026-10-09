@@ -3,356 +3,236 @@
 {% block title %}Bill #{{ bill.bill_number }}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
-    <div class="container-fluid ">
-
-        <!-- Page Header -->
-        <div
-            class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-end mb-4 border-bottom pb-3 gap-3">
-            <div>
-                <h1 class="h3 text-dark fw-bold mb-1 d-flex align-items-center gap-2">
-                    <i class="bi bi-receipt-cutoff text-primary"></i> Bill #{{ bill.bill_number }}
-                </h1>
-                <p class="text-muted small mb-0 fw-medium">
-                    <i class="bi bi-person-circle me-1"></i> {% if visit.appointment.family_member %}
-                                                                {{ visit.appointment.family_member.name }}
-                                                             {% else %}
-                                                                {{ visit.appointment.patient.user.get_full_name }}
-                                                             {% endif %}
-                    <span class="mx-2">•</span>
-                    <i class="bi bi-calendar3 me-1"></i> {{ visit.appointment.appointment_date|date:"d M, Y" }}
-                </p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{% url 'billing:print_bill' visit.id|hid %}?bill_id={{ bill.id|hid }}" target="_blank"
-                    class="btn btn-outline-primary rounded-3 px-3 fw-semibold">
-                    <i class="bi bi-printer me-2"></i>Print
-                </a>
-                <a href="{% url 'billing:bill_list' %}" class="btn btn-outline-secondary rounded-3 px-3 fw-semibold">
-                    <i class="bi bi-arrow-left me-2"></i>Back
-                </a>
-            </div>
+    <div class="page-head">
+        <div>
+            <h2 class="page-title">Bill <span class="dc-mono">#{{ bill.bill_number }}</span></h2>
+            <p class="page-subtitle">
+                {% if visit.appointment.family_member %}
+                    {{ visit.appointment.family_member.name }}
+                {% else %}
+                    {{ visit.appointment.patient.user.get_full_name }}
+                {% endif %}
+                <span class="mx-2">·</span>
+                <span class="dc-mono">{{ visit.appointment.appointment_date|date:"d M, Y" }}</span>
+            </p>
         </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'billing:print_bill' visit.id|hid %}?bill_id={{ bill.id|hid }}" target="_blank" class="action-btn">
+                <i class="bi bi-printer"></i> Print
+            </a>
+            <a href="{% url 'billing:bill_list' %}" class="btn-ghost">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
 
-        
+    <form method="post" class="dc-form-shell">
+        {% csrf_token %}
+        <input type="hidden" name="bill_id" value="{{ bill.id|hid }}">
 
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="bill_id" value="{{ bill.id|hid }}">
-
-            <div class="row g-4">
-
-                <!-- Left Column -->
-                <div class="col-12 col-lg-8">
-
-                    <!-- Patient & Visit Info -->
-                    <div class="card border border-light shadow-sm rounded-4 mb-4">
-                        <div
-                            class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2 rounded-top-4">
-                            <i class="bi bi-person-vcard fs-5 text-primary"></i>
-                            <h5 class="card-title mb-0 fw-bold text-dark">Patient & Visit Details</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <div class="row g-4">
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Patient
-                                        Name</div>
-                                    <div class="fs-6 fw-bold text-dark">{% if visit.appointment.family_member %}
-                                                                            {{ visit.appointment.family_member.name }}
-                                                                        {% else %}
-                                                                            {{ visit.appointment.patient.user.get_full_name }}
-                                                                        {% endif %}</div>
+        <div class="row g-3">
+            <div class="col-12 col-lg-8">
+                <div class="dc-card mb-3">
+                    <div class="dc-card-header">
+                        <h3 class="dc-card-title"><i class="bi bi-person-vcard"></i> Patient & Visit Details</h3>
+                    </div>
+                    <div class="dc-card-body">
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <div class="dc-muted small fw-semibold mb-1">Patient Name</div>
+                                <div class="fw-semibold">
+                                    {% if visit.appointment.family_member %}
+                                        {{ visit.appointment.family_member.name }}
+                                    {% else %}
+                                        {{ visit.appointment.patient.user.get_full_name }}
+                                    {% endif %}
                                 </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Doctor
-                                        Name</div>
-                                    <div class="fs-6 fw-bold text-dark">Dr. {{ request.user.first_name }} {{ request.user.username }}</div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Visit
-                                        Date</div>
-                                    <div class="fs-6 fw-bold text-dark">{{ visit.appointment.appointment_date|date:"d M, Y" }}</div>
-                                </div>
-                                <div class="col-6 col-md-3">
-                                    <div class="text-muted small fw-semibold text-uppercase mb-1 tracking-wide">Bill
-                                        Date</div>
-                                    <div class="fs-6 fw-bold text-dark">{{ bill.bill_date|date:"d M, Y" }}</div>
-                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="dc-muted small fw-semibold mb-1">Doctor Name</div>
+                                <div class="fw-semibold">Dr. {{ request.user.first_name }} {{ request.user.username }}</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="dc-muted small fw-semibold mb-1">Visit Date</div>
+                                <div class="fw-semibold dc-mono">{{ visit.appointment.appointment_date|date:"d M, Y" }}</div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="dc-muted small fw-semibold mb-1">Bill Date</div>
+                                <div class="fw-semibold dc-mono">{{ bill.bill_date|date:"d M, Y" }}</div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Medicines Table -->
-                    <div class="card border border-light shadow-sm rounded-4 mb-4 overflow-hidden">
-                        <div class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2">
-                            <i class="bi bi-capsule fs-5 text-primary"></i>
-                            <h5 class="card-title mb-0 fw-bold text-dark">Prescribed Medicines</h5>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0 border-0 text-nowrap">
-                                    <thead class="bg-light text-muted small text-uppercase">
-                                        <tr>
-                                            <th class="px-4 py-3 fw-semibold border-bottom-0">#</th>
-                                            <th class="py-3 fw-semibold border-bottom-0">Medicine</th>
-                                            <th class="py-3 fw-semibold border-bottom-0">Power</th>
-                                            <th class="text-center py-3 fw-semibold border-bottom-0">Qty</th>
-                                            <th class="text-end pe-4 py-3 fw-semibold border-bottom-0">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="border-top-0">
-                                        {% for item in bill.items.all %}
-                                        <tr>
-                                            <td class="px-4 py-3 text-muted fw-medium">{{ forloop.counter }}</td>
-                                            <td class="py-3 fw-bold text-dark">{{ item.medicine_name }}</td>
-                                            <td class="py-3">
-                                                <span
-                                                    class="badge bg-light text-secondary border px-2 py-1 shadow-sm">{{item.power }}</span>
-                                            </td>
-                                            <td class="py-3 text-center fw-bold">{{ item.quantity }}</td>
-                                            <td class="py-3 text-end pe-4 fw-bolder text-primary">₹{{item.total_price|floatformat:2 }}</td>
-                                        </tr>
-                                        {% empty %}
-                                        <tr>
-                                            <td colspan="5" class="text-center py-5 text-muted">
-                                                <i class="bi bi-inbox fs-1 d-block mb-2 text-light"></i>
-                                                <span class="fw-medium">No medicines in this bill</span>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                <div class="dc-card mb-3">
+                    <div class="dc-card-header">
+                        <h3 class="dc-card-title"><i class="bi bi-capsule"></i> Prescribed Medicines</h3>
                     </div>
+                    <div class="dc-table-wrap">
+                        <table class="table table-hover dc-table" style="min-width:680px;">
+                            <thead>
+                                <tr>
+                                    <th class="col-num">#</th>
+                                    <th>Medicine</th>
+                                    <th>Power</th>
+                                    <th class="text-end">Qty</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in bill.items.all %}
+                                <tr>
+                                    <td class="col-num">{{ forloop.counter }}</td>
+                                    <td class="dc-name">{{ item.medicine_name }}</td>
+                                    <td><span class="dc-badge grey">{{ item.power }}</span></td>
+                                    <td class="text-end dc-mono">{{ item.quantity }}</td>
+                                    <td class="text-end dc-mono">₹{{ item.total_price|floatformat:2 }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="dc-empty">
+                                        <i class="bi bi-inbox"></i>
+                                        <p class="dc-empty-text">No medicines in this bill.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                    <!-- Billing Details -->
-                    <div class="card border border-light shadow-sm rounded-4 mb-4">
-                        <div class="card-header bg-white border-bottom px-4 py-3 d-flex align-items-center gap-2">
-                            <i class="bi bi-calculator fs-5 text-primary"></i>
-                            <h5 class="card-title mb-0 fw-bold text-dark">Billing Details</h5>
-                        </div>
-                        <div class="card-body p-4">
-                            <!-- Consultation Fee -->
-                            <div class="col-12">
-                                <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
-                                    Consultation Fee
-                                </label>
-
-                                <div class="input-group shadow-sm rounded-3">
-                                    <span class="input-group-text bg-light text-muted border-end-0 fw-bold">
-                                        ₹
-                                    </span>
-
-                                    <input type="number" name="consultation_fee"
-                                        class="form-control border-start-0 bg-light fw-bold text-dark"
-                                        value="{{ bill.consultation_fee }}" min="0" step="0.01"
-                                        oninput="calculateTotal()">
-                                </div>
-                            </div>
-                            <div class="row g-4 mt-1">
-
-                                <!-- GST -->
-                                <div class="col-12 col-sm-6 col-lg-3">
-                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
-                                        GST (%) <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="input-group shadow-sm rounded-3">
-                                        <input type="number" name="gst_percent"
-                                            class="form-control border-end-0 bg-light fw-bold text-primary"
-                                            value="{{ bill.gst_percent }}" min="0" max="100" step="0.01"
-                                            oninput="calculateTotal()" required>
-                                        <span
-                                            class="input-group-text bg-light text-muted border-start-0 fw-bold">%</span>
+                <div class="dc-card">
+                    <div class="dc-card-header">
+                        <h3 class="dc-card-title"><i class="bi bi-calculator"></i> Billing Details</h3>
+                    </div>
+                    <div class="dc-card-body">
+                        <section class="dc-section">
+                            <h3 class="dc-section-title"><i class="bi bi-receipt"></i> Amounts & payment</h3>
+                            <div class="row g-3">
+                                <div class="col-12 col-sm-6">
+                                    <label class="dc-label">Consultation Fee</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" name="consultation_fee" class="form-control text-end dc-mono"
+                                            value="{{ bill.consultation_fee }}" min="0" step="0.01" oninput="calculateTotal()">
                                     </div>
                                 </div>
-
-                                <!-- Discount -->
-                                <div class="col-12 col-sm-6 col-lg-3">
-                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
-                                        Discount
-                                    </label>
-                                    <div class="input-group shadow-sm rounded-3">
-                                        <span class="input-group-text bg-light text-muted border-end-0 fw-bold">₹</span>
-                                        <input type="number" name="discount"
-                                            class="form-control border-start-0 bg-light fw-bold text-success"
+                                <div class="col-12 col-sm-6">
+                                    <label class="dc-label">GST (%) <span class="dc-muted">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" name="gst_percent" class="form-control text-end dc-mono"
+                                            value="{{ bill.gst_percent }}" min="0" max="100" step="0.01"
+                                            oninput="calculateTotal()" required>
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-sm-6">
+                                    <label class="dc-label">Discount</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" name="discount" class="form-control text-end dc-mono"
                                             value="{{ bill.discount }}" min="0" step="0.01" oninput="calculateTotal()">
                                     </div>
                                 </div>
-
-                                <!-- Payment Method -->
-                                <div class="col-12 col-sm-6 col-lg-3">
-                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
-                                        Method
-                                    </label>
-                                    <select name="payment_method"
-                                        class="form-select shadow-sm rounded-3 bg-light text-dark fw-bold">
-                                        <option value="cash" {% if bill.payment_method == 'cash' %}selected{% endif %}>
-                                            Cash</option>
-                                        <option value="card" {% if bill.payment_method == 'card' %}selected{% endif %}>
-                                            Card</option>
-                                        <option value="upi" {% if bill.payment_method == 'upi' %}selected{% endif %}>UPI
-                                        </option>
-                                        <option value="online" {% if bill.payment_method == 'online' %}selected{% endif%}>Online</option>
+                                <div class="col-12 col-sm-6">
+                                    <label class="dc-label">Method</label>
+                                    <select name="payment_method" class="form-select">
+                                        <option value="cash" {% if bill.payment_method == 'cash' %}selected{% endif %}>Cash</option>
+                                        <option value="card" {% if bill.payment_method == 'card' %}selected{% endif %}>Card</option>
+                                        <option value="upi" {% if bill.payment_method == 'upi' %}selected{% endif %}>UPI</option>
+                                        <option value="online" {% if bill.payment_method == 'online' %}selected{% endif %}>Online</option>
                                     </select>
                                 </div>
-
-                                <!-- Payment Status -->
-                                <div class="col-12 col-sm-6 col-lg-3">
-                                    <label class="form-label fw-bold text-secondary mb-2 small text-uppercase">
-                                        Status
-                                    </label>
-                                    <select name="payment_status"
-                                        class="form-select shadow-sm rounded-3 bg-light text-dark fw-bold"
-                                        id="paymentStatusSelect" onchange="updateStatusBadge()">
-                                        <option value="unpaid" {% if bill.payment_status == 'unpaid' %} selected{% endif %}>Unpaid</option>
-                                        <option value="paid" {% if bill.payment_status == 'paid' %} selected {% endif %}>Paid</option>
-                                        <option value="partial" {% if bill.payment_status == 'partial' %} selected {% endif %}>Partial</option>
+                                <div class="col-12 col-sm-6">
+                                    <label class="dc-label">Status</label>
+                                    <select name="payment_status" class="form-select" id="paymentStatusSelect" onchange="updateStatusBadge()">
+                                        <option value="unpaid" {% if bill.payment_status == 'unpaid' %}selected{% endif %}>Unpaid</option>
+                                        <option value="paid" {% if bill.payment_status == 'paid' %}selected{% endif %}>Paid</option>
+                                        <option value="partial" {% if bill.payment_status == 'partial' %}selected{% endif %}>Partial</option>
                                     </select>
                                 </div>
-
-                                <!-- Notes -->
-                                <div class="col-12 mt-4">
-                                    <label
-                                        class="form-label fw-bold text-secondary mb-2 small text-uppercase">Additional
-                                        Notes</label>
-                                    <textarea name="notes"
-                                        class="form-control bg-light border-light shadow-sm rounded-3 p-3 fw-medium"
-                                        rows="3"
-                                        placeholder="Type any additional remarks or notes here...">{{ bill.notes }}</textarea>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Right Column — Summary -->
-                <div class="col-12 col-lg-4">
-                    <div class="card border border-light shadow-sm rounded-4 sticky-lg-top"
-                        style="top: 24px; z-index: 10;">
-                        <div
-                            class="card-header bg-primary text-white border-0 px-4 py-3 rounded-top-4 d-flex align-items-center gap-2">
-                            <i class="bi bi-wallet2 fs-5"></i>
-                            <h5 class="card-title mb-0 fw-bold">Payment Summary</h5>
-                        </div>
-                        <div class="card-body p-4">
-
-                            <!-- Status Badge -->
-                            <div class="mb-4 text-center">
-                                <span id="statusBadge" class="badge w-100 py-3 fs-6 rounded-3 shadow-sm text-uppercase tracking-wider
-                                    {% if bill.payment_status == 'paid' %}bg-success
-                                    {% elif bill.payment_status == 'partial' %}bg-warning text-dark
-                                    {% else %}bg-danger{% endif %}">
-                                    {{ bill.get_payment_status_display }}
-                                </span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-secondary fw-bold">
-                                    Consultation Fee
-                                </span>
-
-                                <span class="fw-bold text-dark fs-5"
-                                    id="summaryConsultation">
-                                    ₹{{ bill.consultation_fee|floatformat:2 }}
-                                </span>
-                            </div>
-                            <!-- Summary Rows -->
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-secondary fw-bold">Subtotal</span>
-                                <span class="fw-bold text-dark fs-5" id="summarySubtotal">₹{{ bill.subtotal }}</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="text-secondary fw-bold">
-                                    GST (<span id="summaryGstPercent">{{ bill.gst_percent }}</span>%)
-                                </span>
-                                <span class="fw-bold text-dark fs-5" id="summaryGst">₹{{ bill.gst_amount|floatformat:2}}</span>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center mb-4">
-                                <span class="text-secondary fw-bold">Discount</span>
-                                <span class="fw-bold text-success fs-5" id="summaryDiscount">-₹{{ bill.discount}}</span>
-                            </div>
-
-                            <hr class="text-muted opacity-25 my-4">
-
-                            <div
-                                class="d-flex justify-content-between align-items-center mb-4 bg-light p-3 rounded-3 border">
-                                <span class="fw-bold fs-5 text-secondary text-uppercase tracking-wider">Total</span>
-                                <span class="fw-bolder fs-2 text-primary" id="summaryTotal">₹{{ bill.total }}</span>
-                            </div>
-
-                            {% if bill.is_addon %}
-                            <div class="alert alert-info py-2 small mb-4 rounded-3 border-0">
-                                <strong><i class="bi bi-info-circle-fill me-1"></i> Addon Bill</strong><br>
-                                <span class="text-muted">Parent:</span> 
-                                <a href="{% url 'billing:bill_detail' visit.id|hid %}?bill_id={{ bill.parent_bill.id|hid }}" class="fw-bold text-decoration-none ms-1">
-                                    {{ bill.parent_bill.bill_number }}
-                                </a>
-                            </div>
-                            {% elif bill_summary.addon_bills %}
-                            <div class="bg-light border rounded-3 p-3 mb-4">
-                                <h6 class="fw-bold text-dark mb-2 small text-uppercase"><i class="bi bi-journal-plus me-1"></i> Related Addon Bills</h6>
-                                <div class="d-flex flex-column gap-2 mt-2">
-                                    {% for addon in bill_summary.addon_bills %}
-                                    <div class="d-flex justify-content-between align-items-center bg-white p-2 border rounded-2 shadow-sm">
-                                        <a href="{% url 'billing:bill_detail' visit.id|hid %}?bill_id={{ addon.id|hid }}" class="text-decoration-none fw-semibold small">
-                                            {{ addon.bill_number }}
-                                        </a>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="badge {% if addon.payment_status == 'paid' %}bg-success{% elif addon.payment_status == 'partial' %}bg-warning text-dark{% else %}bg-danger{% endif %} rounded-pill" style="font-size:0.7rem;">
-                                                {{ addon.get_payment_status_display }}
-                                            </span>
-                                            <span class="fw-bold text-dark small">₹{{ addon.total }}</span>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
+                                <div class="col-12">
+                                    <label class="dc-label">Additional Notes</label>
+                                    <textarea name="notes" class="form-control" rows="3" placeholder="Type any additional remarks or notes here...">{{ bill.notes }}</textarea>
                                 </div>
                             </div>
-                            {% endif %}
-
-                            <!-- Buttons -->
-                            <div class="d-flex flex-column gap-3">
-                                {% if bill.payment_status == 'unpaid' %}
-                                <button type="submit"
-                                    class="btn btn-primary btn-sm rounded-3 shadow-sm fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all">
-                                    <i class="bi bi-check-circle-fill fs-4"></i> Generate Bill
-                                </button>
-                                {% else %}
-                                <a href="{% url 'billing:print_bill' visit.id|hid %}?bill_id={{ bill.id|hid }}" target="_blank"
-                                    class="btn btn-outline-secondary btn-sm rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 py-1 transition-all">
-                                    <i class="bi bi-printer-fill fs-4"></i> Print Invoice
-                                </a>
-                                {% endif %}
-                            </div>
-
-                        </div>
+                        </section>
                     </div>
                 </div>
-
             </div>
-        </form>
-    </div>
+
+            <div class="col-12 col-lg-4">
+                <div class="dc-card">
+                    <div class="dc-card-header">
+                        <h3 class="dc-card-title"><i class="bi bi-wallet2"></i> Payment Summary</h3>
+                    </div>
+                    <div class="dc-card-body">
+                        <div class="mb-4 text-center">
+                            <span id="statusBadge" class="badge w-100 py-2 fs-6 rounded-pill
+                                {% if bill.payment_status == 'paid' %}bg-success
+                                {% elif bill.payment_status == 'partial' %}bg-warning text-dark
+                                {% else %}bg-danger{% endif %}">
+                                {{ bill.get_payment_status_display }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="dc-muted fw-semibold">Consultation Fee</span>
+                            <span class="fw-semibold dc-mono text-end" id="summaryConsultation">₹{{ bill.consultation_fee|floatformat:2 }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="dc-muted fw-semibold">Subtotal</span>
+                            <span class="fw-semibold dc-mono text-end" id="summarySubtotal">₹{{ bill.subtotal }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="dc-muted fw-semibold">GST (<span id="summaryGstPercent">{{ bill.gst_percent }}</span>%)</span>
+                            <span class="fw-semibold dc-mono text-end" id="summaryGst">₹{{ bill.gst_amount|floatformat:2 }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <span class="dc-muted fw-semibold">Discount</span>
+                            <span class="fw-semibold dc-mono text-end" id="summaryDiscount">-₹{{ bill.discount }}</span>
+                        </div>
+                        <div class="dc-callout d-flex justify-content-between align-items-center mb-4">
+                            <span class="fw-semibold">Total</span>
+                            <span class="fw-bold fs-4 dc-mono text-end" id="summaryTotal">₹{{ bill.total }}</span>
+                        </div>
+
+                        {% if bill.is_addon %}
+                        <div class="dc-callout small mb-4">
+                            <strong><i class="bi bi-info-circle-fill me-1"></i> Add-on Bill</strong><br>
+                            <span class="dc-muted">Parent:</span>
+                            <a href="{% url 'billing:bill_detail' visit.id|hid %}?bill_id={{ bill.parent_bill.id|hid }}" class="fw-semibold text-decoration-none ms-1">{{ bill.parent_bill.bill_number }}</a>
+                        </div>
+                        {% elif bill_summary.addon_bills %}
+                        <div class="mb-4">
+                            <h3 class="dc-section-title"><i class="bi bi-journal-plus"></i> Related Add-on Bills</h3>
+                            <div class="d-flex flex-column gap-2 mt-2">
+                                {% for addon in bill_summary.addon_bills %}
+                                <div class="dc-callout d-flex justify-content-between align-items-center gap-2">
+                                    <a href="{% url 'billing:bill_detail' visit.id|hid %}?bill_id={{ addon.id|hid }}" class="text-decoration-none fw-semibold small dc-mono">{{ addon.bill_number }}</a>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="dc-badge {% if addon.payment_status == 'paid' %}green{% elif addon.payment_status == 'partial' %}peach{% else %}red{% endif %}">{{ addon.get_payment_status_display }}</span>
+                                        <span class="fw-semibold dc-mono small">₹{{ addon.total }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="dc-form-footer">
+                        {% if bill.payment_status == 'unpaid' %}
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle-fill"></i> Generate Bill</button>
+                        {% else %}
+                        <a href="{% url 'billing:print_bill' visit.id|hid %}?bill_id={{ bill.id|hid }}" target="_blank" class="btn-ghost">
+                            <i class="bi bi-printer-fill"></i> Print Invoice
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </main>
-
-<style>
-    /* Minimal custom CSS to enhance existing Bootstrap classes */
-    .tracking-wide {
-        letter-spacing: 0.05em;
-    }
-
-    .tracking-wider {
-        letter-spacing: 0.1em;
-    }
-
-    .transition-all {
-        transition: all 0.2s ease-in-out;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
-    }
-</style>
 
 <script>
     const subtotal = parseFloat("{{ bill.subtotal }}") || 0;

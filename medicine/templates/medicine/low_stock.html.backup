@@ -1,0 +1,112 @@
+{% extends "doctor/main.html" %}
+{% load hashid_tags %}
+{% load static %}
+{% block title %}Low Stock Alert - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="page-title mb-1">Low Stock Alert</h2>
+            <p class="text-muted small mb-0">
+                Medicines that need restocking
+            </p>
+        </div>
+        <a href="{% url 'medicine:manage_medicine' %}" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i> Medicine Store
+        </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div style="font-size:2rem; color:#dc3545;">{{ count }}</div>
+                <div class="text-muted small">Total Low Stock</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div style="font-size:2rem; color:#fd7e14;">
+                    {{ variants|length }}
+                </div>
+                <div class="text-muted small">Variants Affected</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-3 p-3 text-center">
+                <div style="font-size:2rem; color:#6c757d;">
+                    {{ out_of_stock_count }}
+                </div>
+                <div class="text-muted small">Out of Stock</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-section">
+        <div style="overflow-x:auto;">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Medicine</th>
+                        <th>Power</th>
+                        <th>Current Stock</th>
+                        <th>Low Alert At</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in variants %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td class="patient-name">{{ v.medicine.name }}</td>
+                        <td class="patient-info">{{ v.power }}</td>
+                        <td class="patient-info">
+                            <span
+                                style="font-weight:700; color: {% if v.stock == 0 %} #dc3545 {% else %}#fd7e14{% endif %};">
+                                {{ v.stock }}
+                            </span>
+                        </td>
+                        <td class="patient-info">{{ v.low_stock_alert }}</td>
+                        <td>
+                            {% if v.stock == 0 %}
+                            <span class="badge bg-danger">Out of Stock</span>
+                            {% else %}
+                            <span class="badge bg-warning text-dark">Low Stock</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if v.is_ordered %}
+                            <a href="{% url 'medicine:purchase_detail' v.pending_purchase_id|hid %}"
+                                class="btn btn-sm btn-warning">
+                                Ordered
+                            </a>
+                            {% else %}
+                            <a href="{% url 'medicine:add_purchase' %}?variant={{ v.pk }}"
+                                class="btn btn-sm btn-success">
+                                Order
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-5">
+                            <i class="bi bi-check-circle text-success d-block mb-2" style="font-size:2rem;"></i>
+                            All medicines are well stocked! No low stock alerts at the moment.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+{% endblock %}

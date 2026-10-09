@@ -1,11 +1,11 @@
 
         :root {
-            --primary-color: #0284c7; /* Medical Blue */
-            --primary-light: #e0f2fe;
-            --text-dark: #1e293b;
-            --text-muted: #64748b;
-            --border-color: #e2e8f0;
-            --bg-light: #f8fafc;
+            --primary-color: #015315;
+            --primary-light: #EAF4EA;
+            --text-dark: #14281A;
+            --text-muted: #5B6B5E;
+            --border-color: #DCEBDC;
+            --bg-light: #EAF4EA;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -40,7 +40,7 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             transition: all 0.2s;
         }
-        .print-btn:hover { background: #0369a1; }
+        .print-btn:hover { background: #013A0F; }
 
         @media print {
             .print-btn-container { display: none !important; }
@@ -228,19 +228,19 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .badge-paid { background: #dcfce7; color: #166534; }
-        .badge-partial { background: #fef08a; color: #854d0e; }
-        .badge-unpaid { background: #fee2e2; color: #991b1b; }
+        .badge-paid { background: #EAF4EA; color: #015315; }
+        .badge-partial { background: #FFE0C4; color: #A94600; }
+        .badge-unpaid { background: #FDECEC; color: #AD0002; }
 
         .notes-box {
-            background: #fefce8;
-            border: 1px solid #fef08a;
+            background: #FFE0C4;
+            border: 1px solid #FD6801;
             padding: 14px 20px;
             border-radius: 8px;
             font-size: 13px;
-            color: #854d0e;
+            color: #A94600;
         }
-        .notes-box strong { color: #713f12; }
+        .notes-box strong { color: #A94600; }
 
         /* Footer */
         .footer {

@@ -5,63 +5,80 @@
 {% block content %}
 
 <style>
-    .btn-edit-med {
-        background-color: #e0f2fe !important;
-        color: #0369a1 !important;
-        border: 1px solid #bae6fd !important;
-        padding: 0.375rem 0.75rem !important;
-        font-size: 0.875rem !important;
+    /* Page-specific: clickable rows + variant drawer */
+    .medicine-main-row { cursor: pointer; }
+    .medicine-main-row.is-open > td { background: var(--light-bg); }
+    .medicine-main-row.is-open .variant-toggle i { transform: rotate(180deg); }
+    .variant-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border: none;
+        background: #E6F1E6;
+        color: var(--primary-color);
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 0.74rem;
+        font-weight: 600;
     }
-    .btn-edit-med:hover { background-color: #bae6fd !important; }
-
-    .btn-delete-med {
-        background-color: #fee2e2 !important;
-        color: #dc2626 !important;
-        border: 1px solid #fecaca !important;
-        padding: 0.375rem 0.75rem !important;
-        font-size: 0.875rem !important;
-    }
-    .btn-delete-med:hover { background-color: #fecaca !important; }
-
-    /* Variant expanded row */
+    .variant-toggle i { font-size: 0.7rem; transition: transform 0.2s; }
+    .variant-row > td { padding: 0 !important; background: var(--light-bg) !important; }
     .variant-expand-body {
-        background: #f8fbff;
-        border-left: 4px solid var(--primary-color);
-        border-radius: 0 8px 8px 0;
-        margin: 4px 12px 8px 16px;
+        border-left: 4px solid var(--brand-accent);
+        margin: 0 18px 12px 18px;
         padding: 12px 16px;
+        background: #fff;
+        border-radius: 0 10px 10px 0;
+        box-shadow: var(--shadow);
+    }
+    .variant-title {
+        font-size: 0.74rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
     }
     .variant-chip {
         display: inline-flex;
         align-items: center;
-        border: 1px solid #e2e8f0;
-        border-radius: 50px;
+        border: 1px solid var(--border-light);
+        border-radius: 999px;
         overflow: hidden;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
+        background: #fff;
     }
-    .variant-chip-label {
-        background: var(--primary-color);
-        color: #fff;
-        font-weight: 700;
-        padding: 5px 12px;
+    .variant-chip-label { background: var(--primary-color); color: #fff; font-weight: 600; padding: 4px 12px; }
+    .variant-chip-stock { padding: 4px 12px; color: #4A5A4E; display: inline-flex; align-items: center; gap: 6px; }
+    .stock-ok  { color: var(--primary-color); font-weight: 700; }
+    .stock-low { color: var(--danger-color); font-weight: 700; }
+
+        /* Variants: neutral outline control (not green) */
+    .variant-toggle {
+        background: #fff;
+        color: var(--dark-text);
+        border: 1px solid #DCEBDC;
     }
-    .variant-chip-stock {
-        padding: 5px 12px;
-        color: #475569;
+    .variant-toggle i { color: #8a968d; }
+    .medicine-main-row:hover .variant-toggle { border-color: #B9D3BA; }
+    .medicine-main-row.is-open .variant-toggle {
+        background: #F3F8F2;
+        border-color: var(--accent-color);
+        color: var(--primary-color);
     }
 
-    @media (max-width: 768px) {
-        .btn-edit-med span, .btn-delete-med span { display: none; }
-    }
+    /* Edit: neutral, green only on hover */
+    .medicine-main-row .btn-act.edit { color: #4A5A4E; }
+    .medicine-main-row .btn-act.edit:hover { color: var(--primary-color); }
 </style>
 
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">Medicine Store</h2>
-            <p class="text-muted small mb-0">Manage inventory, variants and stock levels.</p>
+            <h2 class="page-title">Medicine Store</h2>
+            <p class="page-subtitle">Manage inventory, variants and stock levels.</p>
         </div>
         <a href="{% url 'medicine:add_medicine' %}" class="action-btn">
             <i class="bi bi-plus-lg"></i> Add Medicine
@@ -69,139 +86,122 @@
     </div>
 
     <!-- Table Card -->
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center gap-3">
-            <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
-                <i class="bi bi-capsule-pill"></i> Medicines
-            </div>
-            <!-- Inline Search -->
-            <div style="position:relative; max-width:300px; width:100%;">
-                <i class="bi bi-search"
-                   style="position:absolute; top:50%; left:10px; transform:translateY(-50%); color:#999; font-size:0.88rem; pointer-events:none;"></i>
-                <input type="text" id="searchInput" class="form-control form-control-sm"
-                       placeholder="Search name, type, company..."
-                       style="padding-left:30px; border-radius:20px;">
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title">
+                <i class="bi bi-capsule"></i> Medicines
+                {% if medicines.paginator %}<span class="dc-count">{{ medicines.paginator.count }} total</span>{% endif %}
+            </h3>
+            <div class="dc-search">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search name, type, company..." autocomplete="off">
             </div>
         </div>
 
-        <div class="card-body p-0">
-            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
-                <table class="table table-hover mb-0" style="min-width:860px; width:100%;">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Medicine Name</th>
-                            <th>Short Name</th>
-                            <th>Type</th>
-                            <th>Company</th>
-                            <th>Variants</th>
-                            <th>Status</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        {% for medicine in medicines %}
-                        <!-- Main Row -->
-                        <tr class="medicine-main-row" style="cursor:pointer;"
-                            onclick="toggleVariants('variant-row-{{ medicine.pk }}')"
-                            title="Click to expand variants">
-                            <td style="color:#94a3b8; font-size:0.85rem;">{{ forloop.counter }}</td>
-                            <td style="font-weight:600; color:var(--dark-text);">{{ medicine.name }}</td>
-                            <td style="font-size:0.88rem; color:#6c757d;">{{ medicine.short_name }}</td>
-                            <td>
-                                <span class="badge bg-secondary bg-opacity-15"
-                                      style="font-weight:600; font-size:0.78rem;">
-                                    {{ medicine.get_medicine_type_display }}
-                                </span>
-                            </td>
-                            <td style="font-size:0.9rem;">{{ medicine.company|default:"—" }}</td>
-                            <td>
-                                <span class="badge bg-info bg-opacity-15" style="font-weight:600;">
-                                    {{ medicine.variants.count }} variant{{ medicine.variants.count|pluralize }}
-                                    <i class="bi bi-chevron-down ms-1" style="font-size:0.72rem;"></i>
-                                </span>
-                            </td>
-                            <td>
-                                {% if medicine.is_active %}
-                                <span class="badge bg-success bg-opacity-25 text-success" style="font-weight:600;">Active</span>
-                                {% else %}
-                                <span class="badge bg-danger bg-opacity-25 text-danger" style="font-weight:600;">Inactive</span>
-                                {% endif %}
-                            </td>
-                            <td onclick="event.stopPropagation();">
-                                <div class="d-flex align-items-center justify-content-center gap-2">
-                                                <a href="{% url 'medicine:edit_medicine' medicine.id|hid %}"
-                                       class="btn btn-sm btn-edit-med" title="Edit">
-                                        <i class="bi bi-pencil"></i><span> Edit</span>
-                                    </a>
-                                    <form method="post" action="{% url 'medicine:delete_medicine' medicine.id|hid %}"
-                                          style="display:inline;" class="deleteMedicineForm">
-                                        {% csrf_token %}
-                                        <button type="button" class="btn btn-sm btn-delete-med deleteMedicineBtn"
-                                                data-name="{{ medicine.name }}" title="Delete">
-                                            <i class="bi bi-trash"></i><span> Delete</span>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
+        <div class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width:860px;">
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th>Medicine Name</th>
+                        <th>Short Name</th>
+                        <th>Type</th>
+                        <th>Company</th>
+                        <th>Variants</th>
+                        <th>Status</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for medicine in medicines %}
+                    <!-- Main Row -->
+                    <tr class="medicine-main-row" data-target="variant-row-{{ medicine.pk }}"
+                        onclick="toggleVariants('variant-row-{{ medicine.pk }}', this)"
+                        title="Click to view variants">
+                        <td class="col-num">{% if medicines.start_index %}{{ medicines.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}</td>
+                        <td><span class="dc-name">{{ medicine.name }}</span></td>
+                        <td class="dc-muted">{{ medicine.short_name|default:"—" }}</td>
+                        <td><span class="dc-badge grey">{{ medicine.get_medicine_type_display }}</span></td>
+                        <td>{% if medicine.company %}{{ medicine.company }}{% else %}<span class="dc-muted">—</span>{% endif %}</td>
+                        <td>
+                            <span class="variant-toggle">
+                                {{ medicine.variants.count }} variant{{ medicine.variants.count|pluralize }}
+                                <i class="bi bi-chevron-down"></i>
+                            </span>
+                        </td>
+                        <td>
+                            {% if medicine.is_active %}
+                            <span class="dc-badge green">Active</span>
+                            {% else %}
+                            <span class="dc-badge red">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="col-actions" onclick="event.stopPropagation();">
+                            <div class="dc-actions">
+                                <a href="{% url 'medicine:edit_medicine' medicine.id|hid %}" class="btn-act edit" title="Edit">
+                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                                </a>
+                                <form method="post" action="{% url 'medicine:delete_medicine' medicine.id|hid %}" class="deleteMedicineForm">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn-act delete deleteMedicineBtn" data-name="{{ medicine.name }}" title="Delete">
+                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
 
-                        <!-- Expanded Variant Row -->
-                        <tr id="variant-row-{{ medicine.pk }}" style="display:none;">
-                            <td colspan="8" class="p-0 border-0">
-                                <div class="variant-expand-body">
-                                    <div style="font-size:0.75rem; font-weight:700; color:var(--primary-color); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:10px;">
-                                        <i class="bi bi-box-seam me-1"></i> Variants for {{ medicine.name }}
-                                    </div>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        {% for v in medicine.variants.all %}
-                                        <div class="variant-chip">
-                                            <div class="variant-chip-label">
-                                                <i class="bi bi-capsule me-1"></i>{{ v.power }}
-                                            </div>
-                                            <div class="variant-chip-stock">
-                                                Stock:
-                                                <span class="badge {% if v.stock <= v.low_stock_alert %}bg-danger{% else %}bg-success{% endif %} rounded-pill ms-1"
-                                                      style="font-size:0.75rem;">
-                                                    {% if v.stock <= v.low_stock_alert %}
-                                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                                    {% endif %}
-                                                    {{ v.stock }}
-                                                </span>
-                                            </div>
+                    <!-- Expanded Variant Row -->
+                    <tr id="variant-row-{{ medicine.pk }}" class="variant-row" style="display:none;">
+                        <td colspan="8">
+                            <div class="variant-expand-body">
+                                <div class="variant-title"><i class="bi bi-box-seam me-1"></i> Variants for {{ medicine.name }}</div>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% for v in medicine.variants.all %}
+                                    <div class="variant-chip">
+                                        <div class="variant-chip-label"><i class="bi bi-capsule me-1"></i>{{ v.power }}</div>
+                                        <div class="variant-chip-stock">
+                                            Stock:
+                                            {% if v.stock <= v.low_stock_alert %}
+                                            <span class="stock-low"><i class="bi bi-exclamation-triangle-fill"></i> {{ v.stock }}</span>
+                                            {% else %}
+                                            <span class="stock-ok">{{ v.stock }}</span>
+                                            {% endif %}
                                         </div>
-                                        {% empty %}
-                                        <span class="text-muted small">
-                                            <i class="bi bi-info-circle me-1"></i> No variants configured.
-                                        </span>
-                                        {% endfor %}
                                     </div>
+                                    {% empty %}
+                                    <span class="dc-muted small"><i class="bi bi-info-circle me-1"></i> No variants configured.</span>
+                                    {% endfor %}
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
+                    </tr>
 
-                        {% empty %}
-                        <tr>
-                            <td colspan="8" class="text-center text-muted py-5">
-                                <i class="bi bi-capsule" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
-                                No medicines found.
-                                <a href="{% url 'medicine:add_medicine' %}" style="color:var(--primary-color);">Add one now</a>.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="dc-empty">
+                            <i class="bi bi-capsule"></i>
+                            No medicines found.
+                            <a href="{% url 'medicine:add_medicine' %}" style="color:var(--primary-color); font-weight:600;">Add one now</a>.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Search empty state -->
+        <div id="emptyState" style="display:none;" class="dc-empty">
+            <i class="bi bi-search"></i>
+            No medicines match your search.
         </div>
 
         <!-- Pagination -->
         {% if medicines.has_other_pages %}
-        <div class="card-footer bg-white d-flex justify-content-center py-3">
+        <div class="dc-card-footer d-flex justify-content-center">
             <ul class="pagination pagination-sm gap-1 mb-0">
                 {% if medicines.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ medicines.previous_page_number }}">&laquo; Prev</a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?page={{ medicines.previous_page_number }}">&laquo; Prev</a></li>
                 {% else %}
                 <li class="page-item disabled"><span class="page-link">&laquo; Prev</span></li>
                 {% endif %}
@@ -215,21 +215,13 @@
                 {% endfor %}
 
                 {% if medicines.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ medicines.next_page_number }}">Next &raquo;</a>
-                </li>
+                <li class="page-item"><a class="page-link" href="?page={{ medicines.next_page_number }}">Next &raquo;</a></li>
                 {% else %}
                 <li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>
                 {% endif %}
             </ul>
         </div>
         {% endif %}
-
-        <!-- Search empty state -->
-        <div id="emptyState" style="display:none;" class="text-center py-5 text-muted">
-            <i class="bi bi-capsule" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
-            No medicines match your search.
-        </div>
     </div>
 
 </main>
@@ -237,9 +229,11 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Toggle variant expanded row
-    function toggleVariants(rowId) {
+    function toggleVariants(rowId, mainRow) {
         const row = document.getElementById(rowId);
-        row.style.display = (row.style.display === 'none') ? 'table-row' : 'none';
+        const open = row.style.display === 'none';
+        row.style.display = open ? 'table-row' : 'none';
+        if (mainRow) mainRow.classList.toggle('is-open', open);
     }
 
     // Live search
@@ -258,6 +252,7 @@
             const nextRow = row.nextElementSibling;
             if (nextRow && nextRow.id && nextRow.id.startsWith('variant-row-')) {
                 nextRow.style.display = 'none';
+                row.classList.remove('is-open');
             }
             if (show) visible++;
         });
@@ -276,8 +271,8 @@
                 html: `Are you sure you want to delete <strong>${name}</strong>?<br><small class="text-muted">This will also delete all variants.</small>`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#6b7280',
+                confirmButtonColor: '#AD0002',
+                cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Yes, Delete',
                 cancelButtonText: 'Cancel',
                 reverseButtons: true,

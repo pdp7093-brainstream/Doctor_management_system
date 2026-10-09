@@ -1,4 +1,6 @@
 from django.urls import path
+from django.views.generic import RedirectView
+from django.contrib.auth import views as auth_views
 from . import views
 from .views import *
 
@@ -7,9 +9,9 @@ urlpatterns = [
 
     path('',views.home,name='index'),
     path('about/',views.about,name='about'),
-    path('departments/',views.departments,name='departments'),
-    path('services/',views.services,name='services'),
-
+    path('treatments/',views.treatments,name='treatments'),
+    path('departments/', RedirectView.as_view(pattern_name='treatments', permanent=True), name='departments'),
+    path('services/', RedirectView.as_view(pattern_name='treatments', permanent=True), name='services'),
 
     path('terms/',views.terms,name='terms'),
     path('feedback/',views.feedback,name='feedback'),
@@ -26,6 +28,23 @@ urlpatterns = [
     path('remove-profile-picture/', views.remove_profile_picture, name='remove_profile_picture'),
     path('upload-profile-document/', views.upload_profile_document, name='upload_profile_document'),
 
+    # Password reset URLs (Django built-in)
+    path('password-reset/', auth_views.PasswordResetView.as_view(
+        template_name='authentication/password_reset_form.html',
+        email_template_name='authentication/password_reset_email.txt',
+        subject_template_name='authentication/password_reset_subject.txt',
+        success_url='/password-reset/done/',
+    ), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='authentication/password_reset_done.html',
+    ), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='authentication/password_reset_confirm.html',
+        success_url='/reset/done/',
+    ), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='authentication/password_reset_complete.html',
+    ), name='password_reset_complete'),
 
     # document delete endpoints
     path('delete-lab-document/<str:hid>/', views.delete_lab_document, name='delete_lab_document'),

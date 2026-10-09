@@ -5,75 +5,55 @@
 {% block content %}
 
 <main class="main-content" id="mainContent">
-    <div class="patient-form-shell">
-        <div class="page-header patient-form-header">
+    <div class="dc-form-shell">
+        <div class="page-head">
             <div>
-                <h2 class="page-title mb-0">Edit Vendor</h2>
+                <h2 class="page-title">Edit Vendor</h2>
                 <p class="page-subtitle">Update vendor information and contact details.</p>
             </div>
-            <a href="{% url 'medicine:vendor_list' %}" class="patient-link-btn">
-                <i class="bi bi-arrow-left me-2"></i>Vendor List
+            <a href="{% url 'medicine:vendor_list' %}" class="action-btn">
+                <i class="bi bi-arrow-left"></i> Vendor List
             </a>
         </div>
 
-        <div class="patient-form-card">
+        <div class="dc-card">
             <form method="POST" class="patient-form-grid">
                 {% csrf_token %}
-
-                <!-- Messages -->
-                
-
-                <!-- Vendor Name -->
-                <div class="patient-field">
-                    <label class="patient-label" for="vendor-name">
-                        <i class="bi bi-building me-1" style="color: #0066cc;"></i>Vendor Name
-                        <span style="color: #dc3545;">*</span>
-                    </label>
-                    <input id="vendor-name" type="text" name="name" class="patient-input"
-                        placeholder="Enter vendor company name" value="{{ vendor.name }}" required>
-                    <small class="text-muted d-block mt-1">Full name or company name of the medicine supplier</small>
+                <div class="dc-card-body">
+                    <section class="dc-section">
+                        <h3 class="dc-section-title"><i class="bi bi-building"></i> Vendor details</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="dc-label" for="vendor-name">Vendor Name <span class="dc-muted">*</span></label>
+                                <input id="vendor-name" type="text" name="name" class="form-control patient-input"
+                                    placeholder="Enter vendor company name" value="{{ vendor.name }}" required>
+                                <small class="dc-hint">Full name or company name of the medicine supplier</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="dc-label" for="vendor-phone">Phone Number</label>
+                                <input id="vendor-phone" type="text" name="phone" class="form-control patient-input"
+                                    placeholder="Enter phone number" value="{{ vendor.phone }}" maxlength="10">
+                                <small class="dc-hint">10 digit phone number</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="dc-label" for="vendor-email">Email Address</label>
+                                <input id="vendor-email" type="email" name="email" class="form-control patient-input"
+                                    placeholder="vendor@company.com" value="{{ vendor.email }}">
+                                <small class="dc-hint">For communication and invoices</small>
+                            </div>
+                            <div class="col-12">
+                                <label class="dc-label" for="vendor-address">Address</label>
+                                <textarea id="vendor-address" name="address" class="form-control patient-input patient-textarea"
+                                    rows="4" placeholder="Enter complete address (Street, City, State, Zip)">{{ vendor.address }}</textarea>
+                                <small class="dc-hint">Complete address for delivery and official correspondence</small>
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
-                <!-- Row: Phone + Email -->
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label" for="vendor-phone">
-                            <i class="bi bi-telephone me-1" style="color: #28a745;"></i>Phone Number
-                        </label>
-                        <input id="vendor-phone" type="text" name="phone" class="patient-input"
-                            placeholder="Enter phone number" value="{{ vendor.phone }}" maxlength="10">
-                        <small class="text-muted d-block mt-1">10 digit phone number</small>
-                    </div>
-
-                    <div class="patient-field">
-                        <label class="patient-label" for="vendor-email">
-                            <i class="bi bi-envelope me-1" style="color: #fd7e14;"></i>Email Address
-                        </label>
-                        <input id="vendor-email" type="email" name="email" class="patient-input"
-                            placeholder="vendor@company.com" value="{{ vendor.email }}">
-                        <small class="text-muted d-block mt-1">For communication and invoices</small>
-                    </div>
-                </div>
-
-                <!-- Address -->
-                <div class="patient-field">
-                    <label class="patient-label" for="vendor-address">
-                        <i class="bi bi-geo-alt me-1" style="color: #6c757d;"></i>Address
-                    </label>
-                    <textarea id="vendor-address" name="address" class="patient-input patient-textarea"
-                        rows="4" placeholder="Enter complete address (Street, City, State, Zip)">{{ vendor.address }}</textarea>
-                    <small class="text-muted d-block mt-1">Complete address for delivery and official correspondence</small>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="patient-form-actions">
-                    <button type="submit" class="patient-submit-btn me-2">
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Update Vendor</span>
-                    </button>
-                    <a href="{% url 'medicine:vendor_list' %}" class="btn btn-outline-secondary" style="border-radius: 8px; padding: 10px 20px; font-weight: 600;">
-                        <i class="bi bi-x-circle me-2"></i>Cancel
-                    </a>
+                <div class="dc-form-footer">
+                    <a href="{% url 'medicine:vendor_list' %}" class="btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
         </div>

@@ -1,0 +1,121 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration - Clinic</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/bootstrap-icons/font/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/doctor.css' %}">
+    <style>
+        .password-toggle-wrapper { position: relative; }
+        .password-input-wrapper { position: relative; }
+        .password-input-wrapper .form-control { padding-right: 3rem; }
+        .password-toggle {
+            position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+            background: transparent; border: none; color: #0d6efd; cursor: pointer;
+            padding: 0.35rem; font-size: 1rem; line-height: 1; height: 1.9rem;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .password-toggle:hover { color: #084298; }
+        .password-toggle:focus { outline: none; box-shadow: none; }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: #f8f9fa;">
+    <div style="width: 100%; max-width: 420px; padding: 1rem;">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'danger' }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden h-100 d-flex flex-column">
+            <div class="p-4 text-center text-white flex-shrink-0" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+                <div class="mb-2"><i class="bi bi-hospital" style="font-size: 2.5rem;"></i></div>
+                <h2 class="mb-1 fw-bold" style="font-size: 1.5rem;">Doctor Registration</h2>
+                <p class="mb-0 small" style="opacity: 0.9;">Apply for a clinic account</p>
+            </div>
+            <div class="p-4 flex-grow-1 overflow-y-auto">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-3 small" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i><strong>Error!</strong> {{ error }}
+                    <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                <form method="POST" action="{% url 'doctor:register' %}" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-semibold d-block mb-1 small"><i class="bi bi-person me-2"></i>Full Name</label>
+                        <input type="text" class="form-control form-control-sm" id="name" name="name" required value="{{ request.POST.name }}"
+                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-semibold d-block mb-1 small"><i class="bi bi-person-circle me-2"></i>Username</label>
+                        <input type="text" class="form-control form-control-sm" id="username" name="username" required value="{{ request.POST.username }}"
+                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold d-block mb-1 small"><i class="bi bi-envelope me-2"></i>Email</label>
+                        <input type="email" class="form-control form-control-sm" id="email" name="email" required value="{{ request.POST.email }}"
+                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label fw-semibold d-block mb-1 small"><i class="bi bi-telephone me-2"></i>Phone</label>
+                        <input type="tel" class="form-control form-control-sm" id="phone" name="phone" required value="{{ request.POST.phone }}" maxlength="10"
+                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                    </div>
+                    <div class="mb-3 password-toggle-wrapper">
+                        <label for="password" class="form-label fw-semibold d-block mb-1 small"><i class="bi bi-lock-fill me-2"></i>Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" class="form-control form-control-sm" id="password" name="password" required
+                                style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-4 password-toggle-wrapper">
+                        <label for="confirm_password" class="form-label fw-semibold d-block mb-1 small"><i class="bi bi-lock-fill me-2"></i>Confirm Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" class="form-control form-control-sm" id="confirm_password" name="confirm_password" required
+                                style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                            <button type="button" class="password-toggle" aria-label="Toggle password visibility">
+                                <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn w-100 fw-bold rounded-2 text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); border: none; font-size: 0.95rem; padding: 0.6rem;">
+                        <i class="bi bi-person-plus-fill me-1"></i>Register
+                    </button>
+                </form>
+            </div>
+            <div class="bg-light p-3 text-center border-top flex-shrink-0" style="font-size: 0.85rem;">
+                <p class="text-muted mb-0">
+                    Already have an account? <a href="{% url 'doctor:login' %}" class="text-primary text-decoration-none fw-semibold">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script>
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function () { this.style.borderColor = '#0d6efd'; this.style.boxShadow = '0 0 0 3px rgba(13, 110, 253, 0.1)'; });
+            input.addEventListener('blur', function () { this.style.borderColor = '#d6deea'; this.style.boxShadow = 'none'; });
+        });
+        document.querySelectorAll('.password-toggle-wrapper').forEach(function(wrapper) {
+            var inputWrapper = wrapper.querySelector('.password-input-wrapper');
+            var input = inputWrapper ? inputWrapper.querySelector('input[type="password"]') : null;
+            var button = inputWrapper ? inputWrapper.querySelector('.password-toggle') : null;
+            var icon = button ? button.querySelector('.password-toggle-icon') : null;
+            if (!input || !button || !icon) return;
+            button.addEventListener('click', function() {
+                var isHidden = input.type === 'password';
+                input.type = isHidden ? 'text' : 'password';
+                icon.innerHTML = isHidden ? '<path d="M13.359 11.238l1.287 1.287a.5.5 0 0 1-.708.708l-1.26-1.26A7.488 7.488 0 0 1 8 13.5C4.5 13.5 1.8 10.1 1 8a7.506 7.506 0 0 1 2.22-2.912L1.854 3.5a.5.5 0 1 1 .708-.708l1.285 1.285A7.485 7.485 0 0 1 8 2.5c3.5 0 6.2 3.4 7 5.5a7.485 7.485 0 0 1-1.641 3.238z"/><path d="M10.478 11.178A3.998 3.998 0 0 1 4.822 6.522l.738.738a3 3 0 0 0 4.125 4.125l.793.793zm.7-2.017L6.04 5.023A3 3 0 0 1 10.478 9.16z"/>' : '<path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/>';
+                button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+            });
+        });
+    </script>
+</body>
+</html>

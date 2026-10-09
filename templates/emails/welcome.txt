@@ -1,0 +1,27 @@
+Namaste {{ name }},
+
+Welcome to {{ clinic_name }}!
+{% if added_by_clinic %}
+Your patient account has been created by our team. Set your password here:
+{{ set_password_url }}
+(This link can be used once and expires in a few days.)
+{% else %}
+Your account is ready. Login here:
+{{ login_url }}
+{% endif %}
+Your login email: {{ email }}{% if phone %}
+Mobile: {{ phone }}{% endif %}
+
+What you can do online:
+- Book appointments
+- See prescriptions and reports
+- Add family members
+{% if booking_url %}
+Book an appointment: {{ booking_url }}
+{% endif %}
+{% if address %}Address: {{ address }}
+{% endif %}{% if clinic_phone %}Phone: {{ clinic_phone }}
+{% endif %}{% if hours %}Timings: {{ hours }}{% if working_days %} ({{ working_days }}){% endif %}
+{% endif %}
+If this wasn't you, please contact the clinic.
+- {{ clinic_name }}

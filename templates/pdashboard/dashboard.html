@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
 {% load static %}
 {% load hashid_tags %}
 
@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 {% endblock %}
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}?v=4">
+    <link rel="stylesheet" href="{% static 'assets/css/dashboard.css' %}?v=6">
     <link rel="stylesheet" href="{% static 'assets/css/pdashboard.css' %}">
 {% endblock %}
 {% block main_class %}patient-page-shell{% endblock %}
@@ -44,22 +44,48 @@
             </div>
         </section> -->
 
-        <div class="row stats g-3 mb-4">
-            <div class="col-md-6">
-                <div class="stat-card">
-                    <i class="fa-solid fa-hospital-user text-primary"></i>
-                    <h3>{{ total_visits }}</h3>
-                    <p>Total Visits</p>
-                </div>
+        <section class="next-appt-card {% if not next_appointment %}next-appt-card--empty{% endif %}">
+            <div class="next-appt__icon">
+                <i class="fa-solid {% if next_appointment %}fa-calendar-day{% else %}fa-calendar-plus{% endif %}"></i>
             </div>
-            <div class="col-md-6">
-                <div class="stat-card">
-                    <i class="fa-solid fa-clock text-warning"></i>
-                    <h3 class="text-warning">{{ pending_appointments }}</h3>
-                    <p>Pending Appointments</p>
-                </div>
+
+            <div class="next-appt__body">
+                <span class="next-appt__label">Next Appointment</span>
+                {% if next_appointment %}
+                    <h3 class="next-appt__date">{{ next_appointment.appointment_date|date:"D, d M Y" }}</h3>
+                    <div class="next-appt__meta">
+                        <span><i class="fa-regular fa-clock"></i> {{ next_appointment.time_slot|time:"h:i A" }}</span>
+                        <span>
+                            <i class="fa-regular fa-user"></i>
+                            {% if next_appointment.family_member %}
+                                {{ next_appointment.family_member.name }} ({{ next_appointment.family_member.relation }})
+                            {% else %}
+                                {{ next_appointment.patient.user.first_name }}{% if next_appointment.patient.user.last_name %} {{ next_appointment.patient.user.last_name }}{% endif %}
+                            {% endif %}
+                        </span>
+                        <span class="badge appt-badge appt-badge--{{ next_appointment.status }}">{{ next_appointment.get_status_display }}</span>
+                    </div>
+                {% else %}
+                    <h3 class="next-appt__date">No upcoming appointment</h3>
+                    <p class="next-appt__hint">Book your next consultation in under a minute.</p>
+                {% endif %}
             </div>
-        </div>
+
+            <div class="next-appt__actions">
+                {% if next_appointment %}
+                    <a href="{% url 'appointment:appointment_detail' next_appointment.id|hid %}" class="btn-book-appointment">
+                        <i class="fa-solid fa-eye"></i> View details
+                    </a>
+                {% else %}
+                    <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment">
+                        <i class="fa-solid fa-calendar-plus"></i> Book Appointment
+                    </a>
+                {% endif %}
+                {% if completed_visits %}
+                    <span class="next-appt__visits">{{ completed_visits }} visit{{ completed_visits|pluralize }} so far</span>
+                {% endif %}
+            </div>
+        </section>
 
         <div class="card page-card">
             <div class="card-header">
@@ -81,7 +107,7 @@
                             <div class="col-lg-4 col-md-6">
                                 <label class="form-label small fw-semibold">Search</label>
                                 <input type="search" name="search" class="form-control"
-                                       placeholder="Patient, doctor or phone"
+                                       placeholder="Patient name or phone"
                                        value="{{ filters.search }}"
                                        aria-label="Search appointments"
                                        autocomplete="off">
@@ -119,8 +145,7 @@
                         <table class="table" id="appointmentsTable">
                             <thead>
                                 <tr>
-                                    <th>Patient</th>
-                                    <th>Doctor</th>
+                                    <th>Patient Name</th>
                                     <th>Date &amp; Time</th>
                                     <th>Status</th>
                                     <th>Action</th>
@@ -142,14 +167,6 @@
                                     </td>
 
                                     <td>
-                                        {% if appointment.doctor and appointment.doctor.user %}
-                                            Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.username }}
-                                        {% else %}
-                                            —
-                                        {% endif %}
-                                    </td>
-
-                                    <td>
                                         {{ appointment.appointment_date|date:"M d, Y" }}
                                         <span style="font-size:0.75rem;color:var(--muted);display:block;">
                                             {{ appointment.time_slot|time:"h:i A" }}
@@ -157,15 +174,7 @@
                                     </td>
 
                                     <td>
-                                        {% if appointment.status == 'confirmed' %}
-                                            <span class="badge bg-success">Confirmed</span>
-                                        {% elif appointment.status == 'cancelled' %}
-                                            <span class="badge bg-danger">Cancelled</span>
-                                        {% elif appointment.status == 'completed' %}
-                                            <span class="badge" style="background:#e0f2fe;color:#0369a1;">Completed</span>
-                                        {% else %}
-                                            <span class="badge bg-warning">Pending</span>
-                                        {% endif %}
+                                        <span class="badge appt-badge appt-badge--{{ appointment.status }}">{{ appointment.get_status_display }}</span>
                                     </td>
 
                                     <td class="d-flex gap-2">
@@ -185,7 +194,18 @@
                                 </tr>
                                 {% empty %}
                                 <tr id="emptyRow">
-                                    <td colspan="5" class="text-center text-muted py-4">No appointments found.</td>
+                                    <td colspan="4" class="appt-empty">
+                                        {% if has_any_appointments %}
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                            <p>No appointments match your filters.</p>
+                                        {% else %}
+                                            <i class="fa-regular fa-calendar"></i>
+                                            <p>You have no appointments yet.</p>
+                                            <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment btn-book-appointment--sm">
+                                                <i class="fa-solid fa-calendar-plus"></i> Book your first appointment
+                                            </a>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -350,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function () {
             showCancelButton: true,
             confirmButtonText: 'Yes, Cancel Appointment',
             cancelButtonText: 'Keep Appointment',
-            confirmButtonColor: '#dc3545',
+            confirmButtonColor: '#AD0002',
             cancelButtonColor: '#6c757d',
             reverseButtons: true,
             backdrop: 'rgba(0,0,0,0.45)',
@@ -390,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (data.success) {
                             const statusBadge = appointmentRow.querySelector('[class*="badge"]');
                             if (statusBadge) {
-                                statusBadge.className = 'badge bg-danger';
+                                statusBadge.className = 'badge appt-badge appt-badge--cancelled';
                                 statusBadge.textContent = 'Cancelled';
                             }
 
@@ -404,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 text: 'Your appointment has been cancelled successfully.',
                                 icon: 'success',
                                 confirmButtonText: 'OK',
-                                confirmButtonColor: '#1977cc'
+                                confirmButtonColor: '#015315'
                             });
                         } else {
                             Swal.fire({

@@ -40,6 +40,11 @@
   --contrast-color: #ffffff; /* Contrast color for text, ensuring readability against backgrounds of accent, heading, or default colors. */
 }
 
+@media (max-width: 767px) {
+  :root {
+  }
+}
+
 /* Nav Menu Colors */
 :root {
   --nav-color: #3c4049;  /* The default color of the main navmenu links */
@@ -212,26 +217,12 @@ h6 {
   color: var(--contrast-color);
 }
 
-.header .branding {
-  min-height: 60px;
-  padding: 10px 0;
-}
 
 .header .logo {
   line-height: 1;
 }
 
-.header .logo img {
-  max-height: 36px;
-  margin-right: 8px;
-}
 
-.header .logo h1 {
-  font-size: 30px;
-  margin: 0;
-  font-weight: 600;
-  color: var(--heading-color);
-}
 
 .scrolled .header .topbar {
   height: 0;
@@ -1594,6 +1585,7 @@ section,
 
 .home-about .about-visual {
   position: relative;
+  padding-bottom: 48px;
 }
 
 .home-about .about-visual .main-image {
@@ -1615,7 +1607,7 @@ section,
 .home-about .about-visual .floating-card {
   position: absolute;
   bottom: -30px;
-  left: -30px;
+  right: -30px;
   background-color: var(--surface-color);
   padding: 1.5rem;
   border-radius: 8px;
@@ -1624,10 +1616,14 @@ section,
 }
 
 @media (max-width: 768px) {
+  .home-about .about-visual {
+    padding-bottom: 0;
+  }
+
   .home-about .about-visual .floating-card {
     position: static;
     margin-top: 2rem;
-    left: auto;
+    right: auto;
     bottom: auto;
   }
 }

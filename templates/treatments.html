@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Treatments | {{ clinic.clinic_name|default:'Ayurveda Clinic' }}{% endblock %}
+{% block meta_description %}Explore our authentic Ayurvedic treatments including Nadi Pariksha, Panchakarma, Herbal Medicines, and Diet & Lifestyle plans.{% endblock %}
+{% block body_class %}treatments-page{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'assets/css/treatments.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main id="main">
+
+    <!-- Treatments Banner -->
+    <section class="treatments-banner">
+        <div class="container">
+            <div class="banner-content">
+                <h1>Our Treatments</h1>
+                <p>Authentic Ayurvedic therapies to cleanse, heal and restore balance.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Intro -->
+    <section class="treatments-intro text-center">
+        <div class="container">
+            <p class="intro-text">
+                Every treatment at {{ clinic.clinic_name|default:'our clinic' }} begins with a personal consultation and Nadi Pariksha, so your therapy is planned for your body type and condition.
+            </p>
+        </div>
+    </section>
+
+    <!-- Treatments Groups -->
+    <section class="treatments-list">
+        <div class="container">
+            {% for group in TREATMENT_GROUPS %}
+            <div class="treatment-group" id="{{ group.label|slugify }}">
+                <div class="group-header d-flex justify-content-between align-items-end">
+                    <div class="group-header-text">
+                        <span class="group-label">{{ group.label }}</span>
+                        <h2 class="group-title">{{ group.title }}</h2>
+                        <p class="group-subtitle mb-0">{{ group.subtitle }}</p>
+                    </div>
+                    {% if group.treatments|length > 3 %}
+                    <div class="group-nav d-flex gap-2 mb-2">
+                        <button class="nav-btn prev-btn" disabled><i class="bi bi-chevron-left"></i></button>
+                        <button class="nav-btn next-btn"><i class="bi bi-chevron-right"></i></button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="treatment-cards-grid scroll-grid">
+                    {% for treatment in group.treatments %}
+                    <div class="treatment-card-wrapper d-flex">
+                        <div class="treatment-card d-flex flex-column w-100">
+                            <div class="card-icon">
+                                <i class="bi {{ treatment.icon }}"></i>
+                            </div>
+                            <h3 class="card-title">{{ treatment.name }}</h3>
+                            <p class="card-summary">{{ treatment.summary }}</p>
+                            
+                            <div class="helpful-for mt-auto">
+                                <span class="helpful-label">HELPFUL FOR</span>
+                                <ul>
+                                    {% for item in treatment.helpful_for %}
+                                    <li>{{ item }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <a href="{% url 'appointment:appointment' %}" class="btn-book">Book this treatment</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Disclaimer Note -->
+    <section class="treatments-note text-center">
+        <div class="container">
+            <div class="note-box">
+                Treatment suitability is decided by our doctor after consultation.
+            </div>
+        </div>
+    </section>
+
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const groups = document.querySelectorAll('.treatment-group');
+    
+    groups.forEach(group => {
+        const grid = group.querySelector('.scroll-grid');
+        const prevBtn = group.querySelector('.prev-btn');
+        const nextBtn = group.querySelector('.next-btn');
+        
+        if (!grid || !prevBtn || !nextBtn) return;
+        
+        const updateButtons = () => {
+            const scrollLeft = grid.scrollLeft;
+            const maxScroll = grid.scrollWidth - grid.clientWidth;
+            
+            prevBtn.disabled = scrollLeft <= 0;
+            nextBtn.disabled = scrollLeft >= maxScroll - 1; // -1 for rounding errors
+        };
+        
+        grid.addEventListener('scroll', updateButtons);
+        window.addEventListener('resize', updateButtons);
+        
+        prevBtn.addEventListener('click', () => {
+            const cardWidth = grid.querySelector('.treatment-card-wrapper').offsetWidth + 24; // width + gap
+            grid.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            const cardWidth = grid.querySelector('.treatment-card-wrapper').offsetWidth + 24; // width + gap
+            grid.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        });
+        
+        setTimeout(updateButtons, 100);
+    });
+});
+</script>
+{% endblock %}
+

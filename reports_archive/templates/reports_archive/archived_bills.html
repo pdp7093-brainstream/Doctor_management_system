@@ -4,137 +4,124 @@
 {% block content %}
 {% load static %}
 <main class="main-content" id="mainContent">
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">Archived Bills</h2>
-            <p class="text-muted small mb-0">Soft-archived billing records that can be restored.</p>
+            <h2 class="page-title">Archived Bills</h2>
+            <p class="page-subtitle">Soft-archived billing records that can be restored.</p>
         </div>
-        <a href="{% url 'reports_archive:archive_records' %}" class="btn btn-outline-primary">
-            <i class="bi bi-archive me-1"></i> Archive Records
+        <a href="{% url 'reports_archive:archive_records' %}" class="action-btn">
+            <i class="bi bi-archive"></i> Archive Records
         </a>
     </div>
 
     <div class="row g-3 mb-4">
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3"
-                        style="width:48px;height:48px;">
-                        <i class="bi bi-receipt fs-4"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-0 small text-uppercase fw-bold">Active Bills</h6>
-                        <h4 class="mb-0 fw-bold">{{ active_bills_count }}</h4>
-                    </div>
+            <div class="stat-card warning h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">{{ active_bills_count }}</div>
+                    <div class="stat-label text-nowrap">Active Bills</div>
                 </div>
+                <div class="stat-icon warning"><i class="bi bi-receipt"></i></div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card">
-                <div class="card-body d-flex align-items-center">
-                    <div class="rounded-circle bg-secondary bg-opacity-10 text-secondary d-flex align-items-center justify-content-center me-3"
-                        style="width:48px;height:48px;">
-                        <i class="bi bi-archive-fill fs-4"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-0 small text-uppercase fw-bold">Archived Bills</h6>
-                        <h4 class="mb-0 fw-bold">{{ archived_bills_count }}</h4>
-                    </div>
+            <div class="stat-card warning h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">{{ archived_bills_count }}</div>
+                    <div class="stat-label text-nowrap">Archived Bills</div>
                 </div>
+                <div class="stat-icon warning"><i class="bi bi-archive-fill"></i></div>
             </div>
         </div>
     </div>
 
-    <div class="card mb-4">
-        <div class="card-header d-flex align-items-center gap-2 fw-bold">
-            <i class="bi bi-funnel-fill"></i> Filters
+    <div class="dc-form-shell reports-full-width mb-4">
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-funnel-fill"></i> Filters</h3>
         </div>
-        <div class="card-body">
+        <div class="dc-card-body">
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label small fw-semibold">Search Bill/Patient</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <label class="dc-label" for="search">Search Bill/Patient</label>
+                    <div class="dc-search">
+                        <i class="bi bi-search"></i>
                         <input type="text" id="search" class="form-control" placeholder="Search bills..."
                             value="{{ search }}">
                     </div>
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Bill Date</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
-                        <input type="date" id="billDate" class="form-control" value="{{ bill_date }}">
-                    </div>
+                    <label class="dc-label" for="billDate">Bill Date</label>
+                    <input type="date" id="billDate" class="form-control" value="{{ bill_date }}">
                 </div>
                 <div class="col-md-3">
-                    <label class="form-label small fw-semibold">Status</label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-filter"></i></span>
+                    <label class="dc-label" for="billStatus">Status</label>
                         <select id="billStatus" class="form-select">
                             <option value="all" {% if status == "all" %}selected{% endif %}>All</option>
                             {% for value, label in status_choices %}
                             <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
                             {% endfor %}
                         </select>
-                    </div>
                 </div>
                 <div class="col-md-2">
                     <label class="form-label d-none d-md-block">&nbsp;</label>
-                    <button id="clearBtn" type="button" class="btn btn-outline-primary w-100" style="border: 1px solid #0d6efd !important;">
-                        <i class="bi me-1"></i> Clear
+                    <button id="clearBtn" type="button" class="btn-ghost w-100 justify-content-center btn-clear">
+                        <i class="bi bi-x-circle"></i> Clear
                     </button>
                 </div>
             </div>
         </div>
     </div>
+    </div>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2 fw-bold">
-                <i class="bi bi-receipt-cutoff me-1"></i> Archived Bills
-            </div>
-            <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-receipt-cutoff"></i> Archived Bills</h3>
+            <span class="dc-count">{{ page_obj.paginator.count }} total</span>
         </div>
-        <div class="card-body p-0">
-            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
-                <table class="table table-hover mb-0" style="min-width:900px; width:100%;">
-                    <thead>
-                        <tr>
-                            <th>Bill Number</th>
-                            <th>Patient</th>
-                            <th>Bill Date</th>
-                            <th>Total</th>
-                            <th>Status</th>
-                            <th>Archived At</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
+        <div class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width:900px;">
+                <thead>
+                    <tr>
+                        <th>Bill Number</th>
+                        <th>Patient</th>
+                        <th>Bill Date</th>
+                        <th class="text-end">Total</th>
+                        <th>Status</th>
+                        <th>Archived At</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
                     <tbody id="tableBody">
                         {% for bill in bills %}
                         <tr>
-                            <td class="fw-semibold">{{ bill.bill_number }}</td>
-                            <td>{{ bill.visit.patient.user.get_full_name|default:bill.visit.patient.user.username }}
+                            <td class="dc-mono">{{ bill.bill_number }}</td>
+                            <td class="dc-name">{{ bill.visit.patient.user.get_full_name|default:bill.visit.patient.user.username }}
                             </td>
-                            <td>{{ bill.bill_date|date:"d M Y" }}</td>
-                            <td>₹{{ bill.total }}</td>
-                            <td><span class="badge bg-light text-dark">{{ bill.get_payment_status_display }}</span></td>
-                            <td>{{ bill.archived_at|date:"d M Y, h:i A"|default:"Not recorded" }}</td>
-                            <td class="text-center">
-                                <form action="{% url 'reports_archive:restore_bill' bill.id|hid %}" method="POST"
-                                    class="m-0 d-inline">
-                                    {% csrf_token %}
-                                    <button type="button" class="btn btn-sm btn-success restore-btn">
-                                        <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                    </button>
-                                </form>
+                            <td class="dc-mono">{{ bill.bill_date|date:"d M Y" }}</td>
+                            <td class="text-end dc-mono">₹{{ bill.total }}</td>
+                            <td><span class="dc-badge grey">{{ bill.get_payment_status_display }}</span></td>
+                            <td class="dc-mono">{{ bill.archived_at|date:"d M Y, h:i A"|default:"Not recorded" }}</td>
+                            <td class="col-actions">
+                                <div class="dc-actions">
+                                    <form action="{% url 'reports_archive:restore_bill' bill.id|hid %}" method="POST"
+                                        class="m-0 d-inline">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn-act view restore-btn" title="Restore">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
-                                <i class="bi bi-archive d-block mb-2"
-                                    style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
-                                No archived bills found.
+                            <td colspan="7" class="dc-empty">
+                                <i class="bi bi-archive"></i>
+                                <p class="dc-empty-text">No archived bills found.</p>
+                                <a href="{% url 'reports_archive:archive_records' %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-archive"></i> Archive Records
+                                </a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -143,8 +130,9 @@
             </div>
         </div>
         <div id="paginationContainer">
+            {% if bills %}
             {% if page_obj.paginator.num_pages > 1 %}
-            <div id="paginationWrapper" class="card-footer bg-white d-flex flex-column align-items-center py-3">
+            <div id="paginationWrapper" class="dc-card-footer d-flex flex-column align-items-center">
                 <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1 small">
                     <span>
                         <strong>{{ page_obj.start_index }} - {{ page_obj.end_index }}</strong>
@@ -168,6 +156,7 @@
                     </ul>
                 </nav>
             </div>
+            {% endif %}
             {% endif %}
         </div>
     </div>

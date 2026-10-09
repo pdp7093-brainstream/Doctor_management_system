@@ -4,125 +4,114 @@
 {% block title %}Edit Medicine - Doctor Dashboard{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
-    <div class="patient-form-shell">
-        <div class="page-header patient-form-header">
+    <div class="dc-form-shell">
+        <div class="page-head">
             <div>
-                <h2 class="page-title mb-0">Edit Medicine</h2>
+                <h2 class="page-title">Edit Medicine</h2>
                 <p class="page-subtitle">Update the details for {{ medicine.name }}.</p>
             </div>
-            <a href="{% url 'medicine:manage_medicine' %}" class="patient-link-btn">
-                Medicine Store
+            <a href="{% url 'medicine:manage_medicine' %}" class="action-btn">
+                <i class="bi bi-arrow-left"></i> Medicine Store
             </a>
         </div>
 
-        <div class="patient-form-card">
+        <div class="dc-card">
             <form method="POST" action="{% url 'medicine:edit_medicine' medicine.id|hid %}" class="patient-form-grid">
                 {% csrf_token %}
+                <div class="dc-card-body">
+                    <section class="dc-section">
+                        <h3 class="dc-section-title"><i class="bi bi-capsule"></i> Medicine details</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="dc-label" for="medicine-name">Medicine Name <span class="dc-muted">*</span></label>
+                                <input id="medicine-name" type="text" name="name" class="form-control patient-input"
+                                    value="{{ medicine.name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="dc-label" for="medicine-short-name">Short Name <span class="dc-muted">*</span></label>
+                                <input id="medicine-short-name" type="text" name="short_name" class="form-control patient-input"
+                                    value="{{ medicine.short_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="dc-label" for="medicine-type">Medicine Type <span class="dc-muted">*</span></label>
+                                <select id="medicine-type" name="medicine_type" class="form-select patient-input" required>
+                                    <option value="" disabled>Select type...</option>
+                                    {% for value, label in medicine_types %}
+                                    <option value="{{ value }}" {% if medicine.medicine_type == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="dc-label" for="medicine-company">Company</label>
+                                <input id="medicine-company" type="text" name="company" class="form-control patient-input"
+                                    value="{{ medicine.company }}" placeholder="e.g., Sun Pharma">
+                            </div>
+                            <div class="col-12">
+                                <label class="dc-label" for="medicine-desc">Description</label>
+                                <textarea id="medicine-desc" name="description" class="form-control patient-input" rows="2"
+                                    placeholder="Optional notes...">{{ medicine.description }}</textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="dc-callout d-flex align-items-center gap-2">
+                                    <input type="checkbox" class="form-check-input m-0" id="medicine-active" name="is_active" {% if medicine.is_active %}checked{% endif %}>
+                                    <label class="dc-label mb-0" for="medicine-active">Active (available in store)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
 
-                <!-- Row 1: Medicine Name + Short Name -->
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-name">Medicine Name</label>
-                        <input id="medicine-name" type="text" name="name" class="patient-input"
-                            value="{{ medicine.name }}" required>
-                    </div>
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-short-name">Short Name</label>
-                        <input id="medicine-short-name" type="text" name="short_name" class="patient-input"
-                            value="{{ medicine.short_name }}" required>
-                    </div>
-                </div>
+                    <section class="dc-section">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <div>
+                                <h3 class="dc-section-title mb-1"><i class="bi bi-box-seam"></i> Variants</h3>
+                                <p class="dc-muted small mb-0">Power, pricing, stock, units and dates.</p>
+                            </div>
+                            <button type="button" id="addVariantBtn" class="btn-ghost">
+                                <i class="bi bi-plus-circle"></i> Add Variant
+                            </button>
+                        </div>
 
-                <!-- Row 2: Medicine Type + Company -->
-                <div class="patient-form-row">
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-type">Medicine Type</label>
-                        <select id="medicine-type" name="medicine_type" class="patient-input" required>
-                            <option value="" disabled>Select type...</option>
-                            {% for value, label in medicine_types %}
-                            <option value="{{ value }}" {% if medicine.medicine_type == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="patient-field">
-                        <label class="patient-label" for="medicine-company">Company</label>
-                        <input id="medicine-company" type="text" name="company" class="patient-input"
-                            value="{{ medicine.company }}" placeholder="e.g., Sun Pharma">
-                    </div>
-                </div>
-
-                <!-- Description -->
-                <div class="patient-field">
-                    <label class="patient-label" for="medicine-desc">Description</label>
-                    <textarea id="medicine-desc" name="description" class="patient-input" rows="2"
-                        placeholder="Optional notes...">{{ medicine.description }}</textarea>
-                </div>
-
-                <!-- Is Active -->
-                <div class="patient-field" style="display:flex; align-items:center; gap:10px;">
-                    <input type="checkbox" id="medicine-active" name="is_active" {% if medicine.is_active %}checked{% endif %} style="width:18px; height:18px; cursor:pointer;">
-                    <label class="patient-label mb-0" for="medicine-active" style="cursor:pointer;">
-                        Active (available in store)
-                    </label>
-                </div>
-
-                <!-- Variants Section -->
-                <div style="margin-top:8px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <label class="patient-label mb-0">
-                            Variants
-                            <span style="font-weight:400; font-size:0.82rem; color:#888;">
-                                (Power / Cost / Selling / Strips / Unit / Dates)
-                            </span>
-                        </label>
-                        <button type="button" id="addVariantBtn" class="btn btn-sm btn-outline-primary"
-                            style="border-radius:8px; font-size:0.82rem;">
-                            <i class="bi bi-plus-circle"></i> Add Variant
-                        </button>
-                    </div>
-
-                    <div id="variantsContainer">
+                            <div id="variantsContainer">
                         {% for variant in medicine.variants.all %}
-                        <div class="variant-row"
-                            style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <div class="variant-row dc-callout mb-3">
                             <input type="hidden" name="variant_id[]" value="{{ variant.pk }}">
                             <div class="row g-2 mb-2">
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                                    <input type="text" name="power[]" class="patient-input" value="{{ variant.power }}"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Power / Strength <span class="dc-muted">*</span></label>
+                                    <input type="text" name="power[]" class="form-control patient-input" value="{{ variant.power }}"
                                         required>
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
-                                    <input type="number" name="cost_price[]" class="patient-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Cost Price (₹) <span class="dc-muted">*</span></label>
+                                    <input type="number" name="cost_price[]" class="form-control patient-input"
                                         value="{{ variant.cost_price }}" min="0" step="0.01" required>
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
-                                    <input type="number" name="selling_price[]" class="patient-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
+                                    <input type="number" name="selling_price[]" class="form-control patient-input"
                                         value="{{ variant.selling_price }}" min="0" step="0.01" required>
                                 </div>
-                                <div class="col-6 col-md">
+                                <div class="col-12 col-md-6">
                                     <!-- Total Strips: pre-filled via stock // unit_per_strip (NOT stored in DB) -->
-                                    <label class="patient-label" style="font-size:0.78rem;">Total Strips</label>
-                                    <input type="number" name="total_strips[]" class="patient-input strip-input"
+                                    <label class="dc-label">Total Strips</label>
+                                    <input type="number" name="total_strips[]" class="form-control patient-input strip-input"
                                         value="{{ variant.stock_breakdown.strips }}" min="0">
                                     <!-- Hidden computed field sent to the view -->
                                     <input type="hidden" name="stock[]" class="stock-hidden"
                                         value="{{ variant.stock }}">
                                 </div>
-                                <div class="col-12 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                                    <input type="number" name="low_stock_alert[]" class="patient-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Low Alert</label>
+                                    <input type="number" name="low_stock_alert[]" class="form-control patient-input"
                                         value="{{ variant.low_stock_alert }}" min="0">
                                 </div>
                             </div>
                             <div class="row g-2 align-items-end">
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Unit</label>
-                                    <select name="unit[]" class="patient-input">
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Unit</label>
+                                    <select name="unit[]" class="form-select patient-input">
                                         {% for value, label in unit_choices %}
                                         <option value="{{ value }}" {% if variant.unit == value %}selected{% endif %}>
                                             {{ label }}
@@ -130,124 +119,113 @@
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Unit / Strip</label>
-                                    <input type="number" name="unit_per_strip[]" class="patient-input ups-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Unit / Strip</label>
+                                    <input type="number" name="unit_per_strip[]" class="form-control patient-input ups-input"
                                         value="{{ variant.unit_per_strip|default:'' }}" placeholder="e.g., 10" min="1">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
-                                    <input type="date" name="mfg_date[]" class="patient-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Mfg Date</label>
+                                    <input type="date" name="mfg_date[]" class="form-control patient-input"
                                         value="{{ variant.mfg_date|date:'Y-m-d'|default:'' }}">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Exp Date</label>
-                                    <input type="date" name="exp_date[]" class="patient-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Exp Date</label>
+                                    <input type="date" name="exp_date[]" class="form-control patient-input"
                                         value="{{ variant.exp_date|date:'Y-m-d'|default:'' }}">
                                 </div>
-                                <div class="col-12 col-md-auto mt-2 mt-md-0 pb-md-1 text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn w-100"
-                                        style="border-radius:8px;">
+                                <div class="col-12 col-md-6 mt-2 mt-md-0 pb-md-1 text-end">
+                                    <button type="button" class="btn-ghost remove-variant-btn w-100 justify-content-center"
+                                        title="Remove variant">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </div>
 
                             <!-- Live stock preview badge (JS-driven) -->
-                            <div class="stock-preview" style="display:none;
-                                align-items:center;margin-top:10px;padding:7px 12px;
-                                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);border:1px solid #c7dff7;
-                                border-radius:8px;font-size:0.8rem;color:#2c5282;">
-                                <i class="bi bi-calculator" style="color:#3182ce;"></i>
-                                &nbsp;<strong>Calculated stock:</strong>
-                                &nbsp;<span class="preview-text">—</span>
-                                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in
-                                    DB)</span>
+                            <div class="stock-preview dc-callout d-flex align-items-center flex-wrap gap-2 dc-muted mt-2" style="display:none;">
+                                <i class="bi bi-calculator"></i>
+                                <strong>Calculated stock:</strong>
+                                <span class="preview-text dc-mono">—</span>
+                                <span class="small">(units stored in DB)</span>
                             </div>
 
                         </div>
                         {% empty %}
-                        <div class="variant-row"
-                            style="background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;">
+                        <div class="variant-row dc-callout mb-3">
                             <input type="hidden" name="variant_id[]" value="">
                             <div class="row g-2 mb-2">
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                                    <input type="text" name="power[]" class="patient-input" placeholder="e.g., 500mg">
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Power / Strength</label>
+                                    <input type="text" name="power[]" class="form-control patient-input" placeholder="e.g., 500mg">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
-                                    <input type="number" name="cost_price[]" class="patient-input" placeholder="0.00"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Cost Price (₹)</label>
+                                    <input type="number" name="cost_price[]" class="form-control patient-input" placeholder="0.00"
                                         min="0" step="0.01">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
-                                    <input type="number" name="selling_price[]" class="patient-input" placeholder="0.00"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Selling Price (₹)</label>
+                                    <input type="number" name="selling_price[]" class="form-control patient-input" placeholder="0.00"
                                         min="0" step="0.01">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Total Strips</label>
-                                    <input type="number" name="total_strips[]" class="patient-input strip-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Total Strips</label>
+                                    <input type="number" name="total_strips[]" class="form-control patient-input strip-input"
                                         placeholder="e.g., 20" min="0">
                                     <input type="hidden" name="stock[]" class="stock-hidden" value="0">
                                 </div>
-                                <div class="col-12 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                                    <input type="number" name="low_stock_alert[]" class="patient-input" value="10"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Low Alert</label>
+                                    <input type="number" name="low_stock_alert[]" class="form-control patient-input" value="10"
                                         min="0">
                                 </div>
                             </div>
                             <div class="row g-2 align-items-end">
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Unit</label>
-                                    <select name="unit[]" class="patient-input">
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Unit</label>
+                                    <select name="unit[]" class="form-select patient-input">
                                         {% for value, label in unit_choices %}
                                         <option value="{{ value }}">{{ label }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Unit / Strip</label>
-                                    <input type="number" name="unit_per_strip[]" class="patient-input ups-input"
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Unit / Strip</label>
+                                    <input type="number" name="unit_per_strip[]" class="form-control patient-input ups-input"
                                         placeholder="e.g., 10" min="1">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
-                                    <input type="date" name="mfg_date[]" class="patient-input">
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Mfg Date</label>
+                                    <input type="date" name="mfg_date[]" class="form-control patient-input">
                                 </div>
-                                <div class="col-6 col-md">
-                                    <label class="patient-label" style="font-size:0.78rem;">Exp Date</label>
-                                    <input type="date" name="exp_date[]" class="patient-input">
+                                <div class="col-12 col-md-6">
+                                    <label class="dc-label">Exp Date</label>
+                                    <input type="date" name="exp_date[]" class="form-control patient-input">
                                 </div>
-                                <div class="col-12 col-md-auto mt-2 mt-md-0 pb-md-1 text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn w-100"
-                                        style="border-radius:8px;" disabled>
+                                <div class="col-12 col-md-6 mt-2 mt-md-0 pb-md-1 text-end">
+                                    <button type="button" class="btn-ghost remove-variant-btn w-100 justify-content-center"
+                                        title="Remove variant" disabled>
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </div>
                             <!-- Live stock preview badge for empty-row fallback -->
-                            <div class="stock-preview" style="display:none;
-                                align-items:center;margin-top:10px;padding:7px 12px;
-                                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);border:1px solid #c7dff7;
-                                border-radius:8px;font-size:0.8rem;color:#2c5282;">
-                                <i class="bi bi-calculator" style="color:#3182ce;"></i>
-                                &nbsp;<strong>Calculated stock:</strong>
-                                &nbsp;<span class="preview-text">—</span>
-                                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in
-                                    DB)</span>
+                            <div class="stock-preview dc-callout d-flex align-items-center flex-wrap gap-2 dc-muted mt-2" style="display:none;">
+                                <i class="bi bi-calculator"></i>
+                                <strong>Calculated stock:</strong>
+                                <span class="preview-text dc-mono">—</span>
+                                <span class="small">(units stored in DB)</span>
                             </div>
                         </div>
                         {% endfor %}
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="patient-form-actions">
-                    <button type="submit" class="patient-submit-btn">
-                        <i class="bi bi-check2-circle"></i>
-                        <span>Update Medicine</span>
-                    </button>
+                </div>
+                <div class="dc-form-footer">
+                    <a href="{% url 'medicine:manage_medicine' %}" class="btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
                 </div>
             </form>
         </div>

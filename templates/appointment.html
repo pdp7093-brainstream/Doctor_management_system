@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load hashid_tags %}
 
 {% block title %}Appointment - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
 {% block fonts %}
@@ -11,157 +12,196 @@
   {% endblock %}
 {% block body_class %}appointment-page{% endblock %}
 {% block extra_css %}
-  <link href="{% static 'assets/css/appointment.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/appointment.css' %}?v={% now 'U' %}" rel="stylesheet">
 {% endblock %}
 {% block content %}
 
-    <!-- Page Title -->
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">Appointment</h1>
-              <p class="mb-0">Book your appointment easily. You can also book for a family member.</p>
+    <!-- Hero Section for Appointment -->
+    <section id="appointment-hero" class="hero light-background appointment-hero">
+      
+      <!-- Subtle Background Elements -->
+      <div class="background-elements" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.4;">
+        <svg class="section-mandala-deco" width="150" height="150" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute; top:-30px; left:-30px; opacity:0.1;">
+          <circle cx="60" cy="60" r="55" stroke="#117A15" stroke-width="1"/><circle cx="60" cy="60" r="40" stroke="#117A15" stroke-width="1"/><circle cx="60" cy="60" r="25" stroke="#117A15" stroke-width="1"/><circle cx="60" cy="60" r="10" stroke="#117A15" stroke-width="1"/><line x1="60" y1="5" x2="60" y2="115" stroke="#117A15" stroke-width="0.8"/><line x1="5" y1="60" x2="115" y2="60" stroke="#117A15" stroke-width="0.8"/><line x1="21" y1="21" x2="99" y2="99" stroke="#117A15" stroke-width="0.8"/><line x1="99" y1="21" x2="21" y2="99" stroke="#117A15" stroke-width="0.8"/>
+        </svg>
+      </div>
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row justify-content-center text-center">
+          <div class="col-lg-8">
+            <div class="section-label-wrap mb-2" style="position:relative; display:inline-block;">
+                <span class="section-eyebrow" style="font-size:0.75rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--brand-accent); display:inline-flex; align-items:center; gap:0.4rem;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="opacity:0.55;" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4" stroke="#117A15" stroke-width="1.5"/>
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4M5.64 5.64l2.83 2.83M15.54 15.54l2.83 2.83M5.64 18.36l2.83-2.83M15.54 8.46l2.83-2.83" stroke="#117A15" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                  Consultation
+                </span>
             </div>
+            
+            <h1 class="mb-2" style="font-size: 2.2rem; font-weight: 700; color: var(--heading-color); position: relative; z-index: 1;">Book an Appointment</h1>
+            <p class="lead" style="color: var(--default-color); font-size: 1rem; max-width: 600px; margin: 0 auto; position: relative; z-index: 1;">
+              Choose a convenient date and time to consult our Ayurvedic experts.
+            </p>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Appointment Section -->
-    <section id="appointmnet" class="appointmnet section">
+    <section id="appointmnet" class="appointmnet section appointment-section">
       <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row">
-          <div class="col-lg-8 mx-auto">
-            <div class="booking-wrapper">
-
-              <div class="booking-header text-center" data-aos="fade-up" data-aos-delay="200">
-                <h2>Schedule Your Appointment</h2>
-                <p>Book your medical appointment in just a few simple steps.</p>
-              </div>
-
-              <div class="booking-steps" data-aos="fade-up" data-aos-delay="300">
-                <div class="step">
-                  <div class="step-icon"><i class="bi bi-calendar-check"></i></div>
-                  <div class="step-content">
-                    <h4>Enter Details</h4>
-                    <p>Choose who the appointment is for</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="step-icon"><i class="bi bi-clock"></i></div>
-                  <div class="step-content">
-                    <h4>Pick Date &amp; Time</h4>
-                    <p>Select your preferred slot</p>
-                  </div>
-                </div>
-                <div class="step">
-                  <div class="step-icon"><i class="bi bi-person-check"></i></div>
-                  <div class="step-content">
-                    <h4>Confirm Details</h4>
-                    <p>Review and confirm</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="appointment-form" data-aos="fade-up" data-aos-delay="400">
-
-
-                {% if messages %}
-                  <script>
-                    document.addEventListener("DOMContentLoaded", function () {
-                      {% for message in messages %}
-                      Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
-                        title: '{{ message|escapejs }}',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                      });
-                      {% endfor %}
-                    });
-                  </script>
+        <div class="row align-items-stretch gy-4">
+          
+          <!-- LEFT PANEL -->
+          <div class="col-lg-5 order-2 order-lg-1">
+            <div class="clinic-info-panel h-100" style="position: relative; border-radius: 24px;">
+              <!-- Mandala Pattern Overlay -->
+              <svg class="cta-pattern" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="position: absolute; top:0; left:0; width:100%; height:100%; opacity:0.1; pointer-events:none;">
+                <defs>
+                  <pattern id="clinicLeafPattern" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
+                    <circle cx="60" cy="60" r="52" stroke="white" stroke-width="0.8" fill="none"/>
+                    <circle cx="60" cy="60" r="38" stroke="white" stroke-width="0.8" fill="none"/>
+                    <circle cx="60" cy="60" r="24" stroke="white" stroke-width="0.8" fill="none"/>
+                    <circle cx="60" cy="60" r="10" stroke="white" stroke-width="0.8" fill="none"/>
+                    <line x1="60" y1="8"  x2="60" y2="112" stroke="white" stroke-width="0.6"/>
+                    <line x1="8"  y1="60" x2="112" y2="60" stroke="white" stroke-width="0.6"/>
+                    <line x1="18" y1="18" x2="102" y2="102" stroke="white" stroke-width="0.6"/>
+                    <line x1="102" y1="18" x2="18" y2="102" stroke="white" stroke-width="0.6"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(0,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(45,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(90,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(135,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(180,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(225,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(270,60,60)"/>
+                    <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(315,60,60)"/>
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#clinicLeafPattern)"/>
+              </svg>
+              <div style="position: relative; z-index: 2;">
+              <h3>Clinic Information</h3>
+              <ul class="clinic-details-list">
+                {% if clinic.start_time and clinic.end_time %}
+                <li><i class="bi bi-clock"></i> <span><strong>Clinic timings:</strong> {{ clinic.start_time|time:"g:i A" }} – {{ clinic.end_time|time:"g:i A" }}</span></li>
                 {% endif %}
+                {% if clinic.working_days %}
+                <li><i class="bi bi-calendar-day"></i> <span><strong>Working days:</strong> {{ clinic.working_days|format_working_days }}</span></li>
+                {% endif %}
+                {% if clinic.default_consultation_fee %}
+                <li><i class="bi bi-cash"></i> <span><strong>Consultation fee:</strong> ₹{{ clinic.default_consultation_fee }}</span></li>
+                {% endif %}
+                {% if clinic.phone %}
+                <li><i class="bi bi-telephone"></i> <span><strong>Phone:</strong> {{ clinic.phone }}</span></li>
+                {% endif %}
+              </ul>
+              <h4 class="mt-4">What to expect</h4>
+              <ul class="expectations-list">
+                <li><i class="bi bi-check-circle-fill"></i> Nadi Pariksha & Prakriti assessment</li>
+                <li><i class="bi bi-check-circle-fill"></i> Personalised herbal treatment plan</li>
+                <li><i class="bi bi-check-circle-fill"></i> Diet & lifestyle guidance</li>
+              </ul>
+              </div>
+            </div>
+          </div>
 
+          <!-- RIGHT PANEL -->
+          <div class="col-lg-7 order-1 order-lg-2">
+            <div class="appointment-form-card h-100" style="border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.04); border: 1px solid var(--border-color,#DCEBDC);">
 
-                <form method="POST" id="appointmentForm">
-                  {% csrf_token %}
+              {% if messages %}
+                <script>
+                  document.addEventListener("DOMContentLoaded", function () {
+                    {% for message in messages %}
+                    Swal.fire({
+                      toast: true,
+                      position: 'top-end',
+                      icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+                      title: '{{ message|escapejs }}',
+                      showConfirmButton: false,
+                      timer: 3000,
+                      timerProgressBar: true,
+                    });
+                    {% endfor %}
+                  });
+                </script>
+              {% endif %}
 
-                  <div class="row gy-4">
+              <form method="POST" id="appointmentForm" style="padding: 10px;">
+                {% csrf_token %}
 
-                    <!-- ── Patient Selector ── -->
-                    <div class="col-12">
-                      <label for="forWhomSelect" class="patient-selector-label">Booking For</label>
-                      <div class="patient-selector-wrapper">
-                        <select name="for_whom" id="forWhomSelect" class="form-control" required>
-                          <!-- Myself -->
-                          <option value="self" data-phone="{{ request.user.patient.phone }}">
-                            Myself — {{ request.user.get_full_name|default:request.user.username }}
-                          </option>
-                          <!-- Family Members -->
-                          {% for member in family_members %}
-                          <option value="member_{{ member.id }}" data-phone="{{ member.phone }}"
-                            data-name="{{ member.name }}">
-                            {{ member.name }} ({{ member.relation }})
-                          </option>
-                          {% endfor %}
-                        </select>
-                        <button type="button" class="btn-add-member" id="openAddMember">
-                          <i class="bi bi-person-plus"></i> + Family Member
-                        </button>
-                      </div>
-                      <!-- Hidden fields filled by JS -->
-                      <input type="hidden" name="name" id="hiddenName">
-                      <input type="hidden" name="phone" id="hiddenPhone">
-                      <input type="hidden" name="family_member_id" id="hiddenFamilyMemberId">
+                <div class="row gy-4">
+
+                  <!-- ── Patient Selector ── -->
+                  <div class="col-12">
+                    <label for="forWhomSelect" class="patient-selector-label">Booking For</label>
+                    <div class="patient-selector-wrapper">
+                      <select name="for_whom" id="forWhomSelect" class="form-control" required>
+                        <!-- Myself -->
+                        <option value="self" data-phone="{{ request.user.patient.phone }}">
+                          Myself — {{ request.user.get_full_name|default:request.user.username }}
+                        </option>
+                        <!-- Family Members -->
+                        {% for member in family_members %}
+                        <option value="member_{{ member.id }}" data-phone="{{ member.phone }}"
+                          data-name="{{ member.name }}">
+                          {{ member.name }} ({{ member.relation }})
+                        </option>
+                        {% endfor %}
+                      </select>
+                      <button type="button" class="btn-add-member" id="openAddMember">
+                        <i class="bi bi-person-plus"></i> + Family Member
+                      </button>
                     </div>
+                    <!-- Hidden fields filled by JS -->
+                    <input type="hidden" name="name" id="hiddenName">
+                    <input type="hidden" name="phone" id="hiddenPhone">
+                    <input type="hidden" name="family_member_id" id="hiddenFamilyMemberId">
+                  </div>
 
-                    <!-- Email --> 
-                    <div class="col-md-12">
-                      <label for="appointmentEmail" class="patient-selector-label">Email Address</label>
-                      <input type="email" name="email" id="appointmentEmail" class="form-control"
-                        placeholder="Email Address"
-                        value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
-                    </div>
+                  <!-- Email --> 
+                  <div class="col-md-12">
+                    <label for="appointmentEmail" class="patient-selector-label">Email Address</label>
+                    <input type="email" name="email" id="appointmentEmail" class="form-control"
+                      placeholder="Email Address"
+                      value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
+                  </div>
 
-                    <!-- Date -->
-                    <div class="col-md-12">
-                      <label for="appointment_date" class="patient-selector-label">Appointment Date</label>
-                      <input type="date" name="date" id="appointment_date" class="form-control" required>
-                    </div>
+                  <!-- Date -->
+                  <div class="col-md-12">
+                    <label for="appointment_date" class="patient-selector-label">Appointment Date</label>
+                    <input type="date" name="date" id="appointment_date" class="form-control" required>
+                  </div>
 
-                    <!-- Time Slots -->
-                    <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
-                      <label for="selected_time" class="patient-selector-label">Select Preferred Time</label>
-                      <div class="row g-2 row-cols-3 row-cols-md-6" id="time_buttons_container"></div>
-                    </div>
-                    <input type="hidden" name="time_slot" id="selected_time">
+                  <!-- Time Slots -->
+                  <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
+                    <label for="selected_time" class="patient-selector-label">Select Preferred Time</label>
+                    <div class="row g-2 row-cols-3 row-cols-md-4" id="time_buttons_container"></div>
+                  </div>
+                  <input type="hidden" name="time_slot" id="selected_time">
 
-                    <!-- Notes -->
-                    <div class="col-12">
-                      <label for="appointmentNotes" class="patient-selector-label">Notes</label>
-                      <textarea name="message" id="appointmentNotes" class="form-control" rows="4"
-                        placeholder="Notes (optional)"></textarea>
-                    </div>
+                  <!-- Notes -->
+                  <div class="col-12">
+                    <label for="appointmentNotes" class="patient-selector-label">Notes</label>
+                    <textarea name="message" id="appointmentNotes" class="form-control" rows="4"
+                      placeholder="Notes (optional)"></textarea>
+                  </div>
 
+                  <div class="col-12">
                     <button type="button" id="submitBtn" class="btn btn-primary btn-lg w-100">
                       Book Appointment
                     </button>
-
+                    <div class="emergency-info mt-3">
+                      <p class="mb-0"><i class="bi bi-exclamation-triangle"></i> For medical emergencies, please call 112 or go to the nearest hospital.</p>
+                    </div>
                   </div>
-                </form>
-              </div>
 
-              <div class="emergency-info" data-aos="fade-up" data-aos-delay="500">
-                <p><i class="bi bi-exclamation-triangle"></i> For medical emergencies, please call <strong>911</strong>
-                  or go to the nearest emergency room.</p>
-              </div>
-
+                </div>
+              </form>
             </div>
           </div>
+
         </div>
       </div>
     </section>

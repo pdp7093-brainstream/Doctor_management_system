@@ -4,15 +4,13 @@
 {% block title %}Manage Patients{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'assets/css/patients.css' %}">
-
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">Manage Patients</h2>
-            <p class="text-muted small mb-0">View all patients including family members.</p>
+            <h2 class="page-title">Manage Patients</h2>
+            <p class="page-subtitle">View all patients including family members.</p>
         </div>
         <a href="{% url 'doctor:add_patient' %}" class="action-btn">
             <i class="bi bi-plus-lg"></i> Add Patient
@@ -20,125 +18,105 @@
     </div>
 
     <!-- Patients Table Card -->
-    <div class="card">
-        <div class="card-header d-flex align-items-center gap-3 flex-wrap">
-            <div class="d-flex align-items-center gap-2" style="font-size:0.98rem; font-weight:700;">
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title">
                 <i class="bi bi-people-fill"></i> Patients
-                {% if page_obj %}
-                <span class="badge bg-light text-primary">{{ page_obj.paginator.count }} total</span>
-                {% endif %}
-            </div>
-            <div class="patients-search-wrap ms-md-auto">
+                {% if page_obj %}<span class="dc-count">{{ page_obj.paginator.count }} total</span>{% endif %}
+            </h3>
+            <div class="dc-search">
                 <i class="bi bi-search"></i>
-                <input type="text" id="searchInput" class="form-control form-control-sm"
-                    placeholder="Search by name, phone..."
-                    value="{{ search }}"
-                    style="padding-left:30px; border-radius:20px;">
+                <input type="text" id="searchInput" class="form-control"
+                    placeholder="Search by name or phone..." value="{{ search }}" autocomplete="off">
             </div>
         </div>
 
-        <div class="card-body p-0">
-            <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
-                <table class="table table-hover mb-0 patients-table" style="min-width:680px; width:100%;">
-                    <thead>
-                        <tr>
-                            <th style="width:60px;">#</th>
-                            <th>Name</th>
-                            <th>Gender</th>
-                            <th>Phone</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+        <div class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width:680px;">
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th>Name</th>
+                        <th>Gender</th>
+                        <th>Phone</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
 
-                    <tbody id="tableBody">
-                        {% for p in patients %}
-                        <tr>
-                            <td class="text-muted fw-semibold">{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="user-avatar" style="width:30px; height:30px; font-size:0.82rem; flex-shrink:0;">
-                                        {{ p.name|slice:":1"|upper }}
-                                    </div>
-                                    <div>
-                                        <div style="font-weight:600; font-size:0.9rem;">{{ p.name }}</div>
-                                        {% if p.type == 'family' %}
-                                        <div style="font-size:0.75rem; color:#888;"></div>
-                                        {% else %}
-                                        <div style="font-size:0.75rem; color:#888;"></div>
-                                        {% endif %}
-                                    </div>
+                <tbody id="tableBody">
+                    {% for p in patients %}
+                    <tr>
+                        <td class="col-num">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                        <td>
+                            <div class="dc-person">
+                                <div class="dc-avatar {% if p.type == 'family' %}is-family{% endif %}">
+                                    {{ p.name|slice:":1"|upper }}
                                 </div>
-                            </td>
-
-                            <td style="font-size:0.9rem;">{{ p.gender|default:"—"|capfirst }}</td>
-                            <td style="font-size:0.9rem;">{{ p.phone|default:"—" }}</td>
-
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <!-- View -->
-                                    <a href="{% url 'doctor:view_patient' p.type p.id|hid %}" class="btn btn-sm btn-view-patient" title="View">
-                                        <i class="bi bi-eye"></i><span class="d-none d-md-inline"> View</span>
-                                    </a>
-
-
-                                    <!-- Edit -->
-                                    {% if p.type == 'main' %}
-                                    <a href="{% url 'doctor:edit_patient' p.id|hid %}" class="btn btn-sm btn-edit-patient" title="Edit">
-                                        <i class="bi bi-pencil"></i><span class="d-none d-md-inline"> Edit</span>
-                                    </a>
-                                    {% else %}
-                                    <a href="{% url 'doctor:edit_family' p.id|hid %}" class="btn btn-sm btn-edit-patient" title="Edit">
-                                        <i class="bi bi-pencil"></i><span class="d-none d-md-inline"> Edit</span>
-                                    </a>
-                                    {% endif %}
-
-                                    <!-- Delete -->
-                                    {% if p.type == 'main' %}
-                                    <form method="post" action="{% url 'doctor:delete_patient' p.id|hid %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="button" class="btn btn-sm btn-delete-patient delete-btn" data-type="patient" title="Delete">
-                                            <i class="bi bi-trash"></i><span class="d-none d-md-inline"> Delete</span>
-                                        </button>
-                                    </form>
-                                    {% else %}
-                                    <form method="post" action="{% url 'doctor:delete_family' p.id|hid %}" style="display:inline;">
-                                        {% csrf_token %}
-                                        <button type="button" class="btn btn-sm btn-delete-patient delete-btn" data-type="family member" title="Delete">
-                                            <i class="bi bi-trash"></i><span class="d-none d-md-inline"> Delete</span>
-                                        </button>
-                                    </form>
-                                    {% endif %}
+                                <div>
+                                    <div class="dc-name">{{ p.name }}</div>
+                                    <div class="dc-sub">{% if p.type == 'family' %}Family member{% else %}Patient{% endif %}</div>
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
+                        </td>
 
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-5">
-                                <i class="bi bi-person-x" style="font-size:2rem; color:#cbd5e1; display:block; margin-bottom:8px;"></i>
-                                No patients found. Add one to get started.
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        <td>
+                            {% if p.gender %}{{ p.gender|capfirst }}{% else %}<span class="dc-muted">—</span>{% endif %}
+                        </td>
+                        <td class="dc-mono">
+                            {% if p.phone %}{{ p.phone }}{% else %}<span class="dc-muted">—</span>{% endif %}
+                        </td>
+
+                        <td class="col-actions">
+                            <div class="dc-actions">
+                                <a href="{% url 'doctor:view_patient' p.type p.id|hid %}" class="btn-act view" title="View">
+                                    <i class="bi bi-eye"></i><span>View</span>
+                                </a>
+
+                                {% if p.type == 'main' %}
+                                <a href="{% url 'doctor:edit_patient' p.id|hid %}" class="btn-act edit" title="Edit">
+                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                                </a>
+                                <form method="post" action="{% url 'doctor:delete_patient' p.id|hid %}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn-act delete delete-btn" data-type="patient" title="Delete">
+                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                    </button>
+                                </form>
+                                {% else %}
+                                <a href="{% url 'doctor:edit_family' p.id|hid %}" class="btn-act edit" title="Edit">
+                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                                </a>
+                                <form method="post" action="{% url 'doctor:delete_family' p.id|hid %}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn-act delete delete-btn" data-type="family member" title="Delete">
+                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="dc-empty">
+                            <i class="bi bi-person-x"></i>
+                            No patients found. Add one to get started.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
 
         <div id="paginationContainer">
             {% if page_obj.paginator.count > 10 %}
-            <div id="paginationWrapper" class="card-footer bg-white d-flex flex-column align-items-center py-3">
-                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-1" style="font-size:0.875rem;">
-                    <span>
-                        <strong>{{ page_obj.start_index }} – {{ page_obj.end_index }}</strong>
-                        <span class="text-muted"> of {{ page_obj.paginator.count }} patients</span>
-                    </span>
-                    <span class="text-muted">
-                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
-                    </span>
-                </div>
-                <nav aria-label="Patients pagination" class="w-100">
-                    <ul class="pagination pagination-sm justify-content-center flex-wrap gap-1 mb-0">
+            <div id="paginationWrapper" class="dc-card-footer d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
+                <span style="font-size:0.85rem;">
+                    <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+                    <span class="text-muted"> of {{ page_obj.paginator.count }} patients</span>
+                </span>
+                <nav aria-label="Patients pagination">
+                    <ul class="pagination pagination-sm mb-0 gap-1">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
                             <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}"{% endif %} href="#">Prev</a>
                         </li>

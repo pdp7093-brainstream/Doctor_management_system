@@ -7,43 +7,35 @@
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="page-header d-flex justify-content-between align-items-center">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">Medicine Vendors</h2>
-            <p class="text-muted small mb-0">Manage your medicine suppliers and vendors</p>
+            <h2 class="page-title">Medicine Vendors</h2>
+            <p class="page-subtitle">Manage your medicine suppliers and vendors.</p>
         </div>
-        <a href="{% url 'medicine:add_vendor' %}" class="btn btn-primary add-patient-btn">
+        <a href="{% url 'medicine:add_vendor' %}" class="action-btn">
             <i class="bi bi-plus-lg"></i> Add Vendor
         </a>
     </div>
 
-    <!-- Messages -->
-    
-
-    <!-- Search Bar -->
-    <div class="search-container">
-        <div class="input-group" style="max-width: 420px;">
-            <span class="input-group-text bg-white border-end-0">
-                <i class="bi bi-search text-muted"></i>
-            </span>
-            <input type="text" class="form-control border-start-0 search-input ps-0" id="searchInput"
-                placeholder="Search by vendor name, phone or email...">
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-truck"></i> Vendors <span class="dc-count">{{ vendors|length }} total</span></h3>
+            <div class="dc-search">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control search-input" id="searchInput"
+                    placeholder="Search vendors..." autocomplete="off">
+            </div>
         </div>
-    </div>
-
-    <!-- Table Section -->
-    <div class="table-section">
-        <div id="tableContainer"
-            style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; display: block;">
-            <table class="table table-custom" style="min-width: 900px; width: 100%;">
+        <div id="tableContainer" class="dc-table-wrap">
+            <table class="table table-hover dc-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th class="col-num">#</th>
                         <th>Vendor Name</th>
                         <th>Phone</th>
                         <th>Email</th>
                         <th>Address</th>
-                        <th class="text-center">Action</th>
+                        <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -51,60 +43,58 @@
                     <tr class="vendor-row" data-vendor-name="{{ vendor.name|lower }}"
                         data-vendor-phone="{{ vendor.phone|default:''|lower }}"
                         data-vendor-email="{{ vendor.email|default:''|lower }}">
-                        <td class="patient-info fw-semibold">{{ forloop.counter }}</td>
+                        <td class="col-num">{{ forloop.counter }}</td>
 
-                        <td class="patient-name">
-                            <div class="d-flex align-items-center">
-                                <div class="vendor-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                                    style="width: 36px; height: 36px; font-weight: 600; font-size: 0.9rem;">
+                        <td>
+                            <div class="dc-person">
+                                <div class="dc-avatar">
                                     {{ vendor.name|first|upper }}
                                 </div>
-                                <span class="fw-semibold">{{ vendor.name }}</span>
+                                <span class="dc-name">{{ vendor.name }}</span>
                             </div>
                         </td>
 
-                        <td class="patient-info">
+                        <td>
                             {% if vendor.phone %}
-                            <a href="tel:{{ vendor.phone }}" class="text-decoration-none text-dark">
-                                <i class="bi bi-telephone me-1" style="color: #0066cc;"></i>{{ vendor.phone }}
+                            <a href="tel:{{ vendor.phone }}" class="text-decoration-none text-dark dc-mono">
+                                <i class="bi bi-telephone me-1 dc-muted"></i>{{ vendor.phone }}
                             </a>
                             {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-
-                        <td class="patient-info">
-                            {% if vendor.email %}
-                            <a href="mailto:{{ vendor.email }}" class="text-decoration-none text-dark">
-                                <i class="bi bi-envelope me-1" style="color: #0066cc;"></i>{{ vendor.email }}
-                            </a>
-                            {% else %}
-                            <span class="text-muted">—</span>
-                            {% endif %}
-                        </td>
-
-                        <td class="patient-info">
-                            {% if vendor.address %}
-                            <div class="text-truncate" title="{{ vendor.address }}" style="max-width: 200px;">
-                                <i class="bi bi-geo-alt me-1" style="color: #28a745;"></i>{{ vendor.address|truncatewords:6 }}
-                            </div>
-                            {% else %}
-                            <span class="text-muted">—</span>
+                            <span class="dc-muted">—</span>
                             {% endif %}
                         </td>
 
                         <td>
-                            <div class="action-buttons justify-content-center">
-                                <a href="{% url 'medicine:edit_vendor' vendor.id|hid %}"
-                                    class="action-btn btn btn-warning btn-sm" title="Edit Vendor">
-                                    <i class="bi bi-pencil"></i> Edit
+                            {% if vendor.email %}
+                            <a href="mailto:{{ vendor.email }}" class="text-decoration-none text-dark">
+                                <i class="bi bi-envelope me-1 dc-muted"></i>{{ vendor.email }}
+                            </a>
+                            {% else %}
+                            <span class="dc-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="dc-muted">
+                            {% if vendor.address %}
+                            <div class="text-truncate" title="{{ vendor.address }}">
+                                <i class="bi bi-geo-alt me-1"></i>{{ vendor.address|truncatewords:6 }}
+                            </div>
+                            {% else %}
+                            <span class="dc-muted">—</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="col-actions">
+                            <div class="dc-actions">
+                                <a href="{% url 'medicine:edit_vendor' vendor.id|hid %}" class="btn-act edit" title="Edit vendor">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="{% url 'medicine:delete_vendor' vendor.id|hid %}"
-                                    style="display:inline;" onsubmit="return confirmDelete(event, '{{ vendor.name }}')">
+                                    onsubmit="return confirmDelete(event, '{{ vendor.name }}')">
                                     {% csrf_token %}
-                                    <button type="submit" class="action-btn btn btn-danger btn-sm"
-                                        title="Delete Vendor">
-                                        <i class="bi bi-trash"></i> Delete
+                                    <button type="submit" class="btn-act delete"
+                                        title="Delete vendor">
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                             </div>
@@ -112,14 +102,11 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-5">
-                            <div class="empty-state">
-                                <div class="empty-state-icon mb-3">
-                                    <i class="bi bi-inbox" style="font-size: 2.5rem; color: #ccc;"></i>
-                                </div>
-                                <p class="text-muted mb-3">No vendors found yet</p>
-                                <a href="{% url 'medicine:add_vendor' %}" class="btn btn-primary btn-sm">
-                                    <i class="bi bi-plus-lg me-1"></i> Add First Vendor
+                        <td colspan="6" class="dc-empty">
+                            <i class="bi bi-truck"></i>
+                            No vendors found yet.
+                            <div class="mt-3"><a href="{% url 'medicine:add_vendor' %}" class="action-btn">
+                                    <i class="bi bi-plus-lg"></i> Add Vendor
                                 </a>
                             </div>
                         </td>

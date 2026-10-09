@@ -497,9 +497,12 @@ class Book_appointment(View):
 
     def get(self, request):
 
-        family_members = FamilyMember.objects.filter(
-            patient=request.user.patient
-        )
+        try:
+            patient = request.user.patient
+            family_members = FamilyMember.objects.filter(patient=patient)
+        except Patient.DoesNotExist:
+            family_members = []
+
 
         return render(request, "appointment.html", {
             'family_members': family_members
@@ -543,7 +546,11 @@ class Book_appointment(View):
 
             return redirect('appointment:appointment')
 
-        patient = Patient.objects.get(user=request.user)
+        try:
+            patient = request.user.patient
+        except Patient.DoesNotExist:
+            messages.error(request, "Patient profile not found. Please contact support.")
+            return redirect('appointment:appointment')
 
         # Doctor fetch
         doctor = InnerMember.objects.filter(

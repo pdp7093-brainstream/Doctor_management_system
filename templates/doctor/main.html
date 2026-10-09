@@ -16,9 +16,9 @@
     <link href="{% static 'assets/img/apple-touch-icon.png' %}" rel="apple-touch-icon">
     {% endif %}
 
-    <link href="{% static 'assets/css/doctor.css' %}?v=2" rel="stylesheet">
-    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'assets/css/bootstrap.min.css' %}?v=1" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="{% static 'assets/css/doctor.css' %}?v=20" rel="stylesheet">
 
     <!-- Added this small style block to fix mobile responsiveness without touching your main CSS file -->
     <style>
@@ -111,15 +111,13 @@
         <div class="sidebar-header">
             <div class="sidebar-logo">
                 {% if clinic.logo %}
-                <img src="{{clinic.logo.url}}" alt="Clinic Logo"
-                    style="max-height:45px;max-width:140px;object-fit:contain;mix-blend-mode:multiply;">
+                <img src="{{ clinic.logo.url }}" alt="Clinic Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;">
                 {% else %}
-                <img src="/static/images/default-logo.png" alt="Default Logo"
-                    style="max-height:45px;max-width:140px;object-fit:contain;mix-blend-mode:multiply;">
+                <img src="/static/images/default-logo.png" alt="Default Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;">
 
                 {% endif %}
             </div>
-            <h2 class="sidebar-title">{{clinic.clinic_name}}</h2>
+            <h2 class="sidebar-title" title="{{ clinic.clinic_name }}">{{clinic.clinic_name}}</h2>
         </div>
         <ul class="sidebar-menu">
             <!-- Doctor only -->
@@ -203,7 +201,7 @@
                     </li>
                     <li>
                         <a href="{% url 'medicine:low_stock' %}"
-                            class="{% if 'low-stock' in request.path %}active{% endif %}" style="color:#dc3545;">
+                            class="{% if 'low-stock' in request.path %}active{% endif %}" style="color:#FFB27A;">
                             <i class="bi bi-exclamation-triangle"></i>
                             <span>Low Stock Alert</span>
                             <span id="sidebarLowStockCount" class="sidebar-low-stock-count">0</span>
@@ -384,7 +382,7 @@
             <div class="dropdown me-3">
                 <div class="user-info dropdown-toggle" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
                     <div class="user-avatar overflow-hidden rounded-circle d-flex align-items-center justify-content-center" id="headerProfileAvatar"
-                    style="width: 40px; height: 40px; background: linear-gradient(135deg, #0d6efd, #0a58ca); color: white; font-weight: bold;">
+                    style="width: 40px; height: 40px; background: linear-gradient(135deg, #117A15, #015315); border: 2px solid #FD6801; color: white; font-weight: bold;">
                         {% if request.user.innermember.profile_picture %}
                             <img src="{{ request.user.innermember.profile_picture.url }}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
                         {% else %}
@@ -501,8 +499,8 @@
                         showCancelButton: true,
                         confirmButtonText: 'Yes, Logout',
                         cancelButtonText: 'Cancel',
-                        confirmButtonColor: '#007aff',
-                        cancelButtonColor: '#dc3545',
+                        confirmButtonColor: '#015315',
+                        cancelButtonColor: '#6c757d',
                         reverseButtons: true,
                         backdrop: `
             rgba(0,0,0,0.45)

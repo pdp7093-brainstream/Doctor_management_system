@@ -5,16 +5,95 @@
 {% block content %}
 
 <style>
+    /* Cards – same look as Manage Appointments */
+    .leave-card {
+        border: 1px solid var(--border-light);
+        border-radius: 12px;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+    .leave-card .card-header {
+        background: #fff;
+        border-bottom: 1px solid var(--border-light);
+        padding: 14px 18px;
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: var(--dark-text);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .leave-card .card-header i { color: var(--primary-color); }
+    .leave-card .card-body { padding: 18px; }
+
+    /* Form */
+    .leave-card .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: 6px;
+    }
+    .leave-card .form-control,
+    .leave-card .form-select {
+        font-size: 0.92rem;
+        border-color: var(--border-light);
+        border-radius: 8px;
+    }
+    .leave-card .form-control:not(textarea),
+    .leave-card .form-select { height: 40px; }
+    .leave-help {
+        display: block;
+        font-size: 0.78rem;
+        color: #6c757d;
+        margin-top: 6px;
+        line-height: 1.4;
+    }
+    .leave-card .btn-primary { height: 42px; font-weight: 600; border-radius: 8px; }
+
+    /* Table */
+    .leave-card .table-responsive { overflow-x: auto !important; }
+    .leave-card .table { margin-bottom: 0; }
+    .leave-card .table thead th {
+        background: var(--light-bg);
+        color: var(--dark-text);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        padding: 12px 18px;
+        border-bottom: 1px solid var(--border-light);
+        white-space: nowrap;
+    }
+    .leave-card .table tbody td {
+        padding: 12px 18px;
+        font-size: 0.9rem;
+        border-bottom: 1px solid var(--border-light);
+    }
+    .leave-card .table tbody tr:last-child td { border-bottom: none; }
+    .leave-empty { padding: 40px 16px !important; color: #6c757d; }
+    .leave-empty i { font-size: 2rem; color: var(--accent-color); opacity: .4; display: block; margin-bottom: 8px; }
+    .leave-card tbody tr:has(td[colspan]):hover > td { --bs-table-bg-state: transparent; background: transparent; }
+
+    /* Leave type badges */
+    .leave-badge { font-weight: 600; font-size: 0.75rem; padding: 5px 10px; border-radius: 999px; }
+    .leave-badge.full   { background: #FBE3E3; color: #AD0002; }
+    .leave-badge.first  { background: #FFE0C4; color: #A94600; }
+    .leave-badge.second { background: #E6F1E6; color: #015315; }
+
+    /* Delete button */
     .btn-delete-leave {
-        background-color: #fee2e2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-        padding: 0.375rem 0.75rem;
-        font-size: 0.875rem;
+        background-color: #fff;
+        color: #AD0002;
+        border: 1px solid #F5C2C2;
+        padding: 0.3rem 0.7rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border-radius: 8px;
     }
     .btn-delete-leave:hover {
-        background-color: #fecaca;
-        color: #dc2626;
+        background-color: #FBE3E3;
+        color: #8A0002;
+        border-color: #AD0002;
     }
 </style>
 
@@ -28,22 +107,22 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4 align-items-start">
         <!-- Add Leave Form -->
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0 text-primary"><i class="bi bi-calendar-x"></i> Add Leave</h5>
+        <div class="col-lg-4">
+            <div class="card leave-card">
+                <div class="card-header">
+                    <i class="bi bi-calendar-x"></i> Add Leave
                 </div>
                 <div class="card-body">
                     <form method="post" action="{% url 'doctor:manage_leaves' %}">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Date</label>
+                            <label class="form-label">Date</label>
                             <input type="date" name="date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label fw-semibold">Leave Type</label>
+                            <label class="form-label">Leave Type</label>
                             <select name="leave_type" class="form-select" required>
                                 <option value="" disabled selected>Select Type</option>
                                 <option value="first_half">First Half</option>
@@ -51,10 +130,10 @@
                                 <option value="full_day">Full Day</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Reason</label>
+                        <div class="mb-4">
+                            <label class="form-label">Reason</label>
                             <textarea name="reason" class="form-control" rows="3" required placeholder="Reason for leave..."></textarea>
-                            <small class="text-muted">This reason will be shown to patients if their appointments are cancelled.</small>
+                            <small class="leave-help">This reason will be shown to patients if their appointments are cancelled.</small>
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Add Leave</button>
                     </form>
@@ -63,15 +142,15 @@
         </div>
 
         <!-- Leaves Table -->
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="bi bi-list-check"></i> Your Leaves</h5>
+        <div class="col-lg-8">
+            <div class="card leave-card">
+                <div class="card-header">
+                    <i class="bi bi-list-check"></i> Your Leaves
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover mb-0 align-middle">
-                            <thead class="table-light">
+                            <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Type</th>
@@ -85,11 +164,11 @@
                                     <td class="fw-semibold">{{ leave.date|date:"d M Y" }}</td>
                                     <td>
                                         {% if leave.leave_type == 'full_day' %}
-                                            <span class="badge bg-danger">Full Day</span>
+                                            <span class="badge leave-badge full">Full Day</span>
                                         {% elif leave.leave_type == 'first_half' %}
-                                            <span class="badge bg-warning text-dark">First Half</span>
+                                            <span class="badge leave-badge first">First Half</span>
                                         {% else %}
-                                            <span class="badge bg-info text-dark">Second Half</span>
+                                            <span class="badge leave-badge second">Second Half</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-muted text-truncate" style="max-width: 200px;" title="{{ leave.reason }}">
@@ -106,8 +185,8 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">
-                                        <i class="bi bi-calendar2-x fs-1 text-light d-block mb-2"></i>
+                                    <td colspan="4" class="text-center leave-empty">
+                                        <i class="bi bi-calendar2-x"></i>
                                         No leaves found.
                                     </td>
                                 </tr>
@@ -141,7 +220,7 @@
                 text: 'Appointments cancelled due to this leave will NOT be restored automatically.',
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#dc2626',
+                confirmButtonColor: '#AD0002',
                 cancelButtonColor: '#6c757d',
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {

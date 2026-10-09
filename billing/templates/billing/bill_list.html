@@ -7,99 +7,85 @@
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1">
-                <i class="bi bi-receipt-cutoff text-primary me-2"></i>Billing
-            </h2>
-            <p class="text-muted small mb-0">Manage all patient bills & invoices</p>
+            <h2 class="page-title">Billing</h2>
+            <p class="page-subtitle">Manage all patient bills and invoices.</p>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <button id="bulkDeleteBtn" class="btn btn-danger d-none me-2" onclick="bulkDeleteBills()">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <button id="bulkDeleteBtn" class="btn-soft danger d-none" onclick="bulkDeleteBills()">
                 <i class="bi bi-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
             </button>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBillModal">
-                <i class="bi bi-plus-lg me-1"></i>Add Bill
-            </button>
+            <a href="#addBillModal" class="action-btn" data-bs-toggle="modal" data-bs-target="#addBillModal">
+                <i class="bi bi-plus-lg"></i> Add Bill
+            </a>
         </div>
     </div>
 
-    <!-- Compact Stats Cards -->
-    <div class="row g-2 mb-4">
+    <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
-                    <i class="bi bi-receipt" style="font-size:1.1rem;"></i>
+            <div class="stat-card success h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">{{ total_bills_count }}</div>
+                    <div class="stat-label text-nowrap">Total Bills</div>
                 </div>
-                <div>
-                    <div class="fs-6 fw-bold text-primary">{{ total_bills_count }}</div>
-                    <div class="small text-muted">Total Bills</div>
-                </div>
+                <div class="stat-icon success"><i class="bi bi-receipt"></i></div>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
-                    <i class="bi bi-calendar-week" style="font-size:1.1rem;"></i>
+            <div class="stat-card success h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">{{ this_month_count }}</div>
+                    <div class="stat-label text-nowrap">This Month</div>
                 </div>
-                <div>
-                    <div class="fs-6 fw-bold text-primary">{{ this_month_count }}</div>
-                    <div class="small text-muted">This Month</div>
-                </div>
+                <div class="stat-icon success"><i class="bi bi-calendar-week"></i></div>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
-                    <i class="bi bi-exclamation-circle" style="font-size:1.1rem;"></i>
+            <div class="stat-card danger h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono" id="unpaidCount">{{ total_unpaid }}</div>
+                    <div class="stat-label text-nowrap">Unpaid</div>
                 </div>
-                <div>
-                    <div class="fs-6 fw-bold text-primary" id="unpaidCount">{{ total_unpaid }}</div>
-                    <div class="small text-muted">Unpaid</div>
-                </div>
+                <div class="stat-icon danger"><i class="bi bi-exclamation-circle"></i></div>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
-            <div class="d-flex align-items-center gap-3 p-3 bg-white rounded-3 shadow-sm">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:44px; height:44px;">
-                    <i class="bi bi-clock" style="font-size:1.1rem;"></i>
+            <div class="stat-card warning h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono" id="partialCount">{{ total_partial }}</div>
+                    <div class="stat-label text-nowrap">Partial</div>
                 </div>
-                <div>
-                    <div class="fs-6 fw-bold text-primary" id="partialCount">{{ total_partial }}</div>
-                    <div class="small text-muted">Partial</div>
-                </div>
+                <div class="stat-icon warning"><i class="bi bi-clock"></i></div>
             </div>
         </div>
     </div>
 
-    <!-- Filters -->
-    <div class="table-section mb-4">
+    <div class="dc-card mb-4">
+        <div class="dc-card-body">
         <div class="row g-3 align-items-end">
 
             <div class="col-md-3">
-                <label class="form-label fw-semibold">
-                    <i class="bi bi-search me-1 text-primary"></i>Search
-                </label>
-                <input type="text" id="search" class="form-control"
-                    placeholder="Patient name or bill number..."
-                    value="{{ search }}">
+                <label class="dc-label" for="search">Search</label>
+                <div class="dc-search">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="search" class="form-control"
+                        placeholder="Search patient or bill no."
+                        value="{{ search }}">
+                </div>
             </div>
 
             <div class="col-md-2">
-                <label class="form-label fw-semibold">
-                    <i class="bi bi-calendar3 me-1 text-primary"></i>Date
-                </label>
+                <label class="dc-label" for="billDate">Date</label>
                 <input type="date" id="billDate" class="form-control"
                     value="{{ bill_date }}">
             </div>
 
             <div class="col-md-2">
-                <label class="form-label fw-semibold">
-                    <i class="bi bi-calendar-month me-1 text-primary"></i>Month
-                </label>
+                <label class="dc-label" for="billMonth">Month</label>
                 <select id="billMonth" class="form-select">
                     <option value="">All Months</option>
                     {% for month_value in bill_months %}
@@ -111,9 +97,7 @@
             </div>
 
             <div class="col-md-3">
-                <label class="form-label fw-semibold">
-                    <i class="bi bi-funnel me-1 text-primary"></i>Status
-                </label>
+                <label class="dc-label" for="paymentStatus">Status</label>
                 <select id="paymentStatus" class="form-select">
                     <option value="all"     {% if payment_status == 'all'     %}selected{% endif %}>All Status</option>
                     <option value="unpaid"  {% if payment_status == 'unpaid'  %}selected{% endif %}>Unpaid</option>
@@ -124,90 +108,52 @@
 
             <div class="col-md-2">
                 <label class="form-label d-none d-md-block">&nbsp;</label>
-                <button id="clearBtn" class="btn btn-outline-primary w-100" style="border: 1px solid #0d6efd !important;">
-                    <i class="bi me-1"></i>Clear
+                <button id="clearBtn" class="btn btn-outline-primary w-100 btn-clear">
+                    <i class="bi bi-x-circle"></i> Clear
                 </button>
             </div>
 
         </div>
+        </div>
     </div>
 
     <!-- Month Cards -->
-    <div id="monthsContainer" class="table-section">
+    <div id="monthsContainer">
         {% for month_info in month_data %}
-        <div class="card mb-4 border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 pb-3 px-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="bg-primary bg-opacity-10 rounded-3 p-2">
-                            <i class="bi bi-calendar2-week text-primary" style="font-size:1.2rem;"></i>
-                        </div>
-                        <h5 class="fw-bold mb-0 text-primary">{{ month_info.month_name }}</h5>
-                    </div>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:#f8f9fa; border:1px solid #e9ecef;">
-                            <i class="bi bi-wallet2 text-secondary" style="font-size:0.9rem;"></i>
-                            <div>
-                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; color:#6c757d; font-weight:600;">Total</div>
-                                <div class="fw-bold" style="font-size:0.95rem; line-height:1.2;">₹{{ month_info.total_amount|floatformat:2 }}</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
-                            <i class="bi bi-check-circle-fill text-success" style="font-size:0.9rem;"></i>
-                            <div>
-                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; color:#16a34a; font-weight:600;">Paid</div>
-                                <div class="fw-bold text-success" style="font-size:0.95rem; line-height:1.2;">₹{{ month_info.paid_amount|floatformat:2 }}</div>
-                            </div>
-                        </div>
-                        <div class="d-flex align-items-center gap-2 px-3 py-2 rounded-3" style="background:#fff5f5; border:1px solid #fecaca;">
-                            <i class="bi bi-x-circle-fill text-danger" style="font-size:0.9rem;"></i>
-                            <div>
-                                <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.05em; color:#dc2626; font-weight:600;">Unpaid</div>
-                                <div class="fw-bold text-danger" style="font-size:0.95rem; line-height:1.2;">₹{{ month_info.unpaid_amount|floatformat:2 }}</div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="dc-card mb-4">
+            <div class="dc-card-header justify-content-between">
+                <h3 class="dc-card-title">{{ month_info.month_name }}</h3>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="dc-badge grey">Total ₹{{ month_info.total_amount|floatformat:2 }}</span>
+                    <span class="dc-badge green">Paid ₹{{ month_info.paid_amount|floatformat:2 }}</span>
+                    <span class="dc-badge red">Unpaid ₹{{ month_info.unpaid_amount|floatformat:2 }}</span>
                 </div>
             </div>
-            <div style="height:1px; background:linear-gradient(to right, #e9ecef, transparent);"></div>
-            <div class="card-body px-4 py-3">
-                <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
-                    <table class="table table-hover align-middle mb-0" style="min-width:780px; border-collapse:separate; border-spacing:0;">
+            <div class="dc-table-wrap">
+                    <table class="table table-hover dc-table" style="min-width:780px;">
                         <thead>
-                            <tr style="background:#f8faff;">
-                                <th style="width:40px; text-align:center; padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.75rem; color:#94a3b8; font-weight:600;">
-                                    <input type="checkbox" class="form-check-input" id="selectAllBills">
-                                </th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">#</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Bill No.</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Patient</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700; white-space:nowrap;">Date</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Total</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Method</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700;">Status</th>
-                                <th style="padding:10px 12px; border-bottom:2px solid #e2e8f0; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#64748b; font-weight:700; text-align:center;">Action</th>
+                            <tr>
+                                <th class="text-center" style="width:40px;"><input type="checkbox" class="form-check-input" id="selectAllBills"></th>
+                                <th class="col-num">#</th>
+                                <th>Bill No.</th>
+                                <th>Patient</th>
+                                <th>Date</th>
+                                <th class="text-end">Total</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for bill in month_info.bills %}
-                            <tr style="border-bottom:1px solid #f1f5f9; transition:background 0.15s;">
-                                <td style="padding:12px; text-align:center; vertical-align:middle;">
-                                    <input type="checkbox" class="form-check-input bill-checkbox" value="{{ bill.id|hid }}">
-                                </td>
-                                <td style="padding:12px; vertical-align:middle;">
-                                    <span class="text-muted" style="font-size:0.82rem; font-weight:600;">{{ forloop.counter }}</span>
-                                </td>
-                                <td style="padding:12px; vertical-align:middle;">
-                                    <span style="display:inline-flex; align-items:center; gap:4px; background:#eef2ff; color:#4f46e5; font-weight:700; font-size:0.82rem; padding:4px 10px; border-radius:6px; white-space:nowrap;">
-                                        <i class="bi bi-hash" style="font-size:0.75rem;"></i>{{ bill.bill_number }}
-                                    </span>
-                                </td>
-                                <td style="padding:12px; vertical-align:middle;">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0;">
-                                            {{ bill.visit.patient.user.get_full_name|first|upper }}
-                                        </div>
-                                        <span style="font-weight:600; font-size:0.9rem; white-space:nowrap;">
+                            <tr>
+                                <td class="text-center"><input type="checkbox" class="form-check-input bill-checkbox" value="{{ bill.id|hid }}"></td>
+                                <td class="col-num">{{ forloop.counter }}</td>
+                                <td class="dc-mono">{{ bill.bill_number }}</td>
+                                <td>
+                                    <div class="dc-person">
+                                        <div class="dc-avatar">{{ bill.visit.patient.user.get_full_name|first|upper }}</div>
+                                        <span class="dc-name">
                                             {% if bill.visit.appointment.family_member %}
                                                 {{ bill.visit.appointment.family_member.name }}
                                             {% else %}
@@ -216,65 +162,43 @@
                                         </span>
                                     </div>
                                 </td>
-                                <td style="padding:12px; vertical-align:middle; white-space:nowrap;">
-                                    <div style="display:inline-flex; align-items:center; gap:6px; background:#f8faff; border:1px solid #e2e8f0; border-radius:6px; padding:4px 10px;">
-                                        <i class="bi bi-calendar3" style="color:#94a3b8; font-size:0.8rem;"></i>
-                                        <span style="font-size:0.85rem; font-weight:500; color:#374151;">{{ bill.bill_date|date:"d M Y" }}</span>
-                                    </div>
-                                </td>
-                                <td style="padding:12px; vertical-align:middle; white-space:nowrap;">
-                                    <span style="font-weight:700; font-size:0.95rem; color:#059669;">₹{{ bill.total|floatformat:2 }}</span>
-                                </td>
-                                <td style="padding:12px; vertical-align:middle; white-space:nowrap;">
-                                    <div style="display:inline-flex; align-items:center; gap:5px; font-size:0.85rem; color:#475569;">
+                                <td class="dc-mono">{{ bill.bill_date|date:"d M Y" }}</td>
+                                <td class="text-end dc-mono">₹{{ bill.total|floatformat:2 }}</td>
+                                <td>
+                                    <span class="dc-muted">
                                         {% if bill.payment_method == 'cash' %}
-                                            <i class="bi bi-cash" style="color:#059669;"></i>
+                                            <i class="bi bi-cash"></i>
                                         {% elif bill.payment_method == 'card' %}
-                                            <i class="bi bi-credit-card" style="color:#3b82f6;"></i>
+                                            <i class="bi bi-credit-card"></i>
                                         {% elif bill.payment_method == 'upi' %}
-                                            <i class="bi bi-phone" style="color:#06b6d4;"></i>
+                                            <i class="bi bi-phone"></i>
                                         {% else %}
-                                            <i class="bi bi-globe" style="color:#f59e0b;"></i>
+                                            <i class="bi bi-globe"></i>
                                         {% endif %}
                                         {{ bill.get_payment_method_display }}
-                                    </div>
+                                    </span>
                                 </td>
-                                <td style="padding:12px; vertical-align:middle;">
+                                <td>
                                     {% if bill.payment_status == 'paid' %}
-                                        <span style="display:inline-flex; align-items:center; gap:4px; background:#dcfce7; color:#166534; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;">
-                                            <i class="bi bi-check-circle-fill" style="font-size:0.7rem;"></i>Paid
-                                        </span>
+                                        <span class="dc-badge green">Paid</span>
                                     {% elif bill.payment_status == 'partial' %}
-                                        <span style="display:inline-flex; align-items:center; gap:4px; background:#fef9c3; color:#854d0e; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;">
-                                            <i class="bi bi-clock-fill" style="font-size:0.7rem;"></i>Partial
-                                        </span>
+                                        <span class="dc-badge peach">Partial</span>
                                     {% else %}
-                                        <span style="display:inline-flex; align-items:center; gap:4px; background:#fee2e2; color:#991b1b; font-size:0.78rem; font-weight:600; padding:4px 10px; border-radius:20px; white-space:nowrap;">
-                                            <i class="bi bi-x-circle-fill" style="font-size:0.7rem;"></i>Unpaid
-                                        </span>
+                                        <span class="dc-badge red">Unpaid</span>
                                     {% endif %}
                                 </td>
-                                <td style="padding:12px; vertical-align:middle;">
-                                    <div class="d-flex gap-1 justify-content-center align-items-center">
-                                        <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}"
-                                            class="btn btn-sm"
-                                            style="background:#eef2ff; color:#4f46e5; border:none; width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"
-                                            title="View Bill">
-                                            <i class="bi bi-eye" style="font-size:0.85rem;"></i>
+                                <td class="col-actions">
+                                    <div class="dc-actions">
+                                        <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}" class="btn-act view" title="View bill">
+                                            <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="{% url 'billing:print_bill' bill.visit.id|hid %}"
-                                            target="_blank"
-                                            class="btn btn-sm"
-                                            style="background:#dcfce7; color:#166534; border:none; width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"
-                                            title="Print Bill">
-                                            <i class="bi bi-printer" style="font-size:0.85rem;"></i>
+                                        <a href="{% url 'billing:print_bill' bill.visit.id|hid %}" target="_blank" class="btn-act view" title="Print bill">
+                                            <i class="bi bi-printer"></i>
                                         </a>
                                         <form action="{% url 'billing:delete_bill' bill.id|hid %}" method="POST" class="m-0">
                                             {% csrf_token %}
-                                            <button type="button" class="btn btn-sm delete-btn"
-                                                style="background:#fee2e2; color:#991b1b; border:none; width:32px; height:32px; padding:0; display:flex; align-items:center; justify-content:center; border-radius:8px;"
-                                                title="Delete Bill">
-                                                <i class="bi bi-trash" style="font-size:0.85rem;"></i>
+                                            <button type="button" class="btn-act delete delete-btn" title="Delete bill">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
                                     </div>
@@ -282,19 +206,21 @@
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="9" style="text-align:center; padding:40px 12px; color:#94a3b8;">
-                                    <i class="bi bi-inbox d-block mb-2" style="font-size:2rem; opacity:0.4;"></i>
-                                    No bills found for this month
+                                <td colspan="9" class="dc-empty">
+                                    <i class="bi bi-inbox"></i>
+                                    <p class="dc-empty-text">No bills found for this month.</p>
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBillModal">
+                                        <i class="bi bi-plus-lg"></i> Add Bill
+                                    </button>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            </div>
             <!-- Inner Pagination -->
             {% if month_info.bills.paginator.num_pages > 1 %}
-            <div class="card-footer bg-white border-top-0 pb-3 px-4">
+            <div class="dc-card-footer d-flex justify-content-end">
                 <nav aria-label="Month pagination" class="w-100">
                     <ul class="pagination pagination-sm justify-content-end mb-0">
                         <li class="page-item {% if not month_info.bills.has_previous %}disabled{% endif %}">
@@ -312,18 +238,20 @@
             {% endif %}
         </div>
         {% empty %}
-        <div class="text-center py-5 text-muted">
-            <i class="bi bi-receipt d-block mb-3" style="font-size:3rem; opacity:0.2;"></i>
-            <p class="mb-0 fw-semibold">No bills found</p>
-            <small>Try adjusting your filters</small>
+        <div class="dc-empty">
+            <i class="bi bi-receipt"></i>
+            <p class="dc-empty-text">No bills found. Try adjusting your filters.</p>
+            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBillModal">
+                <i class="bi bi-plus-lg"></i> Add Bill
+            </button>
         </div>
         {% endfor %}
 
         <!-- Outer Pagination for months -->
         {% if page_obj.paginator.num_pages > 1 %}
         <div id="paginationContainer" class="mt-4">
-            <div id="paginationWrapper" class="card-footer bg-white border-0 rounded-3 shadow-sm d-flex flex-column align-items-center py-3">
-                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-3" style="font-size:0.875rem;">
+            <div id="paginationWrapper" class="dc-card-footer d-flex flex-column align-items-center">
+                <div class="w-100 d-flex justify-content-between align-items-center mb-3 px-3 small">
                     <span>
                         <strong>{{ page_obj.start_index }} – {{ page_obj.end_index }}</strong>
                         <span class="text-muted"> of {{ page_obj.paginator.count }} months</span>
@@ -360,40 +288,45 @@
                             <h5 class="modal-title" id="addBillModalLabel">Add Bill (without appointment)</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal-body">
-                                                        <div class="mb-3">
-                                                                <label class="form-label">Patient Name</label>
-                                                                <input type="text" id="patientSearch" name="name" class="form-control" placeholder="Full name" autocomplete="off" required>
-                                                                <div id="patientSuggestions" class="list-group position-absolute w-100 mt-1" style="z-index:1050; display:none;"></div>
-                                                                <input type="hidden" name="patient_id" id="patient_id">
-                                                                <input type="hidden" name="family_member_id" id="family_member_id">
-                                                        </div>
-                                                        <div class="mb-3">
-                                                                <label class="form-label">Mobile</label>
-                                                                <input type="text" id="patientPhone" name="phone" class="form-control" placeholder="Mobile number" required>
-                                                        </div>
-                                                        <div class="row g-2">
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Appointment Date</label>
-                                                                    <input type="date" name="appointment_date" class="form-control" required>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <label class="form-label">Appointment Time</label>
-                                                                    <input type="time" name="appointment_time" class="form-control" required>
-                                                                </div>
-                                                        </div>
-                                                        <div class="mt-3">
-                                                            <label class="form-label fw-semibold">Consultation Mode</label>
-                                                            <input type="hidden" name="consultation_type" id="consultation_type" value="in_person">
-                                                            <div class="d-flex gap-2">
-                                                                <button type="button" class="btn btn-outline-primary btn-mode active" data-value="in_person">In Person</button>
-                                                                <button type="button" class="btn btn-outline-primary btn-mode" data-value="phone">Phone Consultant</button>
-                                                                <button type="button" class="btn btn-outline-primary btn-mode" data-value="video">Video Call Consultant</button>
-                                                            </div>
-                                                        </div>
+                        <div class="modal-body dc-card-body">
+                            <div class="dc-form-shell">
+                                <section class="dc-section">
+                                    <h3 class="dc-section-title"><i class="bi bi-person-plus"></i> Patient details</h3>
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="dc-label" for="patientSearch">Patient Name <span class="dc-muted">*</span></label>
+                                            <input type="text" id="patientSearch" name="name" class="form-control" placeholder="Full name" autocomplete="off" required>
+                                            <div id="patientSuggestions" class="list-group position-absolute w-100 mt-1" style="z-index:1050; display:none;"></div>
+                                            <input type="hidden" name="patient_id" id="patient_id">
+                                            <input type="hidden" name="family_member_id" id="family_member_id">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="dc-label" for="patientPhone">Mobile <span class="dc-muted">*</span></label>
+                                            <input type="text" id="patientPhone" name="phone" class="form-control" placeholder="Mobile number" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="dc-label">Appointment Date <span class="dc-muted">*</span></label>
+                                            <input type="date" name="appointment_date" class="form-control" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="dc-label">Appointment Time <span class="dc-muted">*</span></label>
+                                            <input type="time" name="appointment_time" class="form-control" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="dc-label">Consultation Mode</label>
+                                            <input type="hidden" name="consultation_type" id="consultation_type" value="in_person">
+                                            <div class="d-flex flex-wrap gap-2">
+                                                <button type="button" class="btn btn-outline-primary btn-mode active" data-value="in_person">In Person</button>
+                                                <button type="button" class="btn btn-outline-primary btn-mode" data-value="phone">Phone Consultant</button>
+                                                <button type="button" class="btn btn-outline-primary btn-mode" data-value="video">Video Call Consultant</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <div class="modal-footer dc-form-footer">
+                            <button type="button" class="btn-ghost" data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-primary">Create Bill</button>
                         </div>
                     </form>

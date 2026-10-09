@@ -25,6 +25,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import Avg, Count, Q
 from django.core.paginator import Paginator
 from accounts.models import FamilyMember
+from accounts.emails import send_welcome_email
 from appointment.file_validation import validate_uploaded_document
 
 logger = logging.getLogger(__name__)
@@ -33,24 +34,30 @@ def login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        
+        # Pre-check for pending approval
+        try:
+            pending_user = User.objects.get(username=username)
+            if not pending_user.is_active and InnerMember.objects.filter(user=pending_user).exists():
+                return render(request, 'doctor/login.html', {'error': 'Your account is pending approval by the clinic owner.'})
+        except User.DoesNotExist:
+            pass
 
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-            login(request, user)
-
             try:
                 member = InnerMember.objects.get(user=user)
                 role = member.role
-
             except InnerMember.DoesNotExist:
                 return render(request, 'doctor/login.html', {'error': 'Role not assigned'})
+            
+            login(request, user)
 
             if role == 'doctor':
                 return redirect('doctor:dashboard')
             else:
                 return redirect('billing:bill_list')
-
         else:
             return render(request, 'doctor/login.html', {'error': 'Invalid credentials'})
 
@@ -555,11 +562,12 @@ def add_patient(request):
             with transaction.atomic():
                 user = User.objects.create_user(
                     username   = phone,        # phone as username
-                    password   = 'password@123',      # default password = phone
                     email      = email or '',
                     first_name = first_name,
                     last_name  = last_name,
                 )
+                user.set_unusable_password()
+                user.save()
                 # The Patient object is auto-created via a post_save signal on the User model.
                 # So we fetch it and update it, rather than creating a duplicate.
                 patient = user.patient
@@ -570,6 +578,7 @@ def add_patient(request):
                 patient.bld_grop = bld_grop or None
                 patient.save()
 
+            send_welcome_email(request, user, phone=phone, added_by_clinic=True)
             return redirect('doctor:manage_patients')
 
         except Exception as exc:
@@ -588,8 +597,9 @@ def add_patient(request):
 @role_required('doctor')
 def staff_view(request):
     billers = InnerMember.objects.filter(role='biller').select_related('user')
-    return render(request, 'doctor/staff.html', {'billers': billers})
-
+    pending_doctors = InnerMember.objects.filter(role='doctor', user__is_active=False).select_related('user')
+    is_owner = hasattr(request.user, 'innermember') and request.user.innermember.is_owner
+    return render(request, 'doctor/staff.html', {'billers': billers, 'pending_doctors': pending_doctors, 'is_owner': is_owner})
 
 # ─────────────────────────────────────────
 # Add Staff (biller)
@@ -1126,3 +1136,106 @@ def my_profile(request):
             return redirect('doctor:my_profile')
             
     return render(request, 'doctor/my_profile.html', {'member': member})
+
+
+@never_cache
+def register_view(request):
+    # Only redirect if they are actually a logged-in doctor/staff
+    if request.user.is_authenticated:
+        try:
+            if request.user.innermember:
+                return redirect('doctor:dashboard')
+        except:
+            pass
+
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip().lower()
+        phone = request.POST.get('phone', '').strip()
+        password = request.POST.get('password', '')
+        confirm_password = request.POST.get('confirm_password', '')
+
+        if not all([name, username, email, phone, password, confirm_password]):
+            return render(request, 'doctor/register.html', {'error': 'All fields are required.'})
+        
+        if password != confirm_password:
+            return render(request, 'doctor/register.html', {'error': 'Passwords do not match.'})
+            
+        if not phone.isdigit() or len(phone) != 10:
+            return render(request, 'doctor/register.html', {'error': 'Phone must be exactly 10 digits.'})
+            
+        if User.objects.filter(username=username).exists():
+            return render(request, 'doctor/register.html', {'error': 'Username already exists.'})
+            
+        if User.objects.filter(email__iexact=email).exists():
+            return render(request, 'doctor/register.html', {'error': 'Email already in use.'})
+            
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError
+        try:
+            validate_password(password)
+        except ValidationError as e:
+            return render(request, 'doctor/register.html', {'error': ' '.join(e.messages)})
+
+        name_parts = name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=username,
+                    password=password,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    is_active=False
+                )
+                
+                # Find owner doctor if exists
+                owner = InnerMember.objects.filter(role='doctor', is_owner=True).first()
+                owner_user = owner.user if owner else None
+                
+                InnerMember.objects.create(
+                    user=user,
+                    role='doctor',
+                    is_owner=False,
+                    phone=phone,
+                    doctor=owner_user
+                )
+                
+            messages.success(request, 'Registration submitted. You can log in after the clinic owner approves your account.')
+            return redirect('doctor:login')
+        except Exception as e:
+            return render(request, 'doctor/register.html', {'error': 'Registration failed. Please try again.'})
+
+    return render(request, 'doctor/register.html')
+
+@require_POST
+@role_required('doctor')
+def approve_doctor(request, member_id):
+    if not hasattr(request.user, 'innermember') or not request.user.innermember.is_owner:
+        return JsonResponse({'success': False, 'error': 'Permission denied.'}, status=403)
+        
+    try:
+        member = InnerMember.objects.get(id=member_id)
+        member.user.is_active = True
+        member.user.save()
+        return JsonResponse({'success': True})
+    except InnerMember.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Member not found.'})
+
+@require_POST
+@role_required('doctor')
+def reject_doctor(request, member_id):
+    if not hasattr(request.user, 'innermember') or not request.user.innermember.is_owner:
+        return JsonResponse({'success': False, 'error': 'Permission denied.'}, status=403)
+        
+    try:
+        member = InnerMember.objects.get(id=member_id)
+        member.user.delete()
+        return JsonResponse({'success': True})
+    except InnerMember.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Member not found.'})
+

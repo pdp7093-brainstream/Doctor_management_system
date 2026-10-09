@@ -6,39 +6,39 @@
 
 <main class="main-content" id="mainContent">
     <!-- Page Header -->
-    <div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div class="page-head">
         <div>
-            <h2 class="page-title mb-1" style="font-weight: 700; color: #1a2744;">
-                <i class="bi bi-tags me-2 text-primary"></i>Expense Categories
-            </h2>
-            <p class="text-muted small mb-0">Manage categories to organize your expenses properly</p>
+            <h2 class="page-title">Expense Categories</h2>
+            <p class="page-subtitle">Manage categories to organize your expenses properly.</p>
         </div>
-        <a href="{% url 'expenses:expense_list' %}" class="btn btn-outline-secondary rounded-pill px-4" style="font-weight: 500;">
-            <i class="bi bi-arrow-left me-1"></i> Back
+        <a href="{% url 'expenses:expense_list' %}" class="action-btn">
+            <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
 
     <div class="row g-4">
         <!-- Add Category Form -->
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 16px; background: #ffffff;">
-                <div class="card-body p-4">
-                    <h5 class="mb-4" style="color: #2c3e50; font-weight: 600; font-size: 1.1rem; border-bottom: 2px solid #f1f4f8; padding-bottom: 12px;">
-                        Add New Category
-                    </h5>
+        <div class="col-lg-4 dc-form-shell">
+            <div class="dc-card">
+                <div class="dc-card-header">
+                    <h3 class="dc-card-title"><i class="bi bi-plus-circle"></i> Add Category</h3>
+                </div>
+                <div class="dc-card-body">
                     <form method="post" action="{% url 'expenses:add_category' %}">
                         {% csrf_token %}
-                        <div class="form-group mb-3">
-                            <label class="form-label" style="font-weight: 600; color: #4a5568; font-size: 0.9rem;">Category Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control form-control-lg bg-light border-0" placeholder="e.g. Salary, Utilities" required style="border-radius: 10px; font-size: 0.95rem;">
-                        </div>
+                        <section class="dc-section">
+                            <label class="dc-label" for="newCategoryName">Category Name <span class="dc-muted">*</span></label>
+                            <input type="text" id="newCategoryName" name="name" class="form-control" placeholder="e.g. Salary, Utilities" required>
+                        </section>
                         <div class="form-check form-switch mb-4">
-                            <input class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch" name="is_active" checked style="cursor: pointer;">
-                            <label class="form-check-label ms-2" for="isActiveSwitch" style="font-weight: 500; color: #64748b; cursor: pointer;">Active Status</label>
+                            <input class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch" name="is_active" checked>
+                            <label class="form-check-label ms-2" for="isActiveSwitch">Active Status</label>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill shadow-sm" style="font-weight: 600;">
-                            <i class="bi bi-plus-circle me-1"></i> Create Category
-                        </button>
+                        <div class="dc-form-footer mx-n3 mb-n3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-plus-circle"></i> Create Category
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -46,77 +46,83 @@
 
         <!-- Category List -->
         <div class="col-lg-8">
-            <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead style="background: #f8fafc;">
+            <div class="dc-card">
+                <div class="dc-card-header">
+                    <h3 class="dc-card-title"><i class="bi bi-tags"></i> Categories</h3>
+                    <span class="dc-count">{{ categories|length }} total</span>
+                </div>
+                <div class="dc-table-wrap">
+                    <table class="table table-hover dc-table">
+                        <thead>
                             <tr>
-                                <th class="px-4 py-3 text-uppercase" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Category Name</th>
-                                <th class="py-3 text-uppercase" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Date Created</th>
-                                <th class="py-3 text-uppercase" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Status</th>
-                                <th class="py-3 text-uppercase text-center" style="font-size: 0.75rem; color: #64748b; font-weight: 700; letter-spacing: 0.5px;">Actions</th>
+                                <th>Category Name</th>
+                                <th>Date Created</th>
+                                <th>Status</th>
+                                <th class="col-actions">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for category in categories %}
                             <tr>
-                                <td class="px-4 py-3">
-                                    <span class="d-block fw-bold" style="color: #0f172a; font-size: 0.95rem;">{{category.name}}</span>
-                                </td>
-                                <td class="py-3">
-                                    <span class="text-muted" style="font-size: 0.9rem;">{{category.created_at|date:"d M Y"}}</span>
-                                </td>
-                                <td class="py-3">
+                                <td><span class="dc-name">{{category.name}}</span></td>
+                                <td class="dc-mono">{{category.created_at|date:"d M Y"}}</td>
+                                <td>
                                     {% if category.is_active %}
-                                    <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="padding: 6px 12px; font-weight: 600;">Active</span>
+                                    <span class="dc-badge green">Active</span>
                                     {% else %}
-                                    <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="padding: 6px 12px; font-weight: 600;">Inactive</span>
+                                    <span class="dc-badge grey">Inactive</span>
                                     {% endif %}
                                 </td>
-                                <td class="py-3 text-center">
-                                    <button type="button" class="btn btn-sm btn-light text-primary rounded-circle me-1" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">
+                                <td class="col-actions">
+                                    <div class="dc-actions">
+                                    <button type="button" class="btn-act edit" title="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+                                    <form method="post" action="{% url 'expenses:delete_category' category.id %}" class="delete-category-form">
+                                        {% csrf_token %}
+                                        <button type="button" class="btn-act delete delete-category-btn" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    </div>
 
                                     <!-- Edit Category Modal -->
                                     <div class="modal fade" id="editCategoryModal{{ category.id }}" tabindex="-1" aria-labelledby="editCategoryModalLabel{{ category.id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content text-start" style="border-radius: 16px; border: none;">
+                                            <div class="modal-content text-start">
                                                 <div class="modal-header border-0 pb-0 pt-4 px-4">
-                                                    <h5 class="modal-title" id="editCategoryModalLabel{{ category.id }}" style="font-weight: 700; color: #1a2744;">Edit Category</h5>
+                                                    <h5 class="modal-title" id="editCategoryModalLabel{{ category.id }}">Edit Category</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body p-4">
                                                     <form method="post" action="{% url 'expenses:edit_category' category.id %}">
                                                         {% csrf_token %}
-                                                        <div class="form-group mb-4">
-                                                            <label class="form-label d-block text-start" style="font-weight: 600; color: #4a5568; font-size: 0.9rem;">Category Name <span class="text-danger">*</span></label>
-                                                            <input type="text" name="name" value="{{ category.name }}" class="form-control form-control-lg bg-light border-0" required style="border-radius: 10px; font-size: 0.95rem;">
+                                                        <div class="mb-3">
+                                                            <label class="dc-label d-block text-start">Category Name <span class="dc-muted">*</span></label>
+                                                            <input type="text" name="name" value="{{ category.name }}" class="form-control" required>
                                                         </div>
                                                         <div class="form-check form-switch mb-4 text-start">
-                                                            <input class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch{{ category.id }}" name="is_active" {% if category.is_active %}checked{% endif %} style="cursor: pointer;">
-                                                            <label class="form-check-label ms-2" for="isActiveSwitch{{ category.id }}" style="font-weight: 500; color: #64748b; cursor: pointer;">Active Status</label>
+                                                            <input class="form-check-input" type="checkbox" role="switch" id="isActiveSwitch{{ category.id }}" name="is_active" {% if category.is_active %}checked{% endif %}>
+                                                            <label class="form-check-label ms-2" for="isActiveSwitch{{ category.id }}">Active Status</label>
                                                         </div>
-                                                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill shadow-sm" style="font-weight: 600;">
-                                                            <i class="bi bi-save me-1"></i> Save Changes
+                                                        <button type="submit" class="btn btn-primary w-100">
+                                                            <i class="bi bi-save"></i> Save Changes
                                                         </button>
                                                     </form>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <form method="post" action="{% url 'expenses:delete_category' category.id %}" style="display: inline;" class="delete-category-form">
-                                        {% csrf_token %}
-                                        <button type="button" class="btn btn-sm btn-light text-danger rounded-circle delete-category-btn" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;" title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center py-4 text-muted">
-                                    No categories found. Create one to get started.
+                                <td colspan="4" class="dc-empty">
+                                    <i class="bi bi-tags"></i>
+                                    <p class="dc-empty-text">No categories found. Create one to get started.</p>
+                                    <a href="#newCategoryName" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-plus-circle"></i> Add Category
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -127,15 +133,6 @@
         </div>
     </div>
 </main>
-
-<style>
-    .form-control:focus {
-        box-shadow: none;
-        background-color: #f8fafc !important;
-        border: 1px solid #3b82f6 !important;
-    }
-</style>
-</style>
 
 <script>
 

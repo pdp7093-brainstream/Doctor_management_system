@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="x-apple-disable-message-reformatting">
+  <title>Welcome to {{ clinic_name }}</title>
+</head>
+<body style="margin:0; padding:0; background:#F3F8F2; font-family:Arial, Helvetica, sans-serif; color:#14281A;">
+  <!-- Preheader (hidden preview text) -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+    Your {{ clinic_name }} account is ready. Book appointments and view your records online.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F8F2;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+
+        <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; background:#ffffff; border-radius:14px; overflow:hidden; border:1px solid #DCEBDC;">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background:#015315; padding:28px 24px 24px;">
+              {% if logo_url %}
+              <img src="{{ logo_url }}" width="72" height="72" alt="{{ clinic_name }}"
+                   style="display:block; width:72px; height:72px; border-radius:50%; background:#ffffff; padding:4px; border:2px solid #FD6801;">
+              {% endif %}
+              <div style="margin-top:12px; font-size:18px; font-weight:bold; color:#ffffff; line-height:1.3;">{{ clinic_name }}</div>
+              {% if tagline %}<div style="margin-top:4px; font-size:13px; color:#cfe3d0;">{{ tagline }}</div>{% endif %}
+            </td>
+          </tr>
+          <tr><td style="height:4px; background:#FD6801; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+          <!-- Greeting -->
+          <tr>
+            <td style="padding:32px 32px 8px;">
+              <div style="font-size:12px; font-weight:bold; letter-spacing:1px; text-transform:uppercase; color:#FD6801;">Namaste 🙏</div>
+              <h1 style="margin:8px 0 12px; font-size:24px; line-height:1.3; color:#14281A;">Welcome, {{ name }}!</h1>
+              <p style="margin:0 0 12px; font-size:15px; line-height:1.7; color:#3c4049;">
+                {% if added_by_clinic %}
+                  Your patient account has been created by our team at <strong>{{ clinic_name }}</strong>.
+                  Set your password once and you can manage your visits online anytime.
+                {% else %}
+                  Thank you for joining <strong>{{ clinic_name }}</strong>. Your account is ready, and you can now manage your visits online anytime.
+                {% endif %}
+              </p>
+            </td>
+          </tr>
+
+          <!-- Primary button -->
+          <tr>
+            <td align="center" style="padding:12px 32px 8px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" bgcolor="#015315" style="border-radius:999px;">
+                    {% if set_password_url %}
+                    <a href="{{ set_password_url }}" target="_blank"
+                       style="display:inline-block; padding:14px 32px; font-size:15px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:999px;">
+                      Set Your Password
+                    </a>
+                    {% else %}
+                    <a href="{{ login_url }}" target="_blank"
+                       style="display:inline-block; padding:14px 32px; font-size:15px; font-weight:bold; color:#ffffff; text-decoration:none; border-radius:999px;">
+                      Login to Your Account
+                    </a>
+                    {% endif %}
+                  </td>
+                </tr>
+              </table>
+              {% if set_password_url %}
+              <p style="margin:10px 0 0; font-size:12px; color:#8a968d;">This link can be used once and expires in a few days.</p>
+              {% endif %}
+            </td>
+          </tr>
+
+          <!-- Account details -->
+          <tr>
+            <td style="padding:20px 32px 4px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F3F8F2; border:1px solid #DCEBDC; border-radius:10px;">
+                <tr>
+                  <td style="padding:14px 18px; font-size:14px; line-height:1.7; color:#14281A;">
+                    <div style="font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:.5px; color:#015315; margin-bottom:4px;">Your login</div>
+                    Email: <strong>{{ email }}</strong><br>
+                    {% if phone %}Mobile: <strong>{{ phone }}</strong>{% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- What you can do -->
+          <tr>
+            <td style="padding:24px 32px 8px;">
+              <div style="font-size:16px; font-weight:bold; color:#14281A; margin-bottom:12px;">What you can do online</div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="36" valign="top" style="padding:6px 0;"><div style="width:28px; height:28px; border-radius:50%; background:#E6F1E6; color:#015315; font-size:14px; line-height:28px; text-align:center;">📅</div></td>
+                  <td valign="top" style="padding:6px 0 6px 8px; font-size:14px; line-height:1.6; color:#3c4049;"><strong style="color:#14281A;">Book appointments</strong><br>Choose a date and time that suits you.</td>
+                </tr>
+                <tr>
+                  <td width="36" valign="top" style="padding:6px 0;"><div style="width:28px; height:28px; border-radius:50%; background:#E6F1E6; color:#015315; font-size:14px; line-height:28px; text-align:center;">📄</div></td>
+                  <td valign="top" style="padding:6px 0 6px 8px; font-size:14px; line-height:1.6; color:#3c4049;"><strong style="color:#14281A;">See prescriptions &amp; reports</strong><br>All your visit records in one place.</td>
+                </tr>
+                <tr>
+                  <td width="36" valign="top" style="padding:6px 0;"><div style="width:28px; height:28px; border-radius:50%; background:#E6F1E6; color:#015315; font-size:14px; line-height:28px; text-align:center;">👨‍👩‍👧</div></td>
+                  <td valign="top" style="padding:6px 0 6px 8px; font-size:14px; line-height:1.6; color:#3c4049;"><strong style="color:#14281A;">Add family members</strong><br>Book and manage visits for your family too.</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Secondary CTA -->
+          {% if booking_url %}
+          <tr>
+            <td align="center" style="padding:12px 32px 24px;">
+              <a href="{{ booking_url }}" target="_blank"
+                 style="display:inline-block; padding:11px 26px; font-size:14px; font-weight:bold; color:#015315; text-decoration:none; border:2px solid #015315; border-radius:999px;">
+                Book an Appointment
+              </a>
+            </td>
+          </tr>
+          {% endif %}
+
+          <!-- Clinic info -->
+          <tr>
+            <td style="padding:0 32px 28px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px dashed #DCEBDC;">
+                <tr>
+                  <td style="padding-top:18px; font-size:13px; line-height:1.8; color:#4A5A4E;">
+                    <div style="font-size:12px; font-weight:bold; text-transform:uppercase; letter-spacing:.5px; color:#015315; margin-bottom:4px;">Visit us</div>
+                    {% if address %}📍 {{ address }}<br>{% endif %}
+                    {% if clinic_phone %}📞 <a href="tel:{{ clinic_phone }}" style="color:#015315; text-decoration:none;">{{ clinic_phone }}</a><br>{% endif %}
+                    {% if hours %}🕘 {{ hours }}{% if working_days %} &middot; {{ working_days }}{% endif %}{% endif %}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background:#F7FAF6; border-top:1px solid #DCEBDC; padding:18px 24px; font-size:12px; line-height:1.6; color:#8a968d;">
+              You received this email because an account was created for {{ email }} at {{ clinic_name }}.<br>
+              If this wasn't you, please contact the clinic.<br>
+              &copy; {{ year }} {{ clinic_name }}
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -9,6 +9,9 @@ app_name = 'doctor'
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='doctor:dashboard', permanent=False), name='doctor_root'),
     path('login/', views.login_view, name='login'),
+    path('register/', views.register_view, name='register'),
+    path('staff/approve/<int:member_id>/', views.approve_doctor, name='approve_doctor'),
+    path('staff/reject/<int:member_id>/', views.reject_doctor, name='reject_doctor'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.my_profile, name='my_profile'),
