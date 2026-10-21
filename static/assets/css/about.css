@@ -48,9 +48,10 @@
     .about-section { padding: 56px 0; }
 }
 
-/* ── Section heading block (left-aligned) ───────────── */
+/* ── Section heading block (centered) ─────────────── */
 .section-heading-block {
     margin-bottom: 48px;
+    text-align: center;
 }
 
 .section-label {
@@ -69,6 +70,16 @@
     color: var(--heading-color, #222);
     margin-bottom: 0;
     line-height: 1.25;
+}
+
+/* Ensure story section headings stay left-aligned */
+.story-text .section-label,
+.story-text .section-title {
+    text-align: left;
+}
+
+.story-text .section-title {
+    margin-bottom: 20px !important;
 }
 
 /* ── Story section ───────────────────────────────────── */
@@ -290,4 +301,9 @@
     color: #666;
     line-height: 1.55;
     margin: 0;
+}
+/* Story heading spacing fix */
+.story-text .section-title {
+    padding-bottom: 0;
+    margin-bottom: 20px !important;
 }

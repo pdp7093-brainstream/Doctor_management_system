@@ -184,86 +184,73 @@
 
 
 
+
     <!-- Featured Services Section -->
     <section id="featured-services" class="featured-services section light-background">
 
-      <!-- Section Title with decorative mandala SVG -->
-      <div class="container section-title" data-aos="fade-up" style="position:relative;">
-        <!-- Subtle mandala behind heading -->
-        <svg class="section-mandala-deco" width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="position:absolute; top:-30px; left:50%; transform:translateX(-50%); opacity:0.06; pointer-events:none;">
-          <circle cx="60" cy="60" r="55" stroke="#117A15" stroke-width="1"/>
-          <circle cx="60" cy="60" r="40" stroke="#117A15" stroke-width="1"/>
-          <circle cx="60" cy="60" r="25" stroke="#117A15" stroke-width="1"/>
-          <circle cx="60" cy="60" r="10" stroke="#117A15" stroke-width="1"/>
-          <line x1="60" y1="5" x2="60" y2="115" stroke="#117A15" stroke-width="0.8"/>
-          <line x1="5" y1="60" x2="115" y2="60" stroke="#117A15" stroke-width="0.8"/>
-          <line x1="21" y1="21" x2="99" y2="99" stroke="#117A15" stroke-width="0.8"/>
-          <line x1="99" y1="21" x2="21" y2="99" stroke="#117A15" stroke-width="0.8"/>
-        </svg>
+      <!-- Section Title -->
+      <div class="container section-title" data-aos="fade-up">
+        <span class="section-eyebrow">OUR APPROACH</span>
         <h2>How We Care for You</h2>
-        <p>A complete Ayurvedic healing journey, from diagnosis to recovery</p>
+        <p style="max-width:680px; margin-left:auto; margin-right:auto;">From diagnosis to recovery, every treatment begins with understanding you. Our physicians assess your unique body constitution (Prakriti), lifestyle and root imbalances, then guide you with classical herbs, detox therapies and long-term lifestyle care.</p>
       </div><!-- End Section Title -->
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <!-- Centered feature block -->
-        <div class="row justify-content-center text-center mb-5">
-          <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200" style="max-width: 720px; margin: 0 auto;">
-            <div class="featured-service-main">
-              <div class="service-details" style="padding-top: 0;">
-                <h2>A Natural Path to Wellness</h2>
-                <p>Our Ayurvedic physicians begin with a holistic diagnosis — understanding your unique body constitution (Prakriti), lifestyle, and root imbalances. Treatment combines classical herbal formulations, personalised detox therapies, and long-term diet and lifestyle plans, followed by regular follow-up consultations to ensure lasting health.</p>
-                <a href="{% url 'treatments' %}" class="main-cta">Explore Our Treatments</a>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- 4-step journey cards -->
+        <div class="journey-steps-wrap">
+          <div class="row g-4 justify-content-center">
 
-        <!-- 4 Ayurvedic service icon cards (no photos) -->
-        <div class="specialties-grid" data-aos="fade-up" data-aos-delay="300">
-          <div class="row g-4">
-
-            <div class="col-lg-3 col-md-6">
-              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
-                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
-                  <i class="bi bi-broadcast" style="font-size:1.6rem; color:var(--accent-color);"></i>
+            <div class="col-lg-3 col-md-6 d-flex">
+              <div class="journey-card h-100 text-center">
+                <span class="journey-step-num">01</span>
+                <div class="journey-icon-wrap">
+                  <i class="bi bi-broadcast"></i>
                 </div>
-                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Nadi Pariksha</h5>
-                <span style="font-size:0.85rem; color:#6b7280;">Traditional pulse diagnosis</span>
+                <h5 class="journey-title">Nadi Pariksha</h5>
+                <p class="journey-text">Traditional pulse diagnosis to understand your Prakriti and identify the root cause of imbalance.</p>
               </div>
             </div>
 
-            <div class="col-lg-3 col-md-6">
-              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
-                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
-                  <i class="bi bi-flower2" style="font-size:1.6rem; color:var(--accent-color);"></i>
+            <div class="col-lg-3 col-md-6 d-flex">
+              <div class="journey-card h-100 text-center">
+                <span class="journey-step-num">02</span>
+                <div class="journey-icon-wrap">
+                  <i class="bi bi-flower2"></i>
                 </div>
-                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Herbal Medicines</h5>
-                <span style="font-size:0.85rem; color:#6b7280;">Pure natural formulations</span>
+                <h5 class="journey-title">Herbal Medicines</h5>
+                <p class="journey-text">Pure, classical Ayurvedic formulations prepared to suit your body type and condition.</p>
               </div>
             </div>
 
-            <div class="col-lg-3 col-md-6">
-              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
-                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
-                  <i class="bi bi-droplet-half" style="font-size:1.6rem; color:var(--accent-color);"></i>
+            <div class="col-lg-3 col-md-6 d-flex">
+              <div class="journey-card h-100 text-center">
+                <span class="journey-step-num">03</span>
+                <div class="journey-icon-wrap">
+                  <i class="bi bi-droplet-half"></i>
                 </div>
-                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Panchakarma Detox</h5>
-                <span style="font-size:0.85rem; color:#6b7280;">Deep cleansing therapies</span>
+                <h5 class="journey-title">Panchakarma Detox</h5>
+                <p class="journey-text">Deep cleansing therapies that remove toxins and restore your body's natural balance.</p>
               </div>
             </div>
 
-            <div class="col-lg-3 col-md-6">
-              <div class="specialty-card text-center p-4" style="background:#ffffff; border-radius:16px; border:1px solid var(--border-color,#DCEBDC);">
-                <div class="mb-3" style="width:64px; height:64px; background:color-mix(in srgb, var(--accent-color), transparent 88%); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto;">
-                  <i class="bi bi-journal-text" style="font-size:1.6rem; color:var(--accent-color);"></i>
+            <div class="col-lg-3 col-md-6 d-flex">
+              <div class="journey-card h-100 text-center">
+                <span class="journey-step-num">04</span>
+                <div class="journey-icon-wrap">
+                  <i class="bi bi-journal-text"></i>
                 </div>
-                <h5 style="color:var(--heading-color); font-size:1rem; font-weight:600;">Diet &amp; Lifestyle Plans</h5>
-                <span style="font-size:0.85rem; color:#6b7280;">Personalised long-term guidance</span>
+                <h5 class="journey-title">Diet &amp; Lifestyle Plans</h5>
+                <p class="journey-text">Personalised diet, routine and follow-up guidance for long-lasting health.</p>
               </div>
             </div>
 
           </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="text-center" style="margin-top:40px;">
+          <a href="{% url 'treatments' %}" class="journey-cta-btn">Explore Our Treatments <i class="bi bi-arrow-right"></i></a>
         </div>
 
       </div>

@@ -6261,3 +6261,169 @@ section,
   border-color: #015315 !important;
   color: #015315 !important;
 }
+
+/* Ayurveda Wisdom section */
+.aw-section { background: #fff; padding: 80px 0; }
+.aw-head { max-width: 680px; margin: 0 auto 48px; }
+.aw-eyebrow { display: inline-block; font-size: .8rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand-accent); margin-bottom: 10px; }
+.aw-title { color: var(--brand-primary); font-weight: 700; margin-bottom: 12px; }
+.aw-sub { color: #555; margin: 0; }
+
+.aw-card {
+  width: 100%;
+  display: flex; flex-direction: column; align-items: stretch; text-align: left;
+  background: #fff;
+  border: 1px solid rgba(1, 83, 21, .12);
+  border-top: 4px solid var(--brand-primary);
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .05);
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.aw-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(1, 83, 21, .10); }
+
+.aw-card-head {
+  display: flex; align-items: center; gap: 14px;
+  min-height: 56px; margin-bottom: 18px;
+}
+.aw-icon {
+  width: 52px; height: 52px; flex-shrink: 0;
+  border-radius: 12px; background: #EAF4EA;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--brand-primary); font-size: 1.4rem;
+  margin: 0;
+}
+.aw-card-title {
+  color: var(--brand-primary); font-size: 1.15rem; font-weight: 700;
+  line-height: 1.3; margin: 0;
+}
+.aw-shloka {
+  width: 100%; min-height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  background: #EAF4EA; border-radius: 10px;
+  border-bottom: 2px solid var(--brand-accent);
+  padding: 16px;
+  font-family: "Noto Sans Devanagari", sans-serif;
+  font-size: 1.05rem; font-weight: 600; line-height: 1.9;
+  color: var(--brand-primary);
+}
+.aw-ref { font-size: .8rem; font-style: italic; color: #888; margin: 10px 0 14px; text-align: center; }
+.aw-text { flex-grow: 1; font-size: .95rem; line-height: 1.7; color: #444; margin: 0; }
+
+@media (max-width: 767px) {
+  .aw-section { padding: 56px 0; }
+  .aw-card { padding: 24px 20px; }
+  .aw-shloka { font-size: .95rem; min-height: auto; }
+}
+
+.aw-therapies { margin-top: 56px; }
+.aw-therapies img { max-width: 960px; width: 100%; height: auto; }
+@media (max-width: 767px) { .aw-therapies { margin-top: 36px; } }
+
+/* Featured Services – journey redesign */
+.journey-steps-wrap {
+  position: relative;
+}
+
+/* Dashed connector line – desktop only, behind icons at ~top 80px of cards */
+@media (min-width: 992px) {
+  .journey-steps-wrap::before {
+    content: "";
+    position: absolute;
+    top: 80px; /* aligns with centre of icon circles */
+    left: calc(12.5% + 30px); /* starts at centre of first icon */
+    right: calc(12.5% + 30px); /* ends at centre of last icon */
+    height: 2px;
+    border-top: 2px dashed rgba(1, 83, 21, 0.25);
+    z-index: 0;
+    pointer-events: none;
+  }
+}
+
+.journey-card {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border: 1px solid rgba(1, 83, 21, 0.10);
+  border-top: 3px solid transparent;
+  border-radius: 16px;
+  padding: 32px 24px;
+  box-shadow: 0 4px 16px rgba(1, 83, 21, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-top-color 0.3s ease;
+  width: 100%;
+}
+
+.journey-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 32px rgba(1, 83, 21, 0.13);
+  border-top-color: var(--brand-primary);
+}
+
+.journey-step-num {
+  display: block;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-accent);
+  margin-bottom: 16px;
+}
+
+.journey-icon-wrap {
+  width: 60px;
+  height: 60px;
+  background: #EAF4EA;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  transition: background 0.3s ease;
+}
+
+.journey-icon-wrap i {
+  font-size: 1.5rem;
+  color: var(--brand-primary);
+  transition: color 0.3s ease;
+}
+
+.journey-card:hover .journey-icon-wrap {
+  background: var(--brand-primary);
+}
+
+.journey-card:hover .journey-icon-wrap i {
+  color: #ffffff;
+}
+
+.journey-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-primary);
+  margin-bottom: 10px;
+}
+
+.journey-text {
+  font-size: 0.92rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.journey-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--brand-primary);
+  color: #ffffff;
+  border-radius: 50px;
+  padding: 12px 32px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.journey-cta-btn:hover {
+  background: var(--brand-primary-hover);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
