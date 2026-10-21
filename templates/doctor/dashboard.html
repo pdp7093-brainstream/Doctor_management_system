@@ -8,7 +8,8 @@
 <main class="main-content" id="mainContent">
 
     <div class="page-header">
-        <h2 class="page-title">Welcome Back, Dr. {% firstof clinic.doctor_name request.user.username %}</h2>
+        {% firstof clinic.doctor_name request.user.username as doctor_name %}
+        <h2 class="page-title">Welcome Back, {% if doctor_name|slice:":2"|lower == "dr" %}{{ doctor_name }}{% else %}Dr. {{ doctor_name }}{% endif %}</h2>
         <p class="page-subtitle">Here's what's happening with your practice today</p>
     </div>
 
@@ -37,12 +38,12 @@
             </div>
         </div>
         <div class="dashboard-stat-item">
-            <div class="stat-card warning">
+            <div class="stat-card success">
                 <div class="stat-content">
                     <div class="stat-number">{{ total_staff }}</div>
                     <div class="stat-label">Total Staff</div>
                 </div>
-                <div class="stat-icon warning">
+                <div class="stat-icon success">
                     <i class="bi bi-people"></i>
                 </div>
             </div>

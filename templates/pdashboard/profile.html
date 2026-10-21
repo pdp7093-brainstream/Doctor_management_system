@@ -30,7 +30,7 @@
                     </div>
                     <h1 class="patient-hero__title">Welcome, {{ request.user.first_name|default:request.user.username }}</h1>
                     <p class="patient-hero__subtext">
-                        Review your appointment activity, check pending visits, and keep everything in one clean place.
+                        Manage your personal details, family members and medical documents.
                     </p>
                 </div>
                 <div class="col-lg-4">
@@ -46,9 +46,8 @@
         
         <div class="main-content mb-5">
 
-            <!-- ── FIX 2: Row with g-3 spacing, no h-100, no inline styles ── -->
-            <div class="row g-3 align-items-start">
-                <div class="col-lg-6">
+            <div class="row align-items-start">
+                <div class="col-lg-6 profile-left-col">
                     <!-- ── My Profile Card (redesigned) ── -->
                     <div class="card profile-card mb-0">
 
@@ -102,14 +101,17 @@
                                 <div class="pc-tile">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-phone"></i></div>
                                     <div class="pc-tile-content">
-                                        <span class="pc-tile-label">Phone</span>
+                                        <div class="pc-tile-label-row">
+                                            <span class="pc-tile-label">Phone</span>
+                                            {% if request.user.patient.phone %}
+                                            <button class="btn changeNumberBtn pc-change-num-btn pc-tile-inline-btn" data-phone="{{ request.user.patient.phone }}">Change</button>
+                                            {% endif %}
+                                        </div>
                                         <span class="pc-tile-value">
                                             {% if request.user.patient.phone %}
                                             <span id="profilePhone">{{ request.user.patient.phone }}</span>
-                                            <button class="btn changeNumberBtn pc-change-num-btn" data-phone="{{ request.user.patient.phone }}">Change</button>
                                             {% else %}
                                             <a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>
-                                            <button class="btn changeNumberBtn pc-change-num-btn" data-phone="" style="display:none"></button>
                                             {% endif %}
                                         </span>
                                     </div>
@@ -148,28 +150,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Full Name -->
-                                <div class="pc-tile">
-                                    <div class="pc-tile-icon"><i class="fa-solid fa-user"></i></div>
-                                    <div class="pc-tile-content">
-                                        <span class="pc-tile-label">Full Name</span>
-                                        <span class="pc-tile-value">
-                                            {% if request.user.first_name %}{{ request.user.first_name }} {{ request.user.last_name }}{% else %}<a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>{% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <!-- Email -->
-                                <div class="pc-tile">
-                                    <div class="pc-tile-icon"><i class="fa-solid fa-envelope"></i></div>
-                                    <div class="pc-tile-content">
-                                        <span class="pc-tile-label">Email</span>
-                                        <span class="pc-tile-value">
-                                            {% if request.user.email %}{{ request.user.email }}{% else %}<a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>{% endif %}
-                                        </span>
-                                    </div>
-                                </div>
-
                                 <!-- Address – spans both columns -->
                                 <div class="pc-tile pc-tile--full">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-location-dot"></i></div>
@@ -186,9 +166,9 @@
                     </div>
                 </div>
 
-                <div class="col-lg-6">
+                <div class="col-lg-6 profile-right-col d-flex flex-column gap-4">
                     <!-- ── Family Members Card ── -->
-                    <div class="card mb-0">
+                    <div class="card mb-0 w-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-users"></i> Family Members</h4>
                             <div class="d-flex align-items-center gap-2">
@@ -218,7 +198,7 @@
                                     </thead>
                                     <tbody>
                                         {% for member in family_members %}
-                                        <tr>
+                                        <tr class="profile-list-item{% if forloop.counter > 5 %} d-none{% endif %}" data-list-group="family-members">
                                             <td><strong>{{ member.name }}</strong></td>
                                             <td>{{ member.relation }}</td>
                                             <td>{{ member.gender|capfirst|default:"—" }}</td>
@@ -247,6 +227,9 @@
                                         {% endfor %}
                                     </tbody>
                                 </table>
+                                {% if family_members|length > 5 %}
+                                <button type="button" class="btn btn-sm profile-list-toggle" data-list-group="family-members" data-total="{{ family_members|length }}">Show all ({{ family_members|length }})</button>
+                                {% endif %}
                             </div>
                             {% else %}
                             <div class="empty-fm d-flex flex-column align-items-center justify-content-center">
@@ -256,87 +239,9 @@
                             {% endif %}
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="row g-3 mt-0 align-items-start">
-                <div class="col-lg-6">
-                    <!-- ── Lab Documents Card ── -->
-                    <div class="card mb-0">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4><i class="fas fa-file-medical"></i> Lab Documents</h4>
-                            <span style="font-size:0.82rem;color:var(--muted);">
-                                {{ lab_documents|length }} file{% if lab_documents|length != 1 %}s{% endif %}
-                            </span>
-                        </div>
-                        <div class="card-body p-0">
-                            {% if lab_documents %}
-                            <div class="table-responsive">
-                                <table class="fm-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Document</th>
-                                            <th>Patient</th>
-                                            <th>Visit Date</th>
-                                            <th>Doctor</th>
-                                            <th>Uploaded</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for document in lab_documents %}
-                                        <tr>
-                                            <td><strong>{{ document.original_name }}</strong></td>
-                                            <td>
-                                                {% if document.visit.appointment.family_member %}
-                                                {{ document.visit.appointment.family_member.name }}
-                                                <span style="font-size:0.75rem;color:var(--muted);display:block;">
-                                                    {{ document.visit.appointment.family_member.relation }}
-                                                </span>
-                                                {% else %}
-                                                {{ document.visit.patient.user.get_full_name|default:document.visit.patient.user.username }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ document.visit.appointment.appointment_date|date:"d M Y" }}</td>
-                                            <td>
-                                                {% if document.visit.doctor and document.visit.doctor.user %}
-                                                Dr. {{ document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username }}
-                                                {% else %}
-                                                —
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ document.uploaded_at|date:"d M Y" }}</td>
-                                           <td class="d-flex align-items-center gap-2">
-                                                <a href="{{ document.file.url }}" target="_blank"
-                                                    class="btn btn-primary btn-sm" title="View"
-                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button type="button"
-                                                    class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="lab"
-                                                    data-id="{{ document.id|hid }}" title="Delete"
-                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                            {% else %}
-                            <div class="empty-fm d-flex flex-column align-items-center justify-content-center">
-                                <i class="fas fa-file-medical"></i>
-                                No lab documents uploaded yet.
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6">
                     <!-- ── Upload Documents Card ── -->
-                    <div class="card mb-0">
+                    <div class="card mb-0 w-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h4><i class="fas fa-upload"></i> Upload Documents</h4>
                             <span style="font-size:0.82rem;color:var(--muted);">
@@ -388,7 +293,7 @@
                                     </thead>
                                     <tbody>
                                         {% for document in uploaded_documents %}
-                                        <tr>
+                                        <tr class="profile-list-item{% if forloop.counter > 5 %} d-none{% endif %}" data-list-group="uploaded-documents">
                                             <td><strong>{{ document.original_name }}</strong></td>
                                             <td>
                                                 {% if document.family_member %}
@@ -406,36 +311,103 @@
                                             </td>
                                             <td>{{ document.uploaded_at|date:"d M Y" }}</td>
                                             <td style="vertical-align: middle; white-space: nowrap;">
-    
                                                 <span class="d-flex align-items-center justify-content-end gap-2">
-                                                    
                                                     <a href="{{ document.file.url }}" target="_blank"
                                                     class="btn btn-primary btn-sm" title="View"
                                                     style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:0.35rem;">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    
                                                     <button type="button"
                                                             class="btn btn-outline-danger btn-sm delete-doc-btn"
                                                             data-type="profile" data-id="{{ document.id|hid }}" title="Delete"
                                                             style="width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:6px; padding:0.35rem;">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-                                                    
                                                 </span>
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
                                 </table>
+                                {% if uploaded_documents|length > 5 %}
+                                <button type="button" class="btn btn-sm profile-list-toggle" data-list-group="uploaded-documents" data-total="{{ uploaded_documents|length }}">Show all ({{ uploaded_documents|length }})</button>
+                                {% endif %}
                                 </div>
                             </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- ── Lab Documents Card ── -->
+                    <div class="card mb-0 w-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4><i class="fas fa-file-medical"></i> Lab Documents</h4>
+                            <span style="font-size:0.82rem;color:var(--muted);">
+                                {{ lab_documents|length }} file{% if lab_documents|length != 1 %}s{% endif %}
+                            </span>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if lab_documents %}
+                            <div class="table-responsive">
+                                <table class="fm-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Document</th>
+                                            <th>Patient</th>
+                                            <th>Visit Date</th>
+                                            <th>Doctor</th>
+                                            <th>Uploaded</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for document in lab_documents %}
+                                        <tr class="profile-list-item{% if forloop.counter > 5 %} d-none{% endif %}" data-list-group="lab-documents">
+                                            <td><strong>{{ document.original_name }}</strong></td>
+                                            <td>
+                                                {% if document.visit.appointment.family_member %}
+                                                {{ document.visit.appointment.family_member.name }}
+                                                <span style="font-size:0.75rem;color:var(--muted);display:block;">
+                                                    {{ document.visit.appointment.family_member.relation }}
+                                                </span>
+                                                {% else %}
+                                                {{ document.visit.patient.user.get_full_name|default:document.visit.patient.user.username }}
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ document.visit.appointment.appointment_date|date:"d M Y" }}</td>
+                                            <td>
+                                                {% if document.visit.doctor and document.visit.doctor.user %}
+                                                Dr. {{ document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username }}
+                                                {% else %}
+                                                —
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                                           <td class="d-flex align-items-center gap-2">
+                                                <a href="{{ document.file.url }}" target="_blank"
+                                                    class="btn btn-primary btn-sm" title="View"
+                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <button type="button"
+                                                    class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="lab"
+                                                    data-id="{{ document.id|hid }}" title="Delete"
+                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% if lab_documents|length > 5 %}
+                                <button type="button" class="btn btn-sm profile-list-toggle" data-list-group="lab-documents" data-total="{{ lab_documents|length }}">Show all ({{ lab_documents|length }})</button>
+                                {% endif %}
+                            </div>
                             {% else %}
-                            <div>
-                                <div class="empty-fm d-flex flex-column align-items-center justify-content-center">
-                                    <i class="fas fa-upload"></i>
-                                    No uploaded documents yet.
-                                </div>
+                            <div class="empty-fm d-flex flex-column align-items-center justify-content-center">
+                                <i class="fas fa-file-medical"></i>
+                                No lab documents uploaded yet.
                             </div>
                             {% endif %}
                         </div>
@@ -517,6 +489,24 @@
                 }
             });
 
+        </script>
+        <script>
+            document.addEventListener('click', function (event) {
+                const toggle = event.target.closest('.profile-list-toggle');
+                if (!toggle) return;
+
+                const group = toggle.dataset.listGroup;
+                const rows = document.querySelectorAll('.profile-list-item[data-list-group="' + group + '"]');
+                const hiddenRows = [...rows].slice(5);
+                const expanded = toggle.dataset.expanded === 'true';
+
+                hiddenRows.forEach(function (row) {
+                    row.classList.toggle('d-none', expanded);
+                });
+
+                toggle.dataset.expanded = String(!expanded);
+                toggle.textContent = expanded ? 'Show all (' + (toggle.dataset.total || rows.length) + ')' : 'Show less';
+            });
         </script>
 
         <!-- ══════════════════════════════════

@@ -6223,3 +6223,41 @@ section,
   padding-bottom: 60px;
   /* Add your styles here */
 }
+
+/* SweetAlert2 Hitshree theme */
+.swal2-popup {
+  border-radius: 12px !important;
+}
+
+.swal2-popup .swal2-title {
+  color: #015315 !important;
+}
+
+.swal2-styled.swal2-confirm {
+  background: #015315 !important;
+  border: 1px solid #015315 !important;
+  color: #fff !important;
+}
+
+.swal2-styled.swal2-confirm:hover {
+  background: #013d10 !important;
+  border-color: #013d10 !important;
+}
+
+.swal2-styled.swal2-cancel {
+  background: #fff !important;
+  border: 1px solid #015315 !important;
+  color: #015315 !important;
+}
+
+.swal2-styled.swal2-cancel:hover {
+  background: #EAF4EA !important;
+  border-color: #013d10 !important;
+  color: #013d10 !important;
+}
+
+.swal2-icon.swal2-warning,
+.swal2-icon.swal2-question {
+  border-color: #015315 !important;
+  color: #015315 !important;
+}

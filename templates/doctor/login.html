@@ -22,6 +22,15 @@
             padding-right: 3rem;
         }
 
+        .form-control:-webkit-autofill,
+        .form-control:-webkit-autofill:hover,
+        .form-control:-webkit-autofill:focus,
+        .form-control:autofill {
+            -webkit-box-shadow: 0 0 0 1000px #EAF4EA inset;
+            box-shadow: 0 0 0 1000px #EAF4EA inset;
+            -webkit-text-fill-color: inherit;
+        }
+
         .password-toggle {
             position: absolute;
             right: 0.85rem;
@@ -29,7 +38,7 @@
             transform: translateY(-50%);
             background: transparent;
             border: none;
-            color: #0d6efd;
+            color: #015315;
             cursor: pointer;
             padding: 0.35rem;
             font-size: 1rem;
@@ -41,17 +50,21 @@
         }
 
         .password-toggle:hover {
-            color: #084298;
+            color: #013d10;
         }
 
         .password-toggle:focus {
             outline: none;
             box-shadow: none;
         }
+
+        .doctor-login-button:hover {
+            background: #013d10 !important;
+        }
     </style>
 </head>
 
-<body class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: #f8f9fa;">
+<body class="d-flex align-items-center justify-content-center min-vh-100" style="background-color: #EAF4EA;">
 
     <!-- Login Container - Square Card -->
     <div style="width: 100%; max-width: 420px; aspect-ratio: 1 / 1.15; padding: 1rem;">
@@ -65,7 +78,7 @@
             
             <!-- Header with Gradient -->
             <div class="p-4 text-center text-white flex-shrink-0"
-                style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);">
+                style="background: linear-gradient(135deg, #015315, #027a22);">
                 <div class="mb-2">
                     <i class="bi bi-hospital" style="font-size: 2.5rem;"></i>
                 </div>
@@ -94,7 +107,7 @@
                         </label>
                         <input type="text" class="form-control form-control-sm" id="username" name="username"
                             placeholder="Enter username" required
-                            style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                            style="border-radius: 0.5rem; border: 1px solid #cfe3cf; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
                     </div>
 
                     <!-- Password Field -->
@@ -105,7 +118,7 @@
                         <div class="password-input-wrapper">
                             <input type="password" class="form-control form-control-sm" id="password" name="password"
                                 placeholder="Enter password" required
-                                style="border-radius: 0.5rem; border: 1px solid #d6deea; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
+                                style="border-radius: 0.5rem; border: 1px solid #cfe3cf; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
                             <button type="button" class="password-toggle" aria-label="Toggle password visibility">
                                 <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true">
                                     <path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/>
@@ -117,13 +130,13 @@
 
                     <!-- Forgot Password Link -->
                     <div class="text-end mb-3">
-                        <a href="{% url 'doctor:forgot_password' %}" class="text-primary text-decoration-none"
-                            style="font-size: 0.85rem; font-weight: 600;">Forgot Password?</a>
+                        <a href="{% url 'doctor:forgot_password' %}" class="text-decoration-none"
+                            style="font-size: 0.85rem; font-weight: 600; color: #015315;">Forgot Password?</a>
                     </div>
 
                     <!-- Login Button -->
-                    <button type="submit" class="btn w-100 fw-bold rounded-2 text-white"
-                        style="background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); border: none; font-size: 0.95rem; padding: 0.6rem;">
+                    <button type="submit" class="btn doctor-login-button w-100 fw-bold rounded-2 text-white"
+                        style="background: #015315; border: none; font-size: 0.95rem; padding: 0.6rem;">
                         <i class="bi bi-box-arrow-in-right me-1"></i>Login
                     </button>
 
@@ -133,7 +146,7 @@
             <!-- Footer -->
             <div class="bg-light p-3 text-center border-top flex-shrink-0" style="font-size: 0.85rem;">
                 <p class="text-muted mb-0">
-                    Not registered? <a href="#" class="text-primary text-decoration-none fw-semibold">Contact Admin</a>
+                    Not registered? <a href="#" class="text-decoration-none fw-semibold" style="color: #015315;">Contact Admin</a>
                 </p>
             </div>
 
@@ -149,11 +162,11 @@
         const inputs = document.querySelectorAll('.form-control');
         inputs.forEach(input => {
             input.addEventListener('focus', function () {
-                this.style.borderColor = '#0d6efd';
-                this.style.boxShadow = '0 0 0 3px rgba(13, 110, 253, 0.1)';
+                this.style.borderColor = '#015315';
+                this.style.boxShadow = '0 0 0 3px rgba(1,83,21,0.15)';
             });
             input.addEventListener('blur', function () {
-                this.style.borderColor = '#d6deea';
+                this.style.borderColor = '#cfe3cf';
                 this.style.boxShadow = 'none';
             });
         });

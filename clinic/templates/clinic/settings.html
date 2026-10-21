@@ -6,32 +6,15 @@
 <main class="main-content" id="mainContent">
 
   <!-- Page Header -->
-  <div class="page-header d-flex align-items-center justify-content-between flex-wrap gap-3">
+  <div class="page-head">
     <div>
-      <h2 class="page-title mb-1">
-        <i class="bi bi-gear-fill me-2 text-primary"></i>Clinic Settings
-      </h2>
-      <nav aria-label="breadcrumb">
-        <ol class="breadcrumb mb-0" style="font-size:13px;">
-          <li class="breadcrumb-item">
-            <a href="{% url 'doctor:dashboard' %}" class="text-decoration-none text-primary">
-              <i class="bi bi-house-fill me-1"></i>Dashboard
-            </a>
-          </li>
-          <li class="breadcrumb-item active text-secondary">Clinic Settings</li>
-        </ol>
-      </nav>
+      <h2 class="page-title">Clinic Settings</h2>
+      <p class="page-subtitle">Manage clinic details, schedule and billing defaults.</p>
     </div>
-    <div class="d-flex gap-2">
-      <button type="submit" form="settingsForm"
-        class="patient-submit-btn px-4">
-        <i class="bi bi-floppy-fill"></i> Save Settings
-      </button>
-    </div>
+    <button type="submit" form="settingsForm" class="action-btn">
+      <i class="bi bi-floppy-fill"></i> Save Settings
+    </button>
   </div>
-
-  <!-- Flash Messages -->
-
 
   <form method="POST" enctype="multipart/form-data" id="settingsForm">
     {% csrf_token %}
@@ -41,313 +24,239 @@
       <!-- LEFT COLUMN -->
       <div class="col-lg-8">
 
-        <!-- ── SECTION 1: Clinic Information ── -->
-        <div class="patient-form-card mb-4">
-          <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border-light);">
-            <div class="stat-icon primary" style="width:42px;height:42px;font-size:20px;border-radius:10px;">
-              <i class="bi bi-hospital-fill"></i>
-            </div>
-            <div>
-              <h5 class="mb-0 fw-700" style="color:var(--dark-text);">Clinic Information</h5>
-              <small class="text-secondary">Basic details about your clinic</small>
-            </div>
-          </div>
-
-          <!-- Logo Upload -->
-          <div class="mb-4">
-            <label class="patient-label mb-2">
-              <i class="bi bi-image me-1 text-primary"></i> Clinic Logo
-            </label>
-            <div class="d-flex align-items-center gap-4 flex-wrap">
-              <div style="width:90px;height:90px;border-radius:14px;overflow:hidden;border:2px dashed #d6deea;background:#f8f9fa;display:flex;align-items:center;justify-content:center;">
-                {% if clinic.logo %}
-                <img id="logoPreview" src="{{ clinic.logo.url }}" alt="Logo"
-                  style="width:100%;height:100%;object-fit:cover;">
-                {% else %}
-                <img id="logoPreview" src="#" alt="Logo Preview"
-                  style="width:100%;height:100%;object-fit:cover;display:none;">
-                <i class="bi bi-building text-secondary fs-3" id="logoPlaceholder"></i>
-                {% endif %}
+        <!-- SECTION 1: Clinic Information -->
+        <div class="dc-card mb-4">
+          <div class="dc-card-body">
+            <section class="dc-section">
+              <div class="dc-section-header">
+                <div class="dc-section-icon">
+                  <i class="bi bi-hospital-fill"></i>
+                </div>
+                <div class="dc-section-title-wrap">
+                  <h3 class="dc-section-title mb-0">Clinic Information</h3>
+                  <p class="dc-hint">Basic details about your clinic</p>
+                </div>
               </div>
-              <div class="flex-grow-1">
-                <input type="file" name="logo" id="logoInput" accept="image/*"
-                  class="patient-input" style="padding:10px 14px;">
-                <small class="text-secondary d-block mt-1">
-                  <i class="bi bi-info-circle me-1"></i>Recommended: 200×200px PNG/JPG
-                </small>
+
+              <!-- Logo Upload -->
+              <div class="mb-4">
+                <label class="dc-label">Clinic Logo</label>
+                <div class="d-flex align-items-center gap-4 flex-wrap">
+                  <div id="logoPreviewBox">
+                    {% if clinic.logo %}
+                    <img id="logoPreview" src="{{ clinic.logo.url }}" alt="Logo">
+                    {% else %}
+                    <img id="logoPreview" src="#" alt="Logo Preview" style="display:none;">
+                    <i class="bi bi-building text-secondary fs-3" id="logoPlaceholder"></i>
+                    {% endif %}
+                  </div>
+                  <div class="flex-grow-1">
+                    <input type="file" name="logo" id="logoInput" accept="image/*" class="d-none">
+                    <label for="logoInput" class="btn-clear cursor-pointer">
+                      <i class="bi bi-upload"></i> Upload Logo
+                    </label>
+                    <small id="logoFileName" class="dc-hint" style="display:none;"></small>
+                    <small class="dc-hint">Recommended: 200×200px PNG/JPG</small>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Clinic Name & Tagline -->
-          <div class="patient-form-row mb-3">
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-building me-1 text-primary"></i> Clinic Name <span class="text-danger">*</span>
-              </label>
-              <input type="text" name="clinic_name" class="patient-input"
-                placeholder="e.g. LifeCare Multispeciality Clinic"
-                value="{{ clinic.clinic_name }}" required>
-            </div>
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-chat-quote me-1 text-primary"></i> Tagline
-              </label>
-              <input type="text" name="tagline" class="patient-input"
-                placeholder="e.g. Your Health, Our Priority"
-                value="{{ clinic.tagline|default:'' }}">
-            </div>
-          </div>
+              <!-- Clinic Name & Tagline -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="dc-label" for="clinic_name">Clinic Name <span class="dc-muted">*</span></label>
+                  <input type="text" name="clinic_name" id="clinic_name" class="form-control" placeholder="e.g. LifeCare Multispeciality Clinic" value="{{ clinic.clinic_name }}" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="dc-label" for="tagline">Tagline</label>
+                  <input type="text" name="tagline" id="tagline" class="form-control" placeholder="e.g. Your Health, Our Priority" value="{{ clinic.tagline|default:'' }}">
+                </div>
+              </div>
 
-          <!-- Address -->
-          <div class="patient-field mb-3">
-            <label class="patient-label">
-              <i class="bi bi-geo-alt me-1 text-primary"></i> Address
-            </label>
-            <textarea name="address" class="patient-input patient-textarea" rows="2"
-              placeholder="Street / Building No.">{{ clinic.address|default:'' }}</textarea>
-          </div>
+              <!-- Address -->
+              <div class="mb-3">
+                <label class="dc-label" for="address">Address</label>
+                <textarea name="address" id="address" class="form-control" rows="2" placeholder="Street / Building No.">{{ clinic.address|default:'' }}</textarea>
+              </div>
 
-          <!-- City / State / Pincode -->
-          <div class="row g-3 mb-3">
-            <div class="col-sm-4">
-              <label class="patient-label">City</label>
-              <input type="text" name="city" class="patient-input"
-                placeholder="City" value="{{ clinic.city|default:'' }}">
-            </div>
-            <div class="col-sm-4">
-              <label class="patient-label">State</label>
-              <input type="text" name="state" class="patient-input"
-                placeholder="State" value="{{ clinic.state|default:'' }}">
-            </div>
-            <div class="col-sm-4">
-              <label class="patient-label">Pincode</label>
-              <input type="text" name="pincode" class="patient-input"
-                placeholder="Pincode" maxlength="10"
-                value="{{ clinic.pincode|default:'' }}">
-            </div>
-          </div>
+              <!-- City / State / Pincode -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label class="dc-label" for="city">City</label>
+                  <input type="text" name="city" id="city" class="form-control" placeholder="City" value="{{ clinic.city|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                  <label class="dc-label" for="state">State</label>
+                  <input type="text" name="state" id="state" class="form-control" placeholder="State" value="{{ clinic.state|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                  <label class="dc-label" for="pincode">Pincode</label>
+                  <input type="text" name="pincode" id="pincode" class="form-control" placeholder="Pincode" maxlength="10" value="{{ clinic.pincode|default:'' }}">
+                </div>
+              </div>
 
-          <!-- Phone / Email / Website -->
-          <div class="row g-3">
-            <div class="col-sm-4">
-              <label class="patient-label">
-                <i class="bi bi-telephone me-1 text-primary"></i> Phone
-              </label>
-              <input type="tel" name="phone" class="patient-input"
-                placeholder="+91 XXXXXXXXXX"
-                value="{{ clinic.phone|default:'' }}">
-            </div>
-            <div class="col-sm-4">
-              <label class="patient-label">
-                <i class="bi bi-envelope me-1 text-primary"></i> Email
-              </label>
-              <input type="email" name="email" class="patient-input"
-                placeholder="clinic@example.com"
-                value="{{ clinic.email|default:'' }}">
-            </div>
-            <div class="col-sm-4">
-              <label class="patient-label">
-                <i class="bi bi-whatsapp me-1 text-primary"></i> WhatsApp
-              </label>
-              <input type="tel" name="whatsapp" class="patient-input"
-                placeholder="+91 XXXXXXXXXX"
-                value="{{ clinic.whatsapp|default:'' }}">
-            </div>
+              <!-- Phone / Email / Website -->
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="dc-label" for="phone">Phone</label>
+                  <input type="tel" name="phone" id="phone" class="form-control" placeholder="+91 XXXXXXXXXX" value="{{ clinic.phone|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                  <label class="dc-label" for="email">Email</label>
+                  <input type="email" name="email" id="email" class="form-control" placeholder="clinic@example.com" value="{{ clinic.email|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                  <label class="dc-label" for="whatsapp">WhatsApp</label>
+                  <input type="tel" name="whatsapp" id="whatsapp" class="form-control" placeholder="+91 XXXXXXXXXX" value="{{ clinic.whatsapp|default:'' }}">
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
-        <!-- ── SECTION 2: Doctor Information ── -->
-        <div class="patient-form-card mb-4">
-          <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border-light);">
-            <div class="stat-icon success" style="width:42px;height:42px;font-size:20px;border-radius:10px;">
-              <i class="bi bi-person-badge-fill"></i>
-            </div>
-            <div>
-              <h5 class="mb-0 fw-700" style="color:var(--dark-text);">Doctor Information</h5>
-              <small class="text-secondary">Details of the primary doctor</small>
-            </div>
-          </div>
+        <!-- SECTION 2: Doctor Information -->
+        <div class="dc-card mb-4">
+          <div class="dc-card-body">
+            <section class="dc-section">
+              <div class="dc-section-header">
+                <div class="dc-section-icon">
+                  <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <div class="dc-section-title-wrap">
+                  <h3 class="dc-section-title mb-0">Doctor Information</h3>
+                  <p class="dc-hint">Details of the primary doctor</p>
+                </div>
+              </div>
 
-          <div class="patient-form-row mb-3">
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-person-fill me-1 text-success"></i> Doctor Name
-              </label>
-              <input type="text" name="doctor_name" class="patient-input"
-                placeholder="Dr. Full Name"
-                value="{{ clinic.doctor_name|default:'' }}">
-            </div>
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-stethoscope me-1 text-success"></i> Specialization
-              </label>
-              <input type="text" name="specialization" class="patient-input"
-                placeholder="e.g. General Physician"
-                value="{{ clinic.specialization|default:'' }}">
-            </div>
-          </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="dc-label" for="doctor_name">Doctor Name</label>
+                  <input type="text" name="doctor_name" id="doctor_name" class="form-control" placeholder="Dr. Full Name" value="{{ clinic.doctor_name|default:'' }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="dc-label" for="specialization">Specialization</label>
+                  <input type="text" name="specialization" id="specialization" class="form-control" placeholder="e.g. General Physician" value="{{ clinic.specialization|default:'' }}">
+                </div>
+              </div>
 
-          <div class="patient-form-row">
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-mortarboard-fill me-1 text-success"></i> Qualification
-              </label>
-              <input type="text" name="qualification" class="patient-input"
-                placeholder="e.g. MBBS, MD"
-                value="{{ clinic.qualification|default:'' }}">
-            </div>
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-card-text me-1 text-success"></i> Registration No.
-              </label>
-              <input type="text" name="registration_no" class="patient-input"
-                placeholder="Medical Council Reg. No."
-                value="{{ clinic.registration_no|default:'' }}">
-            </div>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="dc-label" for="qualification">Qualification</label>
+                  <input type="text" name="qualification" id="qualification" class="form-control" placeholder="e.g. MBBS, MD" value="{{ clinic.qualification|default:'' }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="dc-label" for="registration_no">Registration No.</label>
+                  <input type="text" name="registration_no" id="registration_no" class="form-control" placeholder="Medical Council Reg. No." value="{{ clinic.registration_no|default:'' }}">
+                </div>
+              </div>
+            </section>
           </div>
         </div>
 
-        <!-- ── SECTION 3: Schedule Settings ── -->
-        <div class="patient-form-card mb-4">
-          <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border-light);">
-            <div class="stat-icon warning" style="width:42px;height:42px;font-size:20px;border-radius:10px;">
-              <i class="bi bi-clock-fill"></i>
-            </div>
-            <div>
-              <h5 class="mb-0 fw-700" style="color:var(--dark-text);">Schedule Settings</h5>
-              <small class="text-secondary">Clinic hours, slots &amp; working days</small>
-            </div>
-          </div>
+        <!-- SECTION 3: Schedule Settings -->
+        <div class="dc-card mb-4">
+          <div class="dc-card-body">
+            <section class="dc-section">
+              <div class="dc-section-header">
+                <div class="dc-section-icon">
+                  <i class="bi bi-clock-fill"></i>
+                </div>
+                <div class="dc-section-title-wrap">
+                  <h3 class="dc-section-title mb-0">Schedule Settings</h3>
+                  <p class="dc-hint">Clinic hours, slots & working days</p>
+                </div>
+              </div>
 
-          <!-- OPD Timing -->
-          <div class="row g-3 mb-3">
-            <div class="col-sm-4">
-              <label class="patient-label">
-                <i class="bi bi-sunrise me-1 text-warning"></i> OPD Start Time
-              </label>
-              <input type="time" name="start_time" class="patient-input"
-                value="{{ clinic.start_time|time:'H:i' }}">
-              <small class="text-secondary mt-1 d-block">
-                <i class="bi bi-info-circle me-1"></i>Morning opening time
-              </small>
-            </div>
-            <div class="col-sm-4">
-              <label class="patient-label">
-                <i class="bi bi-sunset me-1 text-warning"></i> OPD End Time
-              </label>
-              <input type="time" name="end_time" class="patient-input"
-                value="{{ clinic.end_time|time:'H:i' }}">
-              <small class="text-secondary mt-1 d-block">
-                <i class="bi bi-info-circle me-1"></i>Evening closing time
-              </small>
-            </div>
-            <div class="col-sm-4">
-              <label class="patient-label">
-                <i class="bi bi-grid me-1 text-warning"></i> Slot Duration
-              </label>
-              <select name="slot_duration" class="patient-input">
-                {% for value, label in slot_durations %}
-                <option value="{{ value }}" {% if clinic.slot_duration == value %}selected{% endif %}>
-                  {{ label }}
-                </option>
-                {% endfor %}
-              </select>
-              <small class="text-secondary mt-1 d-block">
-                <i class="bi bi-info-circle me-1"></i>Appointment slot size
-              </small>
-            </div>
-          </div>
+              <!-- OPD Timing -->
+              <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                  <label class="dc-label" for="start_time">OPD Start Time</label>
+                  <input type="time" name="start_time" id="start_time" class="form-control" value="{{ clinic.start_time|time:'H:i' }}">
+                  <small class="dc-hint">Morning opening time</small>
+                </div>
+                <div class="col-md-4">
+                  <label class="dc-label" for="end_time">OPD End Time</label>
+                  <input type="time" name="end_time" id="end_time" class="form-control" value="{{ clinic.end_time|time:'H:i' }}">
+                  <small class="dc-hint">Evening closing time</small>
+                </div>
+                <div class="col-md-4">
+                  <label class="dc-label" for="slot_duration">Slot Duration</label>
+                  <select name="slot_duration" id="slot_duration" class="form-select">
+                    {% for value, label in slot_durations %}
+                    <option value="{{ value }}" {% if clinic.slot_duration == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                  <small class="dc-hint">Appointment slot size</small>
+                </div>
+              </div>
 
-          <!-- Lunch Break -->
-          <div class="row g-3 mb-4">
-            <div class="col-sm-6">
-              <label class="patient-label">
-                <i class="bi bi-cup-hot me-1 text-warning"></i> Lunch Break Start
-              </label>
-              <input type="time" name="lunch_start" class="patient-input"
-                value="{{ clinic.lunch_start|time:'H:i' }}">
-            </div>
-            <div class="col-sm-6">
-              <label class="patient-label">
-                <i class="bi bi-cup-hot-fill me-1 text-warning"></i> Lunch Break End
-              </label>
-              <input type="time" name="lunch_end" class="patient-input"
-                value="{{ clinic.lunch_end|time:'H:i' }}">
-            </div>
-          </div>
+              <!-- Lunch Break -->
+              <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                  <label class="dc-label" for="lunch_start">Lunch Break Start</label>
+                  <input type="time" name="lunch_start" id="lunch_start" class="form-control" value="{{ clinic.lunch_start|time:'H:i' }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="dc-label" for="lunch_end">Lunch Break End</label>
+                  <input type="time" name="lunch_end" id="lunch_end" class="form-control" value="{{ clinic.lunch_end|time:'H:i' }}">
+                </div>
+              </div>
 
-          <!-- Working Days -->
-          <div>
-            <label class="patient-label mb-3 d-block">
-              <i class="bi bi-calendar3 me-1 text-warning"></i> Working Days
-            </label>
-            <div class="d-flex flex-wrap gap-2">
-              {% for value, label in all_days %}
-              <label class="working-day-pill {% if value in working_days %}active{% endif %}">
-                <input type="checkbox" name="working_days" value="{{ value }}"
-                  {% if value in working_days %}checked{% endif %}
-                  class="d-none working-day-check">
-                <span>{{ label }}</span>
-              </label>
-              {% endfor %}
-            </div>
-            <small class="text-secondary mt-2 d-block">
-              <i class="bi bi-info-circle me-1"></i>Click to toggle working days
-            </small>
+              <!-- Working Days -->
+              <div>
+                <label class="dc-label">Working Days</label>
+                <div class="d-flex flex-wrap gap-2" id="workingDaysContainer">
+                  {% for value, label in all_days %}
+                  <label class="working-day-pill {% if value in working_days %}active{% endif %}" data-value="{{ value }}">
+                    <input type="checkbox" name="working_days" value="{{ value }}" {% if value in working_days %}checked{% endif %} class="d-none working-day-check">
+                    <span>{{ label }}</span>
+                  </label>
+                  {% endfor %}
+                </div>
+                <small class="dc-hint">Click to toggle working days</small>
+              </div>
+            </section>
           </div>
         </div>
 
-        <!-- ── SECTION 4: Billing Settings ── -->
-        <div class="patient-form-card mb-4">
-          <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border-light);">
-            <div class="stat-icon danger" style="width:42px;height:42px;font-size:20px;border-radius:10px;">
-              <i class="bi bi-receipt-cutoff"></i>
-            </div>
-            <div>
-              <h5 class="mb-0 fw-700" style="color:var(--dark-text);">Billing Settings</h5>
-              <small class="text-secondary">GST, fees and invoice configuration</small>
-            </div>
-          </div>
+        <!-- SECTION 4: Billing Settings -->
+        <div class="dc-card mb-4">
+          <div class="dc-card-body">
+            <section class="dc-section">
+              <div class="dc-section-header">
+                <div class="dc-section-icon">
+                  <i class="bi bi-receipt-cutoff"></i>
+                </div>
+                <div class="dc-section-title-wrap">
+                  <h3 class="dc-section-title mb-0">Billing Settings</h3>
+                  <p class="dc-hint">GST, fees and invoice configuration</p>
+                </div>
+              </div>
 
-          <div class="patient-form-row mb-3">
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-percent me-1 text-danger"></i> Default GST (%)
-              </label>
-              <input type="number" name="default_gst" class="patient-input"
-                placeholder="e.g. 18" step="0.01" min="0" max="100"
-                value="{{ clinic.default_gst }}">
-            </div>
-            <div class="patient-field">
-              <label class="patient-label">
-                <i class="bi bi-currency-rupee me-1 text-danger"></i> Default Consultation Fee (₹)
-              </label>
-              <input type="number" name="default_consultation_fee" class="patient-input"
-                placeholder="e.g. 500" step="0.01" min="0"
-                value="{{ clinic.default_consultation_fee }}">
-            </div>
-          </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="dc-label" for="default_gst">Default GST (%)</label>
+                  <input type="number" name="default_gst" id="default_gst" class="form-control" placeholder="e.g. 18" step="0.01" min="0" max="100" value="{{ clinic.default_gst }}">
+                </div>
+                <div class="col-md-6">
+                  <label class="dc-label" for="default_consultation_fee">Default Consultation Fee (₹)</label>
+                  <input type="number" name="default_consultation_fee" id="default_consultation_fee" class="form-control" placeholder="e.g. 500" step="0.01" min="0" value="{{ clinic.default_consultation_fee }}">
+                </div>
+              </div>
 
-          <div class="patient-field mb-3">
-            <label class="patient-label">
-              <i class="bi bi-hash me-1 text-danger"></i> Bill Prefix
-            </label>
-            <input type="text" name="bill_prefix" class="patient-input"
-              placeholder="e.g. BILL, INV"
-              value="{{ clinic.bill_prefix }}" maxlength="10"
-              style="max-width:220px;">
-            <small class="text-secondary mt-1 d-block">
-              <i class="bi bi-info-circle me-1"></i>Used as prefix for bill numbers — e.g. BILL-001
-            </small>
-          </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <label class="dc-label" for="bill_prefix">Bill Prefix</label>
+                  <input type="text" name="bill_prefix" id="bill_prefix" class="form-control" placeholder="e.g. BILL, INV" value="{{ clinic.bill_prefix }}" maxlength="10">
+                  <small class="dc-hint">Used as prefix for bill numbers — e.g. BILL-001</small>
+                </div>
+              </div>
 
-          <div class="patient-field">
-            <label class="patient-label">
-              <i class="bi bi-chat-left-text me-1 text-danger"></i> Bill Footer Note
-            </label>
-            <textarea name="bill_footer_note" class="patient-input patient-textarea" rows="2"
-              placeholder="e.g. Thank you for visiting our clinic. Get well soon!">{{ clinic.bill_footer_note }}</textarea>
+              <div class="mb-3">
+                <label class="dc-label" for="bill_footer_note">Bill Footer Note</label>
+                <textarea name="bill_footer_note" id="bill_footer_note" class="form-control" rows="2" placeholder="e.g. Thank you for visiting our clinic. Get well soon!">{{ clinic.bill_footer_note }}</textarea>
+              </div>
+            </section>
           </div>
         </div>
 
@@ -358,137 +267,143 @@
         <div style="position:sticky;top:calc(var(--navbar-height) + 20px);">
 
           <!-- Clinic Preview Card -->
-          <div class="patient-form-card mb-4">
-            <div class="text-center mb-3">
-              <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;margin:0 auto 10px;border:3px solid var(--primary-color);background:#f0f4ff;display:flex;align-items:center;justify-content:center;">
-                {% if clinic.logo %}
-                <img id="previewLogoImg" src="{{ clinic.logo.url }}" alt="Clinic Logo"
-                  style="width:100%;height:100%;object-fit:cover;">
-                {% else %}
-                <img id="previewLogoImg" src="#" alt="Clinic Logo"
-                  style="width:100%;height:100%;object-fit:cover;display:none;">
-                <i class="bi bi-building text-primary fs-2" id="previewLogoIcon"></i>
-                {% endif %}
+          <div class="dc-card mb-4" id="clinicPreviewCard">
+            <div class="dc-card-body dc-preview-inner">
+              <!-- Header -->
+              <div class="text-center mb-3" id="previewHeaderWrap">
+                <div style="width:84px;height:84px;border-radius:50%;overflow:hidden;margin:0 auto 12px;border:3px solid var(--primary-color);background:var(--light-bg);display:flex;align-items:center;justify-content:center;">
+                  {% if clinic.logo %}
+                  <img id="previewLogoImg" src="{{ clinic.logo.url }}" alt="Clinic Logo" style="width:100%;height:100%;object-fit:cover;">
+                  {% else %}
+                  <img id="previewLogoImg" src="#" alt="Clinic Logo" style="width:100%;height:100%;object-fit:cover;display:none;">
+                  <i class="bi bi-building text-secondary fs-2" id="previewLogoIcon"></i>
+                  {% endif %}
+                </div>
+                <h6 class="fw-600 mb-0" id="previewClinicName" style="color:#14281A;font-size:16px;line-height:1.35;">{{ clinic.clinic_name|default:"" }}</h6>
+                <span class="pv-accent"></span>
+                <small class="dc-hint d-none" id="previewTagline" style="font-size:13px;color:#5B6B5E;font-style:italic;margin-top:8px;display:block;">{{ clinic.tagline|default:"" }}</small>
               </div>
-              <h6 class="fw-700 mb-0" id="previewClinicName" style="color:var(--dark-text);">
-                {{ clinic.clinic_name }}
-              </h6>
-              <small class="text-secondary" id="previewTagline">{{ clinic.tagline|default:'—' }}</small>
-            </div>
 
-            <hr class="my-3">
+              <hr class="dc-divider">
 
-            <ul class="list-unstyled mb-0" style="font-size:13px;">
-              <li class="d-flex align-items-start gap-2 mb-2">
-                <i class="bi bi-person-fill text-primary mt-1"></i>
-                <span id="previewDoctor">
-                  {% if clinic.doctor_name %}{{ clinic.doctor_name }}{% if clinic.qualification %} ({{ clinic.qualification }}){% endif %}{% else %}—{% endif %}
-                </span>
-              </li>
-              <li class="d-flex align-items-start gap-2 mb-2">
-                <i class="bi bi-stethoscope text-success mt-1"></i>
-                <span id="previewSpec">{{ clinic.specialization|default:'—' }}</span>
-              </li>
-              <li class="d-flex align-items-start gap-2 mb-2">
-                <i class="bi bi-telephone text-warning mt-1"></i>
-                <span>{{ clinic.phone|default:'—' }}</span>
-              </li>
-              <li class="d-flex align-items-start gap-2 mb-2">
-                <i class="bi bi-envelope text-danger mt-1"></i>
-                <span>{{ clinic.email|default:'—' }}</span>
-              </li>
-              <li class="d-flex align-items-start gap-2">
-                <i class="bi bi-geo-alt-fill text-secondary mt-1"></i>
-                <span>
-                  {% if clinic.city or clinic.state %}
-                    {{ clinic.city|default:'' }}{% if clinic.city and clinic.state %}, {% endif %}{{ clinic.state|default:'' }}
-                  {% else %}—{% endif %}
-                </span>
-              </li>
-            </ul>
-
-            <hr class="my-3">
-
-            <!-- OPD Hours -->
-            <div class="d-flex align-items-center gap-2 mb-2" style="font-size:13px;">
-              <i class="bi bi-clock text-warning"></i>
-              <strong>OPD Hours:</strong>
-              <span class="text-secondary">
-                {{ clinic.start_time|time:"h:i A" }} – {{ clinic.end_time|time:"h:i A" }}
-              </span>
-            </div>
-            <div class="d-flex align-items-center gap-2" style="font-size:13px;">
-              <i class="bi bi-cup-hot text-warning"></i>
-              <strong>Lunch:</strong>
-              <span class="text-secondary">
-                {{ clinic.lunch_start|time:"h:i A" }} – {{ clinic.lunch_end|time:"h:i A" }}
-              </span>
-            </div>
-
-            <hr class="my-3">
-
-            <!-- Billing Summary -->
-            <div style="font-size:13px;">
-              <div class="d-flex justify-content-between mb-1">
-                <span class="text-secondary">GST</span>
-                <strong>{{ clinic.default_gst }}%</strong>
+              <!-- Contact Rows -->
+              <div class="preview-row" id="previewDoctorRow">
+                <i class="bi bi-person-fill"></i>
+                <span id="previewDoctor">{% if clinic.doctor_name %}{{ clinic.doctor_name }}{% if clinic.qualification %} ({{ clinic.qualification }}){% endif %}{% endif %}</span>
               </div>
-              <div class="d-flex justify-content-between mb-1">
-                <span class="text-secondary">Consultation Fee</span>
-                <strong>₹{{ clinic.default_consultation_fee }}</strong>
+              <div class="preview-row" id="previewQualRow">
+                <i class="bi bi-mortarboard"></i>
+                <span id="previewQual">{{ clinic.qualification|default:"" }}</span>
               </div>
-              <div class="d-flex justify-content-between">
-                <span class="text-secondary">Bill Prefix</span>
-                <strong>{{ clinic.bill_prefix }}-001</strong>
+              <div class="preview-row" id="previewSpecRow">
+                <i class="bi bi-heart-pulse"></i>
+                <span id="previewSpec">{{ clinic.specialization|default:"" }}</span>
+              </div>
+              <div class="preview-row" id="previewPhoneRow">
+                <i class="bi bi-telephone"></i>
+                <span>{{ clinic.phone|default:"" }}</span>
+              </div>
+              <div class="preview-row" id="previewEmailRow">
+                <i class="bi bi-envelope"></i>
+                <span>{{ clinic.email|default:"" }}</span>
+              </div>
+              <div class="preview-row" id="previewAddressRow">
+                <i class="bi bi-geo-alt-fill"></i>
+                <span>{% if clinic.city or clinic.state %}{{ clinic.city|default:'' }}{% if clinic.city and clinic.state %}, {% endif %}{{ clinic.state|default:'' }}{% endif %}</span>
+              </div>
+
+              <hr class="dc-divider">
+
+              <!-- Timings -->
+              <div class="preview-row" id="previewOPDRow">
+                <i class="bi bi-clock"></i>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <strong style="color:#14281A;font-size:14px;">OPD Hours</strong>
+                  <span class="text-muted" style="font-size:13px;">{{ clinic.start_time|time:"h:i A" }} – {{ clinic.end_time|time:"h:i A" }}</span>
+                </div>
+              </div>
+              <div class="preview-row" id="previewLunchRow">
+                <i class="bi bi-cup-hot"></i>
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <strong style="color:#14281A;font-size:14px;">Lunch</strong>
+                  <span class="text-muted" style="font-size:13px;">{{ clinic.lunch_start|time:"h:i A" }} – {{ clinic.lunch_end|time:"h:i A" }}</span>
+                </div>
+              </div>
+
+              <hr class="dc-divider">
+
+              <!-- Billing -->
+              <div class="preview-row" id="previewGSTRow">
+                <i class="bi bi-percent"></i>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;text-align:right;">
+                  <strong style="color:#14281A;font-size:14px;">GST</strong>
+                  <span style="color:#14281A;font-size:13px;">{{ clinic.default_gst }}%</span>
+                </div>
+              </div>
+              <div class="preview-row" id="previewFeeRow">
+                <i class="bi bi-currency-rupee"></i>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;text-align:right;">
+                  <strong style="color:#14281A;font-size:14px;">Consultation Fee</strong>
+                  <span style="color:#14281A;font-size:13px;">₹{{ clinic.default_consultation_fee }}</span>
+                </div>
+              </div>
+              <div class="preview-row" id="previewPrefixRow">
+                <i class="bi bi-hash"></i>
+                <div style="display:flex;flex-direction:column;gap:2px;flex:1;text-align:right;">
+                  <strong style="color:#14281A;font-size:14px;">Bill Prefix</strong>
+                  <span style="color:#14281A;font-size:13px;">{{ clinic.bill_prefix }}-001</span>
+                </div>
               </div>
             </div>
           </div>
-
-          <!-- Save Button (sticky right column) -->
-          <button type="submit" form="settingsForm" class="patient-submit-btn w-100 justify-content-center">
-            <i class="bi bi-floppy-fill"></i> Save All Settings
-          </button>
 
         </div>
       </div>
 
     </div><!-- /row -->
+
+    <!-- Form Footer Card (left column width) -->
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="dc-card dc-form-footer-card">
+          <div class="dc-form-footer">
+            <a href="{% url 'doctor:dashboard' %}" class="btn-ghost">Cancel</a>
+            <button type="submit" form="settingsForm" class="btn btn-primary">Save Settings</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </form>
 
 </main>
 
-<style>
-  /* Working Day Pills */
-  .working-day-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 18px;
-    border-radius: 30px;
-    border: 2px solid var(--border-light);
-    background: var(--white);
-    color: var(--secondary-color);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    user-select: none;
-  }
-  .working-day-pill:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
-    background: rgba(13,110,253,0.05);
-  }
-  .working-day-pill.active {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(13,110,253,0.25);
-  }
-  .fw-700 { font-weight: 700 !important; }
-</style>
-
 <script>
+  // ── Helper: set text with "Not set" fallback ──
+  function setPreviewText(el, value, isHint) {
+    if (!el) return;
+    const trimmed = (value || '').trim();
+    if (trimmed) {
+      el.textContent = trimmed;
+      if (isHint) el.classList.remove('text-muted');
+    } else {
+      el.textContent = 'Not set';
+      if (isHint) el.classList.add('text-muted');
+      el.style.color = '#8A968C';
+      el.style.fontStyle = 'italic';
+      el.style.fontSize = '13px';
+    }
+  }
+  function setPreviewHtml(el, value, isHint) {
+    if (!el) return;
+    const trimmed = (value || '').trim();
+    if (trimmed) {
+      el.innerHTML = trimmed;
+    } else {
+      el.innerHTML = '<span style="color:#8A968C;font-style:italic;font-size:13px;">Not set</span>';
+    }
+  }
+
   // ── Logo Preview ──
   document.getElementById('logoInput').addEventListener('change', function () {
     const file = this.files[0];
@@ -499,6 +414,7 @@
       const previewImg = document.getElementById('previewLogoImg');
       const placeholder = document.getElementById('logoPlaceholder');
       const previewIcon = document.getElementById('previewLogoIcon');
+      const fileNameEl = document.getElementById('logoFileName');
 
       img.src = e.target.result;
       img.style.display = 'block';
@@ -506,6 +422,11 @@
 
       if (previewImg) { previewImg.src = e.target.result; previewImg.style.display = 'block'; }
       if (previewIcon) previewIcon.style.display = 'none';
+
+      if (fileNameEl) {
+        fileNameEl.textContent = file.name;
+        fileNameEl.style.display = 'block';
+      }
     };
     reader.readAsDataURL(file);
   });
@@ -524,17 +445,141 @@
   if (clinicNameInput) {
     clinicNameInput.addEventListener('input', function () {
       const el = document.getElementById('previewClinicName');
-      if (el) el.textContent = this.value || '—';
+      if (el) {
+        const v = this.value.trim();
+        if (v) {
+          el.textContent = v;
+          el.style.color = '#14281A';
+          el.style.fontStyle = 'normal';
+          el.style.fontSize = '16px';
+          el.style.fontWeight = '600';
+        } else {
+          el.textContent = 'Not set';
+          el.style.color = '#8A968C';
+          el.style.fontStyle = 'italic';
+          el.style.fontSize = '13px';
+          el.style.fontWeight = '400';
+        }
+      }
     });
   }
 
   // ── Live Preview: Tagline ──
   const taglineInput = document.querySelector('input[name="tagline"]');
-  if (taglineInput) {
+  const taglineEl = document.getElementById('previewTagline');
+  if (taglineInput && taglineEl) {
     taglineInput.addEventListener('input', function () {
-      const el = document.getElementById('previewTagline');
-      if (el) el.textContent = this.value || '—';
+      const v = this.value.trim();
+      if (v) {
+        taglineEl.textContent = v;
+        taglineEl.classList.remove('d-none');
+      } else {
+        taglineEl.textContent = '';
+        taglineEl.classList.add('d-none');
+      }
     });
   }
+
+  // ── Live Preview: Doctor Name ──
+  const doctorNameInput = document.querySelector('input[name="doctor_name"]');
+  if (doctorNameInput) {
+    doctorNameInput.addEventListener('input', function () {
+      const el = document.getElementById('previewDoctor');
+      const qualInput = document.querySelector('input[name="qualification"]');
+      const qual = qualInput ? qualInput.value : '';
+      const val = this.value + (qual ? ' (' + qual + ')' : '');
+      setPreviewHtml(el, val);
+    });
+  }
+
+  // ── Live Preview: Qualification ──
+  const qualificationInput = document.querySelector('input[name="qualification"]');
+  if (qualificationInput) {
+    qualificationInput.addEventListener('input', function () {
+      const el = document.getElementById('previewDoctor');
+      const qualEl = document.getElementById('previewQual');
+      const doctorInput = document.querySelector('input[name="doctor_name"]');
+      const doctor = doctorInput ? doctorInput.value : '';
+      const val = doctor + (this.value ? ' (' + this.value + ')' : '');
+      if (el) setPreviewHtml(el, val);
+      setPreviewText(qualEl, this.value);
+    });
+  }
+
+  // ── Live Preview: Specialization ──
+  const specInput = document.querySelector('input[name="specialization"]');
+  if (specInput) {
+    specInput.addEventListener('input', function () {
+      setPreviewText(document.getElementById('previewSpec'), this.value);
+    });
+  }
+
+  // ── Live Preview: Phone ──
+  const phoneInput = document.querySelector('input[name="phone"]');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', function () {
+      const el = document.getElementById('previewPhoneRow');
+      if (el) {
+        const span = el.querySelector('span');
+        if (span) setPreviewText(span, this.value);
+      }
+    });
+  }
+
+  // ── Live Preview: Email ──
+  const emailInput = document.querySelector('input[name="email"]');
+  if (emailInput) {
+    emailInput.addEventListener('input', function () {
+      const el = document.getElementById('previewEmailRow');
+      if (el) {
+        const span = el.querySelector('span');
+        if (span) setPreviewText(span, this.value);
+      }
+    });
+  }
+
+  // ── Live Preview: City/State ──
+  const cityInput = document.querySelector('input[name="city"]');
+  const stateInput = document.querySelector('input[name="state"]');
+  function updateAddressPreview() {
+    const city = cityInput ? cityInput.value : '';
+    const state = stateInput ? stateInput.value : '';
+    const val = (city ? city + (city && state ? ', ' : '') : '') + (state ? state : '');
+    const el = document.getElementById('previewAddressRow');
+    if (el) {
+      const span = el.querySelector('span');
+      if (span) setPreviewText(span, val);
+    }
+  }
+  if (cityInput) cityInput.addEventListener('input', updateAddressPreview);
+  if (stateInput) stateInput.addEventListener('input', updateAddressPreview);
+
+  // Initial render for rows that may be empty on load
+  document.addEventListener('DOMContentLoaded', function () {
+    // Tagline: show/hide based on content
+    if (taglineEl) {
+      const v = (taglineEl.textContent || '').trim();
+      if (v) taglineEl.classList.remove('d-none');
+      else taglineEl.classList.add('d-none');
+    }
+    const doctorEl = document.getElementById('previewDoctor');
+    if (doctorEl) setPreviewHtml(doctorEl, doctorEl.textContent);
+    setPreviewText(document.getElementById('previewQual'), document.getElementById('previewQual') ? document.getElementById('previewQual').textContent : '');
+    setPreviewText(document.getElementById('previewSpec'), document.getElementById('previewSpec') ? document.getElementById('previewSpec').textContent : '');
+    const phoneRow = document.getElementById('previewPhoneRow');
+    if (phoneRow) { const span = phoneRow.querySelector('span'); if (span) setPreviewText(span, span.textContent); }
+    const emailRow = document.getElementById('previewEmailRow');
+    if (emailRow) { const span = emailRow.querySelector('span'); if (span) setPreviewText(span, span.textContent); }
+    const addrRow = document.getElementById('previewAddressRow');
+    if (addrRow) { const span = addrRow.querySelector('span'); if (span) setPreviewText(span, span.textContent); }
+    // Timings & Billing - read from template-rendered values
+    ['previewOPDRow','previewLunchRow','previewGSTRow','previewFeeRow','previewPrefixRow'].forEach(id => {
+      const row = document.getElementById(id);
+      if (row) {
+        const span = row.querySelector('span');
+        if (span && !span.textContent.trim()) setPreviewText(span, '');
+      }
+    });
+  });
 </script>
 {% endblock %}

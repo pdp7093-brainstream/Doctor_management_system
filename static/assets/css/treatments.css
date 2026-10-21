@@ -259,3 +259,25 @@
     text-align: left;
     margin: 0 auto;
 }
+
+/* Treatments intro */
+.treatments-intro {
+    padding-top: 56px;
+    padding-bottom: 48px;
+}
+@media (max-width: 768px) {
+    .treatments-intro {
+        padding-top: 36px;
+        padding-bottom: 32px;
+    }
+}
+.intro-text {
+    max-width: 760px;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: #3E4A41;
+    border-left: 3px solid #FD6801;
+    padding-left: 18px;
+    text-align: left;
+}
