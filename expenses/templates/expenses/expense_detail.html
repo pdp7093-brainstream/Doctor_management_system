@@ -11,9 +11,9 @@
             <h2 class="page-title">Expense Details</h2>
             <p class="page-subtitle">Detailed view of the expense.</p>
         </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
+        <div class="page-btn-group">
             {% if request.user.innermember.role == 'doctor' or expense.status == 'pending' and request.user == expense.created_by %}
-            <a href="{% url 'expenses:edit_expense' expense.id|hid %}" class="action-btn">
+            <a href="{% url 'expenses:edit_expense' expense.id|hid %}" class="btn-page btn-page-outline">
                 <i class="bi bi-pencil-square"></i> Edit
             </a>
             <form method="post" action="{% url 'expenses:delete_expense' expense.id|hid %}" class="d-inline delete-form m-0">
@@ -23,7 +23,7 @@
                 </button>
             </form>
             {% endif %}
-            <a href="{% if request.GET.source == 'pending' %}{% url 'expenses:pending_expenses' %}{% else %}{% url 'expenses:expense_list' %}{% endif %}" class="btn-ghost">
+            <a href="{% if request.GET.source == 'pending' %}{% url 'expenses:pending_expenses' %}{% else %}{% url 'expenses:expense_list' %}{% endif %}" class="btn-page btn-page-outline">
                 <i class="bi bi-arrow-left"></i> {% if request.GET.source == 'pending' %}Back to Pending{% else %}Back to List{% endif %}
             </a>
         </div>

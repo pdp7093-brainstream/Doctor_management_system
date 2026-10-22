@@ -19,6 +19,9 @@ urlpatterns = [
     path('manage-patients/',views.manage_patients,name='manage_patients'),
 
     path('add-patient/', views.add_patient, name='add_patient'),
+    path('patients/import/', views.import_patients, name='import_patients'),
+    path('patients/import/sample/', views.import_patients_sample, name='import_patients_sample'),
+    path('patients/import/skipped/', views.import_patients_skipped, name='import_patients_skipped'),
     path('patient/<str:type>/<str:hid>/', views.view_patient_dynamic, name='view_patient'),
     path('patients/<str:hid>/edit/', views.edit_patient, name='edit_patient'),
     path('patients/<str:hid>/delete/', views.delete_patient, name='delete_patient'),

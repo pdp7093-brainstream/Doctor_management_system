@@ -12,7 +12,7 @@
             <h2 class="page-title">Low Stock Alert</h2>
             <p class="page-subtitle">Medicines that need restocking.</p>
         </div>
-        <a href="{% url 'medicine:manage_medicine' %}" class="action-btn">
+        <a href="{% url 'medicine:manage_medicine' %}" class="btn-page btn-page-outline">
             <i class="bi bi-arrow-left"></i> Medicine Store
         </a>
     </div>
@@ -35,11 +35,11 @@
                     <tr>
                         <th class="col-num">#</th>
                         <th>Medicine</th>
-                        <th>Power</th>
+                        <th>Pack Size</th>
                         <th class="text-end">Current Stock</th>
                         <th class="text-end">Low Alert At</th>
                         <th>Status</th>
-                        <th class="col-actions">Action</th>
+                        <th class="col-actions text-end">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,15 +57,15 @@
                             <span class="dc-badge peach">Low Stock</span>
                             {% endif %}
                         </td>
-                        <td class="col-actions">
-                            <div class="dc-actions">
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
                             {% if v.is_ordered %}
-                            <a href="{% url 'medicine:purchase_detail' v.pending_purchase_id|hid %}" class="btn-act view" title="View order">
-                                <i class="bi bi-box-arrow-up-right"></i><span>Ordered</span>
+                            <a href="{% url 'medicine:purchase_detail' v.pending_purchase_id|hid %}" class="btn-act btn-act-view" title="View" aria-label="View">
+                                <i class="bi bi-eye"></i>
                             </a>
                             {% else %}
-                            <a href="{% url 'medicine:add_purchase' %}?variant={{ v.pk }}" class="btn-act edit" title="Order">
-                                <i class="bi bi-cart-plus"></i><span>Order</span>
+                            <a href="{% url 'medicine:add_purchase' %}?variant={{ v.pk }}" class="btn-act btn-act-edit" title="Order" aria-label="Order">
+                                <i class="bi bi-cart-plus"></i>
                             </a>
                             {% endif %}
                             </div>

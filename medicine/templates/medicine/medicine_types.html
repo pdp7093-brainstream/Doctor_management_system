@@ -1,0 +1,188 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Medicine Types - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-head">
+        <div>
+            <h2 class="page-title">Medicine Types</h2>
+            <p class="page-subtitle">Manage medicine forms, formulations and categories.</p>
+        </div>
+        <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#addTypeModal">
+            <i class="bi bi-plus-lg"></i> Add Type
+        </button>
+    </div>
+
+    <!-- Table Card -->
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title">
+                <i class="bi bi-tags"></i> Medicine Types
+                <span class="dc-count">{{ types|length }} total</span>
+            </h3>
+            <div class="dc-search">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" class="form-control" placeholder="Search types..." autocomplete="off">
+            </div>
+        </div>
+
+        <div class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width:600px;">
+                <thead>
+                    <tr>
+                        <th class="col-num">#</th>
+                        <th>Name</th>
+                        <th>Medicines</th>
+                        <th>Status</th>
+                        <th>Order</th>
+                        <th class="col-actions text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    {% for type in types %}
+                    <tr class="type-row" data-name="{{ type.name|lower }}">
+                        <td class="col-num">{{ forloop.counter }}</td>
+                        <td><span class="dc-name">{{ type.name }}</span></td>
+                        <td>
+                            <span class="dc-badge grey">{{ type.medicine_count }} medicine{{ type.medicine_count|pluralize }}</span>
+                        </td>
+                        <td>
+                            {% if type.is_active %}
+                            <span class="dc-badge green">Active</span>
+                            {% else %}
+                            <span class="dc-badge red">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="dc-muted">{{ type.sort_order }}</td>
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
+                                <a href="{% url 'medicine:edit_medicine_type' type.pk %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{% url 'medicine:delete_medicine_type' type.pk %}" class="deleteTypeForm d-inline">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn-act btn-act-delete deleteTypeBtn"
+                                            data-name="{{ type.name }}"
+                                            data-count="{{ type.medicine_count }}"
+                                            title="Delete" aria-label="Delete">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="dc-empty text-center py-5">
+                            <i class="bi bi-tags" style="font-size:2.5rem; color:#ccc;"></i>
+                            <p class="text-muted mt-3 mb-0">No medicine types found.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- Add Type Modal -->
+<div class="modal fade" id="addTypeModal" tabindex="-1" aria-labelledby="addTypeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addTypeModalLabel" style="color:var(--primary-color);">
+                    <i class="bi bi-plus-circle me-1"></i> Add Medicine Type
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'medicine:medicine_types' %}">
+                {% csrf_token %}
+                <div class="modal-body pt-3">
+                    <div class="mb-3">
+                        <label class="dc-label" for="add-type-name">Type Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control patient-input" id="add-type-name" name="name"
+                               placeholder="e.g., Tablet, Syrup, Vati" required autocomplete="off">
+                        <small class="dc-hint">Must be unique (case-insensitive).</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="dc-label" for="add-type-order">Sort Order</label>
+                        <input type="number" class="form-control patient-input" id="add-type-order" name="sort_order"
+                               value="0" min="0" step="1">
+                        <small class="dc-hint">Lower numbers appear first in dropdowns.</small>
+                    </div>
+                    <div class="form-check mt-3">
+                        <input class="form-check-input" type="checkbox" id="add-type-active" name="is_active" checked>
+                        <label class="form-check-label fw-semibold" for="add-type-active">
+                            Active (available for selection)
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" style="background:var(--primary-color); border-color:var(--primary-color);">
+                        Save Type
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // Search filter
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('tableBody');
+    if (searchInput && tableBody) {
+        searchInput.addEventListener('input', function () {
+            const q = this.value.toLowerCase().trim();
+            const rows = tableBody.querySelectorAll('tr.type-row');
+            rows.forEach(row => {
+                const name = row.dataset.name || '';
+                row.style.display = name.includes(q) ? '' : 'none';
+            });
+        });
+    }
+
+    // Delete confirmation
+    document.querySelectorAll('.deleteTypeBtn').forEach(button => {
+        button.addEventListener('click', function () {
+            const form = this.closest('form');
+            const name = this.dataset.name;
+            const count = parseInt(this.dataset.count, 10) || 0;
+
+            if (count > 0) {
+                Swal.fire({
+                    title: 'Cannot Delete',
+                    text: `This type is used by ${count} medicines. Deactivate it instead.`,
+                    icon: 'error',
+                    confirmButtonColor: '#015315'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Delete Medicine Type?',
+                html: `Are you sure you want to delete <strong>${name}</strong>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#AD0002',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, Delete',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true,
+                customClass: { popup: 'rounded-4 shadow-lg' }
+            }).then(result => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}

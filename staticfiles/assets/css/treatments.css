@@ -1,0 +1,283 @@
+/* treatments.css */
+
+/* Fix header background for treatments page */
+
+.treatments-banner {
+    width: 100%;
+    height: 300px;
+    background-image: linear-gradient(rgba(1, 83, 21, 0.85), rgba(1, 83, 21, 0.35)), url('../img/ayurveda/about.webp');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .treatments-banner {
+        height: 200px;
+    }
+}
+
+.banner-content {
+    max-width: 600px;
+    text-align: left;
+}
+
+.banner-content h1 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.banner-content p {
+    color: #ffffff;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.treatments-intro {
+    padding: 48px 15px 0 15px;
+}
+
+.intro-text {
+    max-width: 720px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    color: #444;
+    line-height: 1.6;
+}
+
+.treatments-list {
+    padding-top: 40px;
+    padding-bottom: 20px;
+}
+
+.treatment-group {
+    margin-bottom: 60px;
+    scroll-margin-top: calc(var(--header-h) + 20px);
+}
+
+.group-header {
+    margin-bottom: 40px;
+}
+
+.group-header-text {
+    text-align: left;
+}
+
+.group-label {
+    display: inline-block;
+    color: #ff9933; /* Saffron */
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.group-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--heading-color, #222);
+    margin-bottom: 10px;
+}
+
+.group-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+    max-width: 700px;
+}
+
+.nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #DCEBDC;
+    background-color: #ffffff;
+    color: #117A15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background-color: var(--accent-color, #117A15);
+    color: #ffffff;
+}
+
+.nav-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.treatment-cards-grid {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+    padding-bottom: 10px; /* space for shadow */
+}
+
+.treatment-cards-grid::-webkit-scrollbar {
+    display: none;
+}
+
+.treatment-card-wrapper {
+    width: calc((100% - 48px) / 3);
+    flex-shrink: 0;
+    scroll-snap-align: start;
+}
+
+@media (max-width: 991px) {
+    .treatment-card-wrapper {
+        width: calc((100% - 24px) / 2);
+    }
+}
+
+@media (max-width: 767px) {
+    .treatment-card-wrapper {
+        width: 85%;
+    }
+}
+
+.treatment-card {
+    background-color: #ffffff;
+    border: 1px solid #DCEBDC;
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 8px 24px rgba(17, 122, 21, 0.08); /* soft green shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.treatment-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(17, 122, 21, 0.12);
+}
+
+.card-icon {
+    width: 56px;
+    height: 56px;
+    background-color: #EAF4EA;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.card-icon i {
+    font-size: 24px;
+    color: #117A15; /* green */
+}
+
+.card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--heading-color, #222);
+    margin-bottom: 15px;
+}
+
+.card-summary {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.helpful-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #117A15; /* green */
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+.helpful-for ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-bottom: 25px;
+}
+
+.helpful-for ul li {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 20px;
+}
+
+.helpful-for ul li::before {
+    content: "•";
+    color: #117A15;
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.btn-book {
+    display: inline-block;
+    background-color: var(--brand-accent, #FD6801);
+    color: #ffffff;
+    text-align: center;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    margin-top: auto; /* Push to bottom */
+}
+
+.btn-book:hover {
+    background-color: #e65c00;
+    color: #ffffff;
+}
+
+.treatments-note {
+    margin-bottom: 72px; /* space above footer */
+}
+
+.note-box {
+    display: inline-block;
+    background-color: #f9f9f9;
+    border-left: 3px solid #117A15;
+    padding: 15px 25px;
+    font-size: 14px;
+    color: #555;
+    border-radius: 4px;
+    text-align: left;
+    margin: 0 auto;
+}
+
+/* Treatments intro */
+.treatments-intro {
+    padding-top: 56px;
+    padding-bottom: 48px;
+}
+@media (max-width: 768px) {
+    .treatments-intro {
+        padding-top: 36px;
+        padding-bottom: 32px;
+    }
+}
+.intro-text {
+    max-width: 760px;
+    margin: 0;
+    font-size: 17px;
+    line-height: 1.7;
+    color: #3E4A41;
+    border-left: 3px solid #FD6801;
+    padding-left: 18px;
+    text-align: left;
+}

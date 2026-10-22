@@ -67,9 +67,6 @@
         color: var(--primary-color);
     }
 
-    /* Edit: neutral, green only on hover */
-    .medicine-main-row .btn-act.edit { color: #4A5A4E; }
-    .medicine-main-row .btn-act.edit:hover { color: var(--primary-color); }
 </style>
 
 <main class="main-content" id="mainContent">
@@ -80,7 +77,7 @@
             <h2 class="page-title">Medicine Store</h2>
             <p class="page-subtitle">Manage inventory, variants and stock levels.</p>
         </div>
-        <a href="{% url 'medicine:add_medicine' %}" class="action-btn">
+        <a href="{% url 'medicine:add_medicine' %}" class="btn-page btn-page-primary">
             <i class="bi bi-plus-lg"></i> Add Medicine
         </a>
     </div>
@@ -109,7 +106,7 @@
                         <th>Company</th>
                         <th>Variants</th>
                         <th>Status</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -121,7 +118,7 @@
                         <td class="col-num">{% if medicines.start_index %}{{ medicines.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}</td>
                         <td><span class="dc-name">{{ medicine.name }}</span></td>
                         <td class="dc-muted">{{ medicine.short_name|default:"—" }}</td>
-                        <td><span class="dc-badge grey">{{ medicine.get_medicine_type_display }}</span></td>
+                        <td><span class="dc-badge grey">{{ medicine.medicine_type.name|default:"—" }}</span></td>
                         <td>{% if medicine.company %}{{ medicine.company }}{% else %}<span class="dc-muted">—</span>{% endif %}</td>
                         <td>
                             <span class="variant-toggle">
@@ -136,15 +133,15 @@
                             <span class="dc-badge red">Inactive</span>
                             {% endif %}
                         </td>
-                        <td class="col-actions" onclick="event.stopPropagation();">
-                            <div class="dc-actions">
-                                <a href="{% url 'medicine:edit_medicine' medicine.id|hid %}" class="btn-act edit" title="Edit">
-                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                        <td class="col-actions text-end" onclick="event.stopPropagation();">
+                            <div class="action-btns">
+                                <a href="{% url 'medicine:edit_medicine' medicine.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="{% url 'medicine:delete_medicine' medicine.id|hid %}" class="deleteMedicineForm">
                                     {% csrf_token %}
-                                    <button type="button" class="btn-act delete deleteMedicineBtn" data-name="{{ medicine.name }}" title="Delete">
-                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                    <button type="button" class="btn-act btn-act-delete deleteMedicineBtn" data-name="{{ medicine.name }}" title="Delete" aria-label="Delete">
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                             </div>

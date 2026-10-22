@@ -3,6 +3,7 @@ from django.views.generic import RedirectView
 from django.contrib.auth import views as auth_views
 from . import views
 from .views import *
+from .forms import PasswordResetEmailForm
 
 urlpatterns = [
 
@@ -30,8 +31,10 @@ urlpatterns = [
 
     # Password reset URLs (Django built-in)
     path('password-reset/', auth_views.PasswordResetView.as_view(
+        form_class=PasswordResetEmailForm,
         template_name='authentication/password_reset_form.html',
         email_template_name='authentication/password_reset_email.txt',
+        html_email_template_name='authentication/password_reset_email.html',
         subject_template_name='authentication/password_reset_subject.txt',
         success_url='/password-reset/done/',
     ), name='password_reset'),

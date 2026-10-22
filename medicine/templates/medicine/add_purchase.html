@@ -11,7 +11,7 @@
                 <h2 class="page-title">Add Purchase</h2>
                 <p class="page-subtitle">Create a new purchase order from vendor.</p>
             </div>
-            <a href="{% url 'medicine:purchase_list' %}" class="btn-ghost">
+            <a href="{% url 'medicine:purchase_list' %}" class="btn-page btn-page-outline">
                 <i class="bi bi-arrow-left"></i> Purchase List
             </a>
         </div>
@@ -92,17 +92,17 @@
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-3">
-                                    <label class="dc-label">Qty Strips <span class="dc-muted">*</span></label>
+                                    <label class="dc-label">Qty Packs <span class="dc-muted">*</span></label>
                                     <input type="number" name="quantity_strips[]"
                                         class="form-control patient-input" placeholder="e.g. 10"
                                         min="1" required>
                                 </div>
                                 <div class="col-12 col-md-3">
-                                    <label class="dc-label">Unit/Strip <span class="dc-muted">*</span></label>
+                                    <label class="dc-label">Units per Pack <span class="dc-muted">*</span></label>
                                     <input type="number" name="unit_per_strip[]"
                                         class="form-control patient-input"
-                                        value="{{ preselected_variant.unit_per_strip|default:10 }}"
-                                        min="1" required>
+                                        value="{{ preselected_variant.unit_per_strip|default:1 }}"
+                                        placeholder="Leave blank for bottle / jar" min="1">
                                 </div>
                                 <div class="col-12 col-md-1 mt-2 mt-md-0 pb-md-1 text-end">
                                     <button type="button"
@@ -134,16 +134,16 @@
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-3">
-                                    <label class="dc-label">Qty Strips <span class="dc-muted">*</span></label>
+                                    <label class="dc-label">Qty Packs <span class="dc-muted">*</span></label>
                                     <input type="number" name="quantity_strips[]"
                                         class="form-control patient-input" placeholder="e.g. 10"
                                         min="1" required>
                                 </div>
                                 <div class="col-12 col-md-3">
-                                    <label class="dc-label">Unit/Strip <span class="dc-muted">*</span></label>
+                                    <label class="dc-label">Units per Pack</label>
                                     <input type="number" name="unit_per_strip[]"
-                                        class="form-control patient-input" placeholder="e.g. 10"
-                                        min="1" required>
+                                        class="form-control patient-input" placeholder="Leave blank for bottle / jar"
+                                        min="1">
                                 </div>
                                 <div class="col-12 col-md-1 mt-2 mt-md-0 pb-md-1 text-end">
                                     <button type="button"

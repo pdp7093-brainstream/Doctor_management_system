@@ -11,7 +11,7 @@
             <h2 class="page-title">All Expenses</h2>
             <p class="page-subtitle">Overview and tracking of all clinic expenditures.</p>
         </div>
-        <a href="{% url 'expenses:add_expense' %}" class="action-btn">
+        <a href="{% url 'expenses:add_expense' %}" class="btn-page btn-page-primary">
             <i class="bi bi-plus-lg"></i> Record New Expense
         </a>
     </div>
@@ -43,7 +43,7 @@
                         <th>Category</th>
                         <th class="text-end">Amount</th>
                         <th>Status</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -67,24 +67,24 @@
                             <span class="dc-badge red">Rejected</span>
                             {% endif %}
                         </td>
-                        <td class="col-actions">
-                            <div class="dc-actions">
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
                                 {% if request.user.innermember.role == 'doctor' or expense.status == 'pending' and request.user == expense.created_by %}
-                                <a href="{% url 'expenses:edit_expense' expense.id|hid %}" class="btn-act edit" title="Edit expense">
-                                    <i class="bi bi-pencil-square"></i>
+                                <a href="{% url 'expenses:edit_expense' expense.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="{% url 'expenses:delete_expense' expense.id|hid %}" class="d-inline delete-form m-0">
                                     {% csrf_token %}
-                                    <button type="button" class="btn-act delete delete-btn" title="Delete expense">
+                                    <button type="button" class="btn-act btn-act-delete delete-btn" title="Delete" aria-label="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                                 {% endif %}
-                                <a href="{% url 'expenses:expense_detail' expense.id|hid %}" class="btn-act view" title="View details">
+                                <a href="{% url 'expenses:expense_detail' expense.id|hid %}" class="btn-act btn-act-view" title="View" aria-label="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 {% if expense.attachment %}
-                                <a href="{{ expense.attachment.url }}" target="_blank" class="btn-act view" title="Download receipt">
+                                <a href="{{ expense.attachment.url }}" target="_blank" class="btn-act btn-act-view" title="Download" aria-label="Download">
                                     <i class="bi bi-download"></i>
                                 </a>
                                 {% endif %}
@@ -96,7 +96,7 @@
                         <td colspan="6" class="dc-empty">
                             <i class="bi bi-wallet2"></i>
                             <p class="dc-empty-text">No expenses recorded yet.</p>
-                            <a href="{% url 'expenses:add_expense' %}" class="btn btn-primary btn-sm">
+                            <a href="{% url 'expenses:add_expense' %}" class="btn-page btn-page-primary">
                                 <i class="bi bi-plus-lg"></i> Record First Expense
                             </a>
                         </td>

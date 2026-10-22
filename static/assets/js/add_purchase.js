@@ -46,14 +46,14 @@ addItemBtn.addEventListener('click', function () {
                     </div>
                 </div>
                 <div class="col-6 col-md-3">
-                    <label class="patient-label" style="font-size:0.78rem;">Qty Strips</label>
+                    <label class="patient-label" style="font-size:0.78rem;">Qty Packs</label>
                     <input type="number" name="quantity_strips[]"
                         class="patient-input" placeholder="e.g. 10" min="1" required>
                 </div>
                 <div class="col-6 col-md-3">
-                    <label class="patient-label" style="font-size:0.78rem;">Unit/Strip</label>
+                    <label class="patient-label" style="font-size:0.78rem;">Units/Pack</label>
                     <input type="number" name="unit_per_strip[]"
-                        class="patient-input" placeholder="e.g. 10" min="1" required>
+                        class="patient-input" placeholder="Leave blank for bottle / jar" min="1">
                 </div>
                 <div class="col-12 col-md-1 mt-2 mt-md-0 pb-md-1 text-end">
                     <button type="button" class="btn btn-sm btn-outline-danger remove-item-btn w-100"

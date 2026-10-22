@@ -67,7 +67,7 @@
             <p class="text-muted small mb-0">Search, filter, and manage all patient visits.</p>
         </div>
 
-        <a href="{% url 'appointment:add_appointment' %}" class="action-btn">
+        <a href="{% url 'appointment:add_appointment' %}" class="btn-page btn-page-primary">
             <i class="bi bi-plus-lg"></i> Add Appointment
         </a>
     </div>
@@ -146,7 +146,7 @@
                             <th>Date</th>
                             <th>Time</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -213,17 +213,17 @@
                             </td>
 
                             <!-- Action -->
-                            <td>
-                                <div class="d-flex gap-1 justify-content-center">
+                            <td class="text-end">
+                                <div class="action-btns">
                                     <a href="{% url 'appointment:start_visit' appointment.id|hid %}"
-                                        class="btn btn-sm btn-primary">
-                                        <i class="bi bi-eye"></i><span> View</span>
+                                        class="btn-act btn-act-view" title="View" aria-label="View">
+                                        <i class="bi bi-eye"></i>
                                     </a>
                                     <form action="{% url 'appointment:delete_appointment' appointment.id|hid %}"
                                         method="POST" class="m-0">
                                         {% csrf_token %}
-                                        <button type="button" class="btn btn-sm btn-danger px-2 delete-btn"
-                                            title="Delete">
+                                        <button type="button" class="btn-act btn-act-delete delete-btn"
+                                            title="Delete" aria-label="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

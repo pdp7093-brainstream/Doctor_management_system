@@ -1,7 +1,17 @@
 from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import re
+
+class PasswordResetEmailForm(PasswordResetForm):
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if not get_user_model().objects.filter(email__iexact=email, is_active=True).exists():
+            raise forms.ValidationError("No account found with this email address.")
+        return email
+
 
 class RegistrationForm(forms.Form):
     name = forms.CharField(

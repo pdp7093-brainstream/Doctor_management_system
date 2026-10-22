@@ -11,7 +11,7 @@
             <h2 class="page-title">Pending Approvals</h2>
             <p class="page-subtitle">Review and approve clinic expenses submitted by staff.</p>
         </div>
-        <a href="{% url 'expenses:expense_list' %}" class="action-btn">
+        <a href="{% url 'expenses:expense_list' %}" class="btn-page btn-page-outline">
             <i class="bi bi-wallet2"></i> All Expenses
         </a>
     </div>
@@ -27,7 +27,7 @@
                         <th>Submitted By / Date</th>
                         <th>Expense Details</th>
                         <th class="text-end">Amount</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -57,25 +57,25 @@
                         <td class="text-end dc-mono">
                             <span class="fw-semibold">₹{{ expense.amount }}</span>
                         </td>
-                        <td class="col-actions">
-                            <div class="dc-actions">
-                                <a href="{% url 'expenses:expense_detail' expense.id|hid %}?source=pending" class="btn-act view" title="View details">
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
+                                <a href="{% url 'expenses:expense_detail' expense.id|hid %}?source=pending" class="btn-act btn-act-view" title="View" aria-label="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <form method="post" action="{% url 'expenses:pending_expenses' %}" class="d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="approve">
                                     <input type="hidden" name="expense_id" value="{{ expense.id }}">
-                                    <button type="submit" class="btn-soft success">
-                                        <i class="bi bi-check2-circle"></i> Approve
+                                    <button type="submit" class="btn-act btn-act-view" title="Approve" aria-label="Approve">
+                                        <i class="bi bi-check2-circle"></i>
                                     </button>
                                 </form>
                                 <form method="post" action="{% url 'expenses:pending_expenses' %}" class="d-inline">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="reject">
                                     <input type="hidden" name="expense_id" value="{{ expense.id }}">
-                                    <button type="submit" class="btn-soft danger">
-                                        <i class="bi bi-x-circle"></i> Reject
+                                    <button type="submit" class="btn-act btn-act-delete" title="Reject" aria-label="Reject">
+                                        <i class="bi bi-x-circle"></i>
                                     </button>
                                 </form>
                             </div>
@@ -86,7 +86,7 @@
                         <td colspan="4" class="dc-empty">
                             <i class="bi bi-check2-all"></i>
                             <p class="dc-empty-text">All caught up! No pending approvals.</p>
-                            <a href="{% url 'expenses:expense_list' %}" class="btn btn-primary btn-sm">
+                            <a href="{% url 'expenses:expense_list' %}" class="btn-page btn-page-outline">
                                 <i class="bi bi-wallet2"></i> View All Expenses
                             </a>
                         </td>

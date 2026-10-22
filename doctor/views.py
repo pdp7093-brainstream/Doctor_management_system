@@ -12,7 +12,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.cache import never_cache
 from django.views import View
-from .decorators import role_required
+from .decorators import role_required, owner_required
 from .models import InnerMember
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument, PatientOldDocument
 from django.utils import timezone
@@ -22,6 +22,7 @@ from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.db.models import Avg, Count, Q
 from django.core.paginator import Paginator
 from accounts.models import FamilyMember
@@ -441,8 +442,10 @@ def edit_patient(request, hid):
         address   = request.POST.get('address')
 
         # EMAIL DUPLICATE CHECK
-        if email and User.objects.filter(email__iexact=email).exclude(pk=patient.user.pk).exists():
-
+        if email and User.objects.filter(
+            Q(email__iexact=email) | Q(username__iexact=email)
+        ).exclude(pk=patient.user.pk).exists():
+            messages.error(request, 'Email already in use.')
             return render(request, 'doctor/edit_patient.html', {
                 'patient': patient
             })
@@ -503,7 +506,7 @@ def add_patient(request):
 
     if request.method == 'POST':
         name      = request.POST.get('name', '').strip()
-        email     = request.POST.get('email', '').strip()
+        email     = request.POST.get('email', '').strip().lower()
         dob       = request.POST.get('dob')
         gender    = request.POST.get('gender')
         phone     = request.POST.get('phone', '').strip()
@@ -546,12 +549,18 @@ def add_patient(request):
                 return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         # ── Case 2: No parent → Create Main Patient (User + Patient) ────
-        if not phone:
-           
+        if not email:
+            messages.error(request, 'Email is required.')
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
-        if User.objects.filter(username=phone).exists():
+        try:
+            validate_email(email)
+        except ValidationError:
+            messages.error(request, 'Enter a valid email address.')
+            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
+        if User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).exists():
+            messages.error(request, 'Email already in use.')
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         name_parts = name.split(' ', 1)
@@ -561,8 +570,8 @@ def add_patient(request):
         try:
             with transaction.atomic():
                 user = User.objects.create_user(
-                    username   = phone,        # phone as username
-                    email      = email or '',
+                    username   = email,
+                    email      = email,
                     first_name = first_name,
                     last_name  = last_name,
                 )
@@ -571,7 +580,7 @@ def add_patient(request):
                 # The Patient object is auto-created via a post_save signal on the User model.
                 # So we fetch it and update it, rather than creating a duplicate.
                 patient = user.patient
-                patient.phone    = phone
+                patient.phone    = phone or None
                 patient.address  = address
                 patient.dob      = dob or None
                 patient.gender   = gender or None
@@ -1238,4 +1247,161 @@ def reject_doctor(request, member_id):
         return JsonResponse({'success': True})
     except InnerMember.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Member not found.'})
+
+
+@never_cache
+@login_required
+@owner_required
+def import_patients(request):
+    """
+    3-step patient import:
+    1. GET: upload form
+    2. POST file: parse & validate without writing to DB, show preview & summary
+    3. POST confirm: create records for 'New' rows, re-checking duplicates at save time
+    """
+    import csv
+    from django.http import HttpResponse
+    from .forms import PatientImportForm
+    from accounts.services.patient_import import (
+        parse_import_file,
+        validate_patient_rows,
+        create_patients_from_rows,
+    )
+
+    step = "upload"
+    summary = None
+    preview_rows = None
+
+    if request.method == "POST":
+        action = request.POST.get("action", "")
+
+        if action == "upload":
+            form = PatientImportForm(request.POST, request.FILES)
+            if form.is_valid():
+                uploaded_file = form.cleaned_data["file"]
+                try:
+                    raw_rows = parse_import_file(uploaded_file)
+                    if not raw_rows:
+                        messages.error(request, "The uploaded file contains no data rows.")
+                        return redirect("doctor:import_patients")
+
+                    validated_rows = validate_patient_rows(raw_rows)
+
+                    new_count = sum(1 for r in validated_rows if r["status"] == "New")
+                    dup_count = sum(1 for r in validated_rows if r["status"] == "Duplicate")
+                    err_count = sum(1 for r in validated_rows if r["status"] == "Error")
+
+                    summary = {
+                        "total": len(validated_rows),
+                        "new": new_count,
+                        "duplicate": dup_count,
+                        "error": err_count,
+                    }
+
+                    # Store parsed rows in session for confirmation
+                    request.session["patient_import_rows"] = validated_rows
+                    request.session["patient_import_summary"] = summary
+                    preview_rows = validated_rows
+                    step = "preview"
+
+                except Exception as e:
+                    logger.exception("Failed to parse patient import file: %s", e)
+                    messages.error(request, f"Failed to process file: {str(e)}")
+                    return redirect("doctor:import_patients")
+            else:
+                step = "upload"
+
+        elif action == "confirm":
+            parsed_rows = request.session.get("patient_import_rows")
+            if not parsed_rows:
+                messages.error(request, "No import session found. Please upload the file again.")
+                return redirect("doctor:import_patients")
+
+            results = create_patients_from_rows(parsed_rows, dry_run=False)
+
+            # Store skipped rows in session for download
+            request.session["patient_import_skipped"] = results["skipped_rows"]
+            # Clear parsed rows from session
+            request.session.pop("patient_import_rows", None)
+            request.session.pop("patient_import_summary", None)
+
+            summary = {
+                "total": results["total"],
+                "created": results["created_count"],
+                "duplicate": results["duplicate_count"],
+                "error": results["error_count"],
+                "skipped_count": len(results["skipped_rows"]),
+            }
+            step = "done"
+
+        elif action == "cancel":
+            request.session.pop("patient_import_rows", None)
+            request.session.pop("patient_import_summary", None)
+            messages.info(request, "Import cancelled.")
+            return redirect("doctor:import_patients")
+
+    else:
+        form = PatientImportForm()
+        # Clean up any leftover unconfirmed import rows on fresh GET
+        request.session.pop("patient_import_rows", None)
+        request.session.pop("patient_import_summary", None)
+
+    return render(request, "doctor/import_patients.html", {
+        "form": form if step == "upload" else None,
+        "step": step,
+        "summary": summary,
+        "preview_rows": preview_rows,
+    })
+
+
+@never_cache
+@login_required
+@owner_required
+def import_patients_sample(request):
+    """
+    Downloads sample CSV for patient import.
+    """
+    from django.http import HttpResponse
+    from accounts.services.patient_import import generate_sample_csv
+
+    csv_data = generate_sample_csv()
+    response = HttpResponse(csv_data, content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="patient_import_sample.csv"'
+    return response
+
+
+@never_cache
+@login_required
+@owner_required
+def import_patients_skipped(request):
+    """
+    Downloads CSV of skipped rows (duplicates, errors) from the last import.
+    """
+    import csv
+    import io
+    from django.http import HttpResponse
+
+    skipped_rows = request.session.get("patient_import_skipped", [])
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["row_num", "name", "phone", "email", "gender", "dob", "blood_group", "address", "status", "reason"])
+
+    for r in skipped_rows:
+        writer.writerow([
+            r.get("row_num", ""),
+            r.get("name", ""),
+            r.get("phone", ""),
+            r.get("email", ""),
+            r.get("gender", ""),
+            r.get("dob", ""),
+            r.get("blood_group", ""),
+            r.get("address", ""),
+            r.get("status", ""),
+            r.get("reason", ""),
+        ])
+
+    response = HttpResponse(output.getvalue(), content_type="text/csv; charset=utf-8")
+    response["Content-Disposition"] = 'attachment; filename="skipped_patients.csv"'
+    return response
+
 

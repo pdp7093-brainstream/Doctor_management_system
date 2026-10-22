@@ -12,11 +12,11 @@
             <h2 class="page-title">Billing</h2>
             <p class="page-subtitle">Manage all patient bills and invoices.</p>
         </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="page-btn-group">
             <button id="bulkDeleteBtn" class="btn-soft danger d-none" onclick="bulkDeleteBills()">
                 <i class="bi bi-trash"></i> Delete Selected (<span id="selectedCount">0</span>)
             </button>
-            <a href="#addBillModal" class="action-btn" data-bs-toggle="modal" data-bs-target="#addBillModal">
+            <a href="#addBillModal" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#addBillModal">
                 <i class="bi bi-plus-lg"></i> Add Bill
             </a>
         </div>
@@ -141,7 +141,7 @@
                                 <th class="text-end">Total</th>
                                 <th>Method</th>
                                 <th>Status</th>
-                                <th class="col-actions">Actions</th>
+                                <th class="col-actions text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -187,17 +187,17 @@
                                         <span class="dc-badge red">Unpaid</span>
                                     {% endif %}
                                 </td>
-                                <td class="col-actions">
-                                    <div class="dc-actions">
-                                        <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}" class="btn-act view" title="View bill">
+                                <td class="col-actions text-end">
+                                    <div class="action-btns">
+                                        <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}" class="btn-act btn-act-view" title="View" aria-label="View">
                                             <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="{% url 'billing:print_bill' bill.visit.id|hid %}" target="_blank" class="btn-act view" title="Print bill">
+                                        <a href="{% url 'billing:print_bill' bill.visit.id|hid %}" target="_blank" class="btn-act btn-act-view" title="Print" aria-label="Print">
                                             <i class="bi bi-printer"></i>
                                         </a>
                                         <form action="{% url 'billing:delete_bill' bill.id|hid %}" method="POST" class="m-0">
                                             {% csrf_token %}
-                                            <button type="button" class="btn-act delete delete-btn" title="Delete bill">
+                                            <button type="button" class="btn-act btn-act-delete delete-btn" title="Delete" aria-label="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
@@ -209,7 +209,7 @@
                                 <td colspan="9" class="dc-empty">
                                     <i class="bi bi-inbox"></i>
                                     <p class="dc-empty-text">No bills found for this month.</p>
-                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBillModal">
+                                    <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#addBillModal">
                                         <i class="bi bi-plus-lg"></i> Add Bill
                                     </button>
                                 </td>
@@ -241,7 +241,7 @@
         <div class="dc-empty">
             <i class="bi bi-receipt"></i>
             <p class="dc-empty-text">No bills found. Try adjusting your filters.</p>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addBillModal">
+            <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#addBillModal">
                 <i class="bi bi-plus-lg"></i> Add Bill
             </button>
         </div>
@@ -303,6 +303,10 @@
                                         <div class="col-12">
                                             <label class="dc-label" for="patientPhone">Mobile <span class="dc-muted">*</span></label>
                                             <input type="text" id="patientPhone" name="phone" class="form-control" placeholder="Mobile number" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="dc-label" for="patientEmail">Email <span class="dc-muted">*</span></label>
+                                            <input type="email" id="patientEmail" name="email" class="form-control" placeholder="name@example.com" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="dc-label">Appointment Date <span class="dc-muted">*</span></label>

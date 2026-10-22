@@ -1,0 +1,307 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Import Patients{% endblock %}
+
+{% block content %}
+<main class="main-content" id="mainContent">
+
+    <!-- Page Header -->
+    <div class="page-head">
+        <div>
+            <h2 class="page-title">Import Patients</h2>
+            <p class="page-subtitle">Bulk import patients using a CSV or Excel (.xlsx) file.</p>
+        </div>
+        <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-outline">
+            <i class="bi bi-people-fill"></i> Manage Patients
+        </a>
+    </div>
+
+    <!-- 3-Step Indicator -->
+    <div class="dc-card mb-4">
+        <div class="p-3 px-4">
+            <div class="d-flex align-items-center justify-content-between position-relative" style="max-width: 650px; margin: 0 auto;">
+                <!-- Step 1 -->
+                <div class="d-flex flex-column align-items-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                         style="width: 38px; height: 38px; {% if step == 'upload' %}background: var(--primary-color); color: #fff;{% else %}background: #E6F1E6; color: var(--primary-color);{% endif %}">
+                        {% if step == 'preview' or step == 'done' %}<i class="bi bi-check-lg"></i>{% else %}1{% endif %}
+                    </div>
+                    <span class="small mt-2 fw-semibold {% if step == 'upload' %}text-dark{% else %}text-muted{% endif %}">1. Upload</span>
+                </div>
+
+                <div class="flex-grow-1 mx-2" style="height: 2px; background: {% if step == 'preview' or step == 'done' %}var(--primary-color){% else %}var(--border-light){% endif %}; margin-top: -18px;"></div>
+
+                <!-- Step 2 -->
+                <div class="d-flex flex-column align-items-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                         style="width: 38px; height: 38px; {% if step == 'preview' %}background: var(--primary-color); color: #fff;{% elif step == 'done' %}background: #E6F1E6; color: var(--primary-color);{% else %}background: #f8f9fa; color: #6c757d; border: 1px solid var(--border-light);{% endif %}">
+                        {% if step == 'done' %}<i class="bi bi-check-lg"></i>{% else %}2{% endif %}
+                    </div>
+                    <span class="small mt-2 fw-semibold {% if step == 'preview' %}text-dark{% else %}text-muted{% endif %}">2. Preview</span>
+                </div>
+
+                <div class="flex-grow-1 mx-2" style="height: 2px; background: {% if step == 'done' %}var(--primary-color){% else %}var(--border-light){% endif %}; margin-top: -18px;"></div>
+
+                <!-- Step 3 -->
+                <div class="d-flex flex-column align-items-center" style="z-index: 2;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm"
+                         style="width: 38px; height: 38px; {% if step == 'done' %}background: var(--primary-color); color: #fff;{% else %}background: #f8f9fa; color: #6c757d; border: 1px solid var(--border-light);{% endif %}">
+                        3
+                    </div>
+                    <span class="small mt-2 fw-semibold {% if step == 'done' %}text-dark{% else %}text-muted{% endif %}">3. Done</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- STEP 1: UPLOAD -->
+    {% if step == 'upload' %}
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="dc-card">
+                <div class="dc-card-header">
+                    <h3 class="dc-card-title"><i class="bi bi-file-earmark-arrow-up"></i> Upload Patient File</h3>
+                </div>
+                <form method="POST" enctype="multipart/form-data" class="dc-card-body p-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="upload">
+
+                    <div class="mb-3">
+                        <label class="dc-label fw-bold mb-2">Select CSV or Excel File</label>
+                        {{ form.file }}
+                        {% if form.file.errors %}
+                        <div class="text-danger small mt-1">{{ form.file.errors.0 }}</div>
+                        {% endif %}
+                        <div class="dc-hint mt-2">
+                            <i class="bi bi-info-circle"></i>
+                            Supported formats: <strong>.csv</strong>, <strong>.xlsx</strong> (Maximum 5 MB).
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-4">
+                        <a href="{% url 'doctor:import_patients_sample' %}" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-1">
+                            <i class="bi bi-download"></i> Download Sample CSV
+                        </a>
+                        <button type="submit" class="action-btn">
+                            <i class="bi bi-arrow-right"></i> Upload &amp; Preview
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="dc-card">
+                <div class="dc-card-header">
+                    <h3 class="dc-card-title"><i class="bi bi-card-checklist"></i> Column Instructions</h3>
+                </div>
+                <div class="p-3 px-4">
+                    <p class="small text-muted mb-3">Headers are case-insensitive and can be in any order:</p>
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong class="text-success">name *</strong> <span class="badge bg-danger ms-1">Required</span><br>
+                            <span class="text-muted">Full name of the patient (split into first &amp; last name).</span>
+                        </li>
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong class="text-success">phone *</strong> <span class="badge bg-danger ms-1">Required</span><br>
+                            <span class="text-muted">10-digit mobile number (leading +91, 0, spaces, and dashes are stripped).</span>
+                        </li>
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong>email</strong> <span class="badge bg-secondary ms-1">Optional</span><br>
+                            <span class="text-muted">Valid email address. Used as login username if provided.</span>
+                        </li>
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong>gender</strong> <span class="badge bg-secondary ms-1">Optional</span><br>
+                            <span class="text-muted">Male, Female, or Other.</span>
+                        </li>
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong>dob</strong> <span class="badge bg-secondary ms-1">Optional</span><br>
+                            <span class="text-muted">Accepted formats: <code>dd/mm/yyyy</code>, <code>dd-mm-yyyy</code>, <code>yyyy-mm-dd</code>.</span>
+                        </li>
+                        <li class="mb-2 pb-2 border-bottom">
+                            <strong>blood_group</strong> <span class="badge bg-secondary ms-1">Optional</span><br>
+                            <span class="text-muted">One of: A+, A-, B+, B-, O+, O-, AB+, AB-.</span>
+                        </li>
+                        <li>
+                            <strong>address</strong> <span class="badge bg-secondary ms-1">Optional</span><br>
+                            <span class="text-muted">Full residential address.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- STEP 2: PREVIEW -->
+    {% if step == 'preview' %}
+    <!-- Summary Counter Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono">{{ summary.total }}</div>
+                    <div class="stat-label">Total Rows</div>
+                </div>
+                <div class="stat-icon primary"><i class="bi bi-file-earmark-spreadsheet"></i></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card success h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono text-success">{{ summary.new }}</div>
+                    <div class="stat-label">Ready to Import</div>
+                </div>
+                <div class="stat-icon success"><i class="bi bi-person-check"></i></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card warning h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono text-warning">{{ summary.duplicate }}</div>
+                    <div class="stat-label">Duplicates (Skip)</div>
+                </div>
+                <div class="stat-icon warning"><i class="bi bi-copy"></i></div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card danger h-100">
+                <div class="stat-content">
+                    <div class="stat-number dc-mono text-danger">{{ summary.error }}</div>
+                    <div class="stat-label">Errors (Skip)</div>
+                </div>
+                <div class="stat-icon danger"><i class="bi bi-exclamation-triangle"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Table -->
+    <div class="dc-card mb-4">
+        <div class="dc-card-header d-flex align-items-center justify-content-between">
+            <h3 class="dc-card-title"><i class="bi bi-table"></i> Data Preview</h3>
+            <span class="text-muted small">No database records have been created yet.</span>
+        </div>
+
+        <div class="dc-table-wrap" style="max-height: 480px; overflow-y: auto;">
+            <table class="table table-hover dc-table mb-0" style="min-width: 800px;">
+                <thead>
+                    <tr>
+                        <th class="col-num">Row</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Reason / Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in preview_rows %}
+                    <tr>
+                        <td class="col-num">{{ r.row_num }}</td>
+                        <td class="fw-semibold">{{ r.name|default:"—" }}</td>
+                        <td class="dc-mono">{{ r.phone|default:"—" }}</td>
+                        <td>{{ r.email|default:"—" }}</td>
+                        <td>
+                            {% if r.status == 'New' %}
+                            <span class="dc-badge green"><i class="bi bi-plus-circle"></i> New</span>
+                            {% elif r.status == 'Duplicate' %}
+                            <span class="dc-badge peach"><i class="bi bi-copy"></i> Duplicate</span>
+                            {% else %}
+                            <span class="dc-badge red"><i class="bi bi-x-circle"></i> Error</span>
+                            {% endif %}
+                        </td>
+                        <td class="small {% if r.status == 'Error' %}text-danger{% elif r.status == 'Duplicate' %}text-warning{% else %}text-muted{% endif %}">
+                            {{ r.reason|default:"Ready for import" }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No rows to preview.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dc-card-footer d-flex align-items-center justify-content-between">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="cancel">
+                <button type="submit" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancel &amp; Re-upload
+                </button>
+            </form>
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="confirm">
+                <button type="submit" class="action-btn" {% if summary.new == 0 %}disabled{% endif %}>
+                    <i class="bi bi-check-lg"></i> Confirm &amp; Import {{ summary.new }} Patients
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- STEP 3: DONE -->
+    {% if step == 'done' %}
+    <div class="dc-card p-5 text-center" style="max-width: 720px; margin: 0 auto;">
+        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+             style="width: 72px; height: 72px; background: #E6F1E6; color: var(--primary-color); font-size: 2rem;">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <h3 class="fw-bold mb-2" style="color: var(--primary-color);">Import Complete!</h3>
+        <p class="text-muted mb-4">Patient accounts and profiles have been created successfully.</p>
+
+        <!-- Summary stats -->
+        <div class="row g-3 justify-content-center mb-4">
+            <div class="col-4">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="fs-4 fw-bold text-success dc-mono">{{ summary.created }}</div>
+                    <div class="small text-muted">Created</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="fs-4 fw-bold text-warning dc-mono">{{ summary.duplicate }}</div>
+                    <div class="small text-muted">Duplicates Skipped</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="p-3 bg-light rounded-3">
+                    <div class="fs-4 fw-bold text-danger dc-mono">{{ summary.error }}</div>
+                    <div class="small text-muted">Errors Skipped</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-btn-group">
+            {% if summary.skipped_count > 0 %}
+            <a href="{% url 'doctor:import_patients_skipped' %}" class="btn btn-outline-danger d-inline-flex align-items-center gap-2">
+                <i class="bi bi-download"></i> Download Skipped Rows CSV ({{ summary.skipped_count }})
+            </a>
+            {% endif %}
+            <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-primary">
+                <i class="bi bi-people-fill"></i> Go to Patients
+            </a>
+            <a href="{% url 'doctor:import_patients' %}" class="btn-page btn-page-outline">
+                <i class="bi bi-upload"></i> Import Another File
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+</main>
+{% endblock %}

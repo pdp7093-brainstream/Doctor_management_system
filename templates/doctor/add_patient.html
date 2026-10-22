@@ -13,7 +13,7 @@
                 <h2 class="page-title">Add Patient</h2>
                 <p class="page-subtitle">Add a new main patient or a family member of an existing patient.</p>
             </div>
-            <a href="{% url 'doctor:manage_patients' %}" class="btn-ghost">
+            <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-outline">
                 <i class="bi bi-people-fill"></i> Manage Patients
             </a>
         </div>
@@ -69,7 +69,7 @@
 
                         <div class="col-md-6" id="phoneField">
                             <label class="dc-label" id="phoneLabel">
-                                Phone * <small id="phoneHint">(used as login username)</small>
+                                Phone <small id="phoneHint">(optional)</small>
                             </label>
                             <input type="tel" name="phone" id="phoneInput" class="form-control"
                                    placeholder="e.g. 9876543210" maxlength="15"
@@ -108,8 +108,8 @@
                         </div>
 
                         <div class="col-md-6" id="emailField">
-                            <label class="dc-label">Email <small>(optional)</small></label>
-                            <input type="email" name="email" class="form-control" placeholder="name@example.com">
+                            <label class="dc-label">Email *</label>
+                            <input type="email" id="emailInput" name="email" class="form-control" placeholder="name@example.com" required>
                         </div>
 
                         <div class="col-12" id="addressField">
@@ -124,8 +124,8 @@
 
             <!-- Footer actions -->
             <div class="dc-form-footer">
-                <a href="{% url 'doctor:manage_patients' %}" class="btn-ghost">Cancel</a>
-                <button type="submit" class="action-btn" id="submitBtn">
+                <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-outline"><i class="bi bi-x-lg"></i> Cancel</a>
+                <button type="submit" class="btn-page btn-page-primary" id="submitBtn">
                     <i class="bi bi-check2-circle"></i>
                     <span id="submitText">Save Patient</span>
                 </button>

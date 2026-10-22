@@ -9,7 +9,7 @@
             <h2 class="page-title">Archived Bills</h2>
             <p class="page-subtitle">Soft-archived billing records that can be restored.</p>
         </div>
-        <a href="{% url 'reports_archive:archive_records' %}" class="action-btn">
+        <a href="{% url 'reports_archive:archive_records' %}" class="btn-page btn-page-outline">
             <i class="bi bi-archive"></i> Archive Records
         </a>
     </div>
@@ -89,7 +89,7 @@
                         <th class="text-end">Total</th>
                         <th>Status</th>
                         <th>Archived At</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
                     <tbody id="tableBody">
@@ -102,12 +102,12 @@
                             <td class="text-end dc-mono">₹{{ bill.total }}</td>
                             <td><span class="dc-badge grey">{{ bill.get_payment_status_display }}</span></td>
                             <td class="dc-mono">{{ bill.archived_at|date:"d M Y, h:i A"|default:"Not recorded" }}</td>
-                            <td class="col-actions">
-                                <div class="dc-actions">
+                            <td class="col-actions text-end">
+                                <div class="action-btns">
                                     <form action="{% url 'reports_archive:restore_bill' bill.id|hid %}" method="POST"
                                         class="m-0 d-inline">
                                         {% csrf_token %}
-                                        <button type="button" class="btn-act view restore-btn" title="Restore">
+                                        <button type="button" class="btn-act btn-act-view restore-btn" title="Restore" aria-label="Restore">
                                             <i class="bi bi-arrow-counterclockwise"></i>
                                         </button>
                                     </form>
@@ -119,7 +119,7 @@
                             <td colspan="7" class="dc-empty">
                                 <i class="bi bi-archive"></i>
                                 <p class="dc-empty-text">No archived bills found.</p>
-                                <a href="{% url 'reports_archive:archive_records' %}" class="btn btn-primary btn-sm">
+                                <a href="{% url 'reports_archive:archive_records' %}" class="btn-page btn-page-outline">
                                     <i class="bi bi-archive"></i> Archive Records
                                 </a>
                             </td>

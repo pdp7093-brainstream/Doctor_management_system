@@ -12,7 +12,7 @@
             <h2 class="page-title">Medicine Vendors</h2>
             <p class="page-subtitle">Manage your medicine suppliers and vendors.</p>
         </div>
-        <a href="{% url 'medicine:add_vendor' %}" class="action-btn">
+        <a href="{% url 'medicine:add_vendor' %}" class="btn-page btn-page-primary">
             <i class="bi bi-plus-lg"></i> Add Vendor
         </a>
     </div>
@@ -35,7 +35,7 @@
                         <th>Phone</th>
                         <th>Email</th>
                         <th>Address</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -84,16 +84,16 @@
                             {% endif %}
                         </td>
 
-                        <td class="col-actions">
-                            <div class="dc-actions">
-                                <a href="{% url 'medicine:edit_vendor' vendor.id|hid %}" class="btn-act edit" title="Edit vendor">
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
+                                <a href="{% url 'medicine:edit_vendor' vendor.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="{% url 'medicine:delete_vendor' vendor.id|hid %}"
                                     onsubmit="return confirmDelete(event, '{{ vendor.name }}')">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn-act delete"
-                                        title="Delete vendor">
+                                    <button type="submit" class="btn-act btn-act-delete"
+                                        title="Delete" aria-label="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -105,7 +105,7 @@
                         <td colspan="6" class="dc-empty">
                             <i class="bi bi-truck"></i>
                             No vendors found yet.
-                            <div class="mt-3"><a href="{% url 'medicine:add_vendor' %}" class="action-btn">
+                            <div class="mt-3"><a href="{% url 'medicine:add_vendor' %}" class="btn-page btn-page-primary">
                                     <i class="bi bi-plus-lg"></i> Add Vendor
                                 </a>
                             </div>

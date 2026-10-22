@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from doctor import hashid as _hashid
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.db.models import Q, Exists, OuterRef, Subquery
+from django.http import JsonResponse, HttpResponseNotAllowed
+from django.db.models import Q, Exists, OuterRef, Subquery, Count
 from .models import *
 from django.core.paginator import Paginator
 from django.db import models as db_models
@@ -17,7 +17,10 @@ class ManageMedicineView(LoginRequiredMixin, View):
 
     def get(self, request):
         medicines_list = (
-            Medicine.objects.prefetch_related("variants").all().order_by("-created_at")
+            Medicine.objects.select_related("medicine_type")
+            .prefetch_related("variants")
+            .all()
+            .order_by("-created_at")
         )
         paginator = Paginator(medicines_list, 20)
         page_number = request.GET.get("page")
@@ -31,7 +34,7 @@ class AddMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
-        medicine_types = Medicine.MEDICINE_TYPE
+        medicine_types = MedicineType.objects.filter(is_active=True).order_by("sort_order", "name")
         unit_choices = MedicineVariant.UNIT_CHOICES
         return render(request,"medicine/add_medicine1.html",{"medicine_types": medicine_types,"unit_choices": unit_choices})
 
@@ -43,7 +46,8 @@ class AddMedicineView(LoginRequiredMixin, View):
             messages.error(request, f"A medicine with short name '{short_name}' already exists.")
             return redirect("medicine:add_medicine")
 
-        med_type = request.POST.get("medicine_type", "")
+        med_type_id = request.POST.get("medicine_type", "")
+        med_type = MedicineType.objects.filter(id=med_type_id).first() if med_type_id else None
         company = request.POST.get("company", "").strip()
         description = request.POST.get("description", "").strip()
         is_active = request.POST.get("is_active") == "on"
@@ -129,8 +133,13 @@ class EditMedicineView(LoginRequiredMixin, View):
         except Exception:
             return get_object_or_404(Medicine, id=0)
 
-        medicine = get_object_or_404(Medicine, pk=pk)
-        medicine_types = Medicine.MEDICINE_TYPE
+        medicine = get_object_or_404(Medicine.objects.select_related("medicine_type"), pk=pk)
+        if medicine.medicine_type_id:
+            medicine_types = MedicineType.objects.filter(
+                Q(is_active=True) | Q(pk=medicine.medicine_type_id)
+            ).distinct().order_by("sort_order", "name")
+        else:
+            medicine_types = MedicineType.objects.filter(is_active=True).order_by("sort_order", "name")
         unit_choices = MedicineVariant.UNIT_CHOICES
         return render(
             request,
@@ -154,9 +163,12 @@ class EditMedicineView(LoginRequiredMixin, View):
             messages.error(request, f"A medicine with short name '{short_name}' already exists.")
             return redirect("medicine:edit_medicine", hid=hid)
 
+        med_type_id = request.POST.get("medicine_type", "")
+        med_type = MedicineType.objects.filter(id=med_type_id).first() if med_type_id else None
+
         medicine.name = request.POST.get("name", "").strip()
         medicine.short_name = short_name
-        medicine.medicine_type = request.POST.get("medicine_type", "")
+        medicine.medicine_type = med_type
         medicine.company = request.POST.get("company", "").strip()
         medicine.description = request.POST.get("description", "").strip()
         medicine.is_active = request.POST.get("is_active") == "on"
@@ -241,10 +253,12 @@ class MedicineSearchView(LoginRequiredMixin, View):
             return JsonResponse({"medicines": []})
 
         medicines = (
-            Medicine.objects.filter(
+            Medicine.objects.select_related("medicine_type")
+            .filter(
                 Q(name__icontains=query)
                 | Q(short_name__icontains=query)
                 | Q(company__icontains=query)
+                | Q(medicine_type__name__icontains=query)
             )
             .prefetch_related("variants")
             .filter(is_active=True)[:10]
@@ -268,7 +282,7 @@ class MedicineSearchView(LoginRequiredMixin, View):
                     "id": med.id,
                     "name": med.name,
                     "short_name": med.short_name,
-                    "type": med.get_medicine_type_display(),
+                    "type": med.medicine_type.name if med.medicine_type else "—",
                     "company": med.company,
                     "variants": variants,
                 }
@@ -283,17 +297,18 @@ def search_medicine(request):
 
     if not query:
         variants = (
-            MedicineVariant.objects.select_related("medicine")
+            MedicineVariant.objects.select_related("medicine", "medicine__medicine_type")
             .filter(medicine__is_active=True)
             .order_by("medicine__name", "power")[:50]
         )
     else:
         variants = (
-            MedicineVariant.objects.select_related("medicine")
+            MedicineVariant.objects.select_related("medicine", "medicine__medicine_type")
             .filter(
                 Q(medicine__name__icontains=query)
                 | Q(medicine__short_name__icontains=query)
-                | Q(medicine__company__icontains=query),
+                | Q(medicine__company__icontains=query)
+                | Q(medicine__medicine_type__name__icontains=query),
                 medicine__is_active=True,
             )
             .order_by("medicine__name", "power")[:50]
@@ -320,7 +335,7 @@ def search_medicine(request):
                     "id": medicine.id,
                     "name": medicine.name,
                     "short_name": medicine.short_name,
-                    "type": medicine.get_medicine_type_display(),
+                    "type": medicine.medicine_type.name if medicine.medicine_type else "—",
                     "company": medicine.company,
                     "variants": [],
                 },
@@ -888,4 +903,106 @@ class ImportMedicineView(LoginRequiredMixin, View):
             messages.error(request, f"Import failed: {str(e)}")
         
         return redirect("medicine:manage_medicine")
-        
+
+
+class MedicineTypeListView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def get(self, request):
+        types = (
+            MedicineType.objects.annotate(medicine_count=Count("medicines"))
+            .order_by("sort_order", "name")
+        )
+        return render(request, "medicine/medicine_types.html", {"types": types})
+
+    def post(self, request):
+        name = request.POST.get("name", "").strip()
+        sort_order_raw = request.POST.get("sort_order", "0").strip()
+        is_active = (
+            request.POST.get("is_active") == "on"
+            or request.POST.get("is_active") == "true"
+            or request.POST.get("is_active") == "1"
+        )
+
+        if not name:
+            messages.error(request, "Medicine type name is required.")
+            return redirect("medicine:medicine_types")
+
+        if MedicineType.objects.filter(name__iexact=name).exists():
+            messages.error(request, f"Medicine type '{name}' already exists.")
+            return redirect("medicine:medicine_types")
+
+        try:
+            sort_order = int(sort_order_raw)
+        except (ValueError, TypeError):
+            sort_order = 0
+
+        MedicineType.objects.create(
+            name=name,
+            sort_order=sort_order,
+            is_active=is_active,
+        )
+        messages.success(request, f'Medicine type "{name}" added successfully.')
+        return redirect("medicine:medicine_types")
+
+
+class EditMedicineTypeView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def get(self, request, pk):
+        med_type = get_object_or_404(MedicineType, pk=pk)
+        return render(request, "medicine/edit_medicine_type.html", {"med_type": med_type})
+
+    def post(self, request, pk):
+        med_type = get_object_or_404(MedicineType, pk=pk)
+        name = request.POST.get("name", "").strip()
+        sort_order_raw = request.POST.get("sort_order", "0").strip()
+        is_active = (
+            request.POST.get("is_active") == "on"
+            or request.POST.get("is_active") == "true"
+            or request.POST.get("is_active") == "1"
+        )
+
+        if not name:
+            messages.error(request, "Medicine type name is required.")
+            return redirect("medicine:edit_medicine_type", pk=pk)
+
+        if MedicineType.objects.filter(name__iexact=name).exclude(pk=pk).exists():
+            messages.error(request, f"Medicine type '{name}' already exists.")
+            return redirect("medicine:edit_medicine_type", pk=pk)
+
+        try:
+            sort_order = int(sort_order_raw)
+        except (ValueError, TypeError):
+            sort_order = 0
+
+        med_type.name = name
+        med_type.sort_order = sort_order
+        med_type.is_active = is_active
+        med_type.save()
+
+        messages.success(request, f'Medicine type "{name}" updated successfully.')
+        return redirect("medicine:medicine_types")
+
+
+class DeleteMedicineTypeView(LoginRequiredMixin, View):
+    login_url = "doctor:login"
+
+    def get(self, request, pk):
+        return HttpResponseNotAllowed(["POST"])
+
+    def post(self, request, pk):
+        med_type = get_object_or_404(MedicineType, pk=pk)
+        med_count = med_type.medicines.count()
+
+        if med_count > 0:
+            messages.error(
+                request,
+                f"This type is used by {med_count} medicines. Deactivate it instead.",
+            )
+            return redirect("medicine:medicine_types")
+
+        name = med_type.name
+        med_type.delete()
+        messages.success(request, f'Medicine type "{name}" deleted successfully.')
+        return redirect("medicine:medicine_types")

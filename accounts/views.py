@@ -263,7 +263,7 @@ class LoginView(View):
         return render(request, self.template_name)
 
     def post(self, request):
-        email = request.POST.get('email', '').strip()
+        email = request.POST.get('email', '').strip().lower()
         password = request.POST.get('password', '')
 
         if not email or not password:
@@ -607,8 +607,10 @@ def profile_settings(request):
 
         # Validate email if provided
         if email:
-            if User.objects.filter(email=email).exclude(id=user.id).exists():
-                errors.append('This email is already in use!')
+            if User.objects.filter(
+                Q(email__iexact=email) | Q(username__iexact=email)
+            ).exclude(pk=user.pk).exists():
+                errors.append('Email already in use.')
 
         if errors:
             for error in errors:
@@ -617,11 +619,9 @@ def profile_settings(request):
 
         #  Update User (email as username)
         user.first_name = first_name
-        if email and user.email != email:
-            # Also update username if email changes
-            if not User.objects.filter(username=email).exclude(id=user.id).exists():
-                user.username = email
+        if email:
             user.email = email
+            user.username = email
         user.save()
 
         #  Update Patient - store phone here

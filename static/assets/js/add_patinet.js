@@ -7,6 +7,7 @@ const phoneInput     = document.getElementById('phoneInput');
 const phoneLabel     = document.getElementById('phoneLabel');
 const phoneHint      = document.getElementById('phoneHint');
 const emailField     = document.getElementById('emailField');
+const emailInput     = document.getElementById('emailInput');
 const addressField   = document.getElementById('addressField');
 const modeText       = document.getElementById('modeText');
 const submitText     = document.getElementById('submitText');
@@ -48,6 +49,7 @@ function renderParentItems(items){
             relationField.style.display = 'block';
             relationSelect.required = true;
             phoneInput.required = false;
+            emailInput.required = false;
             emailField.style.display = 'none';
             addressField.style.display = 'none';
             modeText.innerHTML = ` Parent selected — this person will be added as a <strong>family member</strong> of <strong>${btn.dataset.name || btn.textContent}</strong>. No separate login will be created.`;
@@ -64,7 +66,8 @@ parentSearch && parentSearch.addEventListener('input', function(){
     parentInput.value = '';
     relationField.style.display = 'none';
     relationSelect.required = false;
-    phoneInput.required = true;
+    phoneInput.required = false;
+    emailInput.required = true;
     emailField.style.display = 'block';
     addressField.style.display = 'block';
     modeText.innerHTML = ` No parent selected — this person will be added as a <strong>main patient</strong> with their own login.`;

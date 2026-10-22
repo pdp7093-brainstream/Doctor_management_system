@@ -10,7 +10,7 @@
                 <h2 class="page-title">Add Medicine</h2>
                 <p class="page-subtitle">Add a new medicine to the store inventory.</p>
             </div>
-            <a href="{% url 'medicine:manage_medicine' %}" class="action-btn">
+            <a href="{% url 'medicine:manage_medicine' %}" class="btn-page btn-page-outline">
                 <i class="bi bi-arrow-left"></i> Medicine Store
             </a>
         </div>
@@ -34,13 +34,31 @@
                                     placeholder="e.g., PCM" required>
                             </div>
                             <div class="col-md-6">
-                                <label class="dc-label" for="medicine-type">Medicine Type <span class="dc-muted">*</span></label>
-                                <select id="medicine-type" name="medicine_type" class="form-select patient-input" required>
-                                    <option value="" disabled selected>Select type...</option>
-                                    {% for value, label in medicine_types %}
-                                    <option value="{{ value }}">{{ label }}</option>
-                                    {% endfor %}
-                                </select>
+                                <label class="dc-label" for="medicine-type-trigger">Medicine Type <span class="dc-muted">*</span></label>
+                                <div class="med-type-dropdown-wrap position-relative">
+                                    <button type="button" id="medicine-type-trigger"
+                                        class="form-select patient-input med-type-trigger d-flex align-items-center justify-content-between"
+                                        aria-haspopup="listbox" aria-expanded="false">
+                                        <span class="med-type-label text-muted">Select medicine type</span>
+                                    </button>
+                                    <input type="text" id="medicine-type" name="medicine_type" required
+                                        style="position:absolute;left:20px;bottom:10px;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0;margin:0;"
+                                        value="">
+                                    <div class="med-type-menu">
+                                        <div class="p-1 mb-2">
+                                            <input type="text" class="form-control form-control-sm med-type-search"
+                                                placeholder="Search type..." autocomplete="off">
+                                        </div>
+                                        <ul class="med-type-list" role="listbox">
+                                            {% for type in medicine_types %}
+                                            <li class="med-type-item" role="option" data-value="{{ type.id }}">
+                                                {{ type.name }}
+                                            </li>
+                                            {% endfor %}
+                                            <li class="med-type-empty px-3 py-2 text-muted small" style="display:none;">No matching types</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="dc-label" for="medicine-company">Company</label>
@@ -65,7 +83,7 @@
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                             <div>
                                 <h3 class="dc-section-title mb-1"><i class="bi bi-box-seam"></i> Variants</h3>
-                                <p class="dc-muted small mb-0">Power, pricing, stock, units and dates.</p>
+                                <p class="dc-muted small mb-0">Pack size, pricing, stock, units and dates.</p>
                             </div>
                             <button type="button" id="addVariantBtn" class="btn-ghost">
                                 <i class="bi bi-plus-circle"></i> Add Variant
@@ -73,82 +91,152 @@
                         </div>
 
                         <div id="variantsContainer">
-                        <!-- Default first variant row -->
-                        <div class="variant-row dc-callout mb-3">
-
-                            <!-- Row A: Power / Prices / Strips / Low Alert -->
-                            <div class="row g-2 mb-2">
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Power / Strength <span class="dc-muted">*</span></label>
-                                    <input type="text" name="power[]" class="form-control patient-input" placeholder="e.g., 500mg"
-                                        required>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Cost Price (₹) <span class="dc-muted">*</span></label>
-                                    <input type="number" name="cost_price[]" class="form-control patient-input" placeholder="0.00"
-                                        min="0" step="0.01" required>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
-                                    <input type="number" name="selling_price[]" class="form-control patient-input" placeholder="0.00"
-                                        min="0" step="0.01" required>
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <!-- Total Strips: user-facing convenience field (NOT stored) -->
-                                    <label class="dc-label">Total Strips</label>
-                                    <input type="number" name="total_strips[]" class="form-control patient-input strip-input"
-                                        placeholder="e.g., 20" min="0">
-                                    <!-- Hidden computed field that gets sent to the view -->
-                                    <input type="hidden" name="stock[]" class="stock-hidden" value="0">
-                                </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Low Alert</label>
-                                    <input type="number" name="low_stock_alert[]" class="form-control patient-input" value="10"
-                                        min="0">
-                                </div>
+                          <div class="variant-row vcard">
+                            <div class="vcard-head">
+                              <span class="vcard-badge"><i class="bi bi-box-seam"></i> Variant <span class="variant-no">1</span></span>
+                              <button type="button" class="btn-act btn-act-delete remove-variant-btn" title="Remove variant" aria-label="Remove variant">
+                                <i class="bi bi-trash"></i>
+                              </button>
                             </div>
 
-                            <!-- Row B: Unit / Unit per Strip / Dates / Delete -->
-                            <div class="row g-2 align-items-end">
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Unit</label>
-                                    <select name="unit[]" class="form-select patient-input">
-                                        {% for value, label in unit_choices %}
-                                        <option value="{{ value }}">{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
+                            <div class="vcard-group">
+                              <div class="vcard-group-title">Pack &amp; Pricing</div>
+                              <div class="row g-3">
+                                <div class="col-12 col-lg-4">
+                                  <label class="dc-label">Pack Size / Strength <span class="dc-muted">*</span></label>
+                                  <input type="text" name="power[]" class="form-control patient-input" placeholder="e.g., 100 gm, 450 ml, 60 tablets" required>
                                 </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Unit / Strip</label>
-                                    <input type="number" name="unit_per_strip[]" class="form-control patient-input ups-input"
-                                        placeholder="e.g., 10" min="1">
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Cost Price (₹) <span class="dc-muted">*</span></label>
+                                  <input type="number" name="cost_price[]" class="form-control patient-input" placeholder="0.00" min="0" step="0.01" required>
                                 </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Mfg Date</label>
-                                    <input type="date" name="mfg_date[]" class="form-control patient-input">
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
+                                  <input type="number" name="selling_price[]" class="form-control patient-input" placeholder="0.00" min="0" step="0.01" required>
                                 </div>
-                                <div class="col-12 col-md-6">
-                                    <label class="dc-label">Exp Date</label>
-                                    <input type="date" name="exp_date[]" class="form-control patient-input">
-                                </div>
-                                <div class="col-12 col-md-6 mt-2 mt-md-0 pb-md-1 text-end">
-                                    <button type="button" class="btn-ghost remove-variant-btn w-100 justify-content-center"
-                                        title="Remove variant" disabled>
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
+                              </div>
                             </div>
 
-                            <!-- Live stock preview badge -->
-                            <div class="stock-preview dc-callout dc-muted mt-2" style="display:none;">
-                                <i class="bi bi-calculator"></i>
-                                <strong>Calculated stock:</strong>
-                                <span class="preview-text dc-mono">—</span>
-                                <span class="small">(units stored in DB)</span>
+                            <div class="vcard-group">
+                              <div class="vcard-group-title">Stock</div>
+                              <div class="row g-3">
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Unit</label>
+                                  <select name="unit[]" class="form-select patient-input">
+                                    {% for value, label in unit_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                  </select>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Total Packs</label>
+                                  <input type="number" name="total_strips[]" class="form-control patient-input strip-input" placeholder="e.g., 20" min="0">
+                                  <input type="hidden" name="stock[]" class="stock-hidden" value="0">
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Units per Pack</label>
+                                  <input type="number" name="unit_per_strip[]" class="form-control patient-input ups-input" placeholder="Blank for bottle / jar" min="1">
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Low Stock Alert</label>
+                                  <input type="number" name="low_stock_alert[]" class="form-control patient-input" value="10" min="0">
+                                </div>
+                              </div>
                             </div>
 
+                            <div class="vcard-group">
+                              <div class="vcard-group-title">Dates</div>
+                              <div class="row g-3 align-items-end">
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Mfg Date</label>
+                                  <input type="date" name="mfg_date[]" class="form-control patient-input">
+                                </div>
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Exp Date</label>
+                                  <input type="date" name="exp_date[]" class="form-control patient-input">
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                  <div class="stock-preview" style="display:none;">
+                                    <i class="bi bi-calculator"></i>
+                                    <span>Stock: <strong class="preview-text">—</strong></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        </div>
+
+                        <template id="variantTemplate">
+                          <div class="variant-row vcard">
+                            <div class="vcard-head">
+                              <span class="vcard-badge"><i class="bi bi-box-seam"></i> Variant <span class="variant-no">1</span></span>
+                              <button type="button" class="btn-act btn-act-delete remove-variant-btn" title="Remove variant" aria-label="Remove variant">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
+
+                            <div class="vcard-group">
+                              <div class="vcard-group-title">Pack &amp; Pricing</div>
+                              <div class="row g-3">
+                                <div class="col-12 col-lg-4">
+                                  <label class="dc-label">Pack Size / Strength <span class="dc-muted">*</span></label>
+                                  <input type="text" name="power[]" class="form-control patient-input" placeholder="e.g., 100 gm, 450 ml, 60 tablets" required>
+                                </div>
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Cost Price (₹) <span class="dc-muted">*</span></label>
+                                  <input type="number" name="cost_price[]" class="form-control patient-input" placeholder="0.00" min="0" step="0.01" required>
+                                </div>
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
+                                  <input type="number" name="selling_price[]" class="form-control patient-input" placeholder="0.00" min="0" step="0.01" required>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="vcard-group">
+                              <div class="vcard-group-title">Stock</div>
+                              <div class="row g-3">
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Unit</label>
+                                  <select name="unit[]" class="form-select patient-input">
+                                    {% for value, label in unit_choices %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+                                  </select>
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Total Packs</label>
+                                  <input type="number" name="total_strips[]" class="form-control patient-input strip-input" placeholder="e.g., 20" min="0">
+                                  <input type="hidden" name="stock[]" class="stock-hidden" value="0">
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Units per Pack</label>
+                                  <input type="number" name="unit_per_strip[]" class="form-control patient-input ups-input" placeholder="Blank for bottle / jar" min="1">
+                                </div>
+                                <div class="col-6 col-lg-3">
+                                  <label class="dc-label">Low Stock Alert</label>
+                                  <input type="number" name="low_stock_alert[]" class="form-control patient-input" value="10" min="0">
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="vcard-group">
+                              <div class="vcard-group-title">Dates</div>
+                              <div class="row g-3 align-items-end">
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Mfg Date</label>
+                                  <input type="date" name="mfg_date[]" class="form-control patient-input">
+                                </div>
+                                <div class="col-6 col-lg-4">
+                                  <label class="dc-label">Exp Date</label>
+                                  <input type="date" name="exp_date[]" class="form-control patient-input">
+                                </div>
+                                <div class="col-12 col-lg-4">
+                                  <div class="stock-preview" style="display:none;">
+                                    <i class="bi bi-calculator"></i>
+                                    <span>Stock: <strong class="preview-text">—</strong></span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </template>
                     </section>
                 </div>
 
@@ -161,12 +249,38 @@
     </div>
 </main>
 
+<style>
+/* Professional Variant Cards Styling */
+#variantsContainer { display: flex; flex-direction: column; gap: 16px; }
+.vcard { background: #ffffff; border: 1px solid #DCEBDC; border-radius: 14px; padding: 20px 22px; box-shadow: 0 2px 10px rgba(1, 83, 21, 0.05); transition: border-color 0.2s ease, box-shadow 0.2s ease; position: relative; }
+.vcard:hover { border-color: #C2DFC2; box-shadow: 0 4px 14px rgba(1, 83, 21, 0.08); }
+.vcard-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #EDF4ED; }
+.vcard-badge { display: inline-flex; align-items: center; gap: 7px; background: #EAF4EA; color: #015315; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 5px 14px; border-radius: 999px; border: 1px solid #CFE3CF; }
+.vcard-badge i { font-size: 14px; line-height: 1; }
+.vcard .remove-variant-btn { width: 34px; height: 34px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; background: #FDECEC; color: #AD0002; border: 1px solid #F6CACA; cursor: pointer; transition: all 0.15s ease; }
+.vcard .remove-variant-btn:hover:not(:disabled) { background: #AD0002; color: #ffffff; border-color: #AD0002; }
+.vcard .remove-variant-btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.vcard-group { margin-bottom: 0; }
+.vcard-group + .vcard-group { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #DCEBDC; }
+.vcard-group-title { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5B6B5E; margin-bottom: 12px; }
+.vcard .dc-label { font-size: 12.5px; font-weight: 600; color: #14281A; margin-bottom: 6px; }
+.vcard .dc-label .dc-muted { color: #AD0002 !important; font-weight: 700; }
+.vcard .patient-input { height: 40px; border: 1px solid #DCEBDC; border-radius: 8px; font-size: 13.5px; background-color: #ffffff; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.vcard .patient-input:focus { border-color: #015315; box-shadow: 0 0 0 3px rgba(1, 83, 21, 0.12); outline: none; }
+.vcard .stock-preview { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 8px; background: #EAF4EA; color: #015315; font-size: 13px; font-weight: 500; border: 1px solid #CFE3CF; width: 100%; }
+.vcard .stock-preview i { font-size: 15px; color: #015315; }
+.vcard .stock-preview .preview-text { font-weight: 700; color: #015315; }
+@media (max-width: 575px) { .vcard { padding: 14px 16px; } }
+</style>
+{% endblock %}
+
+{% block page_scripts %}
 <script>
-    const UNIT_CHOICES = [
-        {% for value, label in unit_choices %}
-    { value: "{{ value }}", label: "{{ label }}" } {% if not forloop.last %}, {% endif %}
+  const UNIT_CHOICES = [
+    {% for value, label in unit_choices %}
+    { value: "{{ value }}", label: "{{ label }}" }{% if not forloop.last %},{% endif %}
     {% endfor %}
-    ];
+  ];
 </script>
 <script src="{% static 'assets/js/add_medicine.js' %}?v={% now 'U' %}"></script>
 {% endblock %}

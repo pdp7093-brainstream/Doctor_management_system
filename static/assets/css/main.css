@@ -70,11 +70,6 @@
   --contrast-color: #ffffff;
 }
 
-/* Smooth scroll */
-:root {
-  scroll-behavior: smooth;
-}
-
 /*--------------------------------------------------------------
 # General Styling & Shared Classes
 --------------------------------------------------------------*/
@@ -6316,9 +6311,30 @@ section,
   .aw-shloka { font-size: .95rem; min-height: auto; }
 }
 
-.aw-therapies { margin-top: 56px; }
-.aw-therapies img { max-width: 960px; width: 100%; height: auto; }
-@media (max-width: 767px) { .aw-therapies { margin-top: 36px; } }
+.aw-therapies { margin-top: 72px; padding-top: 56px; border-top: 1px solid rgba(1, 83, 21, .10); }
+.aw-therapies-frame {
+  background: linear-gradient(180deg, #F4F9F4 0%, #EAF4EA 100%);
+  border: 1px solid rgba(1, 83, 21, .10);
+  border-radius: 24px; padding: 24px;
+  box-shadow: 0 10px 30px rgba(1, 83, 21, .06);
+}
+.aw-therapies-frame img { display: block; width: 100%; height: auto; border-radius: 12px; mix-blend-mode: multiply; }
+.aw-therapies-title { color: var(--brand-primary); font-weight: 700; font-size: 1.75rem; margin: 6px 0 14px; }
+.aw-therapies-sub { color: #555; font-size: .98rem; line-height: 1.75; margin: 0 0 18px; }
+.aw-therapies-points { list-style: none; padding: 0; margin: 0 0 18px; }
+.aw-therapies-points li { display: flex; gap: 10px; align-items: flex-start; font-size: .95rem; color: #444; line-height: 1.6; margin-bottom: 10px; }
+.aw-therapies-points i { color: var(--brand-green); font-size: 1.05rem; margin-top: 3px; flex-shrink: 0; }
+.aw-therapies-points strong { color: var(--brand-primary); }
+.aw-therapies-note { font-size: .85rem; font-style: italic; color: #777; margin: 0 0 22px; padding-left: 12px; border-left: 3px solid var(--brand-accent); }
+.aw-therapies-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--brand-primary); color: #fff; font-weight: 600;
+  padding: 12px 28px; border-radius: 50px; text-decoration: none;
+  transition: background .25s ease, transform .25s ease;
+}
+.aw-therapies-btn:hover { background: var(--brand-primary-hover); color: #fff; transform: translateY(-2px); }
+@media (max-width: 991px) { .aw-therapies-title { font-size: 1.5rem; } }
+@media (max-width: 767px) { .aw-therapies { margin-top: 44px; padding-top: 36px; } .aw-therapies-frame { padding: 12px; border-radius: 16px; } }
 
 /* Featured Services – journey redesign */
 .journey-steps-wrap {

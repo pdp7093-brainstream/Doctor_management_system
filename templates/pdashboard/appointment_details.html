@@ -269,7 +269,7 @@
                                 <th style="color: white;">#</th>
                                 <th style="color: white;">Medicine</th>
                                 <th style="color: white;">Type</th>
-                                <th style="color: white;">Power</th>
+                                <th style="color: white;">Pack Size</th>
                                 <th style="color: white;">Dosage</th>
                                 <th style="color: white;">Days</th>
                             </tr>
@@ -281,7 +281,7 @@
                                 aria-controls="dosage-{{ forloop.counter }}">
                                 <td style="border-bottom: none;">{{ forloop.counter }}</td>
                                 <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.name }}{% else %}—{% endif %}</td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.get_medicine_type_display }}{% else %}—{% endif %}</td>
+                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.medicine_type.name|default:"—" }}{% else %}—{% endif %}</td>
                                 <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.power }}{% else %}—{% endif %}</td>
                                 <td style="border-bottom: none;">{{ item.dosage }}</td>
                                 <td style="border-bottom: none;">{{ item.days }} days</td>

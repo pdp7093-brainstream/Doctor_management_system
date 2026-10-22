@@ -137,9 +137,6 @@ document.addEventListener('keydown', function (event) {
     }
 });
 
-// Add smooth scroll behavior
-document.documentElement.style.scrollBehavior = 'smooth';
-
 
 // ===== Low Stock Alert System =====
 

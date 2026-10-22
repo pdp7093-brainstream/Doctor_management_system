@@ -23,7 +23,7 @@
                 {{ purchase.vendor.name }} · <span class="dc-mono">{{ purchase.date|date:"d M, Y" }}</span>
             </p>
         </div>
-        <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}" class="action-btn">
+        <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}" class="btn-page btn-page-outline">
             <i class="bi bi-arrow-left"></i> Back to Purchase Detail
         </a>
     </div>
@@ -40,11 +40,11 @@
                         <thead>
                             <tr>
                                 <th>Medicine</th>
-                                <th>Power</th>
+                                <th>Pack Size</th>
                                 <th>Ordered Qty</th>
-                                <th>Unit/Strip</th>
+                                <th>Units/Pack</th>
                                 <th>Received Qty</th>
-                                <th>Strip Price (₹)</th>
+                                <th>Pack Price (₹)</th>
                                 <th>Tax %</th>
                                 <th>Discount (₹)</th>
                                 <th>Mfg Date</th>

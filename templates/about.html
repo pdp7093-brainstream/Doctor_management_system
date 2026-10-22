@@ -21,86 +21,83 @@
         </div>
     </section>
 
-    <!-- ── 2. OUR STORY ───────────────────────────────────── -->
-    <section class="about-section story-section">
-        <div class="container">
-            <div class="row align-items-center g-5">
-
-                <!-- Text -->
-                <div class="col-lg-6 story-text" data-aos="fade-right" data-aos-delay="100">
-                    <span class="section-label">OUR STORY</span>
-                    <h2 class="section-title mb-4">Healing the Ayurvedic Way</h2>
-                    <p>{{ clinic.clinic_name|default:'Our clinic' }} is an Ayurvedic multispeciality hospital inspired by the healing tradition of Devnarayan Baba. We believe true health comes from balance — of body, mind and lifestyle.</p>
-                    <p>Instead of only treating symptoms, we look for the root cause of every condition. Through Nadi Pariksha, Prakriti analysis and classical therapies like Panchakarma, we create a treatment plan that is made for you.</p>
-                    <a href="{% url 'treatments' %}" class="btn-outline-green">
-                        Explore Our Treatments <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-
-                <!-- Image -->
-                <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
-                    <div class="story-img-wrap">
-                        <img src="{% static 'assets/img/ayurveda/about-story.webp' %}"
-                             alt="Ayurvedic treatment"
-                             class="story-img img-fluid">
-                    </div>
-                </div>
-
-            </div>
+    <!-- ── 2. FOUNDER / ABOUT ──────────────────────────────── -->
+<section class="about-section dr-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5" data-aos="fade-right" data-aos-delay="100">
+        <div class="dr-photo-wrap">
+          <img src="{% static 'assets/img/ayurveda/dr-mohit-agrawal.webp' %}"
+               onerror="this.onerror=null;this.src='{% static 'assets/img/ayurveda/about-story.webp' %}';"
+               alt="Dr. Mohit Agrawal, Ayurvedic physician and Nadi Vaidya" class="dr-photo img-fluid">
+          <div class="dr-exp-badge"><strong>2011</strong><span>Practising since</span></div>
         </div>
-    </section>
+      </div>
+      <div class="col-lg-7" data-aos="fade-left" data-aos-delay="200">
+        <span class="section-label">ABOUT US – HSDB AYURVEDA</span>
+        <h2 class="dr-name">Dr. Mohit Agrawal</h2>
+        <p class="dr-tag"><i class="bi bi-award"></i> Practising Authentic Ayurveda Since 2011</p>
+        <p class="dr-intro">At HSDB Ayurveda, we are dedicated to promoting holistic well-being through the timeless wisdom of authentic Ayurveda. Led by Dr. Mohit Agrawal, who has been practising Ayurveda since 2011, our approach focuses on understanding the individual and guiding them towards a balanced and healthier lifestyle.</p>
+        <a href="{% url 'treatments' %}" class="btn-outline-green">Explore Our Treatments <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <div class="row g-4 mt-4">
+      <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="100">
+        <div class="dr-card">
+          <div class="dr-card-head"><div class="dr-icon"><i class="bi bi-people"></i></div><h3>Rooted in Traditional Ayurvedic Wisdom</h3></div>
+          <p>Dr. Mohit Agrawal has received training in Nadi Vaidya under the traditional Guru–Shishya Parampara, preserving the time-honoured knowledge and practices of Ayurveda. His approach combines traditional Ayurvedic principles with personalised guidance to support overall health and well-being.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
+        <div class="dr-card">
+          <div class="dr-card-head"><div class="dr-icon"><i class="bi bi-heart-pulse"></i></div><h3>Experience in Chronic Health Conditions</h3></div>
+          <p>With years of clinical experience, Dr. Agrawal focuses on supporting individuals dealing with chronic health conditions through an individualised Ayurvedic approach. Each consultation aims to understand the person's unique health concerns and provide guidance in accordance with traditional Ayurvedic principles.</p>
+        </div>
+      </div>
+      <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
+        <div class="dr-card">
+          <div class="dr-card-head"><div class="dr-icon"><i class="bi bi-sunrise"></i></div><h3>Bringing Ayurveda into Everyday Life</h3></div>
+          <p>We believe Ayurveda is more than a system of healthcare—it is a way of life. At HSDB Ayurveda, we help individuals incorporate Ayurvedic principles into their daily routines, including guidance on dinacharya (daily regimen), lifestyle practices, and healthy habits to encourage balance and long-term well-being.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="dr-vision" data-aos="fade-up">
+      <span class="dr-vision-label"><i class="bi bi-eye"></i> Our Vision</span>
+      <p>Our vision is to make authentic Ayurvedic wisdom accessible and practical for modern life while remaining rooted in traditional knowledge, personalised care, and a holistic understanding of health.</p>
+      <strong class="dr-vision-tagline">HSDB Ayurveda – Embracing Traditional Wisdom for a Balanced Life.</strong>
+    </div>
+  </div>
+</section>
  
     <!-- Ayurveda Wisdom Section -->
     <section id="ayurveda-wisdom" class="aw-section section">
   <div class="container">
-    <div class="aw-head text-center" data-aos="fade-up">
-      <span class="aw-eyebrow">Science of Life</span>
-      <h2 class="aw-title">The Wisdom of Ayurveda</h2>
-      <p class="aw-sub">Ayurveda, from Ayu (life) and Veda (knowledge), is India's traditional science of life. These timeless principles from classical texts guide every treatment we offer.</p>
-    </div>
+    {% include 'partials/ayurveda_wisdom_cards.html' %}
 
-    <div class="row g-4 justify-content-center">
-      <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="100">
-        <div class="aw-card">
-          <div class="aw-card-head">
-            <div class="aw-icon"><i class="bi bi-flower1"></i></div>
-            <h3 class="aw-card-title">Holistic Approach</h3>
+    <div class="aw-therapies">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-7 order-2 order-lg-1" data-aos="fade-right" data-aos-delay="100">
+          <div class="aw-therapies-frame">
+            <img src="{% static 'assets/img/ayurveda/common-therapies.webp' %}"
+                 alt="Common therapies used in Ayurveda: dietary modification, herbal remedies, Panchakarma therapies, yoga and meditation, Ayurvedic massage and acupuncture"
+                 class="img-fluid" loading="lazy" width="1600" height="900">
           </div>
-          <div class="aw-shloka">समदोषः समाग्निश्च समधातुमलक्रियः।<br>प्रसन्नात्मेन्द्रियमनाः स्वस्थ इत्यभिधीयते॥</div>
-          <p class="aw-ref">— Sushruta Samhita, Sutrasthana 15</p>
-          <p class="aw-text">A person whose doshas are balanced, whose digestive fire and tissues function well, whose elimination is regular, and whose soul, senses and mind are at peace, is truly healthy. Ayurveda heals the mind, body and spirit together, not just the symptoms.</p>
+        </div>
+        <div class="col-lg-5 order-1 order-lg-2" data-aos="fade-left" data-aos-delay="200">
+          <span class="aw-eyebrow">Healing Methods</span>
+          <h3 class="aw-therapies-title">Common Therapies in Ayurveda</h3>
+          <p class="aw-therapies-sub">Ayurveda uses six classical approaches to restore balance in the body and mind. At our hospital, every therapy is chosen for your unique body type, never one-size-fits-all.</p>
+          <ul class="aw-therapies-points">
+            <li><i class="bi bi-check-circle-fill"></i><span><strong>Diet and herbs</strong> correct imbalance from within</span></li>
+            <li><i class="bi bi-check-circle-fill"></i><span><strong>Panchakarma and massage</strong> detox and rejuvenate the body</span></li>
+            <li><i class="bi bi-check-circle-fill"></i><span><strong>Yoga and meditation</strong> calm the mind and build strength</span></li>
+          </ul>
+          <p class="aw-therapies-note">Your doctor will suggest the right therapies after consultation and Nadi Pariksha.</p>
+          <a href="{% url 'appointment:appointment' %}" class="aw-therapies-btn">Book a Consultation <i class="bi bi-arrow-right"></i></a>
         </div>
       </div>
-
-      <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
-        <div class="aw-card">
-          <div class="aw-card-head">
-            <div class="aw-icon"><i class="bi bi-shield-check"></i></div>
-            <h3 class="aw-card-title">Preventive Care</h3>
-          </div>
-          <div class="aw-shloka">प्रयोजनं चास्य स्वस्थस्य स्वास्थ्यरक्षणम्।<br>आतुरस्य विकारप्रशमनं च॥</div>
-          <p class="aw-ref">— Charaka Samhita, Sutrasthana 30/26</p>
-          <p class="aw-text">The purpose of Ayurveda is to protect the health of the healthy and to cure the diseases of the sick. Daily routines (Dinacharya), seasonal care (Ritucharya), proper sleep and stress management keep you healthy for life.</p>
-        </div>
-      </div>
-
-      <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
-        <div class="aw-card">
-          <div class="aw-card-head">
-            <div class="aw-icon"><i class="bi bi-person-heart"></i></div>
-            <h3 class="aw-card-title">Importance of Consultation</h3>
-          </div>
-          <div class="aw-shloka">यथा विषं यथा शस्त्रं यथाग्निरशनिर्यथा।<br>तथौषधमविज्ञातं विज्ञातममृतं यथा॥</div>
-          <p class="aw-ref">— Charaka Samhita, Sutrasthana 1</p>
-          <p class="aw-text">A medicine taken without proper knowledge can harm like poison, a weapon or fire. Guided by an expert, the same medicine heals like nectar. Always consult a qualified Ayurvedic physician.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="aw-therapies text-center" data-aos="fade-up">
-      <img src="{% static 'assets/img/ayurveda/common-therapies.webp' %}"
-           alt="Common therapies used in Ayurveda: dietary modification, herbal remedies, Panchakarma, yoga and meditation, Ayurvedic massage and acupuncture"
-           class="img-fluid" loading="lazy">
     </div>
   </div>
 </section><!-- /Ayurveda Wisdom Section -->

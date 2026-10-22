@@ -2,11 +2,6 @@
 const variantsContainer = document.getElementById('variantsContainer');
 const addVariantBtn = document.getElementById('addVariantBtn');
 
-// Unit choices from Django (injected via HTML)
-const unitOptions = window.UNIT_CHOICES 
-    ? window.UNIT_CHOICES.map(c => `<option value="${c.value}">${c.label}</option>`).join('')
-    : '<option value="piece">Piece</option>';
-
 /* ── Core: recalculate stock for one variant row ── */
 function recalcStock(row) {
     const stripInput = row.querySelector('.strip-input');
@@ -24,19 +19,31 @@ function recalcStock(row) {
     if (validStrips && validUps) {
         const computed = strips * ups;
         hiddenStock.value = computed;
-        previewText.textContent = `${strips} strips × ${ups} units/strip = ${computed} units`;
-        preview.style.display = 'flex';
-        preview.style.alignItems = 'center';
+        previewText.textContent = `${strips} packs × ${ups} units/pack = ${computed} units`;
+        preview.style.display = 'inline-flex';
     } else if (validStrips && !validUps) {
         // No unit_per_strip set → treat strips field as raw units
         hiddenStock.value = strips;
-        previewText.textContent = `${strips} units (no strip size set)`;
-        preview.style.display = 'flex';
-        preview.style.alignItems = 'center';
+        previewText.textContent = `${strips} units (1 pack = 1 unit)`;
+        preview.style.display = 'inline-flex';
     } else {
         hiddenStock.value = 0;
         preview.style.display = 'none';
     }
+}
+
+function renumber() {
+    variantsContainer.querySelectorAll('.variant-row').forEach((row, index) => {
+        const no = row.querySelector('.variant-no');
+        if (no) no.textContent = index + 1;
+    });
+}
+
+function updateRemoveBtns() {
+    const rows = variantsContainer.querySelectorAll('.variant-row');
+    rows.forEach(row => {
+        row.querySelector('.remove-variant-btn').disabled = rows.length === 1;
+    });
 }
 
 /* ── Attach listeners to a row ── */
@@ -48,15 +55,19 @@ function attachRowListeners(row) {
     // Remove button
     row.querySelector('.remove-variant-btn').addEventListener('click', function () {
         row.remove();
+        renumber();
         updateRemoveBtns();
     });
 }
 
-function updateRemoveBtns() {
-    const rows = variantsContainer.querySelectorAll('.variant-row');
-    rows.forEach(row => {
-        row.querySelector('.remove-variant-btn').disabled = rows.length === 1;
-    });
+function addVariantRow() {
+    const row = document.getElementById('variantTemplate').content.firstElementChild.cloneNode(true);
+    variantsContainer.appendChild(row);
+    attachRowListeners(row);
+    recalcStock(row);
+    renumber();
+    updateRemoveBtns();
+    return row;
 }
 
 /* ── Init existing rows ── */
@@ -64,82 +75,175 @@ variantsContainer.querySelectorAll('.variant-row').forEach(row => {
     attachRowListeners(row);
     recalcStock(row);
 });
+renumber();
 updateRemoveBtns();
+
+if (!variantsContainer.querySelector('.variant-row')) {
+    addVariantRow();
+}
 
 /* ── Add new variant row ── */
 addVariantBtn.addEventListener('click', function () {
-    const row = document.createElement('div');
-    row.className = 'variant-row';
-    row.style.cssText = 'background:#f8fbff; border:1px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:12px;';
-    row.innerHTML = `
-            <div class="row g-2 mb-2">
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Power / Strength</label>
-                    <input type="text" name="power[]" class="patient-input" placeholder="e.g., 250mg" required>
-                </div>
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Cost Price (₹)</label>
-                    <input type="number" name="cost_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
-                </div>
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Selling Price (₹)</label>
-                    <input type="number" name="selling_price[]" class="patient-input" placeholder="0.00" min="0" step="0.01" required>
-                </div>
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Total Strips</label>
-                    <input type="number" name="total_strips[]" class="patient-input strip-input" placeholder="e.g., 20" min="0">
-                    <input type="hidden" name="stock[]" class="stock-hidden" value="0">
-                </div>
-                <div class="col-12 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Low Alert</label>
-                    <input type="number" name="low_stock_alert[]" class="patient-input" value="10" min="0">
-                </div>
-            </div>
-            <div class="row g-2 align-items-end">
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Unit</label>
-                    <select name="unit[]" class="patient-input">${unitOptions}</select>
-                </div>
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Unit / Strip</label>
-                    <input type="number" name="unit_per_strip[]" class="patient-input ups-input" placeholder="e.g., 10" min="1">
-                </div>
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Mfg Date</label>
-                    <input type="date" name="mfg_date[]" class="patient-input">
-                </div>
-                <div class="col-6 col-md">
-                    <label class="patient-label" style="font-size:0.78rem;">Exp Date</label>
-                    <input type="date" name="exp_date[]" class="patient-input">
-                </div>
-                <div class="col-12 col-md-auto mt-2 mt-md-0 pb-md-1 text-end">
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-variant-btn w-100" style="border-radius:8px;">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="stock-preview" style="
-                display:none;
-                margin-top:10px;
-                padding:7px 12px;
-                background:linear-gradient(90deg,#eef6ff 0%,#f0fff8 100%);
-                border:1px solid #c7dff7;
-                border-radius:8px;
-                font-size:0.8rem;
-                color:#2c5282;
-            ">
-                <i class="bi bi-calculator" style="color:#3182ce;"></i>
-                &nbsp;<strong>Calculated stock:</strong>
-                &nbsp;<span class="preview-text">—</span>
-                <span style="color:#718096; margin-left:6px; font-size:0.75rem;">(units stored in DB)</span>
-            </div>`;
-
-    variantsContainer.appendChild(row);
-    attachRowListeners(row);
-    updateRemoveBtns();
+    addVariantRow();
 });
 
 /* ── Guard: make sure hidden stock[] is up-to-date on submit ── */
 document.getElementById('addMedicineForm').addEventListener('submit', function () {
     variantsContainer.querySelectorAll('.variant-row').forEach(row => recalcStock(row));
 });
+
+/* ── Custom Medicine Type Dropdown ── */
+function initMedicineTypeDropdown() {
+    const wrap = document.querySelector('.med-type-dropdown-wrap');
+    if (!wrap) return;
+    const trigger = wrap.querySelector('.med-type-trigger');
+    const menu = wrap.querySelector('.med-type-menu');
+    const search = wrap.querySelector('.med-type-search');
+    const items = Array.from(wrap.querySelectorAll('.med-type-item'));
+    const emptyMsg = wrap.querySelector('.med-type-empty');
+    const hiddenInput = wrap.querySelector('input[name="medicine_type"]');
+    const label = wrap.querySelector('.med-type-label');
+    let highlightedIndex = -1;
+
+    function getVisibleItems() {
+        return items.filter(it => it.style.display !== 'none');
+    }
+
+    function openMenu() {
+        menu.classList.add('show');
+        trigger.setAttribute('aria-expanded', 'true');
+        search.value = '';
+        filterItems('');
+        setTimeout(() => search.focus(), 50);
+        const active = items.find(it => it.classList.contains('selected'));
+        if (active) {
+            highlightItem(getVisibleItems().indexOf(active));
+            active.scrollIntoView({ block: 'nearest' });
+        } else {
+            highlightItem(0);
+        }
+    }
+
+    function closeMenu(focusTrigger) {
+        menu.classList.remove('show');
+        trigger.setAttribute('aria-expanded', 'false');
+        highlightItem(-1);
+        if (focusTrigger) trigger.focus();
+    }
+
+    function highlightItem(index) {
+        items.forEach(it => it.classList.remove('highlighted'));
+        const visible = getVisibleItems();
+        if (index >= 0 && index < visible.length) {
+            visible[index].classList.add('highlighted');
+            visible[index].scrollIntoView({ block: 'nearest' });
+            highlightedIndex = index;
+        } else {
+            highlightedIndex = -1;
+        }
+    }
+
+    function selectItem(item) {
+        const val = item.getAttribute('data-value');
+        const text = item.textContent.trim();
+        hiddenInput.value = val;
+        label.textContent = text;
+        label.classList.remove('text-muted');
+        items.forEach(it => it.classList.remove('selected'));
+        item.classList.add('selected');
+        trigger.classList.remove('is-invalid');
+        hiddenInput.dispatchEvent(new Event('change', { bubbles: true }));
+        closeMenu(true);
+    }
+
+    function filterItems(query) {
+        const q = query.toLowerCase().trim();
+        let matchCount = 0;
+        items.forEach(it => {
+            const match = !q || it.textContent.toLowerCase().includes(q);
+            it.style.display = match ? '' : 'none';
+            if (match) matchCount++;
+        });
+        if (emptyMsg) {
+            emptyMsg.style.display = matchCount === 0 ? '' : 'none';
+        }
+        highlightItem(matchCount > 0 ? 0 : -1);
+    }
+
+    trigger.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (menu.classList.contains('show')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+
+    trigger.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openMenu();
+        }
+    });
+
+    search.addEventListener('input', function () {
+        filterItems(search.value);
+    });
+
+    search.addEventListener('keydown', function (e) {
+        const visible = getVisibleItems();
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (visible.length > 0) {
+                const next = (highlightedIndex + 1) % visible.length;
+                highlightItem(next);
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (visible.length > 0) {
+                const prev = (highlightedIndex - 1 + visible.length) % visible.length;
+                highlightItem(prev);
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (highlightedIndex >= 0 && highlightedIndex < visible.length) {
+                selectItem(visible[highlightedIndex]);
+            }
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeMenu(true);
+        }
+    });
+
+    items.forEach(item => {
+        item.addEventListener('click', function () {
+            selectItem(item);
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!wrap.contains(e.target)) {
+            closeMenu();
+        }
+    });
+
+    if (hiddenInput) {
+        hiddenInput.addEventListener('invalid', function () {
+            trigger.classList.add('is-invalid');
+            trigger.focus();
+        });
+    }
+
+    const form = wrap.closest('form');
+    if (form) {
+        form.addEventListener('submit', function (e) {
+            if (!hiddenInput.value) {
+                e.preventDefault();
+                trigger.classList.add('is-invalid');
+                trigger.focus();
+                openMenu();
+            }
+        });
+    }
+}
+initMedicineTypeDropdown();

@@ -11,7 +11,7 @@
             <h2 class="page-title">Staff Members</h2>
             <p class="page-subtitle">Manage biller accounts and access status.</p>
         </div>
-        <a href="#" class="action-btn" id="openAddStaff" onclick="return false;">
+        <a href="#" class="btn-page btn-page-primary" id="openAddStaff" onclick="return false;">
             <i class="bi bi-plus-lg"></i> Add Staff
         </a>
     </div>
@@ -31,7 +31,7 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -54,13 +54,13 @@
                             <td>
                                 <span class="dc-badge peach">Pending</span>
                             </td>
-                            <td>
-                                <div class="dc-actions">
-                                    <button class="btn-soft success btn-approve-doc" data-id="{{ member.id }}" title="Approve">
-                                        <i class="bi bi-check2-circle"></i> Approve
+                            <td class="text-end">
+                                <div class="action-btns">
+                                    <button class="btn-act btn-act-view btn-approve-doc" data-id="{{ member.id }}" title="Approve" aria-label="Approve">
+                                        <i class="bi bi-check2-circle"></i>
                                     </button>
-                                    <button class="btn-soft danger btn-reject-doc" data-id="{{ member.id }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" title="Reject">
-                                        <i class="bi bi-x-circle"></i> Reject
+                                    <button class="btn-act btn-act-delete btn-reject-doc" data-id="{{ member.id }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" title="Reject" aria-label="Reject">
+                                        <i class="bi bi-x-circle"></i>
                                     </button>
                                 </div>
                             </td>
@@ -88,7 +88,7 @@
                             <th>Email</th>
                             <th>Phone</th>
                             <th>Status</th>
-                            <th>Actions</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="staffTableBody">
@@ -116,22 +116,22 @@
                                 <span class="dc-badge grey">Inactive</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                <div class="dc-actions">
-                                    <button class="btn-act edit btn-edit-staff" data-id="{{ member.id }}"
+                            <td class="text-end">
+                                <div class="action-btns">
+                                    <button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
                                         data-email="{{ member.user.email }}" data-phone="{{ member.phone }}"
-                                        data-active="{{ member.user.is_active|lower }}" title="Edit">
+                                        data-active="{{ member.user.is_active|lower }}" title="Edit" aria-label="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    <button class="btn-act edit btn-reset-pwd" data-id="{{ member.id }}"
+                                    <button class="btn-act btn-act-edit btn-reset-pwd" data-id="{{ member.id }}"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
-                                        title="Reset Password">
+                                        title="Reset Password" aria-label="Reset Password">
                                         <i class="bi bi-key"></i>
                                     </button>
-                                    <button class="btn-act delete btn-delete-staff" data-id="{{ member.id }}"
+                                    <button class="btn-act btn-act-delete btn-delete-staff" data-id="{{ member.id }}"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
-                                        title="Delete">
+                                        title="Delete" aria-label="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -144,7 +144,7 @@
                 <div class="dc-empty">
                     <i class="bi bi-person-x"></i>
                     <p class="dc-empty-text">No billers found. Add a staff member to get started.</p>
-                    <a href="#" class="btn btn-primary btn-sm" onclick="document.getElementById('openAddStaff').click(); return false;">
+                    <a href="#" class="btn-page btn-page-primary" onclick="document.getElementById('openAddStaff').click(); return false;">
                         <i class="bi bi-plus-lg"></i> Add Staff
                     </a>
                 </div>

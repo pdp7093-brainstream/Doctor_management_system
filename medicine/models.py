@@ -1,20 +1,29 @@
 from django.db import models
 from datetime import date
 
+class MedicineType(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['sort_order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
 class Medicine(models.Model):
-
-    MEDICINE_TYPE = [
-        ('tablet', 'Tablet'),
-        ('syrup', 'Syrup'),
-        ('injection', 'Injection'),
-        ('capsule', 'Capsule'),
-        ('drops', 'Drops'),
-        ('cream', 'Cream'),
-    ]
-
     name = models.CharField(max_length=200)
     short_name = models.CharField(max_length=50, unique=True)
-    medicine_type = models.CharField(max_length=20, choices=MEDICINE_TYPE)
+    medicine_type = models.ForeignKey(
+        MedicineType,
+        on_delete=models.PROTECT,
+        related_name='medicines',
+        null=True,
+        blank=True
+    )
     company = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True, null=True)
     is_active = models.BooleanField(default=True)
@@ -39,6 +48,13 @@ class MedicineVariant(models.Model):
 
     UNIT_CHOICES = [
         ('piece', 'Piece'),
+        ('tablet', 'Tablet'),
+        ('bottle', 'Bottle'),
+        ('jar', 'Jar'),
+        ('box', 'Box'),
+        ('packet', 'Packet'),
+        ('tube', 'Tube'),
+        ('sachet', 'Sachet'),
         ('ml', 'ML'),
         ('gm', 'Gram'),
     ]

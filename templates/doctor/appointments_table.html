@@ -29,10 +29,12 @@
                 {{ appointment.status|capfirst }}
             </span>
         </td>
-        <td>
-            <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn btn-sm btn-primary">
-                {% if appointment.status == 'completed' %}View{% else %}Start{% endif %}
+        <td class="text-end">
+            <div class="action-btns">
+            <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn-act btn-act-view" title="{% if appointment.status == 'completed' %}View{% else %}Start Visit{% endif %}" aria-label="{% if appointment.status == 'completed' %}View{% else %}Start Visit{% endif %}">
+                {% if appointment.status == 'completed' %}<i class="bi bi-eye"></i>{% else %}<i class="bi bi-play-fill"></i>{% endif %}
             </a>
+            </div>
         </td>
     </tr>
     {% empty %}

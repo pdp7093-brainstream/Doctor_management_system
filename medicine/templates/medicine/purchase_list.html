@@ -12,7 +12,7 @@
             <h2 class="page-title">Purchase Orders</h2>
             <p class="page-subtitle">Track all medicine purchases from vendors.</p>
         </div>
-        <a href="{% url 'medicine:add_purchase' %}" class="action-btn">
+        <a href="{% url 'medicine:add_purchase' %}" class="btn-page btn-page-primary">
             <i class="bi bi-plus-lg"></i> Add Purchase
         </a>
     </div>
@@ -82,7 +82,7 @@
                         <th>Items</th>
                         <th class="text-end">Total Amount</th>
                         <th>Status</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
@@ -112,7 +112,7 @@
                                 {% for item in purchase.items.all %}
                                 <div>
                                     {{ item.medicine_variant.medicine.name }} -
-                                    {{ item.quantity_strips }} strip{{ item.quantity_strips|pluralize }} -
+                                    {{ item.quantity_strips }} pack{{ item.quantity_strips|pluralize }} -
                                     ₹{{ item.final_amount|floatformat:2 }}
                                 </div>
                                 {% empty %}
@@ -137,17 +137,17 @@
                             {% endif %}
                         </td>
 
-                        <td class="col-actions">
-                            <div class="dc-actions">
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
                                 <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}"
-                                    class="btn-act view" title="View details">
+                                    class="btn-act btn-act-view" title="View" aria-label="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
                                 <form method="post" action="{% url 'medicine:delete_purchase' purchase.id|hid %}" class="m-0 deletePurchaseForm">
 
                                     {% csrf_token %}
 
-                                    <button type="submit" class="btn-act delete" title="Delete purchase">
+                                    <button type="submit" class="btn-act btn-act-delete" title="Delete" aria-label="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
 
@@ -160,7 +160,7 @@
                         <td colspan="7" class="dc-empty purchase-empty">
                             <i class="bi bi-receipt"></i>
                             <div class="dc-name mb-2">No purchase orders yet.</div>
-                            <div class="mt-2"><a href="{% url 'medicine:add_purchase' %}" class="btn btn-primary">
+                            <div class="mt-2"><a href="{% url 'medicine:add_purchase' %}" class="btn-page btn-page-primary">
                                     <i class="bi bi-plus-lg"></i> Create Purchase Order
                                 </a>
                             </div>

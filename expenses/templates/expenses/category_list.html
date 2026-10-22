@@ -11,7 +11,7 @@
             <h2 class="page-title">Expense Categories</h2>
             <p class="page-subtitle">Manage categories to organize your expenses properly.</p>
         </div>
-        <a href="{% url 'expenses:expense_list' %}" class="action-btn">
+        <a href="{% url 'expenses:expense_list' %}" class="btn-page btn-page-outline">
             <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
@@ -58,7 +58,7 @@
                                 <th>Category Name</th>
                                 <th>Date Created</th>
                                 <th>Status</th>
-                                <th class="col-actions">Actions</th>
+                                <th class="col-actions text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -73,14 +73,14 @@
                                     <span class="dc-badge grey">Inactive</span>
                                     {% endif %}
                                 </td>
-                                <td class="col-actions">
-                                    <div class="dc-actions">
-                                    <button type="button" class="btn-act edit" title="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">
+                                <td class="col-actions text-end">
+                                    <div class="action-btns">
+                                    <button type="button" class="btn-act btn-act-edit" title="Edit" aria-label="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">
                                         <i class="bi bi-pencil"></i>
                                     </button>
                                     <form method="post" action="{% url 'expenses:delete_category' category.id %}" class="delete-category-form">
                                         {% csrf_token %}
-                                        <button type="button" class="btn-act delete delete-category-btn" title="Delete">
+                                        <button type="button" class="btn-act btn-act-delete delete-category-btn" title="Delete" aria-label="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>

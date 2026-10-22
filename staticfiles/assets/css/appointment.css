@@ -1,0 +1,289 @@
+/* Typography and Base Variables */
+:root {
+  --accent-color: var(--brand-primary, #015315);
+  --brand-accent: #FD6801;
+  --heading-color: #14281A;
+  --border-color: #DCEBDC;
+}
+
+.time-btn {
+  font-size: 13px !important;
+  padding: 10px 5px !important;
+  white-space: nowrap;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 576px) {
+  .row-cols-3>* {
+    flex: 0 0 auto;
+    width: 33.333333%;
+  }
+}
+
+.appointment-hero {
+  padding: calc(var(--header-h) + 24px) 0 24px;
+  background-color: #f9f9f9;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 0;
+  min-height: 0;
+}
+
+.appointment-section {
+  background-color: #f9f9f9;
+  padding-top: 40px;
+  padding-bottom: 72px;
+}
+
+@media (max-width: 767px) {
+  .appointment-hero {
+    padding: calc(var(--header-h) + 24px) 0 24px;
+  }
+
+  .appointment-section {
+    padding-top: 24px;
+    padding-bottom: 48px;
+  }
+
+  .clinic-info-panel {
+    position: relative;
+    top: auto;
+  }
+}
+
+/* ── Panels Styling ── */
+.clinic-info-panel {
+  background: linear-gradient(135deg, var(--brand-primary, #015315), #023D10);
+  color: #fff;
+  border-radius: 20px;
+  padding: 40px 30px;
+  position: sticky;
+  top: calc(var(--header-h) + 24px);
+  height: auto !important;
+  align-self: flex-start;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.clinic-info-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83v58.34l-.83.83H.83l-.83-.83V.83L.83 0h53.797zm-52.967 1.66v56.68h52.137V1.66H1.66z' fill='%23ffffff' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.clinic-info-panel h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #fff;
+}
+
+.clinic-info-panel h4 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #fff;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 20px;
+}
+
+.clinic-details-list,
+.expectations-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.clinic-details-list li,
+.expectations-list li {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.clinic-details-list li i,
+.expectations-list li i {
+  font-size: 1.2rem;
+  margin-right: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: -2px;
+}
+
+.appointment-form-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Form Inputs ── */
+.patient-selector-label,
+.modal-field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-control,
+.patient-selector-wrapper select,
+.modal-field input,
+.modal-field select {
+  height: 48px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+textarea.form-control {
+  height: auto;
+  min-height: 100px;
+}
+
+.form-control:focus,
+.patient-selector-wrapper select:focus,
+.modal-field input:focus,
+.modal-field select:focus {
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 0 4px rgba(1, 83, 21, 0.1) !important;
+  outline: none;
+}
+
+.patient-selector-wrapper { display: flex;gap: 12px;align-items: center; }
+.patient-selector-wrapper select { flex: 1; }
+
+.btn-add-member {
+  white-space: nowrap;font-size: 0.85rem;font-weight: 600;
+  padding: 0 16px; height: 48px; border-radius: 50px;
+  background: transparent;border: 1.5px solid var(--accent-color);color: var(--accent-color);
+  cursor: pointer;transition: all 0.2s;display: inline-flex;
+  align-items: center;gap: 6px;
+}
+
+.btn-add-member:hover { background: var(--accent-color);color: #fff;}
+
+/* ── Add Member Modal ── */
+.modal-overlay { display: none;position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  align-items: center;justify-content: center;
+}
+.modal-overlay.active { display: flex;}
+
+.modal-box {
+  background: #fff; border-radius: 20px;padding: 32px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-box h5 {
+  font-weight: 700; font-size: 1.2rem;margin-bottom: 24px;color: var(--heading-color);
+  display: flex;align-items: center;gap: 8px; }
+
+.modal-box h5 i {color: var(--accent-color);}
+.modal-field { margin-bottom: 16px; }
+
+.modal-field label {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.modal-actions { display: flex; gap: 12px;margin-top: 24px;}
+
+.modal-actions button {
+  flex: 1; height: 48px;border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-actions .btn-save {background: var(--accent-color);color: #fff;}
+.modal-actions .btn-save:hover { background: #023D10; }
+
+.modal-actions .btn-close-modal { background: transparent;color: #555; border: 1.5px solid #ccc;}
+.modal-actions .btn-close-modal:hover { background: #f8f9fa; border-color: #aaa; color: #333;}
+
+/* Fix page title hidden behind header */
+.page-title {
+  padding-top: 140px !important;
+}
+@media (max-width: 991px) {
+  .page-title {
+    padding-top: 120px !important;
+  }
+}
+
+/* Remove empty space before the footer */
+.appointmnet.section {
+  padding-bottom: 72px !important;
+}
+
+@media (max-width: 767px) {
+  .appointmnet.section {
+    padding-bottom: 48px !important;
+  }
+}
+
+/* Submit Button Override */
+#submitBtn {
+  background-color: var(--brand-accent) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 50px !important;
+  height: 52px !important;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+#submitBtn:hover, #submitBtn:focus {
+  background-color: #E25C00 !important;
+}
+
+/* Emergency note */
+.emergency-info {
+  background: #FFF4F2;
+  color: #8A1C12;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  border: 1px solid #F5C2BC;
+}
+
+.emergency-info i {
+  color: #AD0002;
+}
+
+/* Time slot buttons and form focus overrides (replacing blue) */
+#time_buttons_container .time-btn.btn-outline-primary {
+  color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  background-color: #fff !important;
+}
+#time_buttons_container .time-btn.btn-outline-primary:hover {
+  background-color: #F3F8F2 !important;
+  color: var(--accent-color) !important;
+}
+#time_buttons_container .time-btn.btn-primary {
+  background-color: var(--accent-color) !important;
+  border-color: var(--accent-color) !important;
+  color: #fff !important;
+}

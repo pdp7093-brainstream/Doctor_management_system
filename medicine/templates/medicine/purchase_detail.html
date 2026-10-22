@@ -19,25 +19,25 @@
             </div>
             <p class="page-subtitle">View purchase details and items.</p>
         </div>
-        <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="page-btn-group">
 
             {% if purchase.status == "received" %}
 
-            <button type="button" class="btn-ghost" disabled>
+            <button type="button" class="btn-page btn-page-outline" disabled>
                 <i class="bi bi-check-circle"></i>
                 Already Received
             </button>
 
             {% else %}
 
-            <a href="{% url 'medicine:receive_purchase' purchase.id|hid %}" class="action-btn">
+            <a href="{% url 'medicine:receive_purchase' purchase.id|hid %}" class="btn-page btn-page-primary">
                 <i class="bi bi-box-arrow-in-down"></i>
                 Receive Purchase
             </a>
 
             {% endif %}
 
-            <a href="{% url 'medicine:purchase_list' %}" class="btn-ghost">
+            <a href="{% url 'medicine:purchase_list' %}" class="btn-page btn-page-outline">
                 <i class="bi bi-arrow-left"></i>
                 Purchase List
             </a>
@@ -106,11 +106,11 @@
                 <thead>
                     <tr>
                         <th>Medicine</th>
-                        <th>Power</th>
-                        <th>Qty Strips</th>
-                        <th>Unit/Strip</th>
+                        <th>Pack Size</th>
+                        <th>Qty Packs</th>
+                        <th>Units/Pack</th>
                         <th>Total Units</th>
-                        <th>Strip Price</th>
+                        <th>Pack Price</th>
                         <th>Tax %</th>
                         <th>Discount</th>
                         <th>Final Amount</th>

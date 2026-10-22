@@ -6,6 +6,9 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Q
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from decimal import Decimal
 
 logger = logging.getLogger(__name__)
@@ -380,6 +383,7 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
         # Only collect minimal info: name, phone, appointment_date, appointment_time
         name = (request.POST.get('name') or '').strip()
         phone = (request.POST.get('phone') or '').strip()
+        email = (request.POST.get('email') or '').strip().lower()
         appointment_date = request.POST.get('appointment_date')
         appointment_time = request.POST.get('appointment_time')
         patient_id = request.POST.get('patient_id')
@@ -410,16 +414,28 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
             patient = Patient.objects.filter(phone=phone).first()
 
         if not patient:
-            # create new User
-            username = phone or (name.replace(' ', '')[:30] or f'user{int(timezone.now().timestamp())}')
-            if User.objects.filter(username=username).exists():
-                username = f"{username}{int(timezone.now().timestamp())}"
+            if not email:
+                messages.error(request, 'Email is required.')
+                return redirect('billing:bill_list')
 
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, 'Enter a valid email address.')
+                return redirect('billing:bill_list')
+
+            if User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).exists():
+                messages.error(request, 'Email already in use.')
+                return redirect('billing:bill_list')
+
+            # create new User
             parts = name.split()
             first_name = parts[0] if parts else ''
             last_name = ' '.join(parts[1:]) if len(parts) > 1 else ''
 
-            user = User.objects.create_user(username=username, password='password@123', first_name=first_name, last_name=last_name)
+            user = User.objects.create_user(username=email, email=email, first_name=first_name, last_name=last_name)
+            user.set_unusable_password()
+            user.save()
             try:
                 patient = user.patient
                 patient.phone = phone

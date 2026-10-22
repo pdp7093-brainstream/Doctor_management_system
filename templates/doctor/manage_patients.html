@@ -12,9 +12,14 @@
             <h2 class="page-title">Manage Patients</h2>
             <p class="page-subtitle">View all patients including family members.</p>
         </div>
-        <a href="{% url 'doctor:add_patient' %}" class="action-btn">
-            <i class="bi bi-plus-lg"></i> Add Patient
-        </a>
+        <div class="page-btn-group">
+            <a href="{% url 'doctor:import_patients' %}" class="btn-page btn-page-outline">
+                <i class="bi bi-upload"></i> Import Patients
+            </a>
+            <a href="{% url 'doctor:add_patient' %}" class="btn-page btn-page-primary">
+                <i class="bi bi-plus-lg"></i> Add Patient
+            </a>
+        </div>
     </div>
 
     <!-- Patients Table Card -->
@@ -39,7 +44,7 @@
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Phone</th>
-                        <th class="col-actions">Actions</th>
+                        <th class="col-actions text-end">Actions</th>
                     </tr>
                 </thead>
 
@@ -66,30 +71,30 @@
                             {% if p.phone %}{{ p.phone }}{% else %}<span class="dc-muted">—</span>{% endif %}
                         </td>
 
-                        <td class="col-actions">
-                            <div class="dc-actions">
-                                <a href="{% url 'doctor:view_patient' p.type p.id|hid %}" class="btn-act view" title="View">
-                                    <i class="bi bi-eye"></i><span>View</span>
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
+                                <a href="{% url 'doctor:view_patient' p.type p.id|hid %}" class="btn-act btn-act-view" title="View" aria-label="View">
+                                    <i class="bi bi-eye"></i>
                                 </a>
 
                                 {% if p.type == 'main' %}
-                                <a href="{% url 'doctor:edit_patient' p.id|hid %}" class="btn-act edit" title="Edit">
-                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                                <a href="{% url 'doctor:edit_patient' p.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="{% url 'doctor:delete_patient' p.id|hid %}">
                                     {% csrf_token %}
-                                    <button type="button" class="btn-act delete delete-btn" data-type="patient" title="Delete">
-                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                    <button type="button" class="btn-act btn-act-delete delete-btn" data-type="patient" title="Delete" aria-label="Delete">
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                                 {% else %}
-                                <a href="{% url 'doctor:edit_family' p.id|hid %}" class="btn-act edit" title="Edit">
-                                    <i class="bi bi-pencil"></i><span>Edit</span>
+                                <a href="{% url 'doctor:edit_family' p.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
+                                    <i class="bi bi-pencil"></i>
                                 </a>
                                 <form method="post" action="{% url 'doctor:delete_family' p.id|hid %}">
                                     {% csrf_token %}
-                                    <button type="button" class="btn-act delete delete-btn" data-type="family member" title="Delete">
-                                        <i class="bi bi-trash"></i><span>Delete</span>
+                                    <button type="button" class="btn-act btn-act-delete delete-btn" data-type="family member" title="Delete" aria-label="Delete">
+                                        <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
                                 {% endif %}

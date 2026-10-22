@@ -1,0 +1,57 @@
+{% extends "doctor/main.html" %}
+{% load static %}
+{% block title %}Edit Medicine Type - Medicine Store{% endblock %}
+{% block content %}
+
+<main class="main-content" id="mainContent">
+    <div class="dc-form-shell">
+        <div class="page-head">
+            <div>
+                <h2 class="page-title">Edit Medicine Type</h2>
+                <p class="page-subtitle">Update name, sort order and active status.</p>
+            </div>
+            <a href="{% url 'medicine:medicine_types' %}" class="btn-page btn-page-outline">
+                <i class="bi bi-arrow-left"></i> Medicine Types
+            </a>
+        </div>
+
+        <div class="dc-card">
+            <form method="POST" class="patient-form-grid">
+                {% csrf_token %}
+                <div class="dc-card-body">
+                    <section class="dc-section">
+                        <h3 class="dc-section-title"><i class="bi bi-tags"></i> Type details</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="dc-label" for="type-name">Type Name <span class="dc-muted">*</span></label>
+                                <input id="type-name" type="text" name="name" class="form-control patient-input"
+                                       value="{{ med_type.name }}" required autocomplete="off">
+                                <small class="dc-hint">Unique name (case-insensitive), e.g., Tablet, Syrup, Vati</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="dc-label" for="type-order">Sort Order</label>
+                                <input id="type-order" type="number" name="sort_order" class="form-control patient-input"
+                                       value="{{ med_type.sort_order }}" min="0" step="1">
+                                <small class="dc-hint">Lower numbers appear first in dropdowns</small>
+                            </div>
+                            <div class="col-12">
+                                <div class="dc-callout d-flex align-items-center gap-2">
+                                    <input type="checkbox" class="form-check-input m-0" id="type-active" name="is_active"
+                                           {% if med_type.is_active %}checked{% endif %}>
+                                    <label class="dc-label mb-0" for="type-active">Active (available in dropdowns)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="dc-form-footer">
+                    <a href="{% url 'medicine:medicine_types' %}" class="btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+{% endblock %}

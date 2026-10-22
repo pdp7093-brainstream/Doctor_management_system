@@ -6,10 +6,17 @@ class MedicineVariantInline(admin.TabularInline):
     model = MedicineVariant
     extra =1 
 
+@admin.register(MedicineType)
+class MedicineTypeAdmin(admin.ModelAdmin):
+    list_display = ['name', 'is_active', 'sort_order', 'created_at']
+    list_filter = ['is_active']
+    search_fields = ['name']
+
+
 @admin.register(Medicine)
 class MedicineAdmin(admin.ModelAdmin):
     list_display = ['name','short_name','medicine_type','company','is_active']
-    search_fields = ['name','short_name','company']
+    search_fields = ['name','short_name','company','medicine_type__name']
     list_filter = ['medicine_type','is_active']
     inlines = [MedicineVariantInline]
 

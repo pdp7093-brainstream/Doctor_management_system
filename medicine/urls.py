@@ -16,6 +16,11 @@ urlpatterns = [
     path('low-stock-count/', views.low_stock_count, name='low_stock_count'),
     path('low-stock-list/', views.low_stock_list, name='low_stock_list'),
 
+    # Medicine Types
+    path('types/', MedicineTypeListView.as_view(), name='medicine_types'),
+    path('types/<int:pk>/edit/', EditMedicineTypeView.as_view(), name='edit_medicine_type'),
+    path('types/<int:pk>/delete/', DeleteMedicineTypeView.as_view(), name='delete_medicine_type'),
+
     # Vendor 
     path('vendors/',VendorListView.as_view(),name='vendor_list'),
     path('vendors/add/',AddVendorView.as_view(),name='add_vendor'),

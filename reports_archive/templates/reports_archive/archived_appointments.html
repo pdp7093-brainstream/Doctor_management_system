@@ -10,7 +10,7 @@
             <h2 class="page-title">Archived Appointments</h2>
             <p class="page-subtitle">Review and restore soft-archived appointment records.</p>
         </div>
-        <a href="{% url 'reports_archive:archive_records' %}" class="action-btn">
+        <a href="{% url 'reports_archive:archive_records' %}" class="btn-page btn-page-outline">
             <i class="bi bi-archive"></i> Archive Records
         </a>
     </div>
@@ -89,7 +89,7 @@
                             <th>Time Slot</th>
                             <th>Status</th>
                             <th>Archived At</th>
-                            <th class="col-actions">Actions</th>
+                            <th class="col-actions text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -139,11 +139,11 @@
                                     <span class="dc-muted">Not recorded</span>
                                 {% endif %}
                             </td>
-                            <td class="col-actions">
-                                <div class="dc-actions">
+                            <td class="col-actions text-end">
+                                <div class="action-btns">
                                     <form action="{% url 'reports_archive:restore_appointment' appointment.id|hid %}" method="POST" class="m-0 d-inline">
                                         {% csrf_token %}
-                                        <button type="button" class="btn-act view restore-btn" title="Restore">
+                                        <button type="button" class="btn-act btn-act-view restore-btn" title="Restore" aria-label="Restore">
                                             <i class="bi bi-arrow-counterclockwise"></i>
                                         </button>
                                     </form>
@@ -155,7 +155,7 @@
                             <td colspan="6" class="dc-empty">
                                 <i class="bi bi-archive"></i>
                                 <p class="dc-empty-text">No archived appointments found.</p>
-                                <a href="{% url 'reports_archive:archive_records' %}" class="btn btn-primary btn-sm">
+                                <a href="{% url 'reports_archive:archive_records' %}" class="btn-page btn-page-outline">
                                     <i class="bi bi-archive"></i> Archive Records
                                 </a>
                             </td>

@@ -132,7 +132,7 @@
                     <td>{{ forloop.counter }}</td>
                     <td>
                         <span class="item-name">{{ item.medicine_variant.medicine.name }}</span>
-                        <span class="item-type">{{ item.medicine_variant.medicine.get_medicine_type_display }} • {{ item.medicine_variant.power }}</span>
+                        <span class="item-type">{{ item.medicine_variant.medicine.medicine_type.name|default:"—" }} • {{ item.medicine_variant.power }}</span>
                     </td>
                     <td>
                         <span class="dosage-badge">{{ item.dosage }}</span>

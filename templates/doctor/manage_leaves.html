@@ -175,12 +175,14 @@
                                         {{ leave.reason }}
                                     </td>
                                     <td class="text-end">
+                                        <div class="action-btns">
                                         <form method="post" action="{% url 'doctor:delete_leave' leave.id %}" style="display:inline;" class="delete-leave-form">
                                             {% csrf_token %}
-                                            <button type="submit" class="btn btn-sm btn-delete-leave" title="Delete">
-                                                <i class="bi bi-trash"></i> Delete
+                                            <button type="submit" class="btn-act btn-act-delete btn-delete-leave" title="Delete" aria-label="Delete">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% empty %}

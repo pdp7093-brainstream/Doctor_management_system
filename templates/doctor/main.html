@@ -16,7 +16,7 @@
 
     <link href="{% static 'assets/css/bootstrap.min.css' %}?v=1" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="{% static 'assets/css/doctor.css' %}?v=24" rel="stylesheet">
+    <link href="{% static 'assets/css/doctor.css' %}?v=27" rel="stylesheet">
 
     <!-- Added this small style block to fix mobile responsiveness without touching your main CSS file -->
     <style>
@@ -195,6 +195,13 @@
                             class="{% if request.path == '/medicine/' or 'manage_medicine' in request.path %}active{% endif %}">
                             <i class="bi bi-list-ul"></i>
                             <span>Manage Medicine</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'medicine:medicine_types' %}"
+                            class="{% if 'types' in request.path %}active{% endif %}">
+                            <i class="bi bi-tags"></i>
+                            <span>Medicine Types</span>
                         </a>
                     </li>
                     <li>
@@ -434,7 +441,8 @@
     {% endblock %}
 
     <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'assets/js/doctor.js' %}"></script>
+    <script src="{% static 'assets/js/doctor.js' %}?v=2"></script>
+    {% block page_scripts %}{% endblock %}
 
     <!-- Added Mobile Toggle Script so Hamburger Menu works perfectly -->
     <script>
@@ -545,7 +553,6 @@
 
 
 {% if messages %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         {% for message in messages %}

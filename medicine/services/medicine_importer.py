@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
 
-from medicine.models import Medicine, MedicineVariant
+from medicine.models import Medicine, MedicineVariant, MedicineType
 
 def import_medicines_from_excel(file):
     try:
@@ -30,7 +30,7 @@ def import_medicines_from_excel(file):
                     
                 medicine_name = str(row[0] or "").strip().title()
                 short_name = str(row[1] or "").strip().upper()
-                medicine_type = str(row[2] or "").strip().lower()
+                type_raw = str(row[2] or "").strip()
                 company = str(row[3] or "").strip()
 
                 power = str(row[4] or "").strip()
@@ -42,11 +42,14 @@ def import_medicines_from_excel(file):
                     raise Exception("Short name missing")
 
                 if not power:
-                    raise Exception("Power missing")
+                    raise Exception("Pack size missing")
 
-                valid_types = {choice[0] for choice in Medicine.MEDICINE_TYPE}
-                if medicine_type not in valid_types:
-                    raise Exception(f"Invalid medicine type: {medicine_type}")
+                if type_raw:
+                    type_obj = MedicineType.objects.filter(name__iexact=type_raw).first()
+                    if not type_obj:
+                        type_obj = MedicineType.objects.create(name=type_raw.title())
+                else:
+                    type_obj = None
 
                 unit_per_strip = int(row[5] or 1)
 
@@ -61,7 +64,7 @@ def import_medicines_from_excel(file):
                     short_name = short_name,
                     defaults = {
                         "name":medicine_name,
-                        "medicine_type":medicine_type,
+                        "medicine_type":type_obj,
                         "company":company,
                         "is_active": True,
                     }

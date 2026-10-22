@@ -133,7 +133,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.PhoneBackend',      
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -145,6 +144,7 @@ EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS', default=True)
 EMAIL_HOST_USER = env('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Clinic <noreply@example.com>')
+PASSWORD_RESET_TIMEOUT = 3600  # 1 hour in seconds
 
 # In local development (DEBUG=True, no SMTP configured) print emails to console instead of sending.
 if DEBUG and not EMAIL_HOST_USER:

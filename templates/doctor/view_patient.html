@@ -13,7 +13,7 @@
             <h2 class="page-title mb-1">Patient Profile</h2>
             <p class="text-muted small mb-0">Full details and family members of this patient.</p>
         </div>
-        <a href="{% url 'doctor:manage_patients' %}" class="patient-link-btn btn btn-outline-primary btn-sm">
+        <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-outline">
             <i class="bi bi-arrow-left me-1"></i> Back to Patients
         </a>
     </div>
@@ -203,7 +203,7 @@
                             <th>Visit Date</th>
                             <th>Doctor</th>
                             <th>Uploaded</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -228,13 +228,15 @@
                                 {% endif %}
                             </td>
                             <td>{{ document.uploaded_at|date:"d M Y" }}</td>
-                            <td style="white-space:nowrap; vertical-align:middle;">
-                                <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary me-1" title="View" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                            <td class="text-end" style="white-space:nowrap; vertical-align:middle;">
+                                <div class="action-btns">
+                                <a href="{{ document.file.url }}" target="_blank" class="btn-act btn-act-view" title="View" aria-label="View">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="lab" data-id="{{ document.id|hid }}" title="Delete" style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
+                                <button type="button" class="btn-act btn-act-delete delete-doc-btn" data-type="lab" data-id="{{ document.id|hid }}" title="Delete" aria-label="Delete">
                                     <i class="bi bi-trash"></i>
                                 </button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -301,7 +303,7 @@
                             <th>Patient Type</th>
                             <th>Uploaded By</th>
                             <th>Uploaded</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -328,9 +330,11 @@
                             </td>
                             <td>{{ document.uploaded_by.get_full_name|default:document.uploaded_by.username|default:"Patient" }}</td>
                             <td>{{ document.uploaded_at|date:"d M Y" }}</td>
-                            <td>
-                                <a href="{{ document.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary me-1" title="View"><i class="bi bi-eye"></i></a>
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-doc-btn" data-type="profile" data-id="{{ document.id|hid }}" title="Delete"><i class="bi bi-trash"></i></button>
+                            <td class="text-end">
+                                <div class="action-btns">
+                                <a href="{{ document.file.url }}" target="_blank" class="btn-act btn-act-view" title="View" aria-label="View"><i class="bi bi-eye"></i></a>
+                                <button type="button" class="btn-act btn-act-delete delete-doc-btn" data-type="profile" data-id="{{ document.id|hid }}" title="Delete" aria-label="Delete"><i class="bi bi-trash"></i></button>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -399,7 +403,7 @@
                                     <th>Status</th>
                                     <th>Type</th>
                                     <th>Doctor</th>
-                                    <th>Action</th>
+                                    <th class="text-end">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -438,10 +442,12 @@
                                             -
                                         {% endif %}
                                     </td>
-                                    <td style="white-space:nowrap; vertical-align:middle;">
-                                        <a href="{% url 'appointment:start_visit' appt.id|hid %}" class="btn btn-sm btn-outline-primary" title="View Details">
-                                            <i class="bi bi-eye"></i> View
+                                    <td class="text-end" style="white-space:nowrap; vertical-align:middle;">
+                                        <div class="action-btns">
+                                        <a href="{% url 'appointment:start_visit' appt.id|hid %}" class="btn-act btn-act-view" title="View" aria-label="View">
+                                            <i class="bi bi-eye"></i>
                                         </a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -507,7 +513,7 @@
                                 <tr>
                                     <th scope="col" style="font-weight:600; color:#555; padding:12px 16px;">Document Name</th>
                                     <th scope="col" style="font-weight:600; color:#555; padding:12px 16px;">Date</th>
-                                    <th scope="col" style="font-weight:600; color:#555; padding:12px 16px;">Actions</th>
+                                    <th scope="col" class="text-end" style="font-weight:600; color:#555; padding:12px 16px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -520,13 +526,13 @@
                                         </div>
                                     </td>
                                     <td style="padding:12px 16px;">{{ doc.uploaded_at|date:"M d, Y g:i A" }}</td>
-                                    <td style="padding:12px 16px; white-space:nowrap;">
-                                        <div class="d-flex gap-2">
-                                            <a href="{{ doc.file.url }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View Document">
-                                                <i class="bi bi-eye"></i> View
+                                    <td class="text-end" style="padding:12px 16px; white-space:nowrap;">
+                                        <div class="action-btns">
+                                            <a href="{{ doc.file.url }}" target="_blank" class="btn-act btn-act-view" title="View" aria-label="View">
+                                                <i class="bi bi-eye"></i>
                                             </a>
-                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Delete Document" onclick="deleteOldDocument('{{ doc.id|hid }}', this)">
-                                                <i class="bi bi-trash"></i> Delete
+                                            <button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete" onclick="deleteOldDocument('{{ doc.id|hid }}', this)">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </td>

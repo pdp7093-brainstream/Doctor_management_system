@@ -11,7 +11,7 @@
       <h2 class="page-title">Clinic Settings</h2>
       <p class="page-subtitle">Manage clinic details, schedule and billing defaults.</p>
     </div>
-    <button type="submit" form="settingsForm" class="action-btn">
+    <button type="submit" form="settingsForm" class="btn-page btn-page-primary">
       <i class="bi bi-floppy-fill"></i> Save Settings
     </button>
   </div>
@@ -367,8 +367,8 @@
       <div class="col-lg-8">
         <div class="dc-card dc-form-footer-card">
           <div class="dc-form-footer">
-            <a href="{% url 'doctor:dashboard' %}" class="btn-ghost">Cancel</a>
-            <button type="submit" form="settingsForm" class="btn btn-primary">Save Settings</button>
+            <a href="{% url 'doctor:dashboard' %}" class="btn-page btn-page-outline"><i class="bi bi-x-lg"></i> Cancel</a>
+            <button type="submit" form="settingsForm" class="btn-page btn-page-primary"><i class="bi bi-check2"></i> Save Settings</button>
           </div>
         </div>
       </div>
