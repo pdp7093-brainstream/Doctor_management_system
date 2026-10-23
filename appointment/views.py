@@ -29,6 +29,27 @@ from .file_validation import validate_uploaded_document
 logger = logging.getLogger(__name__)
 
 
+def normalize_advice_lines(value):
+    value = (value or '').strip()
+    if value.casefold() == 'none':
+        return ''
+    result = []
+    seen = set()
+    for line in value.splitlines():
+        line = line.strip()
+        if not line or line.casefold() == 'none':
+            continue
+        line = line[:100]
+        key = line.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        result.append(line)
+        if len(result) == 50:
+            break
+    return '\n'.join(result)
+
+
 def resolve_hid(hid):
     """Resolve a path id that is a hashid.
     Returns integer id or None.
@@ -676,21 +697,7 @@ class StartVisitView(View):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class PrescriptionView(View):
     def parse_dosage(self, dosage):
-        try:
-            parts = dosage.split(' (')
-            dose_parts = [int(part) for part in parts[0].split('-')]
-            meal = parts[1].replace(')', '')
-        except Exception:
-            dose_parts = []
-            meal = 'after_food'
-
-        morning = dose_parts[0] if len(dose_parts) > 0 else 0
-        afternoon = dose_parts[1] if len(dose_parts) > 1 else 0
-        evening = dose_parts[2] if len(dose_parts) > 3 else 0
-        night_index = 3 if len(dose_parts) > 3 else 2
-        night = dose_parts[night_index] if len(dose_parts) > night_index else 0
-
-        return morning, afternoon, evening, night, meal
+        return parse_dosage(dosage)
 
     def get(self, request, hid):
         visit_id = resolve_hid(hid)
@@ -725,6 +732,8 @@ class PrescriptionView(View):
             item.parsed_evening = evening
             item.parsed_night = night
             item.parsed_meal = meal
+            item.parsed_sevan_kaal_label = item.get_sevan_kaal_display()
+            item.parsed_anupana = item.anupana
 
         return render(request, 'doctor/prescription.html', {
             'visit': visit,
@@ -786,9 +795,13 @@ class PrescriptionView(View):
                 return redirect('appointment:prescription', hid=hid)
             valid_uploaded_documents.append((document, original_name))
 
-        visit.symptoms = request.POST.get("symptoms")
-        visit.diagnosis = request.POST.get("diagnosis")
-        visit.notes = request.POST.get("notes")
+        def clean_visit_text(field):
+            value = (request.POST.get(field) or "").strip()
+            return "" if value.casefold() == "none" else value
+
+        visit.symptoms = clean_visit_text("symptoms")
+        visit.diagnosis = clean_visit_text("diagnosis")
+        visit.notes = clean_visit_text("notes")
 
         is_completing = "complete_visit" in request.POST
         if is_completing:
@@ -798,6 +811,11 @@ class PrescriptionView(View):
         visit.save()
 
         prescription, _ = Prescription.objects.get_or_create(visit=visit)
+        prescription.pathya = normalize_advice_lines(request.POST.get('pathya'))
+        prescription.apathya = normalize_advice_lines(request.POST.get('apathya'))
+        vihar = (request.POST.get('vihar') or '').strip()
+        prescription.vihar = '' if vihar.casefold() == 'none' else vihar
+        prescription.save(update_fields=['pathya', 'apathya', 'vihar', 'updated_at'])
 
         variant_ids = request.POST.getlist("variant_id[]")
         item_ids = request.POST.getlist("item_id[]")
@@ -806,6 +824,7 @@ class PrescriptionView(View):
         evening_list = request.POST.getlist("evening")
         night_list = request.POST.getlist("night")
         meal_list = request.POST.getlist("meal")
+        anupana_list = request.POST.getlist("anupana")
         days_list = request.POST.getlist("days")
         notes_list = request.POST.getlist("medicine_notes")
         deduct_list = request.POST.getlist("should_deduct[]")
@@ -818,6 +837,8 @@ class PrescriptionView(View):
                 continue
             variant = MedicineVariant.objects.get(id=v_id)
             dosage = f"{m}-{a}-{e}-{n} ({meal})"
+            anupana = anupana_list[i].strip() if i < len(anupana_list) else ''
+            sevan_kaal = meal if meal in dict(PrescriptionItem.SEVAN_KAAL_CHOICES) else ''
             should_deduct = str(i) in deduct_list
             if item_id_str:
                 try:
@@ -826,6 +847,8 @@ class PrescriptionView(View):
                     item = PrescriptionItem.objects.get(id=item_id_int, prescription=prescription)
                     item.medicine_variant = variant
                     item.dosage = dosage
+                    item.sevan_kaal = sevan_kaal
+                    item.anupana = anupana[:100]
                     item.days = int(days)
                     item.notes = medicine_notes
                     item.should_deduct = should_deduct
@@ -837,6 +860,8 @@ class PrescriptionView(View):
                     prescription=prescription,
                     medicine_variant=variant,
                     dosage=dosage,
+                    sevan_kaal=sevan_kaal,
+                    anupana=anupana[:100],
                     days=int(days),
                     notes=medicine_notes,
                     should_deduct=should_deduct,
@@ -934,22 +959,9 @@ def appointment_detail(request, hid):
             ).all()
             prescription_items = list(items_qs)
 
-            # Parse dosage for template display
             for item in prescription_items:
-                try:
-                    parts = item.dosage.split(' (')
-                    dose_parts = [int(part) for part in parts[0].split('-')]
-                    meal = parts[1].replace(')', '') if len(parts) > 1 else 'after_food'
-                except Exception:
-                    dose_parts = []
-                    meal = 'after_food'
-
-                item.parsed_morning = dose_parts[0] if len(dose_parts) > 0 else 0
-                item.parsed_afternoon = dose_parts[1] if len(dose_parts) > 1 else 0
-                item.parsed_evening = dose_parts[2] if len(dose_parts) > 3 else 0
-                night_index = 3 if len(dose_parts) > 3 else 2
-                item.parsed_night = dose_parts[night_index] if len(dose_parts) > night_index else 0
-                item.parsed_meal = meal
+                item.parsed_sevan_kaal_label = item.get_sevan_kaal_display()
+                item.parsed_anupana = item.anupana
 
     from doctor.models import InnerMember
     default_doctor = InnerMember.objects.filter(role='doctor').first()
@@ -985,9 +997,25 @@ def print_prescription(request, hid):
     ).all()
     
     settings = ClinicSettings.get()
-    
     from doctor.models import InnerMember
     default_doctor = InnerMember.objects.filter(role='doctor').first()
+
+    def display_value(value):
+        if value is None:
+            return ''
+        value = str(value).strip()
+        if value.casefold() in {'', 'not specified', 'n/a', 'none'}:
+            return ''
+        return value
+
+    family_member = visit.appointment.family_member if visit.appointment else None
+    patient_name = display_value(
+        family_member.name if family_member else visit.patient.user.get_full_name()
+    )
+    patient_gender = display_value(family_member.gender if family_member else visit.patient.gender)
+    patient_contact = display_value(visit.patient.phone)
+    doctor = visit.doctor or (visit.appointment.doctor if visit.appointment else None) or default_doctor
+    doctor_name = display_value((doctor.user.get_full_name() or doctor.user.username) if doctor else '')
     
     return render(request, 'appointment/prescription_print.html', {
         'visit': visit,
@@ -995,6 +1023,12 @@ def print_prescription(request, hid):
         'prescription_items': prescription_items,
         'clinic': settings,
         'default_doctor': default_doctor,
+        'patient_name': patient_name,
+        'patient_gender': patient_gender,
+        'patient_contact': patient_contact,
+        'doctor_name': doctor_name,
+        'doctor_specialization': display_value(settings.specialization),
+        'doctor_registration_no': display_value(settings.registration_no),
     })
 
 @login_required

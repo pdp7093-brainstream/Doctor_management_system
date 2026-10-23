@@ -1,7 +1,7 @@
 :root {
-    --primary-color: #0284c7;
-    /* Medical Blue */
-    --primary-light: #e0f2fe;
+    --primary-color: #015315;
+    --primary-light: #EAF4EA;
+    --accent-color: #FD6801;
     --text-dark: #1e293b;
     --text-muted: #64748b;
     --border-color: #e2e8f0;
@@ -273,6 +273,13 @@ td.text-center {
     font-weight: 600;
 }
 
+.meal-timing.dosage-caption {
+    margin-top: 2px;
+    font-size: 9px;
+    white-space: nowrap;
+    color: var(--text-muted);
+}
+
 .med-notes {
     display: block;
     margin-top: 4px;
@@ -321,3 +328,23 @@ td.text-center {
     font-weight: 700;
     color: var(--text-dark);
 }
+
+.advice-print {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+.advice-print-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.advice-print h6 { margin: 0 0 5px; font-size: 13px; color: var(--text-dark); }
+.advice-print .advice-print-title { margin-bottom: 10px; color: var(--primary-color); font-size: 13px; text-transform: uppercase; letter-spacing: .5px; }
+.advice-print .pathya-title { color: #15803d; }
+.advice-print .apathya-title { color: #b91c1c; }
+.advice-print ul { margin: 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.45; }
+.advice-print li { display: flex; gap: 6px; margin-bottom: 2px; }
+.advice-print .pathya-list li::before { content: '✓'; color: #15803d; font-weight: 700; }
+.advice-print .apathya-list li::before { content: '✕'; color: #b91c1c; font-weight: 700; }
+.advice-print-vihar { margin-top: 8px; font-size: 13px; line-height: 1.45; }
+.advice-print-vihar p { margin: 0; white-space: pre-line; }

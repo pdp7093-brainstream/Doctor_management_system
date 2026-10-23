@@ -59,7 +59,14 @@
                                 </div>
                                 <div>
                                     <div class="dc-name">{{ p.name }}</div>
-                                    <div class="dc-sub">{% if p.type == 'family' %}Family member{% else %}Patient{% endif %}</div>
+                                    <div class="dc-sub">
+                                        {% if p.type == 'family' %}Family member{% else %}Patient{% endif %}
+                                        {% if p.type == 'main' %}
+                                            {% if p.login_status == 'active' %}<span class="badge bg-success">Active</span>
+                                            {% elif p.login_status == 'invited' %}<span class="badge bg-warning text-dark" title="Invited {{ p.invite_sent_at|date:'d M Y' }}">Invited · {{ p.invite_sent_at|date:'d M Y' }}</span>
+                                            {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -78,6 +85,12 @@
                                 </a>
 
                                 {% if p.type == 'main' %}
+                                {% if p.email and p.login_status != 'active' %}
+                                <form method="post" action="{% url 'doctor:send_patient_invite' p.id|hid %}" class="d-inline">
+                                    {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                    <button type="submit" class="btn-act" title="{% if p.login_status == 'invited' %}Resend login invite{% else %}Send login invite{% endif %}" aria-label="Send login invite"><i class="bi bi-envelope-arrow-up"></i></button>
+                                </form>
+                                {% endif %}
                                 <a href="{% url 'doctor:edit_patient' p.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>

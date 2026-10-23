@@ -1,6 +1,16 @@
 from django.test import TestCase
+from django.test import override_settings
+from django.utils import timezone
+from datetime import timedelta
+from unittest.mock import patch
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.models import User
 from accounts.models import Patient
+from doctor.models import InnerMember
+from doctor.hashid import encode_id
+from accounts.tokens import patient_invite_token_generator
 from accounts.services.patient_import import (
     clean_phone,
     clean_date,
@@ -116,6 +126,7 @@ class PatientImportTests(TestCase):
         self.assertEqual(user2.patient.phone, "9123456789")
         self.assertEqual(user2.patient.gender, "Female")
         self.assertEqual(user2.patient.bld_grop, "O+")
+
         self.assertEqual(str(user2.patient.dob), "1995-05-20")
 
     def test_duplicate_phone_in_database(self):
@@ -186,3 +197,71 @@ class PatientImportTests(TestCase):
         self.assertEqual(validated[0]["status"], "Error")
         self.assertTrue("Missing name" in validated[0]["reason"])
         self.assertTrue("10 digits" in validated[0]["reason"])
+
+
+class PatientInviteTests(TestCase):
+    def setUp(self):
+        self.doctor = User.objects.create_user(username='doctor-test', password='doctor-pass')
+        InnerMember.objects.create(user=self.doctor, role='doctor')
+        self.patient_user = User.objects.create_user(username='invitee@example.com', email='invitee@example.com')
+        self.patient_user.set_unusable_password()
+        self.patient_user.save()
+        self.patient = self.patient_user.patient
+        self.client.force_login(self.doctor)
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', DEFAULT_FROM_EMAIL='clinic@example.com')
+    def test_invite_sets_timestamp_and_sends_one_email(self):
+        response = self.client.post(reverse('doctor:send_patient_invite', args=[encode_id(self.patient.pk)]))
+        self.assertEqual(response.status_code, 302)
+        self.patient.refresh_from_db()
+        self.assertIsNotNone(self.patient.invite_sent_at)
+        from django.core import mail
+        self.assertEqual(len(mail.outbox), 1)
+
+    def test_invite_token_becomes_invalid_after_password_set(self):
+        token = patient_invite_token_generator.make_token(self.patient_user)
+        self.assertTrue(patient_invite_token_generator.check_token(self.patient_user, token))
+        self.patient_user.set_password('NewStrongPass99!')
+        self.patient_user.save()
+        self.assertFalse(patient_invite_token_generator.check_token(self.patient_user, token))
+
+    def test_invite_token_expires_after_48_hours(self):
+        token = patient_invite_token_generator.make_token(self.patient_user)
+        future = timezone.now() + timedelta(hours=49)
+        with patch.object(patient_invite_token_generator, '_now', return_value=future):
+            self.assertFalse(patient_invite_token_generator.check_token(self.patient_user, token))
+
+    def test_staff_cannot_change_active_patient_email(self):
+        self.patient_user.set_password('KnownPass123!')
+        self.patient_user.save()
+        response = self.client.post(reverse('doctor:edit_patient', args=[encode_id(self.patient.pk)]), {
+            'name': 'Patient Name', 'email': 'changed@example.com', 'phone': '',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.patient_user.refresh_from_db()
+        self.assertEqual(self.patient_user.email, 'invitee@example.com')
+
+    def test_staff_can_change_non_active_patient_email(self):
+        response = self.client.post(reverse('doctor:edit_patient', args=[encode_id(self.patient.pk)]), {
+            'name': 'Patient Name', 'email': 'changed@example.com', 'phone': '',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.patient_user.refresh_from_db()
+        self.assertEqual(self.patient_user.email, 'changed@example.com')
+
+    def test_activation_page_sets_password_and_consumes_token(self):
+        token = patient_invite_token_generator.make_token(self.patient_user)
+        uidb64 = urlsafe_base64_encode(force_bytes(self.patient_user.pk))
+        url = reverse('activate_patient', args=[uidb64, token])
+        response = self.client.post(url, {'new_password1': 'StrongPass123!xyz', 'new_password2': 'StrongPass123!xyz'})
+        self.assertEqual(response.status_code, 302)
+        self.patient_user.refresh_from_db()
+        self.assertTrue(self.patient_user.has_usable_password())
+        self.assertFalse(patient_invite_token_generator.check_token(self.patient_user, token))
+
+    @override_settings(EMAIL_BACKEND='django.core.mail.backends.locmem.EmailBackend', DEFAULT_FROM_EMAIL='clinic@example.com')
+    def test_forgot_password_sends_reset_for_imported_patient(self):
+        response = self.client.post(reverse('password_reset'), {'email': self.patient_user.email})
+        self.assertEqual(response.status_code, 302)
+        from django.core import mail
+        self.assertEqual(len(mail.outbox), 1)

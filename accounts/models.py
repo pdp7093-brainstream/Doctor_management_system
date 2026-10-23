@@ -19,6 +19,15 @@ class Patient(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
+    invite_sent_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def login_status(self):
+        if self.user.has_usable_password():
+            return 'active'
+        if self.user.email and self.invite_sent_at:
+            return 'invited'
+        return 'none'
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.email} - {self.phone}"

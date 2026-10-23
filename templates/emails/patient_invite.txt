@@ -1,0 +1,10 @@
+Hello{% if patient.user.get_full_name %} {{ patient.user.get_full_name }}{% endif %},
+
+Your Hitshree patient account is ready. Set your password using this link:
+
+{{ invite_url }}
+
+This link expires in 48 hours. If you did not expect this invite, you can ignore this email.
+
+Thank you,
+Team Hitshree

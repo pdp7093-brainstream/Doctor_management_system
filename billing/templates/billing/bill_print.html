@@ -1,15 +1,16 @@
 {% load static %}
+{% load billing_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Bill #{{ bill.bill_number }}</title>
+    <title>Bill #{{ bill.bill_number|default_if_none:"—"|default:"—" }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'assets/css/bill_print.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/bill_print.css' %}?v=3">
 </head>
 <body>
 
-    <div class="print-btn-container">
+    <div class="print-btn-container no-print">
         <button class="print-btn" onclick="window.print()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -24,22 +25,30 @@
     <div class="invoice-header">
         <div class="clinic-brand">
             <div class="clinic-logo-name">
-                {% if clinic.logo %}
+                {% if clinic.clinic_logo %}
+                <img src="{{clinic.clinic_logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
+                {% elif clinic.logo %}
                 <img src="{{clinic.logo.url}}" alt="Clinic Logo" style="width:45px;height:45px;border-radius:50%;object-fit:cover;">
                 {% else %}
                 <span style="display:flex;align-items:center;justify-content:center;width:45px;height:45px;border-radius:50%;background:var(--primary-light);color:var(--primary-color);font-size:11px;font-weight:700;border:1.5px solid var(--primary-color);">CLINIC</span>
                 {% endif %}
-                {{clinic.clinic_name}}
+                {{clinic.clinic_name|default_if_none:"—"|default:"—"}}
             </div>
             <div class="clinic-address">
-                {{clinic.address}}
-                {{clinic.phone}}
-                {{clinic.email}}
+                {% if clinic.address %}
+                <div class="clinic-addr-line">{{ clinic.address|clean_address }}</div>
+                {% endif %}
+                {% if clinic.phone %}
+                <div class="clinic-meta-line">Phone: {{ clinic.phone }}</div>
+                {% endif %}
+                {% if clinic.email %}
+                <div class="clinic-meta-line">Email: {{ clinic.email }}</div>
+                {% endif %}
             </div>
         </div>
         <div class="invoice-title-box">
             <div class="invoice-title">INVOICE</div>
-            <div class="bill-number"># {{ bill.bill_number }}</div>
+            <div class="bill-number"># {{ bill.bill_number|default_if_none:"—"|default:"—" }}</div>
         </div>
     </div>
 
@@ -50,19 +59,21 @@
             <h6>Patient Information</h6>
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">{% if visit.appointment.family_member %}
-                                                                {{ visit.appointment.family_member.name }}
-                                                             {% else %}
-                                                                {{ visit.appointment.patient.user.get_full_name }}
-                                                             {% endif %}</span>
+                <span class="info-value">
+                    {% if visit.appointment.family_member %}
+                        {{ visit.appointment.family_member.name|default_if_none:"—"|default:"—" }}
+                    {% else %}
+                        {{ visit.appointment.patient.user.get_full_name|default_if_none:"—"|default:"—" }}
+                    {% endif %}
+                </span>
             </div>
             <div class="info-row">
                 <span class="info-label">Contact</span>
-                <span class="info-value">{{ visit.patient.phone|default:"N/A" }}</span>
+                <span class="info-value">{{ visit.patient.phone|default_if_none:"—"|default:"—" }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Visit Date</span>
-                <span class="info-value">{{ visit.appointment.appointment_date|date:"d M, Y" }}</span>
+                <span class="info-value">{% if visit.appointment.appointment_date %}{{ visit.appointment.appointment_date|date:"d M, Y" }}{% else %}—{% endif %}</span>
             </div>
         </div>
 
@@ -71,11 +82,11 @@
             <h6>Doctor Information</h6>
             <div class="info-row">
                 <span class="info-label">Consulting Doctor</span>
-                <span class="info-value">Dr. {{ request.user.first_name }} {{ request.user.username }}</span>
+                <span class="info-value">{{ visit|doctor_display_name:request.user }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Diagnosis</span>
-                <span class="info-value">{{ visit.diagnosis|truncatewords:6|default:"Not specified" }}</span>
+                <span class="info-value">{% if visit.diagnosis and visit.diagnosis|lower != "none" %}{{ visit.diagnosis }}{% else %}—{% endif %}</span>
             </div>
         </div>
 
@@ -84,11 +95,11 @@
             <h6>Billing Details</h6>
             <div class="info-row">
                 <span class="info-label">Invoice Date</span>
-                <span class="info-value">{{ bill.bill_date|date:"d M, Y" }}</span>
+                <span class="info-value">{% if bill.bill_date %}{{ bill.bill_date|date:"d M, Y" }}{% else %}—{% endif %}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Payment Method</span>
-                <span class="info-value" style="text-transform: capitalize;">{{ bill.get_payment_method_display }}</span>
+                <span class="info-value" style="text-transform: capitalize;">{{ bill.get_payment_method_display|default_if_none:"—"|default:"—" }}</span>
             </div>
         </div>
     </div>
@@ -99,22 +110,27 @@
             <thead>
                 <tr>
                     <th width="5%">#</th>
-                    <th width="45%">Description (Medicine / Service)</th>
+                    <th width="40%">Description</th>
                     <th width="15%">Pack Size</th>
-                    <th width="10%" class="text-center">Qty</th>
-                    
-                    <th width="13%" class="text-right">Total</th>
+                    <th width="10%" class="text-right">Qty</th>
+                    <th width="15%" class="text-right">Rate (₹)</th>
+                    <th width="15%" class="text-right">Amount (₹)</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in bill.items.all %}
                 <tr>
                     <td>{{ forloop.counter }}</td>
-                    <td class="item-name">{{ item.medicine_name }}</td>
-                    <td>{{ item.power }}</td>
-                    <td class="text-center">{{ item.quantity }}</td>
-                    
-                    <td class="text-right"><strong>₹{{ item.total_price|floatformat:2 }}</strong></td>
+                    <td class="item-name">
+                        {{ item.medicine_name|default_if_none:"—"|default:"—" }}
+                        {% if item.medicine_variant and item.medicine_variant.medicine.medicine_type %}
+                            <span class="item-type">({{ item.medicine_variant.medicine.medicine_type.name }})</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.power|default_if_none:"—"|default:"—" }}</td>
+                    <td class="text-right dc-num">{{ item.quantity }}</td>
+                    <td class="text-right dc-num">₹{{ item.unit_price|floatformat:2 }}</td>
+                    <td class="text-right dc-num"><strong>₹{{ item.total_price|floatformat:2 }}</strong></td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -131,53 +147,63 @@
     <div class="summary-wrapper">
         <div class="totals-box">
             <div class="total-row">
-                <span>Consultation Fee</span>
-                <span>₹{{ bill.consultation_fee|floatformat:2 }}</span>
-            </div>
-            <div class="total-row">
                 <span>Medicines Subtotal</span>
-                <span>₹{{ bill.subtotal|floatformat:2 }}</span>
+                <span class="dc-num">₹{{ bill.subtotal|floatformat:2 }}</span>
             </div>
             <div class="total-row">
-                <span>GST ({{ bill.gst_percent }}%)</span>
-                <span>₹{{ bill.gst_amount|floatformat:2 }}</span>
+                <span>GST ({{ bill.gst_percent }}% on medicines)</span>
+                <span class="dc-num">₹{{ bill.gst_amount|floatformat:2 }}</span>
             </div>
+            <div class="total-row">
+                <span>Consultation Fee</span>
+                <span class="dc-num">₹{{ bill.consultation_fee|floatformat:2 }}</span>
+            </div>
+            {% if bill.discount and bill.discount > 0 %}
             <div class="total-row" style="color: #015315;">
                 <span>Discount</span>
-                <span>- ₹{{ bill.discount|floatformat:2 }}</span>
+                <span class="dc-num">- ₹{{ bill.discount|floatformat:2 }}</span>
             </div>
+            {% endif %}
             <div class="total-row grand-total">
                 <span>Total Amount</span>
-                <span>₹{{ bill.total|floatformat:2 }}</span>
+                <span class="dc-num">₹{{ bill.total|floatformat:2 }}</span>
+            </div>
+            <div class="amount-words-box">
+                <span class="words-label">Amount in words:</span>
+                <span class="words-val">{{ bill.total|num_to_words }}</span>
             </div>
         </div>
     </div>
 
     <!-- Bottom Section -->
+    {% if bill.notes and bill.notes|lower != "none" %}
     <div class="bottom-section">
-        <div class="payment-status-box">
-            <span style="color: var(--text-muted); font-size: 13px;">Payment Status:</span>
-            <span class="status-badge 
-                {% if bill.payment_status == 'paid' %}badge-paid
-                {% elif bill.payment_status == 'partial' %}badge-partial
-                {% else %}badge-unpaid{% endif %}">
-                {{ bill.get_payment_status_display }}
-            </span>
-        </div>
-
-        {% if bill.notes %}
         <div class="notes-box">
             <strong>Remarks / Notes:</strong><br>
             {{ bill.notes }}
         </div>
-        {% endif %}
     </div>
+    {% endif %}
 
     <!-- Footer -->
-    <div class="footer">
-        <div class="footer-thankyou">Thank you for trusting {{clinic.clinic_name}}</div>
-        <div>This is a computer-generated invoice and does not require a physical signature.</div>
-        <div style="margin-top: 4px; color: #94a3b8;">For any queries, please contact our support desk.</div>
+    <div class="invoice-footer">
+        <div class="footer-left">
+            <div class="status-wrap">
+                <span class="status-label">Payment status:</span>
+                <span class="status-badge 
+                    {% if bill.payment_status == 'paid' %}badge-paid
+                    {% elif bill.payment_status == 'partial' %}badge-partial
+                    {% else %}badge-unpaid{% endif %}">
+                    {{ bill.get_payment_status_display|default_if_none:"Unpaid"|default:"Unpaid" }}
+                </span>
+            </div>
+            <div class="footer-thankyou">Thank you for choosing {{ clinic.clinic_name|default_if_none:"our clinic"|default:"our clinic" }}.</div>
+            <div class="footer-note">This is a computer-generated invoice.</div>
+        </div>
+        <div class="footer-right">
+            <div class="signature-space"></div>
+            <div class="signatory-line">Authorised Signatory</div>
+        </div>
     </div>
 
 </body>

@@ -24,6 +24,12 @@
                 <i class="bi bi-person-fill"></i> Patient Information
             </div>
             <div class="card-body">
+                {% if patient.login_status == 'invited' %}
+                <form id="resendPatientInviteForm" method="post" action="{% url 'doctor:send_patient_invite' patient.id|hid %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'doctor:edit_patient' patient.id|hid %}">
+                </form>
+                {% endif %}
                 <form method="POST" enctype="multipart/form-data" class="row g-3">
                     {% csrf_token %}
 
@@ -43,10 +49,23 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="patient-email">
-                            Email
-                        </label>
-                        <input id="patient-email" type="email" name="email" class="form-control" value="{{ patient.user.email }}">
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <label class="form-label mb-0" style="font-size:0.85rem; font-weight:600;" for="patient-email">Email</label>
+                            {% if patient.login_status == 'active' %}<span class="badge bg-success">Active</span>
+                            {% elif patient.login_status == 'invited' %}
+                                <span class="badge bg-warning text-dark">Invited · {{ patient.invite_sent_at|date:'d M Y' }}</span>
+                                <button type="submit" form="resendPatientInviteForm" class="btn btn-link btn-sm p-0">Resend invite</button>
+                            {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
+                        </div>
+                        <input id="patient-email" type="email" name="email" class="form-control" value="{{ patient.user.email }}" {% if patient.login_status == 'active' %}readonly aria-describedby="patient-email-note"{% endif %}>
+                        {% if patient.login_status == 'active' %}
+                            <div id="patient-email-note" class="form-text">The patient manages this email from their own account</div>
+                        {% else %}
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" name="send_login_invite" id="send-login-invite" {% if patient.login_status == 'none' or not patient.user.email %}checked{% endif %}>
+                                <label class="form-check-label small" for="send-login-invite">Send login invite to this email after saving</label>
+                            </div>
+                        {% endif %}
                     </div>
 
                     <div class="col-md-6">

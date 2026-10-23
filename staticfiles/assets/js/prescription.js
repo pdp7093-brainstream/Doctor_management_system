@@ -1,6 +1,16 @@
 
 let selectedVariantId = null;
 let selectedMedicineName = '';
+let selectedMedicinePower = '';
+let selectedMedicineType = '';
+const sevanKaalLabels = {
+    before_food: 'Before Food',
+    after_food: 'After Food',
+    empty_stomach: 'Empty Stomach',
+    with_food: 'With Food',
+    between_meals: 'Between Meals',
+    bedtime: 'Bedtime'
+};
 
 // ===== Beautiful Toast Notification System =====
 function showToast(message, type = 'info', duration = 3000) {
@@ -136,10 +146,10 @@ function validateMedicineForm() {
         return false;
     }
 
-    // Check if meal timing is selected (should have a value)
+    // Check if Sevan Kaal is selected.
     const meal = document.getElementById('modal_meal').value;
     if (!meal || meal.trim() === '') {
-        showToast('Please select meal timing (Before or After Food)', 'warning');
+        showToast('Please select Sevan Kaal', 'warning');
         return false;
     }
 
@@ -155,6 +165,7 @@ function validateMedicineForm() {
 
 document.addEventListener('DOMContentLoaded', function () {
     updateCounts();
+    initDietAdviceEditor();
     // Bootstrap tooltips init
     document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
         new bootstrap.Tooltip(el);
@@ -168,10 +179,66 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+function initDietAdviceEditor() {
+    const card = document.querySelector('.advice-card');
+    if (!card) return;
+
+    function syncValue(column) {
+        const items = Array.from(column.querySelectorAll('.advice-chip-label'), el => el.textContent.trim());
+        column.querySelector('.advice-value').value = items.join('\n');
+    }
+
+    function addItem(column, value) {
+        const item = value.trim().slice(0, 100);
+        if (!item || item.toLowerCase() === 'none') return;
+        const labels = Array.from(column.querySelectorAll('.advice-chip-label'), el => el.textContent.trim());
+        if (labels.length >= 50 || labels.some(label => label.toLowerCase() === item.toLowerCase())) return;
+
+        const chip = document.createElement('span');
+        chip.className = 'advice-chip';
+        const label = document.createElement('span');
+        label.className = 'advice-chip-label';
+        label.textContent = item;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'advice-remove';
+        remove.setAttribute('aria-label', `Remove ${item}`);
+        remove.textContent = '×';
+        chip.append(label, remove);
+        column.querySelector('.advice-items').appendChild(chip);
+        syncValue(column);
+    }
+
+    card.querySelectorAll('.advice-column').forEach(syncValue);
+    card.addEventListener('click', event => {
+        const column = event.target.closest('.advice-column');
+        if (!column) return;
+        if (event.target.closest('.advice-remove')) {
+            event.target.closest('.advice-chip').remove();
+            syncValue(column);
+        } else if (event.target.closest('.advice-add')) {
+            const input = column.querySelector('.advice-input');
+            addItem(column, input.value);
+            input.value = '';
+        } else {
+            const suggestion = event.target.closest('[data-advice-suggestion]');
+            if (suggestion) addItem(column, suggestion.dataset.adviceSuggestion);
+        }
+    });
+    card.querySelectorAll('.advice-input').forEach(input => input.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            input.closest('.advice-column').querySelector('.advice-add').click();
+        }
+    }));
+}
+
 function resetModalForm() {
     try {
         selectedVariantId = null;
         selectedMedicineName = '';
+        selectedMedicinePower = '';
+        selectedMedicineType = '';
         document.getElementById('modalSearchInput').value = '';
         document.getElementById('modalSearchResults').innerHTML =
             '<div class="text-center py-4 text-muted border rounded-3 border-dashed"><p class="mb-0 small">Type to search medicines...</p></div>';
@@ -187,6 +254,7 @@ function resetModalForm() {
         document.getElementById('modal_night').value = 0;
         document.getElementById('modal_days').value = 7;
         document.getElementById('modal_meal').value = 'after_food';
+        document.getElementById('modal_anupana').value = '';
         document.getElementById('modal_medicine_notes').value = '';
 
         document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('selected'));
@@ -197,6 +265,15 @@ function resetModalForm() {
 
 // ---- Search ----
 let searchTimer;
+const medicineResults = document.getElementById('modalSearchResults');
+medicineResults.addEventListener('click', function (event) {
+    const chip = event.target.closest('.v-chip');
+    if (!chip || !medicineResults.contains(chip) || chip.classList.contains('out-of-stock')) return;
+    const variantId = chip.dataset.variantId;
+    if (!variantId) return;
+    selectVariant(variantId, chip.dataset.name, chip);
+});
+
 document.getElementById('modalSearchInput').addEventListener('input', function () {
     const query = this.value.trim();
     const container = document.getElementById('modalSearchResults');
@@ -219,17 +296,17 @@ document.getElementById('modalSearchInput').addEventListener('input', function (
                             <div class="med-result-item">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <span class="badge bg-primary-subtle text-primary mb-1">${med.type}</span>
-                                        <h6 class="mb-0 fw-bold text-dark">${med.name}</h6>
-                                        <small class="text-muted">${med.company || 'Generic'}</small>
+                                        <span class="badge bg-primary-subtle text-primary mb-1">${escapeHtml(med.type || '')}</span>
+                                        <h6 class="mb-0 fw-bold text-dark">${escapeHtml(med.name || '')}</h6>
+                                        <small class="text-muted">${escapeHtml(med.company || 'Generic')}</small>
                                     </div>
                                 </div>
                                 <div class="variant-grid">
                                     ${med.variants.map(v => `
                                         <div class="v-chip ${v.stock <= 0 ? 'out-of-stock' : ''}"
-                                             onclick="${v.stock > 0 ? `selectVariant(${v.id}, '${med.name} ${v.power}', this)` : ''}">
+                                             ${v.stock > 0 ? `data-variant-id="${escapeHtml(String(v.id))}" data-name="${escapeHtml(`${med.name || ''} ${v.power || ''}`.trim())}" data-type="${escapeHtml(med.type || '')}"` : ''}>
                                             <span class="stock-dot"></span>
-                                            ${v.power} ${v.stock > 0 ? `<span class="ms-1 text-muted">(${v.stock})</span>` : '(OOS)'}
+                                            ${escapeHtml(v.power || '')} ${v.stock > 0 ? `<span class="ms-1 text-muted">(${escapeHtml(String(v.stock))})</span>` : '(OOS)'}
                                         </div>
                                     `).join('')}
                                 </div>
@@ -244,6 +321,8 @@ function selectVariant(id, name, el) {
     el.classList.add('selected');
     selectedVariantId = id;
     selectedMedicineName = name;
+    selectedMedicinePower = '';
+    selectedMedicineType = el.dataset.type || '';
     const info = document.getElementById('selectedMedicineInfo');
     document.getElementById('selectedMedicineName').textContent = name;
     info.style.setProperty('display', 'flex', 'important');
@@ -252,12 +331,14 @@ function selectVariant(id, name, el) {
 function clearSelectedMedicine() {
     selectedVariantId = null;
     selectedMedicineName = '';
+    selectedMedicinePower = '';
+    selectedMedicineType = '';
     document.getElementById('selectedMedicineInfo').style.setProperty('display', 'none', 'important');
     document.querySelectorAll('.v-chip').forEach(c => c.classList.remove('selected'));
 }
 
 function escapeHtml(value) {
-    return value
+    return String(value ?? '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -267,17 +348,6 @@ function escapeHtml(value) {
 
 function escapeAttr(value) {
     return escapeHtml(value).replace(/`/g, '&#096;');
-}
-
-// ✅ Row index tracker — existing items se start hoga
-function getNextIndex() {
-    // Find the highest index value from existing checkboxes
-    let max = -1;
-    document.querySelectorAll('input[name="should_deduct[]"]').forEach(cb => {
-        const val = parseInt(cb.value);
-        if (val > max) max = val;
-    });
-    return max + 1;
 }
 
 function saveMedicine(close) {
@@ -292,38 +362,39 @@ function saveMedicine(close) {
     const e = document.getElementById('modal_evening').value;
     const n = document.getElementById('modal_night').value;
     const meal = document.getElementById('modal_meal').value;
+    const anupana = document.getElementById('modal_anupana').value.trim();
     const medicineNotes = document.getElementById('modal_medicine_notes').value.trim();
-    const mealLabel = meal === 'after_food' ? 'After Food' : 'Before Food';
-    const mealBadge = meal === 'after_food'
-        ? 'bg-info-subtle text-info'
-        : 'bg-warning-subtle text-warning';
+    const mealLabel = sevanKaalLabels[meal] || '';
 
     // ✅ FIX: Default to true since toggle is removed
     const shouldDeduct = true;
-    const rowIndex = getNextIndex();
+    const rowIndex = document.querySelectorAll('#medicineList > tr').length;
 
+    const totalQuantity = (Number(m) + Number(a) + Number(e) + Number(n)) * Number(days);
     const row = `
-                <tr>
-                    <td class="text-center">
+                <tr class="prescription-row">
+                    <td class="select-col" data-label="Select">
                         <input type="checkbox" class="form-check-input prescription-checkbox" onchange="updatePrescriptionBulkDeleteBtn()">
                     </td>
-                    <td class="px-4">
-                        <div class="fw-bold text-dark">${selectedMedicineName}</div>
-                        ${medicineNotes ? `<div class="small text-muted mt-1"><i class="bi bi-journal-text me-1"></i>${escapeHtml(medicineNotes)}</div>` : ''}
+                    <td class="medicine-cell" data-label="Medicine">
+                        <div class="medicine-name"></div>
+                        <div class="medicine-meta"><span class="medicine-type"></span>${medicineNotes ? `<span class="medicine-notes" title="${escapeAttr(medicineNotes)}"><i class="bi bi-journal-text"></i> ${escapeHtml(medicineNotes)}</span>` : ''}</div>
                         <input type="hidden" name="variant_id[]" value="${selectedVariantId}">
                         <input type="hidden" name="item_id[]" value="">
                         <input type="hidden" name="medicine_notes" value="${escapeAttr(medicineNotes)}">
                     </td>
-                    <td class="text-center">${m}<input type="hidden" name="morning" value="${m}"></td>
-                    <td class="text-center">${a}<input type="hidden" name="afternoon" value="${a}"></td>
-                    <td class="text-center">${e}<input type="hidden" name="evening" value="${e}"></td>
-                    <td class="text-center">${n}<input type="hidden" name="night" value="${n}"></td>
-                    <td>
-                        <span class="badge ${mealBadge}">${mealLabel}</span>
-                        <input type="hidden" name="meal" value="${meal}">
+                    <td class="dosage-cell" data-label="Dosage">
+                        <div class="dosage-stack"><div class="dosage-pill"><span class="${Number(m) ? '' : 'dose-zero'}">${m}</span><span>–</span><span class="${Number(a) ? '' : 'dose-zero'}">${a}</span><span>–</span><span class="${Number(e) ? '' : 'dose-zero'}">${e}</span><span>–</span><span class="${Number(n) ? '' : 'dose-zero'}">${n}</span></div><div class="dosage-caption">M · A · E · N</div></div>
+                        <input type="hidden" name="morning" value="${m}"><input type="hidden" name="afternoon" value="${a}"><input type="hidden" name="evening" value="${e}"><input type="hidden" name="night" value="${n}">
                     </td>
-                    <td class="text-center">${days} Days<input type="hidden" name="days" value="${days}"></td>
-                    <td class="text-center">
+                    <td class="timing-cell" data-label="Timing">
+                        <span class="badge bg-info-subtle text-info text-nowrap">${escapeHtml(mealLabel)}</span>
+                        ${anupana ? `<span class="small text-muted d-inline-block">with ${escapeHtml(anupana)}</span>` : ''}
+                        <input type="hidden" name="meal" value="${meal}">
+                        <input type="hidden" name="anupana" value="${escapeAttr(anupana)}">
+                    </td>
+                    <td class="duration-cell" data-label="Duration"><div>${days} days</div><div class="duration-total">${totalQuantity} units</div><input type="hidden" name="days" value="${days}"></td>
+                    <td class="stock-cell" data-label="Stock">
                         <label class="toggle-switch">
                             <input 
                                 type="checkbox" 
@@ -335,26 +406,25 @@ function saveMedicine(close) {
                             >
                             <span class="toggle-slider"></span>
                         </label>
+                        <span class="stock-status will-deduct">Will deduct</span>
                     </td>
-                    <td class="text-center">
-                        <span class="badge bg-light text-muted rounded-pill">
-                            <i class="bi bi-clock me-1"></i>Pending
-                        </span>
-                    </td>
-                    <td class="text-center">
-                        <button type="button" class="btn btn-link text-danger p-0" onclick="removeMedicineRow(this)">
-                            <i class="bi bi-trash3 fs-5"></i>
-                        </button>
+                    <td class="action-cell" data-label="Action">
+                        <div class="action-btns"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete" onclick="removeMedicineRow(this)">
+                            <i class="bi bi-trash"></i>
+                        </button></div>
                     </td>
                 </tr>`;
 
     document.getElementById('medicineList').insertAdjacentHTML('beforeend', row);
+    const addedRow = document.getElementById('medicineList').lastElementChild;
+    addedRow.querySelector('.medicine-name').textContent = selectedMedicineName;
+    addedRow.querySelector('.medicine-type').textContent = selectedMedicineType || '—';
     document.getElementById('emptyMessage').style.display = 'none';
     currentPage = Math.max(1, Math.ceil(document.getElementById('medicineList').children.length / rowsPerPage));
     updateCounts();
 
     // Show success toast
-    showToast(`${selectedMedicineName} added successfully!`, 'success', 2000);
+    showToast(`${escapeHtml(selectedMedicineName)} added successfully!`, 'success', 2000);
 
     if (close) {
         const modalEl = document.getElementById('medicineModal');
@@ -369,10 +439,18 @@ function saveMedicine(close) {
 
 function removeMedicineRow(btn) {
     btn.closest('tr').remove();
+    reindexDeductRows();
     updateCounts();
     if (!document.getElementById('medicineList').children.length) {
         document.getElementById('emptyMessage').style.display = 'block';
     }
+}
+
+function reindexDeductRows() {
+    document.querySelectorAll('#medicineList > tr').forEach((row, index) => {
+        const checkbox = row.querySelector('input[name="should_deduct[]"]');
+        if (checkbox) checkbox.value = String(index);
+    });
 }
 
 function updateDeductCount() {
@@ -441,6 +519,20 @@ function changePage(page) {
 function updateCounts() {
     const totalRows = document.getElementById('medicineList').children.length;
     const deductCount = document.querySelectorAll('input[name="should_deduct[]"]:checked').length;
+    const listCount = document.getElementById('prescriptionListCount');
+    if (listCount) listCount.textContent = `${totalRows} ${totalRows === 1 ? 'medicine' : 'medicines'}`;
+    document.querySelectorAll('#medicineList > tr').forEach(row => {
+        const doses = ['morning', 'afternoon', 'evening', 'night'].map(name => Number(row.querySelector(`input[name="${name}"]`)?.value || 0));
+        const days = Number(row.querySelector('input[name="days"]')?.value || 0);
+        const total = row.querySelector('.duration-total');
+        if (total) total.textContent = `${doses.reduce((sum, dose) => sum + dose, 0) * days} units`;
+        const toggle = row.querySelector('input[name="should_deduct[]"]');
+        const status = row.querySelector('.stock-status');
+        if (toggle && status && !status.classList.contains('is-deducted')) {
+            status.textContent = toggle.checked ? 'Will deduct' : 'Skipped';
+            status.className = `stock-status ${toggle.checked ? 'will-deduct' : 'is-skipped'}`;
+        }
+    });
     document.getElementById('medicineCount').textContent = totalRows;
     const deductEl = document.getElementById('deductCount');
     if (deductEl) deductEl.textContent = deductCount;

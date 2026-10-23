@@ -220,11 +220,13 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
 
         # Bill summary - with all bills
         bill_summary = get_bill_summary(visit)
+        combined_subtotal = (bill.subtotal or Decimal('0')) + (bill.consultation_fee or Decimal('0'))
 
         return render(request, 'billing/bill_detail.html', {
             'bill': bill,
             'visit': visit,
             'bill_summary': bill_summary,
+            'combined_subtotal': combined_subtotal,
         })
 
     def post(self, request, hid):
@@ -253,7 +255,8 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
         bill.discount       = Decimal(request.POST.get('discount', 0))
         bill.payment_method = request.POST.get('payment_method', 'cash')
         bill.payment_status = request.POST.get('payment_status', 'unpaid')
-        bill.notes          = request.POST.get('notes', '')
+        bill_notes = (request.POST.get('notes') or '').strip()
+        bill.notes = '' if bill_notes.casefold() == 'none' else bill_notes
         bill.subtotal       = bill.subtotal  # same rakho
         bill.save()  # GST + total auto calculate hoga
 

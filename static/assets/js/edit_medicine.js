@@ -36,6 +36,8 @@ function renumber() {
     variantsContainer.querySelectorAll('.variant-row').forEach((row, index) => {
         const no = row.querySelector('.variant-no');
         if (no) no.textContent = index + 1;
+        const freeSample = row.querySelector('.free-sample-checkbox');
+        if (freeSample) freeSample.value = index;
     });
 }
 
@@ -70,6 +72,22 @@ function addVariantRow() {
     return row;
 }
 
+function validateVariantPrices() {
+    let valid = true;
+    variantsContainer.querySelectorAll('.variant-row').forEach(row => {
+        const cost = Number(row.querySelector('[name="cost_price[]"]').value);
+        const selling = row.querySelector('[name="selling_price[]"]');
+        const freeSample = row.querySelector('.free-sample-checkbox').checked;
+        const rowValid = Number(selling.value) > 0 && (freeSample || Number(selling.value) >= cost);
+        const feedback = row.querySelector('.price-validation-error');
+        selling.classList.toggle('is-invalid', !rowValid);
+        feedback.textContent = rowValid ? '' : 'Selling price must be greater than zero; unless marked Free / sample, it must not be less than cost price.';
+        feedback.style.display = rowValid ? 'none' : 'block';
+        valid = valid && rowValid;
+    });
+    return valid;
+}
+
 /* ── Init existing rows ── */
 variantsContainer.querySelectorAll('.variant-row').forEach(row => {
     attachRowListeners(row);
@@ -88,7 +106,11 @@ addVariantBtn.addEventListener('click', function () {
 });
 
 /* ── Guard: ensure hidden stock[] is up-to-date on submit ── */
-document.querySelector('form').addEventListener('submit', function () {
+document.querySelector('form').addEventListener('submit', function (event) {
+    if (!validateVariantPrices()) {
+        event.preventDefault();
+        return;
+    }
     variantsContainer.querySelectorAll('.variant-row').forEach(row => recalcStock(row));
 });
 

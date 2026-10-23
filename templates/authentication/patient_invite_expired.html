@@ -1,0 +1,38 @@
+{% extends 'authentication/auth_base.html' %}
+{% load static %}
+{% block title %}Invite link expired – Hitshree{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block auth_css %}
+{{ block.super }}
+<style>
+  .patient-auth-brand { align-items: center !important; text-align: center; }
+  .patient-auth-logo { width: 88px; height: 88px; padding: 6px; border-radius: 50%; background: #fff; box-shadow: 0 5px 18px rgba(0,0,0,.2); object-fit: contain; margin-bottom: 24px; }
+  .patient-auth-brand .auth-brand-heading { margin: 0 0 12px; }
+  .patient-auth-brand .auth-brand-sub { max-width: 360px; margin: 0 0 18px; }
+  .patient-auth-clinic-name { color: rgba(255,255,255,.72); font-size: .82rem; }
+  @media (max-width: 767.98px) {
+    .patient-auth-brand { flex-direction: row !important; justify-content: flex-start !important; gap: 14px; padding: 10px 20px !important; text-align: left; min-height: 78px; }
+    .patient-auth-logo { width: 56px; height: 56px; margin: 0; flex: 0 0 56px; }
+    .patient-auth-brand .auth-brand-heading { margin: 0; font-size: 1.3rem !important; }
+    .patient-auth-brand .auth-brand-sub, .patient-auth-clinic-name { display: none; }
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="auth-split">
+  <div class="auth-brand-panel patient-auth-brand">
+    {% if clinic and clinic.logo %}<img class="patient-auth-logo" src="{{ clinic.logo.url }}" alt="{{ clinic.clinic_name|default:'Hitshree' }} logo">
+    {% else %}<img class="patient-auth-logo" src="{% static 'assets/img/ayurveda/favicon_io/android-chrome-192x192.png' %}" alt="Hitshree logo">{% endif %}
+    <h2 class="auth-brand-heading">Welcome to <span>Hitshree</span></h2>
+    <p class="auth-brand-sub">Your patient account</p>
+    <div class="patient-auth-clinic-name">{{ clinic.clinic_name|default:'Hitshree Devnarayan Baba Ayurvedic Multispeciality Hospital' }}</div>
+  </div>
+  <div class="auth-form-panel">
+    <div class="auth-form-inner">
+      <h1 class="auth-form-title">This link has expired or was already used</h1>
+      <p class="auth-form-subtitle">Please request a new password reset link to continue.</p>
+      <a class="btn btn-success w-100" href="{% url 'password_reset' %}">Forgot password</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

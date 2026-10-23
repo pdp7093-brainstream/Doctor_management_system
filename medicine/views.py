@@ -12,6 +12,23 @@ from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from .services.medicine_importer import import_medicines_from_excel
 
+
+def variant_price_error(cost_prices, selling_prices, free_samples, powers):
+    for index, power in enumerate(powers):
+        if not power.strip():
+            continue
+        try:
+            cost = Decimal(cost_prices[index])
+            selling = Decimal(selling_prices[index])
+        except (IndexError, ArithmeticError, ValueError):
+            return f"Variant {index + 1}: enter valid cost and selling prices."
+        if not cost.is_finite() or not selling.is_finite():
+            return f"Variant {index + 1}: enter valid cost and selling prices."
+        is_free_sample = str(index) in free_samples
+        if selling <= 0 or (not is_free_sample and selling < cost):
+            return f"Variant {index + 1}: selling price must be greater than zero; unless marked Free / sample, it must not be less than cost price."
+    return None
+
 class ManageMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
@@ -52,6 +69,15 @@ class AddMedicineView(LoginRequiredMixin, View):
         description = request.POST.get("description", "").strip()
         is_active = request.POST.get("is_active") == "on"
 
+        powers = request.POST.getlist("power[]")
+        cost_prices = request.POST.getlist("cost_price[]")
+        selling_prices = request.POST.getlist("selling_price[]")
+        free_samples = request.POST.getlist("free_sample[]")
+        price_error = variant_price_error(cost_prices, selling_prices, free_samples, powers)
+        if price_error:
+            messages.error(request, price_error)
+            return redirect("medicine:add_medicine")
+
         medicine = Medicine.objects.create(
             name=name,
             short_name=short_name,
@@ -60,10 +86,6 @@ class AddMedicineView(LoginRequiredMixin, View):
             description=description,
             is_active=is_active,
         )
-
-        powers = request.POST.getlist("power[]")
-        cost_prices = request.POST.getlist("cost_price[]")
-        selling_prices = request.POST.getlist("selling_price[]")
         stocks = request.POST.getlist("stock[]")  # JS-computed hidden field
         total_strips_list = request.POST.getlist(
             "total_strips[]"
@@ -166,6 +188,16 @@ class EditMedicineView(LoginRequiredMixin, View):
         med_type_id = request.POST.get("medicine_type", "")
         med_type = MedicineType.objects.filter(id=med_type_id).first() if med_type_id else None
 
+        variant_ids = request.POST.getlist("variant_id[]")
+        powers = request.POST.getlist("power[]")
+        cost_prices = request.POST.getlist("cost_price[]")
+        selling_prices = request.POST.getlist("selling_price[]")
+        free_samples = request.POST.getlist("free_sample[]")
+        price_error = variant_price_error(cost_prices, selling_prices, free_samples, powers)
+        if price_error:
+            messages.error(request, price_error)
+            return redirect("medicine:edit_medicine", hid=hid)
+
         medicine.name = request.POST.get("name", "").strip()
         medicine.short_name = short_name
         medicine.medicine_type = med_type
@@ -177,10 +209,6 @@ class EditMedicineView(LoginRequiredMixin, View):
         kept_ids = request.POST.getlist("variant_id[]")
         medicine.variants.exclude(pk__in=[i for i in kept_ids if i]).delete()
 
-        variant_ids = request.POST.getlist("variant_id[]")
-        powers = request.POST.getlist("power[]")
-        cost_prices = request.POST.getlist("cost_price[]")
-        selling_prices = request.POST.getlist("selling_price[]")
         stocks = request.POST.getlist("stock[]")  # JS-computed hidden field
         total_strips_list = request.POST.getlist(
             "total_strips[]"

@@ -24,11 +24,13 @@ class PrescriptionAdmin(admin.ModelAdmin):
     list_display = ('visit', 'is_stock_deducted', 'created_at')
     list_filter = ('is_stock_deducted', 'created_at')
     search_fields = ('visit__patient__user__first_name',)
+    fields = ('visit', 'is_stock_deducted', 'pathya', 'apathya', 'vihar', 'created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at')
 
 
 @admin.register(PrescriptionItem)
 class PrescriptionItemAdmin(admin.ModelAdmin):
-    list_display = ('prescription', 'medicine_variant', 'dosage', 'days')
+    list_display = ('prescription', 'medicine_variant', 'dosage', 'sevan_kaal', 'anupana', 'days')
     search_fields = ('prescription__visit__patient__user__first_name',)
 
 

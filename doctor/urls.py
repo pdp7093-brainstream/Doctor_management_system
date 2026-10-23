@@ -24,6 +24,7 @@ urlpatterns = [
     path('patients/import/skipped/', views.import_patients_skipped, name='import_patients_skipped'),
     path('patient/<str:type>/<str:hid>/', views.view_patient_dynamic, name='view_patient'),
     path('patients/<str:hid>/edit/', views.edit_patient, name='edit_patient'),
+    path('patients/<str:hid>/send-login-invite/', views.send_patient_invite, name='send_patient_invite'),
     path('patients/<str:hid>/delete/', views.delete_patient, name='delete_patient'),
     path('family/edit/<str:hid>/', views.edit_family, name='edit_family'),
     path('family/delete/<str:hid>/', views.delete_family, name='delete_family'),

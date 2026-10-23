@@ -1,11 +1,12 @@
 {% load static %}
+{% load billing_tags %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Prescription - {{ visit.patient.user.get_full_name }}</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'assets/css/prescription_print.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/prescription_print.css' %}?v=3">
 </head>
 <body>
 
@@ -32,9 +33,9 @@
                 {{clinic.clinic_name}}
             </div>
             <div class="clinic-address">
-                {{clinic.address}}<br>
-                Phone: {{clinic.phone}}<br>
-                Email: {{clinic.email}}
+                {% if clinic.address %}<div class="clinic-addr-line">{{ clinic.address|clean_address }}</div>{% endif %}
+                {% if clinic.phone %}<div class="clinic-meta-line">Phone: {{ clinic.phone }}</div>{% endif %}
+                {% if clinic.email %}<div class="clinic-meta-line">Email: {{ clinic.email }}</div>{% endif %}
             </div>
         </div>
         <div class="invoice-title-box">
@@ -48,47 +49,47 @@
         <!-- Patient -->
         <div class="info-card" style="border-color: #3b82f6;">
             <h6>Patient Information</h6>
+            {% if patient_name %}
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">
-                    {% if visit.appointment and visit.appointment.family_member %}
-                        {{ visit.appointment.family_member.name }}
-                    {% else %}
-                        {{ visit.patient.user.get_full_name }}
-                    {% endif %}
-                </span>
+                <span class="info-value">{{ patient_name }}</span>
             </div>
+            {% endif %}
+            {% if patient_gender %}
             <div class="info-row">
                 <span class="info-label">Age / Gender</span>
-                <span class="info-value">
-                    {% if visit.appointment and visit.appointment.family_member %}
-                        {{ visit.appointment.family_member.gender|default:"Not specified"|capfirst }}
-                    {% else %}
-                        {{ visit.patient.gender|default:"Not specified"|capfirst }}
-                    {% endif %}
-                </span>
+                <span class="info-value">{{ patient_gender|capfirst }}</span>
             </div>
+            {% endif %}
+            {% if patient_contact %}
             <div class="info-row">
                 <span class="info-label">Contact</span>
-                <span class="info-value">{{ visit.patient.phone|default:"N/A" }}</span>
+                <span class="info-value">{{ patient_contact }}</span>
             </div>
+            {% endif %}
         </div>
 
         <!-- Doctor -->
         <div class="info-card" style="border-color: #10b981;">
             <h6>Consulting Doctor</h6>
+            {% if doctor_name %}
             <div class="info-row">
                 <span class="info-label">Name</span>
-                <span class="info-value">Dr. {% if visit.doctor %}{{ visit.doctor.user.get_full_name|default:visit.doctor.user.username }}{% elif visit.appointment and visit.appointment.doctor %}{{ visit.appointment.doctor.user.get_full_name|default:visit.appointment.doctor.user.username }}{% elif default_doctor %}{{ default_doctor.user.get_full_name|default:default_doctor.user.username }}{% else %}N/A{% endif %}</span>
+                <span class="info-value">Dr. {{ doctor_name }}</span>
             </div>
+            {% endif %}
+            {% if doctor_specialization %}
             <div class="info-row">
                 <span class="info-label">Specialization</span>
-                <span class="info-value">{{ clinic.specialization|default:"General Physician" }}</span>
+                <span class="info-value">{{ doctor_specialization }}</span>
             </div>
+            {% endif %}
+            {% if doctor_registration_no %}
             <div class="info-row">
                 <span class="info-label">Reg. No.</span>
-                <span class="info-value">{{ clinic.registration_no|default:"N/A" }}</span>
+                <span class="info-value">{{ doctor_registration_no }}</span>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -135,21 +136,14 @@
                         <span class="item-type">{{ item.medicine_variant.medicine.medicine_type.name|default:"—" }} • {{ item.medicine_variant.power }}</span>
                     </td>
                     <td>
-                        <span class="dosage-badge">{{ item.dosage }}</span>
+                        <span class="dosage-badge">{{ item.dose_parts.0 }} – {{ item.dose_parts.1 }} – {{ item.dose_parts.2 }} – {{ item.dose_parts.3 }}</span>
+                        <span class="meal-timing dosage-caption">M · A · E · N</span>
                         <span class="meal-timing">
-                            {% if 'after_food' in item.notes|lower or 'After Food' in item.notes %}
-                                After Food
-                            {% elif 'before_food' in item.notes|lower or 'Before Food' in item.notes %}
-                                Before Food
-                            {% else %}
-                                As Directed
-                            {% endif %}
+                            {{ item.get_sevan_kaal_display }}{% if item.anupana %} with {{ item.anupana }}{% endif %}
                         </span>
-                        {% if item.notes %}
-                        <span class="med-notes">{{ item.notes }}</span>
-                        {% endif %}
+                        {% if item.notes %}<span class="med-notes">{{ item.notes }}</span>{% endif %}
                     </td>
-                    <td><strong>{{ item.days }} Days</strong></td>
+                    <td><strong>{{ item.days }} days</strong></td>
                 </tr>
                 {% empty %}
                 <tr>
@@ -161,6 +155,19 @@
             </tbody>
         </table>
     </div>
+
+    {% if prescription.pathya_list or prescription.apathya_list or prescription.vihar %}
+    <section class="advice-print">
+        <h6 class="advice-print-title">Diet &amp; Lifestyle Advice</h6>
+        {% if prescription.pathya_list or prescription.apathya_list %}
+        <div class="advice-print-columns">
+            {% if prescription.pathya_list %}<div><h6 class="pathya-title">Pathya – Take</h6><ul class="pathya-list">{% for advice in prescription.pathya_list %}<li>{{ advice }}</li>{% endfor %}</ul></div>{% endif %}
+            {% if prescription.apathya_list %}<div><h6 class="apathya-title">Apathya – Avoid</h6><ul class="apathya-list">{% for advice in prescription.apathya_list %}<li>{{ advice }}</li>{% endfor %}</ul></div>{% endif %}
+        </div>
+        {% endif %}
+        {% if prescription.vihar %}<div class="advice-print-vihar"><h6>Lifestyle advice</h6><p>{{ prescription.vihar }}</p></div>{% endif %}
+    </section>
+    {% endif %}
 
     <!-- Signature -->
     <div class="signature-area">

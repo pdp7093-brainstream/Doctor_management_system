@@ -113,6 +113,17 @@
                     <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">
                         {{ patient.user.email|default:"—" }}
                     </div>
+                    <div class="mt-2">
+                        {% if patient.login_status == 'active' %}<span class="badge bg-success">Active</span>
+                        {% elif patient.login_status == 'invited' %}<span class="badge bg-warning text-dark">Invited · {{ patient.invite_sent_at|date:'d M Y' }}</span>
+                        {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
+                        {% if patient.user.email and patient.login_status != 'active' %}
+                        <form method="post" action="{% url 'doctor:send_patient_invite' patient.id|hid %}" class="mt-2">
+                            {% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn-page btn-page-primary"><i class="bi bi-envelope-arrow-up"></i> {% if patient.login_status == 'invited' %}Resend invite{% else %}Send login invite{% endif %}</button>
+                        </form>
+                        {% elif not patient.user.email %}<div class="small text-muted mt-2">Add an email to invite this patient</div>{% endif %}
+                    </div>
                 </div>
                 <div class="col-12">
                     <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Address</div>

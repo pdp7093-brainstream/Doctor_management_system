@@ -12,6 +12,12 @@ class PasswordResetEmailForm(PasswordResetForm):
             raise forms.ValidationError("No account found with this email address.")
         return email
 
+    def get_users(self, email):
+        # Imported patients may not have set a password yet, but can still use
+        # the public reset flow to create one.
+        active_users = get_user_model()._default_manager.filter(email__iexact=email, is_active=True)
+        return (user for user in active_users)
+
 
 class RegistrationForm(forms.Form):
     name = forms.CharField(

@@ -1,6 +1,7 @@
 import json
 import re
 import random
+import logging
 from .models import *
 from .forms import *
 from django.http import JsonResponse
@@ -10,6 +11,12 @@ from django.contrib.auth import authenticate, logout as auth_logout, login as au
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
+from django.contrib.auth.forms import SetPasswordForm
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils import timezone
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -23,6 +30,29 @@ from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date, parse_time
 from appointment.file_validation import validate_uploaded_document
 from .emails import send_welcome_email
+
+security_logger = logging.getLogger('accounts.security')
+
+def activate_patient(request, uidb64, token):
+    from .tokens import patient_invite_token_generator
+    try:
+        user_id = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=user_id)
+        patient = user.patient
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist, Patient.DoesNotExist):
+        user = patient = None
+
+    if not user or user.has_usable_password() or not patient_invite_token_generator.check_token(user, token):
+        return render(request, 'authentication/patient_invite_expired.html', status=200)
+
+    form = SetPasswordForm(user, request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+        security_logger.info('patient_invite_accepted patient_id=%s user_id=%s actor_user_id=%s', patient.pk, user.pk, user.pk)
+        messages.success(request, 'Your password has been set. Welcome to Hitshree!')
+        return redirect('dashboard')
+    return render(request, 'authentication/patient_set_password.html', {'form': form})
 
 def home(request):
     return render(request, 'index.html')
@@ -593,6 +623,10 @@ def profile_settings(request):
         bld_grop = request.POST.get('bld_grop') or None
 
         errors = []
+        old_email = user.email
+        email_changed = (email or old_email or '').casefold() != (old_email or '').casefold()
+        if email_changed and not user.check_password(request.POST.get('current_password', '')):
+            errors.append('Enter your current password to change your email.')
 
         # Validate phone if provided
         if phone:
@@ -623,6 +657,19 @@ def profile_settings(request):
             user.email = email
             user.username = email
         user.save()
+        if email_changed:
+            if old_email:
+                try:
+                    send_mail(
+                        'Your Hitshree account email was changed',
+                        'Your Hitshree account email was changed. If you did not make this change, please contact the clinic.',
+                        settings.DEFAULT_FROM_EMAIL,
+                        [old_email],
+                        fail_silently=False,
+                    )
+                except Exception:
+                    logging.getLogger(__name__).exception('Could not send patient email change notification user_id=%s', user.pk)
+            security_logger.info('patient_email_changed user_id=%s actor_user_id=%s', user.pk, request.user.pk)
 
         #  Update Patient - store phone here
         patient.phone = phone  # Phone goes to Patient table only

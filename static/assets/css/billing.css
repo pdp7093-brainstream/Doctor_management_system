@@ -97,6 +97,133 @@ body {
     background: #f8f9fa;
 }
 
+/* Page width: full content width override */
+.dc-form-shell.bill-form-shell,
+.bill-form-shell {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Sticky Payment Summary on desktop */
+@media (min-width: 992px) {
+    .bill-payment-summary-card {
+        position: sticky !important;
+        top: calc(var(--navbar-height, 70px) + 20px) !important;
+        z-index: 10;
+    }
+}
+
+/* Prescribed Medicines table & wrapper rules */
+.bill-table-scroll,
+.dc-card .dc-table-wrap.bill-table-scroll,
+html body .prescribed-medicines-scroll,
+body .prescribed-medicines-scroll,
+.prescribed-medicines-scroll {
+    width: 100% !important;
+}
+
+@media (min-width: 576px) {
+    .bill-table-scroll,
+    .dc-card .dc-table-wrap.bill-table-scroll,
+    html body .prescribed-medicines-scroll,
+    body .prescribed-medicines-scroll,
+    .prescribed-medicines-scroll {
+        overflow-x: visible !important;
+    }
+
+    .bill-medicines-table,
+    .dc-card table.dc-table.bill-medicines-table,
+    html body table.medicines-table.bill-prescribed-medicines,
+    html body .prescribed-medicines-scroll > table.bill-prescribed-medicines,
+    body .prescribed-medicines-scroll > table.bill-prescribed-medicines,
+    .prescribed-medicines-scroll .bill-prescribed-medicines,
+    .bill-prescribed-medicines {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .bill-table-scroll,
+    .dc-card .dc-table-wrap.bill-table-scroll,
+    html body .prescribed-medicines-scroll,
+    body .prescribed-medicines-scroll,
+    .prescribed-medicines-scroll {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .bill-medicines-table,
+    .dc-card table.dc-table.bill-medicines-table,
+    html body table.medicines-table.bill-prescribed-medicines,
+    body .prescribed-medicines-scroll > table.bill-prescribed-medicines,
+    .bill-prescribed-medicines {
+        width: 560px !important;
+        min-width: 560px !important;
+    }
+}
+
+/* Columns for bill medicines table */
+.bill-medicines-table th:nth-child(1),
+.bill-medicines-table td:nth-child(1),
+.bill-prescribed-medicines th:nth-child(1),
+.bill-prescribed-medicines td:nth-child(1) {
+    width: 5%;
+}
+
+.bill-medicines-table th:nth-child(2),
+.bill-medicines-table td:nth-child(2),
+.bill-prescribed-medicines th:nth-child(2),
+.bill-prescribed-medicines td:nth-child(2) {
+    width: 33%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.bill-medicines-table th:nth-child(3),
+.bill-medicines-table td:nth-child(3),
+.bill-prescribed-medicines th:nth-child(3),
+.bill-prescribed-medicines td:nth-child(3) {
+    width: 16%;
+}
+
+.bill-medicines-table th:nth-child(4),
+.bill-medicines-table td:nth-child(4),
+.bill-prescribed-medicines th:nth-child(4),
+.bill-prescribed-medicines td:nth-child(4) {
+    width: 12%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.bill-medicines-table th:nth-child(5),
+.bill-medicines-table td:nth-child(5),
+.bill-prescribed-medicines th:nth-child(5),
+.bill-prescribed-medicines td:nth-child(5) {
+    width: 17%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.bill-medicines-table th:nth-child(6),
+.bill-medicines-table td:nth-child(6),
+.bill-prescribed-medicines th:nth-child(6),
+.bill-prescribed-medicines td:nth-child(6) {
+    width: 17%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tabular numbers & right align in footer */
+.bill-medicines-table tfoot td,
+.bill-prescribed-medicines tfoot td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-top: 2px solid #dee2e6;
+}
+
 /* Totals */
 .totals-section {
     display: flex;

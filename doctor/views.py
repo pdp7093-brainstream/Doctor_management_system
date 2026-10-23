@@ -16,6 +16,8 @@ from .decorators import role_required, owner_required
 from .models import InnerMember
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument, PatientOldDocument
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
@@ -284,7 +286,10 @@ def manage_patients(request):
             'name': f"{p.user.first_name} {p.user.last_name}",
             'phone': p.phone,
             'gender': p.gender,
-            'type': 'main'
+            'type': 'main',
+            'email': p.user.email,
+            'login_status': p.login_status,
+            'invite_sent_at': p.invite_sent_at,
         })
 
     # Family Members (as patients)
@@ -422,8 +427,41 @@ def view_patient_dynamic(request, type, hid):
     
 @never_cache
 @role_required('doctor')
+@require_POST
+def send_patient_invite(request, hid):
+    from . import hashid as _hashid
+    from accounts.services.invites import send_patient_invite_email
+
+    try:
+        patient_id = _hashid.decode_hash(hid)
+    except Exception:
+        return get_object_or_404(Patient, id=0)
+    patient = get_object_or_404(Patient.objects.select_related('user'), pk=patient_id)
+    return_to = request.POST.get('next', '')
+    if not url_has_allowed_host_and_scheme(return_to, {request.get_host()}, require_https=request.is_secure()):
+        return_to = reverse('doctor:manage_patients')
+
+    status, email = send_patient_invite_email(patient, request, request.user)
+    if status == 'sent':
+        messages.success(request, f'Login invite sent to {email}.')
+    elif status == 'recent':
+        messages.error(request, 'Please wait 2 minutes before sending another invite.')
+    elif status == 'no_email':
+        messages.error(request, 'Add an email address before sending a login invite.')
+    elif status == 'active':
+        messages.error(request, 'This patient already has an active login.')
+    elif status == 'invalid_email':
+        messages.error(request, 'Enter a valid email address before sending a login invite.')
+    else:
+        messages.error(request, 'The login invite could not be sent. Please try again.')
+    return redirect(return_to)
+
+
+@never_cache
+@role_required('doctor')
 def edit_patient(request, hid):
     from . import hashid as _hashid
+    from accounts.services.invites import send_patient_invite_email
     try:
         patient_id = _hashid.decode_hash(hid)
     except Exception:
@@ -435,6 +473,9 @@ def edit_patient(request, hid):
 
         name      = request.POST.get('name', '').strip()
         email     = request.POST.get('email', '').strip().lower()
+        active_login = patient.login_status == 'active'
+        if active_login:
+            email = patient.user.email
         dob       = request.POST.get('dob')
         gender    = request.POST.get('gender')
         phone     = request.POST.get('phone', '').strip()
@@ -442,7 +483,7 @@ def edit_patient(request, hid):
         address   = request.POST.get('address')
 
         # EMAIL DUPLICATE CHECK
-        if email and User.objects.filter(
+        if not active_login and email and User.objects.filter(
             Q(email__iexact=email) | Q(username__iexact=email)
         ).exclude(pk=patient.user.pk).exists():
             messages.error(request, 'Email already in use.')
@@ -462,8 +503,9 @@ def edit_patient(request, hid):
             name_parts = name.split(' ', 1)
             patient.user.first_name = name_parts[0]
             patient.user.last_name = name_parts[1] if len(name_parts) > 1 else ''
-        patient.user.email      = email or patient.user.email
-        patient.user.username   = email or patient.user.username
+        if not active_login:
+            patient.user.email      = email or patient.user.email
+            patient.user.username   = email or patient.user.username
         patient.user.save()
 
         # UPDATE PATIENT
@@ -474,6 +516,21 @@ def edit_patient(request, hid):
         patient.bld_grop  = bld_grop
         patient.save()
 
+        if request.POST.get('send_login_invite') == 'on' and not active_login:
+            if not patient.user.email:
+                messages.warning(request, 'Add an email to send a login invite')
+            else:
+                invite_status, invite_email = send_patient_invite_email(patient, request, request.user)
+                if invite_status == 'sent':
+                    messages.success(request, f'Patient updated and login invite sent to {invite_email}')
+                elif invite_status == 'recent':
+                    messages.warning(request, 'Patient updated. Invite was sent recently, try again in a minute.')
+                elif invite_status == 'no_email':
+                    messages.warning(request, 'Add an email to send a login invite')
+                elif invite_status == 'invalid_email':
+                    messages.error(request, 'Patient updated, but the email address is invalid and the invite was not sent.')
+                elif invite_status == 'error':
+                    messages.error(request, 'Patient updated, but the login invite could not be sent. Please try again.')
 
         return redirect('doctor:manage_patients')
 

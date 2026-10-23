@@ -377,7 +377,77 @@ textarea.form-control {
 }
 
 /* ===== MOBILE ===== */
+.prescription-list-card { overflow: hidden; }
+.prescription-list-card .card-header { gap: 12px; }
+.prescription-list-card .btn-page { white-space: nowrap; }
+.prescription-table-wrap { overflow-x: hidden; }
+.prescription-table { width: 100%; table-layout: fixed; }
+.prescription-table { min-width: 0; }
+.prescription-table thead th { padding: 12px 10px; color: #64748b; font-size: .68rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; border-bottom: 1px solid #e8edf3; }
+.prescription-table tbody td { height: 64px; padding: 8px 10px; vertical-align: middle; border-bottom: 1px solid #edf1f5; }
+.prescription-table tbody tr { transition: background-color .15s ease; }
+.prescription-table tbody tr:hover { background: #f8fafc; }
+.prescription-table .select-col { width: 34px; padding-left: 12px; padding-right: 4px; text-align: center; }
+.prescription-table th:nth-child(2), .prescription-table td.medicine-cell { width: auto; }
+.prescription-table th:nth-child(3) { width: 145px; }
+.prescription-table th:nth-child(4) { width: 138px; }
+.prescription-table th:nth-child(5) { width: 86px; }
+.prescription-table th:nth-child(6) { width: 180px; }
+.prescription-table th:nth-child(7), .prescription-table td.action-cell { width: 56px; min-width: 56px; max-width: 56px; text-align: right; }
+.prescription-table .medicine-name { overflow: hidden; color: #172033; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.medicine-strength { margin-left: 4px; color: #475569; font-weight: 600; }
+.medicine-meta { display: flex; gap: 7px; min-width: 0; overflow: hidden; color: #8491a3; font-size: .72rem; white-space: nowrap; }
+.medicine-notes { overflow: hidden; text-overflow: ellipsis; }
+.dosage-pill { display: inline-flex; gap: 5px; align-items: center; padding: 4px 8px; border: 1px solid #e7ebf1; border-radius: 8px; color: #263449; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dosage-stack { display: inline-flex; flex-direction: column; align-items: center; }
+.dose-zero { color: #cbd5e1; }
+.dosage-caption { margin-top: 2px; color: #94a3b8; font-size: .58rem; letter-spacing: .1em; text-align: center; white-space: nowrap; }
+.timing-cell .badge { white-space: nowrap; }
+.timing-cell .small { display: block !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.duration-total { color: #94a3b8; font-size: .72rem; white-space: nowrap; }
+.stock-cell { white-space: nowrap; }
+.stock-status { display: inline-block; margin-left: 5px; font-size: .69rem; white-space: nowrap; }
+.stock-status.is-deducted { color: #15803d; }
+.stock-status.is-deducted { cursor: help; }
+.stock-cell .toggle-input:disabled + .toggle-slider { opacity: .75; cursor: not-allowed; }
+.stock-status.will-deduct { padding: 2px 6px; border: 1px solid #86efac; border-radius: 999px; color: #15803d; }
+.stock-status.is-skipped { color: #94a3b8; }
+.action-cell { text-align: center; }
+#emptyMessage { padding: 32px 16px !important; }
+.advice-column { min-width: 0; }
+.advice-heading { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 700; }
+.pathya-column .advice-heading { color: #15803d; }
+.apathya-column .advice-heading { color: #b91c1c; }
+.advice-heading i { font-size: 1rem; }
+.advice-items { display: flex; flex-wrap: wrap; gap: 7px; min-height: 8px; }
+.advice-chip { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; padding: 5px 8px 5px 11px; border-radius: 999px; font-size: .8rem; }
+.pathya-column .advice-chip { background: #ecfdf3; color: #166534; }
+.apathya-column .advice-chip { background: #fef2f2; color: #991b1b; }
+.advice-chip-label { overflow-wrap: anywhere; }
+.advice-remove { padding: 0 1px; border: 0; background: transparent; color: inherit; font-size: 1rem; line-height: 1; opacity: .7; }
+.advice-remove:hover { opacity: 1; }
+.advice-suggestions { display: flex; flex-wrap: wrap; gap: 6px; }
+.advice-suggestions button { padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 999px; background: #fff; color: #64748b; font-size: .7rem; }
+.advice-suggestions button:hover { border-color: #94a3b8; color: #334155; }
+
 @media (max-width: 768px) {
+    .prescription-table-wrap { overflow: visible; }
+    .prescription-table, .prescription-table tbody { display: block; width: 100%; }
+    .prescription-table thead { display: none; }
+    .prescription-table tbody tr.prescription-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; height: auto; margin: 0 12px 12px; padding: 14px; border: 1px solid #e8edf3; border-radius: 12px; box-shadow: 0 2px 8px rgba(15,23,42,.04); }
+    .prescription-table tbody td { display: flex; width: auto !important; height: auto; min-width: 0; padding: 0; border: 0; text-align: left !important; }
+    .prescription-table tbody td::before { content: attr(data-label); flex: 0 0 auto; margin-right: 8px; color: #94a3b8; font-size: .62rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+    .prescription-table tbody td.select-col { display: none; }
+    .prescription-table tbody td.medicine-cell { grid-column: 1 / -1; display: block; padding-bottom: 8px; border-bottom: 1px solid #edf1f5; }
+    .prescription-table tbody td.medicine-cell::before { display: none; }
+    .prescription-table tbody td.dosage-cell { display: block; }
+    .prescription-table tbody td.dosage-cell::before { display: block; margin-bottom: 3px; }
+    .prescription-table tbody td.stock-cell { align-items: center; }
+    .prescription-table tbody td.action-cell { justify-content: flex-end; grid-column: 2; }
+    .prescription-table tbody td.action-cell::before { display: none; }
+    .prescription-table tbody tr:hover { background: #fff; }
+    .prescription-list-card .card-header { flex-wrap: wrap; padding: 14px !important; }
+    .prescription-list-card .card-header > div:last-child { margin-left: auto; }
     .page-title {
         font-size: 1.4rem;
     }

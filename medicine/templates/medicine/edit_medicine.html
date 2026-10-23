@@ -117,6 +117,8 @@
                                 <div class="col-6 col-lg-4">
                                   <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
                                   <input type="number" name="selling_price[]" class="form-control patient-input" value="{{ variant.selling_price }}" placeholder="0.00" min="0" step="0.01" required>
+                                  <div class="form-check mt-2"><label class="form-check-label small"><input class="form-check-input free-sample-checkbox" type="checkbox" name="free_sample[]" value="{{ forloop.counter0 }}"> Free / sample</label></div>
+                                  <div class="invalid-feedback price-validation-error"></div>
                                 </div>
                               </div>
                             </div>
@@ -192,6 +194,8 @@
                                 <div class="col-6 col-lg-4">
                                   <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
                                   <input type="number" name="selling_price[]" class="form-control patient-input" placeholder="0.00" min="0" step="0.01" required>
+                                  <div class="form-check mt-2"><label class="form-check-label small"><input class="form-check-input free-sample-checkbox" type="checkbox" name="free_sample[]" value="0"> Free / sample</label></div>
+                                  <div class="invalid-feedback price-validation-error"></div>
                                 </div>
                               </div>
                             </div>
@@ -268,6 +272,8 @@
                                 <div class="col-6 col-lg-4">
                                   <label class="dc-label">Selling Price (₹) <span class="dc-muted">*</span></label>
                                   <input type="number" name="selling_price[]" class="form-control patient-input" placeholder="0.00" min="0" step="0.01" required>
+                                  <div class="form-check mt-2"><label class="form-check-label small"><input class="form-check-input free-sample-checkbox" type="checkbox" name="free_sample[]" value="0"> Free / sample</label></div>
+                                  <div class="invalid-feedback price-validation-error"></div>
                                 </div>
                               </div>
                             </div>

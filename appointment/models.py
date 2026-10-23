@@ -5,6 +5,24 @@ from django.contrib.auth.models import User
 from accounts.models import Patient, FamilyMember
 from .file_validation import clean_original_filename, validate_uploaded_document
 
+
+def parse_dosage(dosage):
+    """Return the four dose counts and meal timing from a stored dosage string."""
+    try:
+        parts = (dosage or '').split(' (', 1)
+        dose_parts = [int(part) for part in parts[0].split('-')]
+        meal = parts[1].replace(')', '') if len(parts) > 1 else 'after_food'
+    except (TypeError, ValueError):
+        dose_parts = []
+        meal = 'after_food'
+
+    morning = dose_parts[0] if len(dose_parts) > 0 else 0
+    afternoon = dose_parts[1] if len(dose_parts) > 1 else 0
+    evening = dose_parts[2] if len(dose_parts) > 3 else 0
+    night_index = 3 if len(dose_parts) > 3 else 2
+    night = dose_parts[night_index] if len(dose_parts) > night_index else 0
+    return morning, afternoon, evening, night, meal
+
 class Appointment(models.Model):
     BOOKED_STATUSES = ('pending', 'confirmed', 'completed')
 
@@ -96,8 +114,19 @@ class Visit(models.Model):
 class Prescription(models.Model):
     visit = models.OneToOneField(Visit, on_delete=models.CASCADE)
     is_stock_deducted = models.BooleanField(default=False)
+    pathya = models.TextField(blank=True, default='')
+    apathya = models.TextField(blank=True, default='')
+    vihar = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def pathya_list(self):
+        return [line.strip() for line in self.pathya.splitlines() if line.strip()]
+
+    @property
+    def apathya_list(self):
+        return [line.strip() for line in self.apathya.splitlines() if line.strip()]
 
     def __str__(self):
         return f"Prescription for {self.visit.patient.user.username} on {self.visit.appointment.appointment_date}"
@@ -152,10 +181,21 @@ class PatientUploadedDocument(models.Model):
 
 # Prescription list 
 class PrescriptionItem(models.Model):
+    SEVAN_KAAL_CHOICES = [
+        ('before_food', 'Before Food'),
+        ('after_food', 'After Food'),
+        ('empty_stomach', 'Empty Stomach'),
+        ('with_food', 'With Food'),
+        ('between_meals', 'Between Meals'),
+        ('bedtime', 'Bedtime'),
+    ]
+
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name="items")
 
     medicine_variant = models.ForeignKey('medicine.MedicineVariant', on_delete=models.CASCADE, null=True, blank=True)
     dosage = models.CharField(max_length=100)
+    sevan_kaal = models.CharField(max_length=20, choices=SEVAN_KAAL_CHOICES, blank=True, default='')
+    anupana = models.CharField(max_length=100, blank=True, default='')
     days = models.IntegerField()
     notes = models.TextField(blank=True, null=True)
     should_deduct    = models.BooleanField(default=True) 
@@ -167,6 +207,10 @@ class PrescriptionItem(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def dose_parts(self):
+        return parse_dosage(self.dosage)[:4]
 
     def __str__(self):
         return f"Prescription Item for {self.prescription.visit.patient.user.username} on {self.prescription.visit.appointment.appointment_date}"

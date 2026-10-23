@@ -26,373 +26,143 @@
             </a>
         </div>
 
-        <!-- Card 1: Appointment + Patient + Doctor -->
+        <!-- Top summary card -->
         <div class="card">
-
-            <!-- Appointment Info -->
-            <div class="detail-section">
-                <div class="section-title">
-                    <i class="fas fa-calendar-alt"></i> Appointment Info
-                </div>
-
-                <div class="info-grid">
-                    <div class="info-box">
-                        <div class="label">Date/Time</div>
-                        <div class="value">{{ appointment.appointment_date }}
-                            {% if appointment.time_slot %}
-                            <span class="status-badge status-confirmed">{{ appointment.time_slot }}</span>
-                            {% else %}
-                                —
-                            {% endif %}</div>
+            <div class="summary-row">
+                <div class="summary-left">
+                    <div class="summary-date">{{ appointment.appointment_date|date:"d M Y" }}</div>
+                    <span class="slot-badge">{{ appointment.time_slot|default:"—" }}</span>
+                    <div class="status-badge
+                        {% if appointment.status == 'completed' %}status-completed
+                        {% elif appointment.status == 'cancelled' %}status-cancelled
+                        {% elif appointment.status == 'confirmed' %}status-confirmed
+                        {% else %}status-pending{% endif %}">
+                        {% if appointment.status == 'completed' %}Completed
+                        {% elif appointment.status == 'cancelled' %}Cancelled
+                        {% elif appointment.status == 'confirmed' %}Upcoming
+                        {% else %}{{ appointment.status|capfirst }}{% endif %}
                     </div>
-                    <!-- <div class="info-box">
-                        <div class="label">Time</div>
-                        <div class="value">{{ appointment.time_slot }}</div>
-                    </div> -->
-                    <!-- <div class="info-box">
-                        <div class="label">Appointment Slot</div>
-                        <div class="value">
-                            {% if appointment.time_slot %}
-                            <span class="status-badge status-confirmed">{{ appointment.time_slot }}</span>
-                            {% else %}
-                            —
-                            {% endif %}
-                        </div>
-                    </div> -->
-                    <div class="info-box">
-                        <div class="label">Status</div>
-                        <div class="value">
-                            {% if appointment.status == 'confirmed' %}
-                            <span class="status-badge status-confirmed">Confirmed</span>
-                            {% elif appointment.status == 'cancelled' %}
-                            <span class="status-badge status-cancelled">Cancelled</span>
-                            {% elif appointment.status == 'completed' %}
-                            <span class="status-badge status-completed">Completed</span>
-                            {% else %}
-                            <span class="status-badge status-pending">Pending</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Booked On</div>
-                        <div class="value">{{ appointment.appointment_date|date:"d M Y" }}</div>
+                    <div class="summary-doctor">
+                        {% if doctor and doctor.user %}Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}{% else %}—{% endif %}
                     </div>
                 </div>
-
-                {% if appointment.status == 'cancelled' %}
-                <div class="info-grid full mt-3">
-                    <div class="info-box">
-                        <div class="label">Reason</div>
-                        <div class="value">{{ appointment.cancellation_reason }}</div>
-                    </div>
-                </div>
-                {% endif %}
-
-                {% if appointment.notes %}
-                <div class="info-grid full mt-3">
-                    <div class="info-box">
-                        <div class="label">Reason for Visit / Notes</div>
-                        <div class="value">{{ appointment.notes }}</div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Patient Info -->
-            <div class="detail-section">
-                <div class="section-title">
-                    <i class="fas fa-user"></i> Patient Info
-                    {% if appointment.family_member %}
-                    <span class="section-tag">Family Member</span>
-                    {% endif %}
-                </div>
-                <div class="info-grid">
-
-                    {% if appointment.family_member %}
-                    <div class="info-box">
-                        <div class="label">Full Name</div>
-                        <div class="value">{{ appointment.family_member.name }}</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Relation</div>
-                        <div class="value">{{ appointment.family_member.relation }}</div>
-                    </div>
-                    {% if appointment.family_member.phone %}
-                    <div class="info-box">
-                        <div class="label">Phone</div>
-                        <div class="value">{{ appointment.family_member.phone }}</div>
-                    </div>
-                    {% endif %}
-                    {% if appointment.family_member.gender %}
-                    <div class="info-box">
-                        <div class="label">Gender</div>
-                        <div class="value">{{ appointment.family_member.gender|capfirst }}</div>
-                    </div>
-                    {% endif %}
-                    {% if appointment.family_member.dob %}
-                    <div class="info-box">
-                        <div class="label">Date of Birth</div>
-                        <div class="value">{{ appointment.family_member.dob|date:"d M Y" }}</div>
-                    </div>
-                    {% endif %}
-                    {% if appointment.family_member.bld_grop %}
-                    <div class="info-box">
-                        <div class="label">Blood Group</div>
-                        <div class="value">{{ appointment.family_member.bld_grop }}</div>
-                    </div>
-                    {% endif %}
-                    <div class="info-box">
-                        <div class="label">Booked By</div>
-                        <div class="value">
-                            {{ appointment.patient.user.first_name }}
-                            {% if appointment.patient.user.last_name %}
-                            {{ appointment.patient.user.last_name }}
-                            {% endif %}
-                            <span style="font-size:0.8rem;color:var(--muted);"> (Account Holder)</span>
-                        </div>
-                    </div>
-
-                    {% else %}
-                    <div class="info-box">
-                        <div class="label">Full Name</div>
-                        <div class="value">
-                            {{ appointment.patient.user.first_name }}
-                            {% if appointment.patient.user.last_name %}
-                            {{ appointment.patient.user.last_name }}
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Phone</div>
-                        <div class="value">{{ appointment.patient.phone|default:"—" }}</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Email</div>
-                        <div class="value">{{ request.user.email }}</div>
-                    </div>
-                    {% if appointment.patient.dob %}
-                    <div class="info-box">
-                        <div class="label">Date of Birth</div>
-                        <div class="value">{{ appointment.patient.dob|date:"d M Y" }}</div>
-                    </div>
-                    {% endif %}
-                    {% if appointment.patient.gender %}
-                    <div class="info-box">
-                        <div class="label">Gender</div>
-                        <div class="value">{{ appointment.patient.gender|capfirst }}</div>
-                    </div>
-                    {% endif %}
-                    {% if appointment.patient.bld_grop %}
-                    <div class="info-box">
-                        <div class="label">Blood Group</div>
-                        <div class="value">{{ appointment.patient.bld_grop }}</div>
-                    </div>
-                    {% endif %}
-                    {% endif %}
-
-                </div>
-            </div>
-
-            <!-- Doctor Info -->
-            <div class="detail-section">
-                <div class="section-title"><i class="fas fa-user-md"></i> Doctor</div>
-                <div class="info-grid">
-                    <div class="info-box">
-                        <div class="label">Doctor Name</div>
-                        <div class="value">
-                            {% if doctor and doctor.user %}
-                                Dr. {{ doctor.user.get_full_name|default:doctor.user.username }}
-                            {% else %}
-                            —
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── Card 2: Visit Details ── -->
-            {% if visit %}
-            <div class="detail-section">
-                <div class="section-title"><i class="fas fa-stethoscope"></i> Visit Details</div>
-                <div class="info-grid">
-                    <div class="info-box">
-                        <div class="label">Visit Status</div>
-                        <div class="value"><span class="status-badge status-completed">{{ visit.visted_status|capfirst }}</span></div>
-                    </div>
-                    <div class="info-box">
-                        <div class="label">Visit Date</div>
-                        <div class="value">{{ visit.created_at|date:"d M Y" }}</div>
-                    </div>
-                </div>
-                {% if visit.symptoms %}
-                <div class="info-grid full mt-3">
-                    <div class="info-box">
-                        <div class="label">Symptoms</div>
-                        <div class="value">{{ visit.symptoms }}</div>
-                    </div>
-                </div>
-                {% endif %}
-                {% if visit.diagnosis %}
-                <div class="info-grid full mt-3">
-                    <div class="info-box">
-                        <div class="label">Diagnosis</div>
-                        <div class="value">{{ visit.diagnosis }}</div>
-                    </div>
-                </div>
-                {% endif %}
-                {% if visit.notes %}
-                <div class="info-grid full mt-3">
-                    <div class="info-box">
-                        <div class="label">Doctor's Notes</div>
-                        <div class="value">{{ visit.notes }}</div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-            {% endif %}
-
-            <!-- ── Card 3: Prescription ── -->
-            {% if prescription and prescription_items %}
-            <div class="detail-section">
-                <div
-                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; flex-wrap: wrap;">
-                    <div class="section-title" style="margin-bottom: 0;"><i class="fas fa-prescription-bottle-alt"></i>
-                        Prescription</div>
+                <div class="summary-right">
+                    <div class="booked-on">Booked on {{ appointment.created_at|default:appointment.appointment_date|date:"d M Y" }}</div>
+                    {% if prescription and prescription_items %}
                     <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank" class="btn-print">
                         <i class="fas fa-print"></i> Print
                     </a>
-                </div>
-                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid var(--border, #e5e7eb);">
-                    <table class="rx-table">
-                        <thead>
-                            <tr>
-                                <th style="color: white;">#</th>
-                                <th style="color: white;">Medicine</th>
-                                <th style="color: white;">Type</th>
-                                <th style="color: white;">Pack Size</th>
-                                <th style="color: white;">Dosage</th>
-                                <th style="color: white;">Days</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in prescription_items %}
-                            <tr style="border-bottom: none; cursor: pointer;" data-bs-toggle="collapse"
-                                data-bs-target="#dosage-{{ forloop.counter }}" aria-expanded="false"
-                                aria-controls="dosage-{{ forloop.counter }}">
-                                <td style="border-bottom: none;">{{ forloop.counter }}</td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.name }}{% else %}—{% endif %}</td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.medicine_type.name|default:"—" }}{% else %}—{% endif %}</td>
-                                <td style="border-bottom: none;">{% if item.medicine_variant %}{{ item.medicine_variant.power }}{% else %}—{% endif %}</td>
-                                <td style="border-bottom: none;">{{ item.dosage }}</td>
-                                <td style="border-bottom: none;">{{ item.days }} days</td>
-                            </tr>
-                            <tr>
-                                <td colspan="6" style="padding: 0; border-top: none;">
-                                    <div class="collapse" id="dosage-{{ forloop.counter }}">
-                                        <div
-                                            style="margin: 0 20px 20px 40px; border-left: 3px solid var(--brand-accent, #FD6801); padding-left: 15px;">
-                                            <div
-                                                style="font-weight: 700; color: var(--brand-accent, #FD6801); text-transform: uppercase; font-size: 0.75rem; margin-bottom: 10px; letter-spacing: 0.5px;">
-                                                <i class="fas fa-box-open me-1"></i> DOSAGE FOR
-                                                {% if item.medicine_variant %}
-                                                {{ item.medicine_variant.medicine.name|upper }}
-                                                {% else %}
-                                                MEDICINE
-                                                {% endif %}
-                                            </div>
-                                            <div class="d-flex align-items-center flex-wrap gap-2">
-                                                {% if item.parsed_morning %}
-                                                <span class="badge rounded-pill d-flex align-items-center"
-                                                    style="background-color: var(--brand-accent, #FD6801); color: white; padding: 6px 12px; font-size: 0.8rem; font-weight: 500;">
-                                                    <i class="fas fa-sun me-1"></i> Morning: <span
-                                                        class="ms-1 fw-bold">{{ item.parsed_morning }}</span>
-                                                </span>
-                                                {% endif %}
-                                                {% if item.parsed_afternoon %}
-                                                <span class="badge rounded-pill d-flex align-items-center"
-                                                    style="background-color: var(--brand-accent, #FD6801); color: white; padding: 6px 12px; font-size: 0.8rem; font-weight: 500;">
-                                                    <i class="fas fa-cloud-sun me-1"></i> Afternoon: <span
-                                                        class="ms-1 fw-bold">{{ item.parsed_afternoon }}</span>
-                                                </span>
-                                                {% endif %}
-                                                {% if item.parsed_evening %}
-                                                <span class="badge rounded-pill d-flex align-items-center"
-                                                    style="background-color: var(--brand-accent, #FD6801); color: white; padding: 6px 12px; font-size: 0.8rem; font-weight: 500;">
-                                                    <i class="fas fa-moon me-1"></i> Evening: <span
-                                                        class="ms-1 fw-bold">{{ item.parsed_evening }}</span>
-                                                </span>
-                                                {% endif %}
-                                                {% if item.parsed_night %}
-                                                <span class="badge rounded-pill d-flex align-items-center"
-                                                    style="background-color: var(--brand-accent, #FD6801); color: white; padding: 6px 12px; font-size: 0.8rem; font-weight: 500;">
-                                                    <i class="fas fa-star me-1"></i> Night: <span
-                                                        class="ms-1 fw-bold">{{ item.parsed_night }}</span>
-                                                </span>
-                                                {% endif %}
-                                                {% if item.parsed_meal == "after_food" %}
-                                                <span
-                                                    class="badge rounded-pill d-flex align-items-center bg-success text-white"
-                                                    style="padding: 6px 12px; font-size: 0.8rem; font-weight: 500;">
-                                                    <i class="fas fa-utensils me-1"></i> After Food
-                                                </span>
-                                                {% elif item.parsed_meal == "before_food" %}
-                                                <span
-                                                    class="badge rounded-pill d-flex align-items-center bg-warning text-dark"
-                                                    style="padding: 6px 12px; font-size: 0.8rem; font-weight: 500;">
-                                                    <i class="fas fa-utensils me-1"></i> Before Food
-                                                </span>
-                                                {% endif %}
-                                            </div>
-                                            {% if item.notes %}
-                                            <div class="mt-2 text-muted" style="font-size: 0.8rem;">
-                                                <strong><i class="fas fa-info-circle me-1"></i> Notes:</strong> {{ item.notes }}
-                                            </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div style="font-size: 0.8rem; color: var(--muted, #6b7280); margin-top: 12px;">
-                    Prescribed on: {{ prescription.created_at|date:"d M Y" }}
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
-
-            <!-- ── Card 4: Lab Documents ── -->
-            {% if visit and visit.lab_documents.all %}
-            <div class="detail-section">
-                <div class="section-title"><i class="fas fa-file-medical"></i> Lab Documents</div>
-                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid var(--border, #e5e7eb);">
-                    <table class="rx-table">
-                        <thead>
-                            <tr>
-                                <th style="color: white;">Document</th>
-                                <th style="color: white;">Uploaded</th>
-                                <th style="color: white;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for document in visit.lab_documents.all %}
-                            <tr>
-                                <td style="border-bottom: none;"><strong>{{ document.original_name }}</strong></td>
-                                <td style="border-bottom: none;">{{ document.uploaded_at|date:"d M Y" }}</td>
-                                <td style="border-bottom: none;">
-                                    <a href="{{ document.file.url }}" target="_blank"
-                                        class="btn btn-primary btn-sm" title="View"
-                                        style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+            {% if appointment.status == 'cancelled' and appointment.cancellation_reason %}
+            <div class="info-grid full mt-3">
+                <div class="info-box">
+                    <div class="label">Reason</div>
+                    <div class="value">{{ appointment.cancellation_reason }}</div>
                 </div>
             </div>
             {% endif %}
         </div>
-    {% endblock %}
+
+        <!-- Visit card -->
+        {% if visit and visit.symptoms or visit.diagnosis or visit.notes %}
+        <div class="card">
+            <div class="section-title"><i class="fas fa-stethoscope"></i> Visit details</div>
+            {% if visit.symptoms %}
+            <p class="labelled-para"><span class="lbl">Symptoms:</span> {{ visit.symptoms }}</p>
+            {% else %}
+            <p class="labelled-para"><span class="lbl">Symptoms:</span> —</p>
+            {% endif %}
+            {% if visit.diagnosis %}
+            <p class="labelled-para"><span class="lbl">Diagnosis:</span> {{ visit.diagnosis }}</p>
+            {% else %}
+            <p class="labelled-para"><span class="lbl">Diagnosis:</span> —</p>
+            {% endif %}
+            {% if visit.notes %}
+            <p class="labelled-para"><span class="lbl">Doctor's notes:</span> {{ visit.notes }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Prescription card -->
+        {% if prescription and prescription_items %}
+        <div class="card">
+            <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Prescription</div>
+            <div class="rx-list">
+                {% for item in prescription_items %}
+                <div class="rx-item">
+                    <div class="rx-head">
+                        <div>
+                            <div class="rx-name">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.name }}{% else %}—{% endif %}</div>
+                            <div class="rx-type">{% if item.medicine_variant %}{{ item.medicine_variant.medicine.medicine_type.name|default:"" }}{% endif %} {% if item.medicine_variant %}· {{ item.medicine_variant.power }}{% endif %}</div>
+                        </div>
+                        <div class="rx-days">{{ item.days }} days</div>
+                    </div>
+                    <div class="dosage-pill">{{ item.dose_parts.0 }} – {{ item.dose_parts.1 }} – {{ item.dose_parts.2 }} – {{ item.dose_parts.3 }}</div>
+                    <div class="dosage-caption" style="white-space:nowrap;">M · A · E · N</div>
+                    <div class="rx-meta">
+                        {% if item.parsed_sevan_kaal_label %}<span class="sevan">{{ item.parsed_sevan_kaal_label }}</span>{% endif %}
+                        {% if item.parsed_anupana %}<span class="anupana">with {{ item.parsed_anupana }}</span>{% endif %}
+                    </div>
+                    {% if item.notes %}<div class="rx-notes">{{ item.notes }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="prescribed-on">Prescribed on {{ prescription.created_at|date:"d M Y" }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Diet & Lifestyle -->
+        {% if prescription and prescription.pathya_list or prescription.apathya_list or prescription.vihar %}
+        <div class="card">
+            <div class="section-title"><i class="fas fa-leaf"></i> Diet &amp; lifestyle advice</div>
+            <div class="row g-3">
+                {% if prescription.pathya_list %}
+                <div class="col-md-6">
+                    <div class="soft-box pathya-box">
+                        <div class="fw-semibold text-success mb-2"><i class="fas fa-check-circle me-1"></i> Pathya (Take)</div>
+                        <ul class="mb-0 ps-3">{% for advice in prescription.pathya_list %}<li>{{ advice }}</li>{% endfor %}</ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if prescription.apathya_list %}
+                <div class="col-md-6">
+                    <div class="soft-box apathya-box">
+                        <div class="fw-semibold text-danger mb-2"><i class="fas fa-times-circle me-1"></i> Apathya (Avoid)</div>
+                        <ul class="mb-0 ps-3">{% for advice in prescription.apathya_list %}<li>{{ advice }}</li>{% endfor %}</ul>
+                    </div>
+                </div>
+                {% endif %}
+                {% if prescription.vihar %}
+                <div class="col-12">
+                    <div class="soft-box">
+                        <div class="text-muted small mb-1">Lifestyle advice</div>
+                        <div>{{ prescription.vihar }}</div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if visit and visit.lab_documents.all %}
+        <div class="card">
+            <div class="section-title"><i class="fas fa-file-medical"></i> Lab documents</div>
+            <div style="overflow-x: auto;">
+                <table class="rx-table">
+                    <thead><tr><th>Document</th><th>Uploaded</th><th>Action</th></tr></thead>
+                    <tbody>
+                        {% for document in visit.lab_documents.all %}
+                        <tr>
+                            <td><strong>{{ document.original_name }}</strong></td>
+                            <td>{{ document.uploaded_at|date:"d M Y" }}</td>
+                            <td><a href="{{ document.file.url }}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+{% endblock %}

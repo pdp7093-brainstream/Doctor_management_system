@@ -73,7 +73,7 @@
                                 </label>
                                 <textarea class="form-control" id="symptoms" name="symptoms" rows="3"
                                     placeholder="Describe patient's symptoms..."
-                                    required>{{ visit.symptoms }}</textarea>
+                                    required>{{ visit.symptoms|default_if_none:"" }}</textarea>
                             </div>
                             <div class="mb-4">
                                 <label for="diagnosis" class="form-label fw-semibold text-dark mb-2">
@@ -81,14 +81,14 @@
                                 </label>
                                 <textarea class="form-control" id="diagnosis" name="diagnosis" rows="3"
                                     placeholder="Document the medical diagnosis..."
-                                    required>{{ visit.diagnosis }}</textarea>
+                                    required>{{ visit.diagnosis|default_if_none:"" }}</textarea>
                             </div>
                             <div class="mb-0">
                                 <label for="notes" class="form-label fw-semibold text-dark mb-2">
                                     Additional Notes <span class="text-muted">(Optional)</span>
                                 </label>
                                 <textarea class="form-control" id="notes" name="notes" rows="2"
-                                    placeholder="Any additional observations...">{{ visit.notes }}</textarea>
+                                    placeholder="Any additional observations...">{{ visit.notes|default_if_none:"" }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -192,120 +192,88 @@
             <!-- Prescription Table -->
             <div class="row">
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card border-0 shadow-sm rounded-3 prescription-list-card">
                         <div
                             class="card-header bg-white border-0 px-4 py-3 d-flex justify-content-between align-items-center border-bottom">
-                            <h5 class="card-title mb-0 fw-semibold text-dark">Prescription List</h5>
+                            <div class="d-flex align-items-center gap-2"><h5 class="card-title mb-0 fw-semibold text-dark">Prescription List</h5><span class="badge rounded-pill text-bg-light" id="prescriptionListCount">{{ items|length }} {% if items|length == 1 %}medicine{% else %}medicines{% endif %}</span></div>
                             <div class="d-flex align-items-center gap-2">
                                 <button type="button" id="bulkDeletePrescriptionBtn" class="btn btn-danger d-none rounded-pill px-3" onclick="bulkRemoveMedicineRows()">
                                     <i class="bi bi-trash"></i> Delete Selected
                                 </button>
-                                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal"
+                                <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal"
                                     data-bs-target="#medicineModal">
                                     <i class="bi bi-plus-lg me-2"></i>Add Medicine
                                 </button>
                             </div>
                         </div>
                         <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle mb-0">
-                                    <thead class="bg-light">
+                            <div class="table-responsive prescription-table-wrap">
+                                <table class="table align-middle mb-0 prescription-table">
+                                    <thead>
                                         <tr>
-                                            <th style="width: 40px; text-align: center; border-bottom: 0;">
+                                            <th class="select-col">
                                                 <input type="checkbox" class="form-check-input" id="selectAllPrescriptions" onchange="toggleAllPrescriptions(this)">
                                             </th>
-                                            <th class="px-4 py-3 border-0">Medicine & Strength</th>
-                                            <th class="text-center border-0">Morn.</th>
-                                            <th class="text-center border-0">Aft.</th>
-                                            <th class="text-center border-0">Eve.</th>
-                                            <th class="text-center border-0">Night</th>
-                                            <th class="border-0">Timing</th>
-                                            <th class="text-center border-0">Duration</th>
-                                            <th class="text-center border-0">
-                                                Stock Deduct
+                                            <th>Medicine</th><th>Dosage</th><th>Timing</th><th>Duration</th>
+                                            <th class="stock-heading">
+                                                Stock
                                                 <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
                                                     title="ON = Stock is deducted after complete visit. OFF = Stock Skipped."></i>
                                             </th>
-                                            <th class="text-center border-0">Stock Status</th>
-                                            <th class="text-end border-0">Action</th>
+                                            <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="medicineList">
-            </style>                                {% for item in items %}
-                                        <tr>
-                                            <td class="text-center">
+                                        {% for item in items %}
+                                        <tr class="prescription-row">
+                                            <td class="select-col" data-label="Select">
                                                 <input type="checkbox" class="form-check-input prescription-checkbox" onchange="updatePrescriptionBulkDeleteBtn()">
                                             </td>
-                                            <td class="px-4">
-                                                <div class="fw-bold text-dark">{{ item.medicine_variant.medicine.name }}
-                                                </div>
-                                                <div class="small text-muted">{{ item.medicine_variant.power }}</div>
+                                            <td class="medicine-cell" data-label="Medicine">
+                                                <div class="medicine-name">{{ item.medicine_variant.medicine.name }} <span class="medicine-strength">{{ item.medicine_variant.power }}</span></div>
+                                                <div class="medicine-meta"><span>{{ item.medicine_variant.medicine.medicine_type.name|default:"—" }}</span>
                                                 {% if item.notes %}
-                                                <div class="small text-muted mt-1">
-                                                    <i class="bi bi-journal-text me-1"></i>{{ item.notes }}
-                                                </div>
-                                                {% endif %}
+                                                <span class="medicine-notes" title="{{ item.notes }}"><i class="bi bi-journal-text"></i> {{ item.notes }}</span>
+                                                {% endif %}</div>
                                                 <input type="hidden" name="variant_id[]"
                                                     value="{{ item.medicine_variant.id }}">
                                                 <input type="hidden" name="item_id[]" value="{{ item.id }}">
                                                 <input type="hidden" name="medicine_notes"
                                                     value="{{ item.notes|default:'' }}">
                                             </td>
-                                            <td class="text-center">
-                                                {{ item.parsed_morning }}
-                                                <input type="hidden" name="morning" value="{{ item.parsed_morning }}">
+                                            <td class="dosage-cell" data-label="Dosage">
+                                                <div class="dosage-stack"><div class="dosage-pill"><span class="{% if not item.parsed_morning %}dose-zero{% endif %}">{{ item.parsed_morning }}</span><span>–</span><span class="{% if not item.parsed_afternoon %}dose-zero{% endif %}">{{ item.parsed_afternoon }}</span><span>–</span><span class="{% if not item.parsed_evening %}dose-zero{% endif %}">{{ item.parsed_evening }}</span><span>–</span><span class="{% if not item.parsed_night %}dose-zero{% endif %}">{{ item.parsed_night }}</span></div><div class="dosage-caption">M · A · E · N</div></div>
+                                                <input type="hidden" name="morning" value="{{ item.parsed_morning }}"><input type="hidden" name="afternoon" value="{{ item.parsed_afternoon }}"><input type="hidden" name="evening" value="{{ item.parsed_evening }}"><input type="hidden" name="night" value="{{ item.parsed_night }}">
                                             </td>
-                                            <td class="text-center">
-                                                {{ item.parsed_afternoon }}
-                                                <input type="hidden" name="afternoon"
-                                                    value="{{ item.parsed_afternoon }}">
-                                            </td>
-                                            <td class="text-center">
-                                                {{ item.parsed_evening }}
-                                                <input type="hidden" name="evening" value="{{ item.parsed_evening }}">
-                                            </td>
-                                            <td class="text-center">
-                                                {{ item.parsed_night }}
-                                                <input type="hidden" name="night" value="{{ item.parsed_night }}">
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge {% if item.parsed_meal == 'after_food' %}bg-info-subtle text-info{% else %}bg-warning-subtle text-warning{% endif %}">
-                                                    {% if item.parsed_meal == 'after_food' %}After Food{% else %}Before
-                                                    Food{% endif %}
-                                                </span>
+                                            <td class="timing-cell" data-label="Timing">
+                                                <span class="badge bg-info-subtle text-info text-nowrap">{{ item.parsed_sevan_kaal_label }}</span>
+                                                {% if item.parsed_anupana %}<span class="small text-muted d-inline-block">with {{ item.parsed_anupana }}</span>{% endif %}
                                                 <input type="hidden" name="meal" value="{{ item.parsed_meal }}">
+                                                <input type="hidden" name="anupana" value="{{ item.anupana }}">
                                             </td>
-                                            <td class="text-center">
-                                                {{ item.days }} Days
+                                            <td class="duration-cell" data-label="Duration">
+                                                <div>{{ item.days }} days</div><div class="duration-total">{{ item.parsed_quantity }} units</div>
                                                 <input type="hidden" name="days" value="{{ item.days }}">
                                             </td>
 
                                             <!-- ✅ TOGGLE COLUMN — existing items -->
-                                            <td class="text-center">
+                                            <td class="stock-cell" data-label="Stock">
                                                 <label class="toggle-switch">
                                                     <input type="checkbox" name="should_deduct[]"
                                                         value="{{ forloop.counter0 }}" class="toggle-input"
-                                                        {% if item.should_deduct %}checked{% endif %}
+                                                        {% if item.should_deduct or item.was_deducted %}checked{% endif %}
+                                                        {% if item.was_deducted %}disabled{% endif %}
                                                         onchange="updateCounts()">
                                                     <span class="toggle-slider"></span>
                                                 </label>
-                                            </td>
-
-                                            <!-- ✅ Stock Status Column -->
-                                            <td class="text-center">
                                                 {% if item.was_deducted %}
-                                                <span class="badge bg-success-subtle text-success rounded-pill">
-                                                    <i class="bi bi-check-circle-fill me-1"></i>Stock Deducted
-                                                </span>
+                                                {% if item.should_deduct %}<input type="hidden" name="should_deduct[]" value="{{ forloop.counter0 }}">{% endif %}
+                                                <span class="stock-status is-deducted" title="Stock already deducted for this item"><i class="bi bi-lock-fill" aria-hidden="true"></i> Deducted</span>
                                                 {% else %}
-                                                <span class="badge bg-light text-muted rounded-pill">
-                                                    <i class="bi bi-clock me-1"></i>Pending
-                                                </span>
+                                                <span class="stock-status {% if item.should_deduct %}will-deduct{% else %}is-skipped{% endif %}">{% if item.should_deduct %}Will deduct{% else %}Skipped{% endif %}</span>
                                                 {% endif %}
                                             </td>
-
-                                            <td class="text-end">
+                                            <td class="action-cell" data-label="Action">
                                                 <div class="action-btns">
                                                     <button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete"
                                                         onclick="removeMedicineRow(this)">
@@ -319,11 +287,36 @@
                                 </table>
                                 <div id="emptyMessage" class="text-center py-5 text-muted" {% if items %}style="display:none;"{% endif %}>
                                     <i class="bi bi-capsule-pill d-block mb-3" style="font-size:3rem; opacity:0.2;"></i>
-                                    <p class="mb-0">No medicines added to prescription yet.</p>
+                                    <p class="mb-3">No medicines added yet</p>
+                                    <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#medicineModal"><i class="bi bi-plus-lg me-2"></i>Add Medicine</button>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+            <div class="card border-0 shadow-sm rounded-3 mt-4 advice-card">
+                <div class="card-header bg-white border-0 px-4 py-3 border-bottom"><h5 class="card-title mb-0 fw-semibold text-dark">Diet &amp; Lifestyle Advice</h5></div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-6 advice-column pathya-column" data-advice-kind="pathya">
+                            <h6 class="advice-heading"><i class="bi bi-check-circle"></i> Pathya — What to take</h6>
+                            <div class="advice-items" aria-live="polite">{% for advice in prescription.pathya_list %}<span class="advice-chip"><span class="advice-chip-label">{{ advice }}</span><button type="button" class="advice-remove" aria-label="Remove {{ advice }}">×</button></span>{% endfor %}</div>
+                            <input type="hidden" name="pathya" class="advice-value" value="{{ prescription.pathya }}">
+                            <div class="input-group mt-3"><input type="text" class="form-control advice-input" maxlength="100" placeholder="Add item…"><button type="button" class="btn btn-outline-success advice-add">Add</button></div>
+                            <div class="advice-suggestions mt-3">
+                                <button type="button" data-advice-suggestion="Warm water">Warm water</button><button type="button" data-advice-suggestion="Moong dal">Moong dal</button><button type="button" data-advice-suggestion="Khichdi">Khichdi</button><button type="button" data-advice-suggestion="Green vegetables">Green vegetables</button><button type="button" data-advice-suggestion="Seasonal fruits">Seasonal fruits</button><button type="button" data-advice-suggestion="Buttermilk">Buttermilk</button><button type="button" data-advice-suggestion="Ghee (in moderation)">Ghee (in moderation)</button><button type="button" data-advice-suggestion="Early &amp; light dinner">Early &amp; light dinner</button><button type="button" data-advice-suggestion="Herbal tea">Herbal tea</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 advice-column apathya-column" data-advice-kind="apathya">
+                            <h6 class="advice-heading"><i class="bi bi-x-circle"></i> Apathya — What to avoid</h6>
+                            <div class="advice-items" aria-live="polite">{% for advice in prescription.apathya_list %}<span class="advice-chip"><span class="advice-chip-label">{{ advice }}</span><button type="button" class="advice-remove" aria-label="Remove {{ advice }}">×</button></span>{% endfor %}</div>
+                            <input type="hidden" name="apathya" class="advice-value" value="{{ prescription.apathya }}">
+                            <div class="input-group mt-3"><input type="text" class="form-control advice-input" maxlength="100" placeholder="Add item…"><button type="button" class="btn btn-outline-danger advice-add">Add</button></div>
+                            <div class="advice-suggestions mt-3"><button type="button" data-advice-suggestion="Cold drinks">Cold drinks</button><button type="button" data-advice-suggestion="Fried food">Fried food</button><button type="button" data-advice-suggestion="Junk food">Junk food</button><button type="button" data-advice-suggestion="Curd at night">Curd at night</button><button type="button" data-advice-suggestion="Excess sugar">Excess sugar</button><button type="button" data-advice-suggestion="Maida">Maida</button><button type="button" data-advice-suggestion="Spicy food">Spicy food</button><button type="button" data-advice-suggestion="Late-night eating">Late-night eating</button><button type="button" data-advice-suggestion="Alcohol">Alcohol</button><button type="button" data-advice-suggestion="Smoking">Smoking</button></div>
+                        </div>
+                    </div>
+                    <div class="mt-4"><label for="vihar" class="form-label fw-semibold text-dark">Lifestyle advice (Vihar)</label><textarea id="vihar" name="vihar" class="form-control" rows="3" placeholder="e.g., Wake up early, 30 min walk, yoga / pranayama, sleep by 10 pm">{{ prescription.vihar }}</textarea></div>
                 </div>
             </div>
         </form>
@@ -367,7 +360,7 @@
                                 <small class="d-block opacity-75"
                                     style="font-size: 0.7rem; text-transform: uppercase;">Selected Medicine</small>
                                 <span id="selectedMedicineName" class="fw-bold"></span>
-                            </div>11/
+                            </div>
                         </div>
                         <button type="button" class="btn-close btn-close-white"
                             onclick="clearSelectedMedicine()"></button>
@@ -412,11 +405,30 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label small fw-bold text-muted">Meal Timing</label>
-                                <select id="modal_meal" class="form-select shadow-sm">
-                                    <option value="after_food">After Food</option>
+                                <label class="form-label small fw-bold text-muted">Sevan Kaal (When to take)</label>
+                                <select id="modal_meal" class="form-select shadow-sm" required>
                                     <option value="before_food">Before Food</option>
+                                    <option value="after_food" selected>After Food</option>
+                                    <option value="empty_stomach">Empty Stomach</option>
+                                    <option value="with_food">With Food</option>
+                                    <option value="between_meals">Between Meals</option>
+                                    <option value="bedtime">Bedtime</option>
                                 </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Anupana (take with) <span class="fw-normal">(Optional)</span></label>
+                                <input type="text" id="modal_anupana" class="form-control shadow-sm" list="anupana_suggestions" maxlength="100">
+                                <datalist id="anupana_suggestions">
+                                    <option value="Warm Water"></option>
+                                    <option value="Lukewarm Water"></option>
+                                    <option value="Honey"></option>
+                                    <option value="Ghee"></option>
+                                    <option value="Milk"></option>
+                                    <option value="Warm Milk"></option>
+                                    <option value="Buttermilk"></option>
+                                    <option value="Coconut Water"></option>
+                                    <option value="Jaggery"></option>
+                                </datalist>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small fw-bold text-muted">Duration (Days)</label>
@@ -449,7 +461,7 @@
 
     <!-- ===== STYLES ===== -->
 
-    <link rel="stylesheet" href="{% static 'assets/css/prescription.css' %}">
+    <link rel="stylesheet" href="{% static 'assets/css/prescription.css' %}?v=4">
 
 
     <!-- ===== Toast Notification Container ===== -->
@@ -458,6 +470,6 @@
         style="top: 20px; right: 20px; z-index: 9999;"></div>
 
     <!-- ===== SCRIPTS ===== -->
-    <script src="{% static 'assets/js/prescription.js' %}?v={% now 'U' %}"></script>
+    <script src="{% static 'assets/js/prescription.js' %}?v=5"></script>
 </main>
 {% endblock %}
