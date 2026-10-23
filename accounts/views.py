@@ -360,7 +360,7 @@ def dashboard(request):
         'family_member',
         'doctor__user',
         'booked_by',
-    )
+    ).prefetch_related('visit_set__prescription')
 
     search = request.GET.get('search', '').strip()
     date_from = request.GET.get('date_from', '').strip()
@@ -428,6 +428,7 @@ def dashboard(request):
         Q(appointment_date=today, time_slot__gte=now_time)
     ).order_by('appointment_date', 'time_slot').first()
 
+    total_appointments = base_appointments.count()
     paginator = Paginator(appointments, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -452,6 +453,8 @@ def dashboard(request):
         },
         'status_choices': Appointment.status_choices,
         'total_visits': appointment_counts['total_visits'],
+        'total_prescriptions': base_appointments.filter(visit__prescription__isnull=False).values('visit__prescription').distinct().count(),
+        'total_appointments': total_appointments,
         'pending_appointments': appointment_counts['pending_appointments'],
         'completed_visits': appointment_counts['completed_visits'],
         'has_any_appointments': appointment_counts['total_visits'] > 0,

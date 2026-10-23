@@ -21,69 +21,34 @@
 {% endblock %}
 {% block content %}
     <div class="container">
-        <!-- <section class="patient-hero">
-            <div class="row align-items-center g-3">
-                <div class="col-lg-8">
-                    <div class="patient-hero__eyebrow">
-                        <i class="fa-solid fa-circle-user"></i>
-                        Patient Portal
-                    </div>
-                    <h1 class="patient-hero__title">Welcome, {{ request.user.first_name|default:request.user.username }}</h1>
-                    <p class="patient-hero__subtext">
-                        Review your appointment activity, check pending visits, and keep everything in one clean place.
-                    </p>
+        <section class="patient-header-card">
+            <div class="patient-header-top">
+                <div>
+                    <h1>Namaste, {{ request.user.first_name|default:request.user.username }}</h1>
+                    <p>Here are your visits and prescriptions.</p>
                 </div>
-                <div class="col-lg-4">
-                    <div class="patient-actions">
-                        <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment">
-                            <i class="fa-solid fa-calendar-plus"></i>
-                            Book Appointment
-                        </a>
-                    </div>
+                <div class="patient-stat-pills">
+                    <span>{{ total_visits }} visit{{ total_visits|pluralize }}</span>
+                    <span>{{ total_prescriptions }} prescription{{ total_prescriptions|pluralize }}</span>
                 </div>
             </div>
-        </section> -->
-
-        <section class="next-appt-card {% if not next_appointment %}next-appt-card--empty{% endif %}">
-            <div class="next-appt__icon">
-                <i class="fa-solid {% if next_appointment %}fa-calendar-day{% else %}fa-calendar-plus{% endif %}"></i>
-            </div>
-
-            <div class="next-appt__body">
-                <span class="next-appt__label">Next Appointment</span>
-                {% if next_appointment %}
-                    <h3 class="next-appt__date">{{ next_appointment.appointment_date|date:"D, d M Y" }}</h3>
-                    <div class="next-appt__meta">
-                        <span><i class="fa-regular fa-clock"></i> {{ next_appointment.time_slot|time:"h:i A" }}</span>
-                        <span>
-                            <i class="fa-regular fa-user"></i>
-                            {% if next_appointment.family_member %}
-                                {{ next_appointment.family_member.name }} ({{ next_appointment.family_member.relation }})
-                            {% else %}
-                                {{ next_appointment.patient.user.first_name }}{% if next_appointment.patient.user.last_name %} {{ next_appointment.patient.user.last_name }}{% endif %}
-                            {% endif %}
-                        </span>
-                        <span class="badge appt-badge appt-badge--{{ next_appointment.status }}">{{ next_appointment.get_status_display }}</span>
-                    </div>
-                {% else %}
-                    <h3 class="next-appt__date">No upcoming appointment</h3>
-                    <p class="next-appt__hint">Book your next consultation in under a minute.</p>
-                {% endif %}
-            </div>
-
-            <div class="next-appt__actions">
-                {% if next_appointment %}
-                    <a href="{% url 'appointment:appointment_detail' next_appointment.id|hid %}" class="btn-book-appointment">
-                        <i class="fa-solid fa-eye"></i> View details
-                    </a>
-                {% else %}
-                    <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment">
-                        <i class="fa-solid fa-calendar-plus"></i> Book Appointment
-                    </a>
-                {% endif %}
-                {% if completed_visits %}
-                    <span class="next-appt__visits">{{ completed_visits }} visit{{ completed_visits|pluralize }} so far</span>
-                {% endif %}
+            <div class="patient-header-next">
+                <div class="next-appt__icon"><i class="fa-solid fa-calendar-day"></i></div>
+                <div class="next-appt__body">
+                    <span class="next-appt__label">Next appointment</span>
+                    {% if next_appointment %}
+                        <h3 class="next-appt__date">{{ next_appointment.appointment_date|date:"D, d M Y" }}</h3>
+                        <div class="next-appt__meta">
+                            <span><i class="fa-regular fa-clock"></i> {{ next_appointment.time_slot|time:"h:i A" }}</span>
+                            <span><i class="fa-solid fa-user-doctor"></i> Dr. {{ next_appointment.doctor.user.get_full_name|default:next_appointment.doctor.user.first_name }}</span>
+                        </div>
+                    {% else %}
+                        <h3 class="next-appt__date">No upcoming appointment</h3>
+                    {% endif %}
+                </div>
+                <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment patient-header-book">
+                    <i class="fa-solid fa-calendar-plus"></i> Book Appointment
+                </a>
             </div>
         </section>
 
@@ -95,8 +60,9 @@
                 </a> -->
             </div>
             <div class="card-body">
-                <form method="get" action="{% url 'dashboard' %}" class="appointment-filter-form mb-3" id="appointmentFilterForm">
-                    <div class="filter-toolbar">
+                <form method="get" action="{% url 'dashboard' %}" class="appointment-filter-form mb-3 {% if total_appointments > 5 or filters.search or filters.date_from or filters.date_to or filters.status %}is-visible{% endif %} {% if total_appointments <= 5 and not filters.search and not filters.date_from and not filters.date_to and not filters.status %}d-none{% endif %}" id="appointmentFilterForm">
+                    <button type="button" class="filters-toggle" aria-expanded="{% if total_appointments > 5 or filters.search or filters.date_from or filters.date_to or filters.status %}true{% else %}false{% endif %}" aria-controls="appointmentFilterFields"><i class="fa-solid fa-sliders"></i> Filters</button>
+                    <div class="filter-toolbar" id="appointmentFilterFields">
                         <div class="filter-toolbar__head">
                             <div>
                                 <h5 class="filter-toolbar__title">Appointment filters</h5>
@@ -107,7 +73,7 @@
                             <div class="col-lg-4 col-md-6">
                                 <label class="form-label small fw-semibold">Search</label>
                                 <input type="search" name="search" class="form-control"
-                                       placeholder="Patient name or phone"
+                                       placeholder="Search by doctor or family member"
                                        value="{{ filters.search }}"
                                        aria-label="Search appointments"
                                        autocomplete="off">
@@ -145,8 +111,9 @@
                         <table class="table" id="appointmentsTable">
                             <thead>
                                 <tr>
-                                    <th>Patient Name</th>
+                                    <th>For</th>
                                     <th>Date &amp; Time</th>
+                                    <th>Doctor</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -156,14 +123,8 @@
                                 <tr>
                                     <td>
                                         {% if appointment.family_member %}
-                                            {{ appointment.family_member.name }}
-                                            <span style="font-size:0.75rem;color:var(--muted);display:block;">
-                                                {{ appointment.family_member.relation }}
-                                            </span>
-                                        {% else %}
-                                            {{ appointment.patient.user.first_name }}
-                                            {% if appointment.patient.user.last_name %} {{ appointment.patient.user.last_name }}{% endif %}
-                                        {% endif %}
+                                            {{ appointment.family_member.name }} · {{ appointment.family_member.relation }}
+                                        {% else %}Self{% endif %}
                                     </td>
 
                                     <td>
@@ -173,36 +134,36 @@
                                         </span>
                                     </td>
 
+                                    <td>{% if appointment.doctor and appointment.doctor.user %}Dr. {{ appointment.doctor.user.get_full_name|default:appointment.doctor.user.first_name }}{% else %}—{% endif %}</td>
+
                                     <td>
                                         <span class="badge appt-badge appt-badge--{{ appointment.status }}">{{ appointment.get_status_display }}</span>
                                     </td>
 
-                                    <td class="d-flex gap-2">
+                                    <td class="appt-actions">
                                         <a href="{% url 'appointment:appointment_detail' appointment.id|hid %}"
                                            class="btn btn-primary btn-sm">
                                             <i class="fas fa-eye"></i> View
                                         </a>
 
-                                        {% if appointment.status == 'pending' %}
-                                        <a href="{% url 'appointment:cancel_appointment' appointment.id|hid %}"
-                                           class="btn btn-danger btn-sm cancel-btn"
-                                           data-appointment-id="{{ appointment.id|hid }}">
-                                            <i class="fas fa-times"></i> Cancel
-                                        </a>
-                                        {% endif %}
+                                        {% with appointment.visit_set.all|first as visit %}
+                                            {% if visit and visit.prescription %}
+                                                <a href="{% url 'appointment:print_prescription' visit.id|hid %}" class="btn btn-outline-success btn-sm prescription-action" title="View prescription" aria-label="View prescription"><i class="bi bi-file-earmark-medical"></i> Prescription</a>
+                                            {% endif %}
+                                        {% endwith %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr id="emptyRow">
-                                    <td colspan="4" class="appt-empty">
+                                    <td colspan="5" class="appt-empty">
                                         {% if has_any_appointments %}
                                             <i class="fa-solid fa-magnifying-glass"></i>
                                             <p>No appointments match your filters.</p>
                                         {% else %}
                                             <i class="fa-regular fa-calendar"></i>
-                                            <p>You have no appointments yet.</p>
+                                            <p>No appointments yet</p>
                                             <a href="{% url 'appointment:appointment' %}" class="btn-book-appointment btn-book-appointment--sm">
-                                                <i class="fa-solid fa-calendar-plus"></i> Book your first appointment
+                                                <i class="fa-solid fa-calendar-plus"></i> Book Appointment
                                             </a>
                                         {% endif %}
                                     </td>
@@ -447,6 +408,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 1500);
             }
         });
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('appointmentFilterForm');
+    const toggle = form && form.querySelector('.filters-toggle');
+    if (!toggle) return;
+    toggle.addEventListener('click', function () {
+        const open = form.classList.toggle('is-visible');
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 });
 </script>

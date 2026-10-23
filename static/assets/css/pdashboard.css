@@ -8,6 +8,51 @@ body {
             padding: 118px 0 48px;
         }
 
+        .patient-header-card { background: #fff; border: 1px solid #DCEBDC; border-radius: 14px; box-shadow: 0 6px 18px rgba(15, 23, 42, .06); padding: 24px; margin-bottom: 20px; }
+        .patient-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+        .patient-header-top h1 { color: #015315; font-size: 24px; font-weight: 700; margin: 0 0 5px; }
+        .patient-header-top p { color: #66756a; margin: 0; }
+        .patient-stat-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .patient-stat-pills span { padding: 7px 12px; border: 1px solid #dce9dc; border-radius: 999px; background: #fff; color: #285c36; font-size: .82rem; font-weight: 600; }
+        .patient-header-next { display: flex; align-items: center; gap: 14px; border-top: 1px solid #e7eee7; margin-top: 20px; padding-top: 18px; }
+        .patient-header-next .next-appt__icon { display: grid; place-items: center; flex: 0 0 42px; width: 42px; height: 42px; border-radius: 12px; background: #f1f7f1; color: #015315; font-size: 1.1rem; }
+        .patient-header-next .next-appt__body { min-width: 0; flex: 1; }
+        .patient-header-next .next-appt__label { display: block; color: #66756a; font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+        .patient-header-next .next-appt__date { color: #173c25; font-size: 1rem; font-weight: 700; margin: 3px 0; }
+        .patient-header-next .next-appt__meta { display: flex; flex-wrap: wrap; gap: 12px; color: #58675b; font-size: .85rem; }
+        .patient-header-book { flex: 0 0 auto; }
+        .prescription-action { background: #fff; border-color: #83a78a; color: #245b31; }
+        .prescription-action:hover { background: #f2f8f2; border-color: #50855c; color: #174b25; }
+        .appt-badge--completed { background: #e8f4e9 !important; color: #17652a !important; }
+        .appt-badge--pending, .appt-badge--confirmed { background: #fff0df !important; color: #a34b00 !important; border: 1px solid #f3d1ad !important; }
+        .appt-badge--cancelled { background: #fbe3e3 !important; color: #ad0002 !important; }
+        .filters-toggle { border: 1px solid #dce6dc; border-radius: 9px; background: #fff; color: #285c36; padding: 8px 12px; font-weight: 600; }
+        .filter-toolbar { display: none; margin-top: 10px; }
+        .appointment-filter-form:not(.is-visible) { display: none; }
+        .appointment-filter-form.is-visible .filter-toolbar { display: flex; }
+        #appointmentsTable { min-width: 720px; }
+        .appt-actions { white-space: nowrap; }
+
+        @media (max-width: 767px) {
+            .patient-header-card { padding: 19px 16px; }
+            .patient-header-top { flex-direction: column; gap: 12px; }
+            .patient-header-next { align-items: flex-start; flex-wrap: wrap; }
+            .patient-header-next .next-appt__body { flex-basis: calc(100% - 58px); }
+            .patient-header-book { width: 100%; justify-content: center; }
+            #appointmentsTable, #appointmentsTable tbody { display: block; min-width: 0; }
+            #appointmentsTable thead { display: none; }
+            #appointmentsTable tbody tr:not(#emptyRow) { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; padding: 14px; margin: 0 0 12px; border: 1px solid #e3ebe2; border-radius: 14px; background: #fff; box-shadow: 0 4px 14px rgba(25, 64, 37, .05); }
+            #appointmentsTable tbody tr:not(#emptyRow) td { display: block; padding: 0; border: 0; font-size: .9rem; }
+            #appointmentsTable tbody tr:not(#emptyRow) td::before { display: block; margin-bottom: 3px; color: #748276; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+            #appointmentsTable tbody tr:not(#emptyRow) td:nth-child(1)::before { content: 'For'; }
+            #appointmentsTable tbody tr:not(#emptyRow) td:nth-child(2)::before { content: 'Date & Time'; }
+            #appointmentsTable tbody tr:not(#emptyRow) td:nth-child(3)::before { content: 'Doctor'; }
+            #appointmentsTable tbody tr:not(#emptyRow) td:nth-child(4)::before { content: 'Status'; }
+            #appointmentsTable tbody tr:not(#emptyRow) td:nth-child(5)::before { content: 'Action'; }
+            #appointmentsTable tbody tr:not(#emptyRow) td:nth-child(5) { grid-column: 1 / -1; }
+            .patient-stat-pills { justify-content: flex-start; }
+        }
+
 
         .stats .stat-card {
             min-height: 160px;
