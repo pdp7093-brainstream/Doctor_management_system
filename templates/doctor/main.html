@@ -236,6 +236,13 @@
                 </ul>
             </li>
             <li>
+                <a href="{% url 'doctor:therapy:therapy_list' %}"
+                    class="{% if '/therapies' in request.path %}active{% endif %}">
+                    <i class="bi bi-droplet-half"></i>
+                    <span>Therapies</span>
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'doctor:staff' %}" class="{% if '/staff' in request.path %}active{% endif %}">
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Staff</span>

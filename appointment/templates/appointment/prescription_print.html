@@ -156,6 +156,26 @@
         </table>
     </div>
 
+    {% if prescription_therapies %}
+    <div class="table-container">
+        <h6>Therapies</h6>
+        <table>
+            <thead><tr><th>Therapy</th><th>Sessions</th><th>Frequency</th><th>Start date</th><th>Notes</th></tr></thead>
+            <tbody>
+                {% for item in prescription_therapies %}
+                <tr>
+                    <td>{{ item.therapy.name }}</td>
+                    <td>{{ item.sessions }}</td>
+                    <td>{{ item.get_frequency_display }}</td>
+                    <td>{% if item.start_date %}{{ item.start_date|date:"d M Y" }}{% else %}—{% endif %}</td>
+                    <td>{{ item.notes|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
     {% if prescription.pathya_list or prescription.apathya_list or prescription.vihar %}
     <section class="advice-print">
         <h6 class="advice-print-title">Diet &amp; Lifestyle Advice</h6>

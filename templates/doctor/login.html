@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Clinic</title>
+    <title>Doctor Login | {{ clinic.clinic_name|default:'Hitshree' }}</title>
     <!-- Favicons -->
     <link rel="icon" href="{% static 'assets/img/ayurveda/favicon_io/favicon.ico' %}" sizes="any">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/ayurveda/favicon_io/favicon-32x32.png' %}">
@@ -75,10 +75,16 @@
     <!-- Login Container - Square Card -->
     <div style="width: 100%; max-width: 420px; aspect-ratio: 1 / 1.15; padding: 1rem;">
         {% for message in messages %}
-            <div class="alert alert-danger">
+            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% else %}alert-danger{% endif %}">
                 {{ message }}
             </div>
             {% endfor %}
+        {% if patient_logged_in %}
+            <div class="alert alert-info small">
+                You are logged in as a patient. Log out to sign in with a staff account.
+                <a href="{% url 'doctor:logout' %}" class="alert-link">Logout</a>
+            </div>
+        {% endif %}
         <!-- Login Card -->
         <div class="card border-0 shadow-lg rounded-4 overflow-hidden h-100 d-flex flex-column">
             
@@ -112,7 +118,7 @@
                             <i class="bi bi-person-circle me-2"></i>Username
                         </label>
                         <input type="text" class="form-control form-control-sm" id="username" name="username"
-                            placeholder="Enter username" required
+                            placeholder="Enter username" autocomplete="username" required
                             style="border-radius: 0.5rem; border: 1px solid #cfe3cf; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
                     </div>
 
@@ -123,7 +129,7 @@
                         </label>
                         <div class="password-input-wrapper">
                             <input type="password" class="form-control form-control-sm" id="password" name="password"
-                                placeholder="Enter password" required
+                                placeholder="Enter password" autocomplete="current-password" required
                                 style="border-radius: 0.5rem; border: 1px solid #cfe3cf; padding: 0.5rem 0.75rem; font-size: 0.9rem;">
                             <button type="button" class="password-toggle" aria-label="Toggle password visibility">
                                 <svg class="password-toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor" aria-hidden="true">

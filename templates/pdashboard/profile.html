@@ -46,16 +46,13 @@
         
         <div class="main-content mb-5">
 
-            <div class="row align-items-start">
-                <div class="col-lg-6 profile-left-col">
+            <div class="row g-4 align-items-start">
+                <div class="col-lg-6 profile-left-col d-flex flex-column gap-4">
                     <!-- ── My Profile Card (redesigned) ── -->
                     <div class="card profile-card mb-0">
 
-                        <!-- Cover strip + Edit button -->
+                        <!-- Cover strip -->
                         <div class="pc-cover">
-                            <button class="btn btn-primary btn-sm pc-edit-btn" id="openEditProfile">
-                                <i class="fas fa-edit"></i> Edit Profile
-                            </button>
                         </div>
 
                         <!-- Avatar + name/email/chip -->
@@ -67,100 +64,110 @@
                                 {{ request.user.first_name|default:request.user.username|slice:":1"|upper }}
                             </div>
                             {% endif %}
-                            <div class="pc-name">{{ request.user.first_name }} {{ request.user.last_name }}</div>
+                            <button type="button" class="pc-camera-btn" id="changeProfilePhoto" aria-label="Change profile photo">
+                                <i class="fas fa-camera"></i>
+                            </button>
+                            <div class="pc-name">{{ request.user.get_full_name|default:request.user.username }}</div>
                             <div class="pc-email">{{ request.user.email }}</div>
-                            <span class="pc-chip">Patient</span>
+                            <a href="{% url 'profile-setting' %}" class="btn btn-primary btn-sm pc-primary-btn">
+                                <i class="fas fa-edit"></i> Edit profile
+                            </a>
                         </div>
 
-                        {% with p=request.user.patient %}
-                        {% with c1=p.phone|yesno:"1,," c2=p.dob|yesno:"1,," c3=p.gender|yesno:"1,," c4=p.bld_grop|yesno:"1,," c5=p.address|yesno:"1,," %}
-                        {% with total=c1|add:c2|add:c3|add:c4|add:c5 %}
-                        {% if total|length < 5 %}
+                        {% if profile_completeness < 100 %}
                         <!-- Profile completion -->
-                        <div style="margin: 0 20px 16px; padding: 12px 16px; background: var(--bg-tint, #F3F8F2); border-radius: 10px;">
+                        <div class="pc-completion">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span style="font-size: 13px; color: var(--heading-color, #222); font-weight: 600;">
-                                    Profile {% if total|length == 0 %}0{% elif total|length == 1 %}20{% elif total|length == 2 %}40{% elif total|length == 3 %}60{% elif total|length == 4 %}80{% endif %}% complete
-                                </span>
-                                <button class="btn btn-sm pc-change-num-btn" style="color: var(--accent-color, #117A15) !important; border-color: var(--accent-color, #117A15) !important; padding: 4px 12px !important; font-size: 11px !important; font-weight: 600;" onclick="document.getElementById('openEditProfile').click()">Complete Profile</button>
+                                <span class="pc-completion-title">Profile {{ profile_completeness }}% complete</span>
+                                <a href="{% url 'profile-setting' %}" class="btn btn-outline-primary btn-sm">Complete profile</a>
                             </div>
-                            <div style="height: 6px; border-radius: 3px; background: #DCEBDC; width: 100%; overflow: hidden;">
-                                <div style="height: 100%; background: var(--accent-color, #117A15); width: {% if total|length == 0 %}0{% elif total|length == 1 %}20{% elif total|length == 2 %}40{% elif total|length == 3 %}60{% elif total|length == 4 %}80{% endif %}%;"></div>
+                            <div class="pc-progress-track">
+                                <div class="pc-progress-fill" style="width: {{ profile_completeness }}%;"></div>
                             </div>
+                            <p class="pc-missing-fields mb-0">Add {{ missing_profile_fields|join:", " }}</p>
                         </div>
                         {% endif %}
-                        {% endwith %}
-                        {% endwith %}
-                        {% endwith %}
 
                         <!-- 2-column info grid -->
                         <div class="card-body pc-fields-body">
                             <div class="pc-fields-grid">
 
                                 <!-- Phone -->
-                                <div class="pc-tile">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-phone"></i></div>
                                     <div class="pc-tile-content">
                                         <div class="pc-tile-label-row">
                                             <span class="pc-tile-label">Phone</span>
                                             {% if request.user.patient.phone %}
-                                            <button class="btn changeNumberBtn pc-change-num-btn pc-tile-inline-btn" data-phone="{{ request.user.patient.phone }}">Change</button>
+                                            <button type="button" class="btn btn-outline-primary btn-sm pc-tile-inline-btn changeNumberBtn" data-phone="{{ request.user.patient.phone }}" onclick="event.stopPropagation()">Change</button>
                                             {% endif %}
                                         </div>
                                         <span class="pc-tile-value">
                                             {% if request.user.patient.phone %}
                                             <span id="profilePhone">{{ request.user.patient.phone }}</span>
                                             {% else %}
-                                            <a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>
+                                            <span class="pc-not-added">Not added</span>
                                             {% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Date of Birth -->
-                                <div class="pc-tile">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-cake-candles"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Date of Birth</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.dob %}{{ request.user.patient.dob|date:"d M Y" }}{% else %}<a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>{% endif %}
+                                            {% if request.user.patient.dob %}{{ request.user.patient.dob|date:"d M Y" }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Gender -->
-                                <div class="pc-tile">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-venus-mars"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Gender</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.gender %}{{ request.user.patient.gender|capfirst }}{% else %}<a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>{% endif %}
+                                            {% if request.user.patient.gender %}{{ request.user.patient.gender|capfirst }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Blood Group -->
-                                <div class="pc-tile">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-droplet"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Blood Group</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.bld_grop %}{{ request.user.patient.bld_grop }}{% else %}<a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>{% endif %}
+                                            {% if request.user.patient.bld_grop %}{{ request.user.patient.bld_grop }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Address – spans both columns -->
-                                <div class="pc-tile pc-tile--full">
+                                <div class="pc-tile pc-tile--full" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-location-dot"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Address</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.address %}{{ request.user.patient.address }}{% else %}<a class="pc-add-link" onclick="document.getElementById('openEditProfile').click()">+ Add</a>{% endif %}
+                                            {% if request.user.patient.address %}{{ request.user.patient.address }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card account-security-card mb-0">
+                        <div class="card-header"><h4><i class="fas fa-shield-halved"></i> Account &amp; security</h4></div>
+                        <div class="card-body">
+                            <div class="security-email-label">Login email <span>Managed by you</span></div>
+                            <div class="security-email-value">{{ request.user.email|default:"Not added" }}</div>
+                            <div class="security-actions">
+                                <a href="{% url 'resetpass' %}" class="btn btn-outline-primary btn-sm">Change password</a>
+                                <a href="{% url 'logout' %}" class="security-logout">Log out</a>
                             </div>
                         </div>
                     </div>
@@ -176,8 +183,8 @@
                                     style="font-size:0.82rem;color:var(--muted);">
                                     {{ family_members|length }} member{% if family_members|length != 1 %}s{% endif %}
                                 </span>
-                                <button class="btn btn-primary btn-sm" id="openAddMember">
-                                    <i class="fas fa-user-plus"></i> Add Member
+                                <button type="button" class="btn btn-primary btn-sm" id="openAddMember">
+                                    <i class="fas fa-user-plus"></i> Add family member
                                 </button>
                             </div>
                         </div>
@@ -255,8 +262,10 @@
                                 <div class="profile-upload-form">
                                     <div class="profile-upload-file">
                                         <label class="form-label mb-1">Document File</label>
-                                        <input type="file" name="document" class="form-control"
+                                        <input type="file" id="profileDocumentInput" name="document" class="form-control"
                                             accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx" required>
+                                        <small class="upload-help">PDF, JPG or PNG, up to 5 MB</small>
+                                        <small class="upload-file-name" id="profileDocumentName" aria-live="polite"></small>
                                     </div>
                                     <div class="profile-upload-actions">
                                         <div class="profile-upload-select">
@@ -348,62 +357,28 @@
                         </div>
                         <div class="card-body p-0">
                             {% if lab_documents %}
-                            <div class="table-responsive">
-                                <table class="fm-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Document</th>
-                                            <th>Patient</th>
-                                            <th>Visit Date</th>
-                                            <th>Doctor</th>
-                                            <th>Uploaded</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for document in lab_documents %}
-                                        <tr class="profile-list-item{% if forloop.counter > 5 %} d-none{% endif %}" data-list-group="lab-documents">
-                                            <td><strong>{{ document.original_name }}</strong></td>
-                                            <td>
-                                                {% if document.visit.appointment.family_member %}
-                                                {{ document.visit.appointment.family_member.name }}
-                                                <span style="font-size:0.75rem;color:var(--muted);display:block;">
-                                                    {{ document.visit.appointment.family_member.relation }}
-                                                </span>
-                                                {% else %}
-                                                {{ document.visit.patient.user.get_full_name|default:document.visit.patient.user.username }}
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ document.visit.appointment.appointment_date|date:"d M Y" }}</td>
-                                            <td>
-                                                {% if document.visit.doctor and document.visit.doctor.user %}
-                                                Dr. {{ document.visit.doctor.user.get_full_name|default:document.visit.doctor.user.username }}
-                                                {% else %}
-                                                —
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ document.uploaded_at|date:"d M Y" }}</td>
-                                           <td class="d-flex align-items-center gap-2">
-                                                <a href="{{ document.file.url }}" target="_blank"
-                                                    class="btn btn-primary btn-sm" title="View"
-                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button type="button"
-                                                    class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="lab"
-                                                    data-id="{{ document.id|hid }}" title="Delete"
-                                                    style="width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:6px;padding:0.35rem;">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                <div class="lab-document-list">
+                                    {% for document in lab_documents %}
+                                    <div class="lab-document-row profile-list-item{% if forloop.counter > 5 %} d-none{% endif %}" data-list-group="lab-documents">
+                                        <span class="lab-document-icon"><i class="fas fa-file-medical"></i></span>
+                                        <div class="lab-document-info">
+                                            <strong>{{ document.original_name }}</strong>
+                                            <span>{{ document.uploaded_at|date:"d M Y" }}</span>
+                                        </div>
+                                        <div class="lab-document-actions">
+                                            <a href="{{ document.file.url }}" target="_blank" class="btn btn-outline-primary btn-sm" title="View or download" aria-label="View or download {{ document.original_name }}">
+                                                <i class="fas fa-eye"></i><span class="d-none d-sm-inline"> View</span>
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger btn-sm delete-doc-btn" data-type="lab" data-id="{{ document.id|hid }}" title="Delete" aria-label="Delete {{ document.original_name }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
                                 {% if lab_documents|length > 5 %}
                                 <button type="button" class="btn btn-sm profile-list-toggle" data-list-group="lab-documents" data-total="{{ lab_documents|length }}">Show all ({{ lab_documents|length }})</button>
                                 {% endif %}
-                            </div>
+                                </div>
                             {% else %}
                             <div class="empty-fm d-flex flex-column align-items-center justify-content-center">
                                 <i class="fas fa-file-medical"></i>
@@ -766,6 +741,27 @@
         
         <script src="{% static 'assets/js/dashboard.js' %}"></script>
         <script src="{% static 'assets/js/profile-pagination.js' %}?v=1"></script>
+        <script>
+            const profilePhotoButton = document.getElementById('changeProfilePhoto');
+            const profilePhotoModal = document.getElementById('editProfileModal');
+            const profilePhotoInput = document.getElementById('modalPhotoUpload');
+            if (profilePhotoButton && profilePhotoModal && profilePhotoInput) {
+                profilePhotoButton.addEventListener('click', () => {
+                    profilePhotoModal.classList.add('active');
+                    profilePhotoInput.click();
+                });
+            }
+
+            const profileDocumentInput = document.getElementById('profileDocumentInput');
+            const profileDocumentName = document.getElementById('profileDocumentName');
+            if (profileDocumentInput && profileDocumentName) {
+                profileDocumentInput.addEventListener('change', () => {
+                    profileDocumentName.textContent = profileDocumentInput.files.length
+                        ? profileDocumentInput.files[0].name
+                        : '';
+                });
+            }
+        </script>
         <!-- SweetAlert2 -->
         
 

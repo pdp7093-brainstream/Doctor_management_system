@@ -18,9 +18,12 @@ const csrfToken = getCookie('csrftoken');
 // ── Edit Profile Modal ──────────────────────────────────
 const editProfileModal = document.getElementById('editProfileModal');
 
-document.getElementById('openEditProfile').addEventListener('click', () => {
-    editProfileModal.classList.add('active');
-});
+const openEditProfileButton = document.getElementById('openEditProfile');
+if (openEditProfileButton) {
+    openEditProfileButton.addEventListener('click', () => {
+        editProfileModal.classList.add('active');
+    });
+}
 document.getElementById('closeEditProfile').addEventListener('click', () => {
     editProfileModal.classList.remove('active');
 });

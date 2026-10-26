@@ -16,9 +16,11 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
 
 from medicine.models import *
 from .models import *
+from therapy.models import PrescriptionTherapy, Therapy
 from doctor.decorators import role_required
 from accounts.models import Patient, FamilyMember
 from doctor.models import InnerMember
@@ -27,6 +29,92 @@ from clinic.models import ClinicSettings
 from .file_validation import validate_uploaded_document
 
 logger = logging.getLogger(__name__)
+
+
+def parse_prescription_therapies(post_data, prescription=None):
+    field_names = (
+        'therapy_id[]',
+        'therapy_item_id[]',
+        'therapy_sessions[]',
+        'therapy_frequency[]',
+        'therapy_start[]',
+        'therapy_notes[]',
+    )
+    values = [post_data.getlist(field_name) for field_name in field_names]
+    if len({len(field_values) for field_values in values}) != 1:
+        return None, 'Therapy details are incomplete. Please review the therapy list.'
+
+    therapy_ids, item_ids, sessions_list, frequencies, start_dates, notes_list = values
+    existing_ids = set(
+        prescription.therapies.values_list('id', flat=True)
+    ) if prescription else set()
+    parsed_rows = []
+    submitted_item_ids = set()
+    valid_frequencies = dict(PrescriptionTherapy.FREQUENCY_CHOICES)
+
+    for index, therapy_id in enumerate(therapy_ids):
+        if not therapy_id:
+            continue
+        try:
+            therapy = Therapy.objects.get(pk=int(therapy_id))
+        except (Therapy.DoesNotExist, TypeError, ValueError):
+            return None, 'Select a valid therapy.'
+
+        item_id = item_ids[index].strip()
+        if item_id:
+            try:
+                item_id = int(item_id)
+            except ValueError:
+                return None, 'Invalid prescribed therapy row.'
+            if item_id not in existing_ids or item_id in submitted_item_ids:
+                return None, 'Invalid prescribed therapy row.'
+            submitted_item_ids.add(item_id)
+
+        try:
+            sessions = int(sessions_list[index])
+        except (TypeError, ValueError):
+            return None, 'Therapy sessions must be between 1 and 60.'
+        if not 1 <= sessions <= 60:
+            return None, 'Therapy sessions must be between 1 and 60.'
+
+        frequency = frequencies[index]
+        if frequency not in valid_frequencies:
+            return None, 'Select a valid therapy frequency.'
+
+        start_value = start_dates[index].strip()
+        start_date = parse_date(start_value) if start_value else None
+        if start_value and start_date is None:
+            return None, 'Enter a valid therapy start date.'
+
+        parsed_rows.append({
+            'id': item_id or None,
+            'therapy': therapy,
+            'sessions': sessions,
+            'frequency': frequency,
+            'start_date': start_date,
+            'notes': notes_list[index].strip(),
+        })
+    return parsed_rows, None
+
+
+def save_prescription_therapies(prescription, therapy_rows):
+    existing_rows = {
+        row.pk: row for row in prescription.therapies.all()
+    }
+    submitted_ids = set()
+    for row_data in therapy_rows:
+        item = existing_rows.get(row_data['id']) if row_data['id'] else None
+        if item is None:
+            item = PrescriptionTherapy(prescription=prescription)
+        item.therapy = row_data['therapy']
+        item.sessions = row_data['sessions']
+        item.frequency = row_data['frequency']
+        item.start_date = row_data['start_date']
+        item.notes = row_data['notes']
+        item.save()
+        submitted_ids.add(item.pk)
+
+    prescription.therapies.exclude(pk__in=submitted_ids).delete()
 
 
 def normalize_advice_lines(value):
@@ -383,6 +471,7 @@ def appointment_detail_modal(request, hid):
     visit        = Visit.objects.filter(appointment=appointment).first()
     prescription = None
     prescription_items = []
+    prescription_therapies = []
 
     if visit:
         prescription = Prescription.objects.filter(visit=visit).first()
@@ -390,6 +479,7 @@ def appointment_detail_modal(request, hid):
             prescription_items = prescription.items.select_related(
                 'medicine_variant', 'medicine_variant__medicine'
             ).all()
+            prescription_therapies = prescription.therapies.select_related('therapy').all()
 
     return render(request, 'doctor/appointment_detail.html', {
         'appointment'       : appointment,
@@ -723,6 +813,8 @@ class PrescriptionView(View):
         items = prescription.items.select_related(
             'medicine_variant', 'medicine_variant__medicine'
         )
+        prescription_therapies = prescription.therapies.select_related('therapy')
+        therapy_options = Therapy.objects.filter(is_active=True)
         lab_documents = visit.lab_documents.all()
 
         for item in items:
@@ -739,6 +831,8 @@ class PrescriptionView(View):
             'visit': visit,
             'variants': variants,
             'items': items,
+            'prescription_therapies': prescription_therapies,
+            'therapy_options': therapy_options,
             'lab_documents': lab_documents,
             'visit_completed': visit.visted_status == 'completed' or visit.appointment.status == 'completed',
             'is_today': is_today,
@@ -795,6 +889,15 @@ class PrescriptionView(View):
                 return redirect('appointment:prescription', hid=hid)
             valid_uploaded_documents.append((document, original_name))
 
+        existing_prescription = Prescription.objects.filter(visit=visit).first()
+        therapy_rows, therapy_error = parse_prescription_therapies(
+            request.POST,
+            existing_prescription,
+        )
+        if therapy_error:
+            messages.error(request, therapy_error)
+            return redirect('appointment:prescription', hid=hid)
+
         def clean_visit_text(field):
             value = (request.POST.get(field) or "").strip()
             return "" if value.casefold() == "none" else value
@@ -816,6 +919,7 @@ class PrescriptionView(View):
         vihar = (request.POST.get('vihar') or '').strip()
         prescription.vihar = '' if vihar.casefold() == 'none' else vihar
         prescription.save(update_fields=['pathya', 'apathya', 'vihar', 'updated_at'])
+        save_prescription_therapies(prescription, therapy_rows)
 
         variant_ids = request.POST.getlist("variant_id[]")
         item_ids = request.POST.getlist("item_id[]")
@@ -940,6 +1044,7 @@ def appointment_detail(request, hid):
     visit             = Visit.objects.filter(appointment=appointment).first()
     prescription      = None
     prescription_items = []
+    prescription_therapies = []
 
 
     try:
@@ -958,6 +1063,9 @@ def appointment_detail(request, hid):
                 'medicine_variant__medicine'
             ).all()
             prescription_items = list(items_qs)
+            prescription_therapies = list(
+                prescription.therapies.select_related('therapy').all()
+            )
 
             for item in prescription_items:
                 item.parsed_sevan_kaal_label = item.get_sevan_kaal_display()
@@ -971,6 +1079,7 @@ def appointment_detail(request, hid):
         'visit'             : visit,
         'prescription'      : prescription,
         'prescription_items': prescription_items,
+        'prescription_therapies': prescription_therapies,
         'default_doctor'    : default_doctor,
         'doctor'            : appointment.doctor or default_doctor,
     })
@@ -995,6 +1104,7 @@ def print_prescription(request, hid):
     prescription_items = prescription.items.select_related(
         'medicine_variant', 'medicine_variant__medicine'
     ).all()
+    prescription_therapies = prescription.therapies.select_related('therapy').all()
     
     settings = ClinicSettings.get()
     from doctor.models import InnerMember
@@ -1021,6 +1131,8 @@ def print_prescription(request, hid):
         'visit': visit,
         'prescription': prescription,
         'prescription_items': prescription_items,
+        'prescription_therapies': prescription_therapies,
+        'prescription_therapies': prescription_therapies,
         'clinic': settings,
         'default_doctor': default_doctor,
         'patient_name': patient_name,

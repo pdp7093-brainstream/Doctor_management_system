@@ -460,3 +460,264 @@ input.form-control[type="file"]:hover::file-selector-button {
   --bs-gutter-x: 24px;
   --bs-gutter-y: 24px;
 }
+
+/* Patient profile polish */
+.profile-page-shell .row.g-4 {
+  gap: 0;
+}
+
+.profile-page-shell .main-content > .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.profile-left-col,
+.profile-right-col {
+  min-width: 0;
+}
+
+.pc-identity {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+.pc-avatar,
+.pc-avatar-initials {
+  box-shadow: 0 0 0 2px var(--brand-primary, #117A15);
+}
+
+.pc-camera-btn {
+  position: absolute;
+  top: 50px;
+  left: calc(50% + 22px);
+  width: 30px;
+  height: 30px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: var(--brand-primary, #117A15);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.pc-primary-btn {
+  margin-top: 8px;
+}
+
+.pc-completion {
+  margin: 0 20px 16px;
+  padding: 12px 16px;
+  background: var(--bg-tint, #F3F8F2);
+  border-radius: 10px;
+}
+
+.pc-completion-title {
+  color: var(--heading-color, #222);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pc-progress-track {
+  height: 7px;
+  border-radius: 4px;
+  background: #DCEBDC;
+  overflow: hidden;
+}
+
+.pc-progress-fill {
+  height: 100%;
+  background: #198754;
+  border-radius: inherit;
+}
+
+.pc-missing-fields {
+  margin-top: 8px;
+  color: #68766b;
+  font-size: 12px;
+}
+
+.pc-tile {
+  align-items: center;
+  color: inherit;
+  cursor: pointer;
+  min-height: 90px;
+  text-decoration: none;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.pc-tile:hover,
+.pc-tile:focus-visible {
+  color: inherit;
+  border-color: var(--brand-primary, #117A15);
+  background: #f8fbf7;
+  outline: none;
+}
+
+.pc-not-added {
+  color: #88948b;
+  font-style: italic;
+  font-weight: 400;
+}
+
+.pc-tile-inline-btn {
+  border: 1px solid var(--brand-primary, #117A15) !important;
+  color: var(--brand-primary, #117A15) !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  padding: 3px 8px !important;
+  font-size: 11px !important;
+  white-space: nowrap;
+}
+
+.account-security-card .card-body {
+  padding: 18px 20px;
+}
+
+.security-email-label {
+  color: #526056;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.security-email-label span {
+  color: #78867c;
+  font-size: 11px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+
+.security-email-value {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+
+.security-actions {
+  align-items: center;
+  border-top: 1px solid #e5eee5;
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 14px;
+}
+
+.security-logout {
+  color: #53645a;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.upload-help,
+.upload-file-name {
+  color: #6b7a6f;
+  display: block;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.upload-file-name:not(:empty) {
+  color: var(--heading-color, #222);
+  font-weight: 600;
+}
+
+.lab-document-row {
+  align-items: center;
+  border-bottom: 1px solid #e5eee5;
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 16px;
+}
+
+.lab-document-row:last-of-type {
+  border-bottom: 0;
+}
+
+.lab-document-icon {
+  align-items: center;
+  background: #eff7ef;
+  border-radius: 10px;
+  color: var(--brand-primary, #117A15);
+  display: inline-flex;
+  flex: 0 0 38px;
+  height: 38px;
+  justify-content: center;
+}
+
+.lab-document-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lab-document-info strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.lab-document-info span {
+  color: #718075;
+  display: block;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.lab-document-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+@media (max-width: 576px) {
+  .profile-page-shell .container {
+    max-width: 100%;
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .profile-page-shell .row.g-4 {
+    --bs-gutter-x: 16px;
+  }
+
+  .pc-fields-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .pc-tile {
+    min-width: 0;
+    min-height: 92px;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .pc-tile-icon {
+    flex: 0 0 30px;
+    margin-right: 0;
+  }
+
+  .pc-tile-content,
+  .pc-tile-value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .pc-completion {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .pc-completion .btn {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .lab-document-row {
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .lab-document-actions .btn {
+    padding: 5px 7px;
+  }
+}

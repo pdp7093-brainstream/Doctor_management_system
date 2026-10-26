@@ -1,5 +1,6 @@
 from django.urls import path
 from django.views.generic import RedirectView
+from django.urls import include
 from . import views
 from .views import *
 from medicine.views import *
@@ -48,5 +49,6 @@ urlpatterns = [
     path('feedback/', views.feedback_list, name='feedback_list'),
     path('feedback/bulk-delete/', views.bulk_delete_feedback, name='bulk_delete_feedback'),
     path('feedback/<int:pk>/delete/', views.delete_feedback, name='delete_feedback'),
+    path('therapies/', include(('therapy.urls', 'therapy'), namespace='therapy')),
 
 ]

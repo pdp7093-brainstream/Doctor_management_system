@@ -598,3 +598,79 @@ function bulkRemoveMedicineRows() {
         }
     });
 }
+
+function updateTherapyCount() {
+    const count = document.querySelectorAll('#therapyList .therapy-prescription-row').length;
+    const countBadge = document.getElementById('therapyListCount');
+    if (countBadge) countBadge.textContent = `${count} ${count === 1 ? 'therapy' : 'therapies'}`;
+    const emptyMessage = document.getElementById('therapyEmptyMessage');
+    if (emptyMessage) emptyMessage.style.display = count ? 'none' : 'block';
+}
+
+function removeTherapyRow(button) {
+    button.closest('.therapy-prescription-row')?.remove();
+    updateTherapyCount();
+}
+
+function resetTherapyModal() {
+    const modal = document.getElementById('therapyModal');
+    document.getElementById('therapySearchInput').value = '';
+    document.getElementById('therapySelect').value = '';
+    document.getElementById('therapySessionsInput').value = '7';
+    document.getElementById('therapyFrequencyInput').value = 'daily';
+    document.getElementById('therapyStartInput').value = modal.dataset.visitDate || '';
+    document.getElementById('therapyNotesInput').value = '';
+    document.querySelectorAll('#therapySelect option').forEach(option => {
+        option.hidden = false;
+    });
+}
+
+function addTherapyRow() {
+    const select = document.getElementById('therapySelect');
+    const option = select.selectedOptions[0];
+    const therapyId = select.value;
+    const sessions = Number(document.getElementById('therapySessionsInput').value);
+    const frequencySelect = document.getElementById('therapyFrequencyInput');
+    const frequency = frequencySelect.value;
+    const startDate = document.getElementById('therapyStartInput').value;
+    const notes = document.getElementById('therapyNotesInput').value.trim();
+
+    if (!therapyId) {
+        showToast('Select a therapy first.', 'warning');
+        return;
+    }
+    if (!Number.isInteger(sessions) || sessions < 1 || sessions > 60) {
+        showToast('Therapy sessions must be between 1 and 60.', 'warning');
+        return;
+    }
+
+    const dateLabel = startDate
+        ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(`${startDate}T00:00:00`))
+        : '—';
+    const row = `
+        <tr class="therapy-prescription-row">
+            <td><div class="fw-semibold">${escapeHtml(option.textContent.trim())}</div><small class="text-muted">${escapeHtml(option.dataset.duration)} min</small><input type="hidden" name="therapy_id[]" value="${escapeAttr(therapyId)}"><input type="hidden" name="therapy_item_id[]" value=""></td>
+            <td>${sessions}<input type="hidden" name="therapy_sessions[]" value="${sessions}"></td>
+            <td>${escapeHtml(frequencySelect.selectedOptions[0].textContent)}<input type="hidden" name="therapy_frequency[]" value="${escapeAttr(frequency)}"></td>
+            <td>${escapeHtml(dateLabel)}<input type="hidden" name="therapy_start[]" value="${escapeAttr(startDate)}"></td>
+            <td>${notes ? escapeHtml(notes) : '—'}<input type="hidden" name="therapy_notes[]" value="${escapeAttr(notes)}"></td>
+            <td class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
+        </tr>`;
+    document.getElementById('therapyList').insertAdjacentHTML('beforeend', row);
+    updateTherapyCount();
+    resetTherapyModal();
+    bootstrap.Modal.getInstance(document.getElementById('therapyModal'))?.hide();
+}
+
+const therapySearchInput = document.getElementById('therapySearchInput');
+if (therapySearchInput) {
+    therapySearchInput.addEventListener('input', () => {
+        const query = therapySearchInput.value.trim().toLowerCase();
+        document.querySelectorAll('#therapySelect option').forEach(option => {
+            option.hidden = Boolean(option.value) && !option.textContent.toLowerCase().includes(query);
+        });
+        document.getElementById('therapySelect').value = '';
+    });
+}
+
+document.getElementById('therapyModal')?.addEventListener('hidden.bs.modal', resetTherapyModal);

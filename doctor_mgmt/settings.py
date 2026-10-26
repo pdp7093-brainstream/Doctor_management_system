@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'appointment', 
     'doctor',
     'medicine',
+    'therapy.apps.TherapyConfig',
     'billing',
     'expenses',
     'reports_archive',
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'clinic.middleware.SetupRequiredMiddleware',
+    'accounts.middleware.RoleRedirectMiddleware',
 ]
 
 ROOT_URLCONF = 'doctor_mgmt.urls'

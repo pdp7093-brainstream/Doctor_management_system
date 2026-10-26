@@ -1,0 +1,103 @@
+{% extends "doctor/main.html" %}
+{% block title %}Therapies - Doctor Dashboard{% endblock %}
+{% block content %}
+<main class="main-content" id="mainContent">
+    <div class="page-head">
+        <div>
+            <h2 class="page-title">Therapies</h2>
+            <p class="page-subtitle">Manage Ayurvedic therapies available for prescription.</p>
+        </div>
+        <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#addTherapyModal">
+            <i class="bi bi-plus-lg"></i> Add Therapy
+        </button>
+    </div>
+
+    {% if messages %}
+    <div class="mb-3">
+        {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} py-2">{{ message }}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="dc-card">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-droplet-half"></i> Therapy Catalog <span class="dc-count">{{ therapies|length }} total</span></h3>
+            <div class="dc-search"><i class="bi bi-search"></i><input type="text" id="therapySearch" class="form-control" placeholder="Search therapies..." autocomplete="off"></div>
+        </div>
+        <div class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width:800px;">
+                <thead><tr><th class="col-num">#</th><th>Name</th><th>Duration</th><th>Price / session</th><th>Prescribed</th><th>Status</th><th>Order</th><th class="col-actions text-end">Actions</th></tr></thead>
+                <tbody id="therapyTableBody">
+                    {% for therapy in therapies %}
+                    <tr class="therapy-row" data-name="{{ therapy.name|lower }}">
+                        <td class="col-num">{{ forloop.counter }}</td>
+                        <td><span class="dc-name">{{ therapy.name }}</span></td>
+                        <td>{{ therapy.duration_minutes }} min</td>
+                        <td>{{ therapy.price_per_session }}</td>
+                        <td><span class="dc-badge grey">{{ therapy.prescribed_count }} prescription{{ therapy.prescribed_count|pluralize }}</span></td>
+                        <td>{% if therapy.is_active %}<span class="dc-badge green">Active</span>{% else %}<span class="dc-badge red">Inactive</span>{% endif %}</td>
+                        <td class="dc-muted">{{ therapy.sort_order }}</td>
+                        <td class="col-actions text-end">
+                            <div class="action-btns">
+                                <a href="{% url 'doctor:therapy:therapy_edit' therapy.pk %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
+                                <form method="post" action="{% url 'doctor:therapy:therapy_delete' therapy.pk %}" class="d-inline therapy-delete-form" data-name="{{ therapy.name }}" data-count="{{ therapy.prescribed_count }}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="dc-empty text-center py-5"><i class="bi bi-droplet-half" style="font-size:2.5rem;color:#ccc;"></i><p class="text-muted mt-3 mb-0">No therapies found.</p></td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div class="modal fade" id="addTherapyModal" tabindex="-1" aria-labelledby="addTherapyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="addTherapyModalLabel">Add Therapy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{% url 'doctor:therapy:therapy_list' %}">
+                {% csrf_token %}
+                <div class="modal-body pt-3">
+                    <div class="mb-3"><label class="dc-label" for="new-therapy-name">Name *</label><input id="new-therapy-name" class="form-control patient-input" name="name" maxlength="100" required></div>
+                    <div class="mb-3"><label class="dc-label" for="new-therapy-description">Description</label><textarea id="new-therapy-description" class="form-control patient-input" name="description" rows="2"></textarea></div>
+                    <div class="row g-3">
+                        <div class="col-6"><label class="dc-label" for="new-therapy-duration">Duration (minutes)</label><input id="new-therapy-duration" class="form-control patient-input" type="number" name="duration_minutes" value="45" min="0" required></div>
+                        <div class="col-6"><label class="dc-label" for="new-therapy-price">Price / session</label><input id="new-therapy-price" class="form-control patient-input" type="number" name="price_per_session" value="0.00" min="0" step="0.01" required></div>
+                        <div class="col-6"><label class="dc-label" for="new-therapy-order">Order</label><input id="new-therapy-order" class="form-control patient-input" type="number" name="sort_order" value="0" min="0"></div>
+                        <div class="col-6 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" id="new-therapy-active" type="checkbox" name="is_active" checked><label class="form-check-label" for="new-therapy-active">Active</label></div></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-primary">Save Therapy</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const therapySearch = document.getElementById('therapySearch');
+    therapySearch?.addEventListener('input', () => {
+        const query = therapySearch.value.trim().toLowerCase();
+        document.querySelectorAll('#therapyTableBody .therapy-row').forEach(row => {
+            row.style.display = row.dataset.name.includes(query) ? '' : 'none';
+        });
+    });
+    document.querySelectorAll('.therapy-delete-form button').forEach(button => {
+        button.addEventListener('click', () => {
+            const form = button.closest('form');
+            const count = Number(form.dataset.count);
+            if (count) {
+                window.alert(`Used in ${count} prescriptions. Deactivate it instead.`);
+            } else if (window.confirm(`Delete ${form.dataset.name}?`)) {
+                form.submit();
+            }
+        });
+    });
+</script>
+{% endblock %}

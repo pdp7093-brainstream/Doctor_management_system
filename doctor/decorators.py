@@ -2,6 +2,15 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from .models import InnerMember
+from accounts.models import Patient
+
+
+def _redirect_without_member(request):
+    if Patient.objects.filter(user=request.user).exists():
+        messages.info(request, "That page is only for clinic staff.")
+        return redirect('dashboard')
+    messages.warning(request, "Please log in with your account.")
+    return redirect('login')
 
 
 def role_required(required_role):
@@ -15,8 +24,7 @@ def role_required(required_role):
             try:
                 member = InnerMember.objects.get(user=request.user)
             except InnerMember.DoesNotExist:
-                messages.error(request, "User role not assigned")
-                return redirect('doctor:login')
+                return _redirect_without_member(request)
 
             if member.role != required_role:
 
@@ -45,8 +53,7 @@ def owner_required(view_func):
         try:
             member = InnerMember.objects.get(user=request.user)
         except InnerMember.DoesNotExist:
-            messages.error(request, "User role not assigned")
-            return redirect('doctor:login')
+            return _redirect_without_member(request)
 
         if not member.is_owner:
             messages.error(request, "You do not have permission to access this page.")

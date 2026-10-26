@@ -48,7 +48,7 @@
                 </div>
                 <div class="summary-right">
                     <div class="booked-on">Booked on {{ appointment.created_at|default:appointment.appointment_date|date:"d M Y" }}</div>
-                    {% if prescription and prescription_items %}
+                    {% if prescription and prescription_items or prescription and prescription_therapies %}
                     <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank" class="btn-print">
                         <i class="fas fa-print"></i> Print
                     </a>
@@ -86,7 +86,7 @@
         {% endif %}
 
         <!-- Prescription card -->
-        {% if prescription and prescription_items %}
+        {% if prescription and prescription_items or prescription and prescription_therapies %}
         <div class="card">
             <div class="section-title"><i class="fas fa-prescription-bottle-alt"></i> Prescription</div>
             <div class="rx-list">
@@ -109,6 +109,17 @@
                 </div>
                 {% endfor %}
             </div>
+            {% if prescription_therapies %}
+            <div class="mt-3">
+                <h6 class="fw-semibold">Therapies</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead><tr><th>Therapy</th><th>Sessions</th><th>Frequency</th><th>Start date</th><th>Notes</th></tr></thead>
+                        <tbody>{% for item in prescription_therapies %}<tr><td>{{ item.therapy.name }} <span class="text-muted small">{{ item.therapy.duration_minutes }} min</span></td><td>{{ item.sessions }}</td><td>{{ item.get_frequency_display }}</td><td>{% if item.start_date %}{{ item.start_date|date:"d M Y" }}{% else %}—{% endif %}</td><td>{{ item.notes|default:"—" }}</td></tr>{% endfor %}</tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
             <div class="prescribed-on">Prescribed on {{ prescription.created_at|date:"d M Y" }}</div>
         </div>
         {% endif %}

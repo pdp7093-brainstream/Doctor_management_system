@@ -339,6 +339,7 @@ class LoginView(View):
 def logout_view(request):
     """Logout user"""
     auth_logout(request)
+    messages.success(request, 'You have been logged out.')
     return redirect('login')
 
 
@@ -485,11 +486,28 @@ def profile(request):
         )
     except (ProgrammingError, OperationalError):
         uploaded_documents = []
+
+    profile_fields = (
+        patient.phone,
+        request.user.email,
+        patient.dob,
+        patient.gender,
+        patient.bld_grop,
+        patient.address,
+    )
+    profile_completeness = round(sum(bool(value) for value in profile_fields) * 100 / 6)
+    missing_profile_fields = [
+        label for value, label in zip(profile_fields, (
+            'phone', 'email', 'date of birth', 'gender', 'blood group', 'address'
+        )) if not value
+    ]
     
     return render(request, 'pdashboard/profile.html', {
         'family_members': family_members,
         'lab_documents': lab_documents,
         'uploaded_documents': uploaded_documents,
+        'profile_completeness': profile_completeness,
+        'missing_profile_fields': missing_profile_fields,
     })
 
 @login_required

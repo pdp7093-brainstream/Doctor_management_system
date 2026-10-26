@@ -2,15 +2,24 @@ from django.shortcuts import render, redirect, get_object_or_404
 from doctor import hashid as _hashid
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.db.models import Q, Exists, OuterRef, Subquery, Count
 from .models import *
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from decimal import Decimal
-from .services.medicine_importer import import_medicines_from_excel
+import hashlib
+from io import BytesIO
+from .services.medicine_importer import (
+    MissingRequiredHeaders,
+    generate_error_excel,
+    generate_sample_excel,
+    import_medicine_rows,
+    parse_medicine_excel,
+)
 
 
 def variant_price_error(cost_prices, selling_prices, free_samples, powers):
@@ -905,32 +914,144 @@ class PurchaseDetailView(LoginRequiredMixin, View):
 # Medicine Import 
 class ImportMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
+    MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+    STOCK_OPTIONS = {'add', 'replace', 'keep'}
 
-    def get(self,request):
-        return render(request,"medicine/import_medicine.html")
-    
-    def post(self,request):
-        excel_file = request.FILES.get("excel_file")
+    def _summary(self, rows):
+        return {
+            'total': len(rows),
+            'new_medicine': sum(row.get('status') == 'New medicine' for row in rows),
+            'new_variant': sum(row.get('status') == 'New variant' for row in rows),
+            'update': sum(row.get('status') == 'Update existing' for row in rows),
+            'error': sum(row.get('status') == 'Error' for row in rows),
+            'importable': sum(row.get('status') != 'Error' for row in rows),
+        }
 
-        if not excel_file:
-            messages.error(request,"Please upload an Excel file.")
-            return redirect("medicine:import_medicine")
+    def _render_preview(self, request, rows=None, error=None):
+        preview = request.session.get('medicine_import_preview', {})
+        rows = rows if rows is not None else preview.get('rows', [])
+        last_import = request.session.get('medicine_last_import', {})
+        show_duplicate_warning = (
+            preview.get('stock_option') == 'add'
+            and bool(preview.get('file_hash'))
+            and preview.get('file_hash') == last_import.get('file_hash')
+        )
+        if error:
+            messages.error(request, error)
+        return render(request, 'medicine/import_medicine.html', {
+            'step': 'preview',
+            'preview_rows': rows,
+            'summary': self._summary(rows),
+            'stock_option': preview.get('stock_option', 'add'),
+            'stock_option_label': {
+                'add': 'Add to existing stock',
+                'replace': 'Replace existing stock',
+                'keep': "Don't change stock of existing variants",
+            }.get(preview.get('stock_option'), 'Add to existing stock'),
+            'duplicate_import_warning': show_duplicate_warning,
+            'last_import_date': last_import.get('date', ''),
+        })
 
-        try:
-            result = import_medicines_from_excel(excel_file)
-
-            messages.success(
-                request,f"{result['success_count']} medicines imported successfully"
+    def get(self, request):
+        if request.GET.get('download_sample') == '1':
+            response = HttpResponse(
+                generate_sample_excel(),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             )
+            response['Content-Disposition'] = 'attachment; filename="medicine_import_sample.xlsx"'
+            return response
+        if request.GET.get('download_errors') == '1':
+            error_rows = request.session.get('medicine_import_errors', [])
+            response = HttpResponse(
+                generate_error_excel(error_rows),
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            )
+            response['Content-Disposition'] = 'attachment; filename="medicine_import_errors.xlsx"'
+            return response
+        request.session.pop('medicine_import_preview', None)
+        return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
 
-            if result["errors"]:
-                for error in result["errors"]:
-                    messages.warning(request,error)
+    def post(self, request):
+        action = request.POST.get('action', 'upload')
+        if action == 'cancel':
+            request.session.pop('medicine_import_preview', None)
+            return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
 
-        except Exception as e:
-            messages.error(request, f"Import failed: {str(e)}")
-        
-        return redirect("medicine:manage_medicine")
+        if action == 'upload':
+            request.session.pop('medicine_import_preview', None)
+            stock_option = request.POST.get('stock_option', '')
+            excel_file = request.FILES.get('excel_file')
+            if stock_option not in self.STOCK_OPTIONS:
+                messages.error(request, 'Select a stock option before uploading.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+            if not excel_file:
+                messages.error(request, 'Please upload an Excel file.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+            if not excel_file.name.lower().endswith('.xlsx'):
+                messages.error(request, 'Only .xlsx files are supported.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+            if excel_file.size > self.MAX_UPLOAD_SIZE:
+                messages.error(request, 'The Excel file must be 5 MB or smaller.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+
+            content = excel_file.read()
+            file_hash = hashlib.sha256(content).hexdigest()
+            try:
+                rows = parse_medicine_excel(BytesIO(content))
+            except MissingRequiredHeaders as exc:
+                messages.error(request, str(exc))
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+            except Exception as exc:
+                messages.error(request, f'Could not read the Excel file: {exc}')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+
+            if not rows:
+                messages.error(request, 'The uploaded workbook contains no data rows.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+            request.session['medicine_import_preview'] = {
+                'rows': rows,
+                'file_hash': file_hash,
+                'stock_option': stock_option,
+            }
+            return self._render_preview(request, rows)
+
+        if action == 'import':
+            preview = request.session.get('medicine_import_preview')
+            if not preview or not preview.get('rows'):
+                messages.error(request, 'No preview is available. Upload the file again.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+
+            last_import = request.session.get('medicine_last_import', {})
+            is_duplicate_add = (
+                preview.get('stock_option') == 'add'
+                and preview.get('file_hash') == last_import.get('file_hash')
+            )
+            if is_duplicate_add and request.POST.get('confirm_duplicate') != 'on':
+                return self._render_preview(
+                    request,
+                    error='Confirm that you want to add this file to existing stock again.',
+                )
+
+            result = import_medicine_rows(preview['rows'], preview.get('stock_option', 'add'))
+            request.session['medicine_import_errors'] = result['error_rows']
+            imported_at = timezone.localtime()
+            request.session['medicine_last_import'] = {
+                'file_hash': preview.get('file_hash'),
+                'date': imported_at.strftime('%d %b %Y %H:%M'),
+            }
+            summary = {
+                'total': result['total'],
+                'imported': result['success_count'],
+                'error': len(result['error_rows']),
+            }
+            request.session.pop('medicine_import_preview', None)
+            return render(request, 'medicine/import_medicine.html', {
+                'step': 'done',
+                'summary': summary,
+            })
+
+        messages.error(request, 'Invalid import action. Start again by uploading the workbook.')
+        return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
 
 
 class MedicineTypeListView(LoginRequiredMixin, View):

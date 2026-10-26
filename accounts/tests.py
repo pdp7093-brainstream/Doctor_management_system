@@ -7,7 +7,10 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.models import User
+from django.http import HttpResponse
+from django.test import RequestFactory
 from accounts.models import Patient
+from accounts.middleware import RoleRedirectMiddleware
 from doctor.models import InnerMember
 from doctor.hashid import encode_id
 from accounts.tokens import patient_invite_token_generator
@@ -17,6 +20,43 @@ from accounts.services.patient_import import (
     validate_patient_rows,
     create_patients_from_rows,
 )
+
+
+class RoleRedirectMiddlewareTests(TestCase):
+    def setUp(self):
+        self.patient_user = User.objects.create_user(username='role-patient', password='pass')
+        Patient.objects.create(user=self.patient_user, phone='9000000001')
+        self.staff_user = User.objects.create_user(username='role-staff', password='pass')
+        InnerMember.objects.create(user=self.staff_user, role='doctor')
+
+    def test_patient_login_redirects_to_dashboard(self):
+        self.client.force_login(self.patient_user)
+        response = self.client.get('/login/')
+        self.assertRedirects(response, reverse('dashboard'), fetch_redirect_response=False)
+
+    def test_patient_doctor_dashboard_redirects_to_patient_dashboard(self):
+        self.client.force_login(self.patient_user)
+        response = self.client.get('/doctor/dashboard/')
+        self.assertRedirects(response, reverse('dashboard'), fetch_redirect_response=False)
+
+    def test_staff_login_redirects_to_doctor_dashboard(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get('/login/')
+        self.assertRedirects(response, reverse('doctor:dashboard'), fetch_redirect_response=False)
+
+    def test_anonymous_login_shows_patient_login_page(self):
+        response = self.client.get('/login/')
+        self.assertEqual(response.status_code, 200)
+
+    def test_static_and_ajax_requests_pass_through(self):
+        factory = RequestFactory()
+        middleware = RoleRedirectMiddleware(lambda request: HttpResponse('passed'))
+        static_request = factory.get('/static/example.css')
+        static_request.user = self.patient_user
+        ajax_request = factory.get('/doctor/dashboard/', HTTP_X_REQUESTED_WITH='XMLHttpRequest')
+        ajax_request.user = self.patient_user
+        self.assertEqual(middleware(static_request).content, b'passed')
+        self.assertEqual(middleware(ajax_request).content, b'passed')
 
 
 class PatientImportTests(TestCase):

@@ -34,6 +34,7 @@ from appointment.file_validation import validate_uploaded_document
 logger = logging.getLogger(__name__)
 
 def login_view(request):
+    patient_logged_in = request.user.is_authenticated and Patient.objects.filter(user=request.user).exists()
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -64,7 +65,7 @@ def login_view(request):
         else:
             return render(request, 'doctor/login.html', {'error': 'Invalid credentials'})
 
-    return render(request, 'doctor/login.html')
+    return render(request, 'doctor/login.html', {'patient_logged_in': patient_logged_in})
 
 @never_cache
 def forgot_password(request):
@@ -171,7 +172,8 @@ def forgot_password(request):
 # Logout 
 def logout_view(request):
     auth_logout(request)
-    return render(request,'doctor/login.html')
+    messages.success(request, 'You have been logged out.')
+    return redirect('doctor:login')
 
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class DashboardView(View):
@@ -1130,7 +1132,7 @@ def bulk_delete_feedback(request):
         return JsonResponse({'success': False, 'error': 'An error occurred during deletion.'})
 
 @never_cache
-@login_required(login_url='doctor:login')
+@role_required('doctor')
 def my_profile(request):
     member = get_object_or_404(InnerMember, user=request.user)
     
