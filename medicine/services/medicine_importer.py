@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
+import re
 
 from django.core.exceptions import ImproperlyConfigured
 from django.db import transaction
@@ -238,6 +239,222 @@ def parse_medicine_excel(file):
         return parsed_rows
     finally:
         workbook.close()
+
+
+def _display_medicine_name(value):
+    text = ' '.join(_text(value).split())
+    text = re.sub(r'\bChurana\b', 'Churna', text, flags=re.IGNORECASE)
+    words = []
+    for word in text.split(' '):
+        if word.isupper() and len(word) <= 3:
+            words.append(word)
+        else:
+            words.append(word.title())
+    return ' '.join(words)
+
+
+def _normalize_names_only_type(value):
+    text = ' '.join(_text(value).split())
+    folded = text.casefold()
+    if folded == 'vati':
+        return 'Vati / Gutika'
+    if folded in {'taila', 'tel'}:
+        return 'Taila (Oil)'
+    return text.title()
+
+
+def _generate_short_name(name, used_short_names):
+    words = [word for word in name.split() if word]
+    initials = ''.join(word[0] for word in words).upper()
+    if len(words) == 1:
+        base = words[0][:4].upper() if words else 'MED'
+    else:
+        base = initials
+
+    candidate = base
+    suffix = 2
+    while candidate.casefold() in used_short_names:
+        candidate = f'{base}{suffix}'
+        suffix += 1
+    used_short_names.add(candidate.casefold())
+    return candidate
+
+
+def _names_header_indexes(header_row):
+    headers = [_normalize_header(value) for value in header_row]
+    name_aliases = {'medicine name', 'name', 'medicine'}
+    name_index = next((i for i, value in enumerate(headers) if value in name_aliases), None)
+    if name_index is None:
+        return None
+
+    indexes = {'name': name_index, 'serial': name_index - 1 if name_index else None}
+    for index, value in enumerate(headers):
+        if value == 'type':
+            indexes['type'] = index
+        elif value == 'company':
+            indexes['company'] = index
+    if (
+        'company' not in indexes
+        and name_index + 1 < len(header_row)
+        and indexes.get('type') != name_index + 1
+    ):
+        indexes['company'] = name_index + 1
+    return indexes
+
+
+def _names_only_row_value(values, index):
+    if index is None or index < 0 or index >= len(values):
+        return None
+    return values[index]
+
+
+def _sheet_fallback_type(sheet_name):
+    return '' if re.fullmatch(r'sheet\s*\d+', sheet_name.strip(), flags=re.IGNORECASE) else _normalize_names_only_type(sheet_name)
+
+
+def parse_names_only_excel(file):
+    """Parse all workbook sheets as a preview of medicine names only."""
+    _Workbook, load_workbook = _openpyxl()
+    workbook = load_workbook(file, data_only=True, read_only=True)
+    used_short_names = set(
+        name.casefold() for name in Medicine.objects.values_list('short_name', flat=True)
+    )
+    seen_names = {}
+    parsed_rows = []
+    try:
+        for sheet in workbook.worksheets:
+            header = None
+            header_row_number = None
+            for row_number, values in enumerate(sheet.iter_rows(values_only=True), start=1):
+                if row_number > 20:
+                    break
+                candidate = _names_header_indexes(values)
+                if candidate is not None:
+                    header = candidate
+                    header_row_number = row_number
+                    break
+            if header is None:
+                parsed_rows.append({
+                    'sheet_name': sheet.title,
+                    'row_num': '',
+                    'type': '',
+                    'type_status': '',
+                    'name': '',
+                    'short_name': '',
+                    'company': '',
+                    'status': 'Error',
+                    'reason': 'MEDICINE NAME header not found in the first 20 rows',
+                })
+                continue
+
+            fallback_type = _sheet_fallback_type(sheet.title)
+            current_type = fallback_type
+            sheet_has_heading = False
+            for row_number, values in enumerate(
+                sheet.iter_rows(min_row=header_row_number + 1, values_only=True),
+                start=header_row_number + 1,
+            ):
+                raw_name = _text(_names_only_row_value(values, header['name']))
+                serial = _names_only_row_value(values, header.get('serial'))
+                company = _text(_names_only_row_value(values, header.get('company')))
+                explicit_type = _text(_names_only_row_value(values, header.get('type')))
+                if not any(value is not None and _text(value) for value in values):
+                    continue
+
+                if raw_name and not _text(serial) and not company and not explicit_type:
+                    current_type = _normalize_names_only_type(raw_name)
+                    sheet_has_heading = True
+                    continue
+
+                if not raw_name:
+                    parsed_rows.append({
+                        'sheet_name': sheet.title,
+                        'row_num': row_number,
+                        'type': explicit_type or current_type,
+                        'type_status': '',
+                        'name': '',
+                        'short_name': '',
+                        'company': company,
+                        'status': 'Error',
+                        'reason': 'missing field: name',
+                    })
+                    continue
+
+                name = _display_medicine_name(raw_name)
+                medicine_type = _normalize_names_only_type(explicit_type or current_type or fallback_type)
+                existing_name = seen_names.get(name.casefold())
+                existing_medicine = None
+                if existing_name is None:
+                    existing_medicine = Medicine.objects.filter(name__iexact=name).first()
+                if existing_name is not None:
+                    short_name = existing_name
+                    status = 'Already exists'
+                elif existing_medicine:
+                    short_name = existing_medicine.short_name
+                    status = 'Already exists'
+                    seen_names[name.casefold()] = short_name
+                else:
+                    short_name = _generate_short_name(name, used_short_names)
+                    status = 'New'
+                    seen_names[name.casefold()] = short_name
+
+                matched_type = None
+                type_status = ''
+                if medicine_type:
+                    matched_type = MedicineType.objects.filter(name__iexact=medicine_type).first()
+                    if matched_type:
+                        medicine_type = matched_type.name
+                    else:
+                        type_status = 'will be created'
+
+                parsed_rows.append({
+                    'sheet_name': sheet.title,
+                    'row_num': row_number,
+                    'type': medicine_type,
+                    'type_status': type_status,
+                    'name': name,
+                    'short_name': short_name,
+                    'company': company,
+                    'status': status,
+                    'reason': '',
+                })
+            if not sheet_has_heading and not fallback_type:
+                for row in parsed_rows:
+                    if row['sheet_name'] == sheet.title and not row['type']:
+                        row['type_status'] = ''
+        return parsed_rows
+    finally:
+        workbook.close()
+
+
+def import_names_only_rows(rows):
+    success_count = 0
+    error_rows = []
+    for row in rows:
+        if row.get('status') != 'New':
+            if row.get('status') == 'Error':
+                error_rows.append(row)
+            continue
+        try:
+            with transaction.atomic():
+                medicine_type = None
+                if row.get('type'):
+                    medicine_type = MedicineType.objects.filter(name__iexact=row['type']).first()
+                    if medicine_type is None:
+                        medicine_type = MedicineType.objects.create(name=row['type'])
+                if Medicine.objects.filter(name__iexact=row['name']).exists():
+                    raise ValueError('Medicine name already exists')
+                Medicine.objects.create(
+                    name=row['name'],
+                    short_name=row['short_name'],
+                    medicine_type=medicine_type,
+                    company=row.get('company', ''),
+                    is_active=True,
+                )
+            success_count += 1
+        except Exception as exc:
+            error_rows.append({**row, 'status': 'Error', 'reason': str(exc)})
+    return {'success_count': success_count, 'error_rows': error_rows, 'total': len(rows)}
 
 
 def import_medicine_rows(rows, stock_option='add'):

@@ -13,7 +13,10 @@ from medicine.models import Medicine, MedicineType, MedicineVariant
 from medicine.services.medicine_importer import (
     MissingRequiredHeaders,
     import_medicine_rows,
+    import_names_only_rows,
     parse_medicine_excel,
+    parse_names_only_excel,
+    _generate_short_name,
 )
 from openpyxl import Workbook
 import importlib
@@ -295,3 +298,77 @@ class MedicineImporterTests(TestCase):
         self.client.post(url, {'action': 'import', 'confirm_duplicate': 'on'})
         variant.refresh_from_db()
         self.assertEqual(variant.stock, 12)
+
+    def test_names_only_client_layout_parses_sections_and_headerless_company_on_all_sheets(self):
+        workbook = Workbook()
+        first = workbook.active
+        first.title = 'Sheet1'
+        first.append(['Client inventory'])
+        first.append(['S.No', 'MEDICINE NAME', None])
+        first.append([None, 'CHURNA', None])
+        first.append([1, 'Mahasudarshan Churana', 'KALEDA'])
+        second = workbook.create_sheet('Taila')
+        second.append([None, 'Medicine Name', 'Company'])
+        second.append([1, 'Mahanarayan Taila', 'LOCAL'])
+        output = BytesIO()
+        workbook.save(output)
+        workbook.close()
+        output.seek(0)
+
+        rows = parse_names_only_excel(output)
+
+        self.assertEqual(len(rows), 2)
+        self.assertEqual(rows[0]['sheet_name'], 'Sheet1')
+        self.assertEqual(rows[0]['type'], 'Churna')
+        self.assertEqual(rows[0]['name'], 'Mahasudarshan Churna')
+        self.assertEqual(rows[0]['company'], 'KALEDA')
+        self.assertEqual(rows[0]['short_name'], 'MC')
+        self.assertEqual(rows[1]['type'], 'Taila (Oil)')
+        self.assertEqual(rows[1]['company'], 'LOCAL')
+
+    def test_names_only_short_names_are_unique_and_single_word_uses_four_letters(self):
+        used = set()
+
+        self.assertEqual(_generate_short_name('Mahasudarshan Churna', used), 'MC')
+        self.assertEqual(_generate_short_name('Mahanarayan Churna', used), 'MC2')
+        self.assertEqual(_generate_short_name('Sunth', used), 'SUNT')
+
+    def test_names_only_duplicates_are_skipped_and_import_creates_no_variants(self):
+        Medicine.objects.create(name='Ashwagandha Churna', short_name='OLD-AS')
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = 'Sheet1'
+        sheet.append(['S.No', 'MEDICINE NAME', None])
+        sheet.append([1, 'Ashwagandha Churna', 'OLD'])
+        sheet.append([2, 'Neem Churna', 'LOCAL'])
+        sheet.append([3, 'Neem Churna', 'LOCAL'])
+        output = BytesIO()
+        workbook.save(output)
+        workbook.close()
+        output.seek(0)
+
+        rows = parse_names_only_excel(output)
+
+        self.assertEqual([row['status'] for row in rows], ['Already exists', 'New', 'Already exists'])
+        result = import_names_only_rows(rows)
+        self.assertEqual(result['success_count'], 1)
+        self.assertEqual(Medicine.objects.filter(name__iexact='Neem Churna').count(), 1)
+        neem = Medicine.objects.get(name__iexact='Neem Churna')
+        self.assertFalse(neem.variants.exists())
+
+    def test_variantless_medicine_is_flagged_in_store_and_grouped_search(self):
+        self._login_import_user()
+        incomplete = Medicine.objects.create(name='Sunth', short_name='SUNT')
+
+        store_response = self.client.get(reverse('medicine:manage_medicine'))
+        self.assertContains(store_response, 'Add pack &amp; price')
+        self.assertContains(store_response, 'Incomplete (1)')
+
+        search_response = self.client.get(
+            reverse('medicine:search_medicine'),
+            {'q': 'Sunth', 'grouped': '1'},
+        )
+        medicine_result = search_response.json()['medicines'][0]
+        self.assertEqual(medicine_result['id'], incomplete.pk)
+        self.assertTrue(medicine_result['price_not_set'])
+        self.assertEqual(medicine_result['variants'], [])

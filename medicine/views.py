@@ -18,7 +18,9 @@ from .services.medicine_importer import (
     generate_error_excel,
     generate_sample_excel,
     import_medicine_rows,
+    import_names_only_rows,
     parse_medicine_excel,
+    parse_names_only_excel,
 )
 
 
@@ -45,6 +47,7 @@ class ManageMedicineView(LoginRequiredMixin, View):
         medicines_list = (
             Medicine.objects.select_related("medicine_type")
             .prefetch_related("variants")
+            .annotate(variant_count=Count("variants"))
             .all()
             .order_by("-created_at")
         )
@@ -52,7 +55,14 @@ class ManageMedicineView(LoginRequiredMixin, View):
         page_number = request.GET.get("page")
         medicines = paginator.get_page(page_number)
         return render(
-            request, "medicine/manage_medicine.html", {"medicines": medicines}
+            request,
+            "medicine/manage_medicine.html",
+            {
+                "medicines": medicines,
+                "incomplete_count": Medicine.objects.annotate(
+                    variant_count=Count("variants")
+                ).filter(variant_count=0).count(),
+            },
         )
 
 
@@ -331,6 +341,45 @@ class MedicineSearchView(LoginRequiredMixin, View):
 @login_required(login_url="doctor:login")
 def search_medicine(request):
     query = request.GET.get("q", "").strip()
+
+    if request.GET.get("grouped") == "1":
+        medicine_filter = Q(is_active=True)
+        if query:
+            medicine_filter &= (
+                Q(name__icontains=query)
+                | Q(short_name__icontains=query)
+                | Q(company__icontains=query)
+                | Q(medicine_type__name__icontains=query)
+            )
+        medicines = (
+            Medicine.objects.select_related('medicine_type')
+            .prefetch_related('variants')
+            .filter(medicine_filter)
+            .order_by('name')[:50]
+        )
+        data = []
+        for medicine in medicines:
+            variants = [
+                {
+                    'id': variant.id,
+                    'power': variant.power,
+                    'price': str(variant.selling_price),
+                    'stock': variant.stock,
+                    'is_low_stock': variant.is_low_stock,
+                    'is_expired': variant.is_expired,
+                }
+                for variant in medicine.variants.all()
+            ]
+            data.append({
+                'id': medicine.id,
+                'name': medicine.name,
+                'short_name': medicine.short_name,
+                'type': medicine.medicine_type.name if medicine.medicine_type else '—',
+                'company': medicine.company,
+                'variants': variants,
+                'price_not_set': not variants,
+            })
+        return JsonResponse({'medicines': data})
 
     if not query:
         variants = (
@@ -916,6 +965,7 @@ class ImportMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
     MAX_UPLOAD_SIZE = 5 * 1024 * 1024
     STOCK_OPTIONS = {'add', 'replace', 'keep'}
+    IMPORT_TYPES = {'full', 'names_only'}
 
     def _summary(self, rows):
         return {
@@ -931,17 +981,44 @@ class ImportMedicineView(LoginRequiredMixin, View):
         preview = request.session.get('medicine_import_preview', {})
         rows = rows if rows is not None else preview.get('rows', [])
         last_import = request.session.get('medicine_last_import', {})
+        import_type = preview.get('import_type', 'full')
         show_duplicate_warning = (
+            import_type == 'full'
+            and
             preview.get('stock_option') == 'add'
             and bool(preview.get('file_hash'))
             and preview.get('file_hash') == last_import.get('file_hash')
         )
         if error:
             messages.error(request, error)
+        summary = self._summary(rows)
+        sheet_counts = []
+        if import_type == 'names_only':
+            summary.update({
+                'new': sum(row.get('status') == 'New' for row in rows),
+                'already_exists': sum(row.get('status') == 'Already exists' for row in rows),
+                'error': sum(row.get('status') == 'Error' for row in rows),
+                'importable': sum(row.get('status') == 'New' for row in rows),
+            })
+            by_sheet = {}
+            for row in rows:
+                sheet_name = row.get('sheet_name', '')
+                counts = by_sheet.setdefault(sheet_name, {'sheet_name': sheet_name, 'total': 0, 'new': 0, 'already_exists': 0, 'error': 0})
+                counts['total'] += 1
+                if row.get('status') == 'New':
+                    counts['new'] += 1
+                elif row.get('status') == 'Already exists':
+                    counts['already_exists'] += 1
+                elif row.get('status') == 'Error':
+                    counts['error'] += 1
+            sheet_counts = list(by_sheet.values())
+
         return render(request, 'medicine/import_medicine.html', {
             'step': 'preview',
             'preview_rows': rows,
-            'summary': self._summary(rows),
+            'summary': summary,
+            'import_type': import_type,
+            'sheet_counts': sheet_counts,
             'stock_option': preview.get('stock_option', 'add'),
             'stock_option_label': {
                 'add': 'Add to existing stock',
@@ -979,9 +1056,13 @@ class ImportMedicineView(LoginRequiredMixin, View):
 
         if action == 'upload':
             request.session.pop('medicine_import_preview', None)
+            import_type = request.POST.get('import_type', 'full')
             stock_option = request.POST.get('stock_option', '')
             excel_file = request.FILES.get('excel_file')
-            if stock_option not in self.STOCK_OPTIONS:
+            if import_type not in self.IMPORT_TYPES:
+                messages.error(request, 'Select a valid import type.')
+                return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
+            if import_type == 'full' and stock_option not in self.STOCK_OPTIONS:
                 messages.error(request, 'Select a stock option before uploading.')
                 return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
             if not excel_file:
@@ -997,7 +1078,11 @@ class ImportMedicineView(LoginRequiredMixin, View):
             content = excel_file.read()
             file_hash = hashlib.sha256(content).hexdigest()
             try:
-                rows = parse_medicine_excel(BytesIO(content))
+                rows = (
+                    parse_names_only_excel(BytesIO(content))
+                    if import_type == 'names_only'
+                    else parse_medicine_excel(BytesIO(content))
+                )
             except MissingRequiredHeaders as exc:
                 messages.error(request, str(exc))
                 return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
@@ -1012,6 +1097,7 @@ class ImportMedicineView(LoginRequiredMixin, View):
                 'rows': rows,
                 'file_hash': file_hash,
                 'stock_option': stock_option,
+                'import_type': import_type,
             }
             return self._render_preview(request, rows)
 
@@ -1023,6 +1109,8 @@ class ImportMedicineView(LoginRequiredMixin, View):
 
             last_import = request.session.get('medicine_last_import', {})
             is_duplicate_add = (
+                preview.get('import_type', 'full') == 'full'
+                and
                 preview.get('stock_option') == 'add'
                 and preview.get('file_hash') == last_import.get('file_hash')
             )
@@ -1032,7 +1120,10 @@ class ImportMedicineView(LoginRequiredMixin, View):
                     error='Confirm that you want to add this file to existing stock again.',
                 )
 
-            result = import_medicine_rows(preview['rows'], preview.get('stock_option', 'add'))
+            if preview.get('import_type') == 'names_only':
+                result = import_names_only_rows(preview['rows'])
+            else:
+                result = import_medicine_rows(preview['rows'], preview.get('stock_option', 'add'))
             request.session['medicine_import_errors'] = result['error_rows']
             imported_at = timezone.localtime()
             request.session['medicine_last_import'] = {
@@ -1043,6 +1134,7 @@ class ImportMedicineView(LoginRequiredMixin, View):
                 'total': result['total'],
                 'imported': result['success_count'],
                 'error': len(result['error_rows']),
+                'already_exists': sum(row.get('status') == 'Already exists' for row in preview['rows']),
             }
             request.session.pop('medicine_import_preview', None)
             return render(request, 'medicine/import_medicine.html', {

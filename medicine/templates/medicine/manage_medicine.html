@@ -66,6 +66,17 @@
         border-color: var(--accent-color);
         color: var(--primary-color);
     }
+    .incomplete-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 10px;
+        background: #fff1df;
+        color: #a85400;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+    .incomplete-filter.active { background: #fff1df; border-color: #e29a45; color: #8a4300; }
 
 </style>
 
@@ -93,6 +104,7 @@
                 <i class="bi bi-search"></i>
                 <input type="text" id="searchInput" class="form-control" placeholder="Search name, type, company..." autocomplete="off">
             </div>
+            <button type="button" id="incompleteFilter" class="btn btn-sm btn-outline-secondary incomplete-filter" aria-pressed="false">Incomplete ({{ incomplete_count }})</button>
         </div>
 
         <div class="dc-table-wrap">
@@ -112,19 +124,21 @@
                 <tbody id="tableBody">
                     {% for medicine in medicines %}
                     <!-- Main Row -->
-                    <tr class="medicine-main-row" data-target="variant-row-{{ medicine.pk }}"
-                        onclick="toggleVariants('variant-row-{{ medicine.pk }}', this)"
-                        title="Click to view variants">
+                    <tr class="medicine-main-row" data-incomplete="{% if not medicine.variant_count %}true{% else %}false{% endif %}"{% if medicine.variant_count %} data-target="variant-row-{{ medicine.pk }}" onclick="toggleVariants('variant-row-{{ medicine.pk }}', this)" title="Click to view variants"{% endif %}>
                         <td class="col-num">{% if medicines.start_index %}{{ medicines.start_index|add:forloop.counter0 }}{% else %}{{ forloop.counter }}{% endif %}</td>
                         <td><span class="dc-name">{{ medicine.name }}</span></td>
                         <td class="dc-muted">{{ medicine.short_name|default:"—" }}</td>
                         <td><span class="dc-badge grey">{{ medicine.medicine_type.name|default:"—" }}</span></td>
                         <td>{% if medicine.company %}{{ medicine.company }}{% else %}<span class="dc-muted">—</span>{% endif %}</td>
-                        <td>
+                        <td onclick="event.stopPropagation();">
+                            {% if medicine.variant_count %}
                             <span class="variant-toggle">
-                                {{ medicine.variants.count }} variant{{ medicine.variants.count|pluralize }}
+                                {{ medicine.variant_count }} variant{{ medicine.variant_count|pluralize }}
                                 <i class="bi bi-chevron-down"></i>
                             </span>
+                            {% else %}
+                            <a href="{% url 'medicine:edit_medicine' medicine.id|hid %}" class="incomplete-badge" title="Add a pack size and price">Add pack &amp; price</a>
+                            {% endif %}
                         </td>
                         <td>
                             {% if medicine.is_active %}
@@ -149,7 +163,7 @@
                     </tr>
 
                     <!-- Expanded Variant Row -->
-                    <tr id="variant-row-{{ medicine.pk }}" class="variant-row" style="display:none;">
+                    {% if medicine.variant_count %}<tr id="variant-row-{{ medicine.pk }}" class="variant-row" style="display:none;">
                         <td colspan="8">
                             <div class="variant-expand-body">
                                 <div class="variant-title"><i class="bi bi-box-seam me-1"></i> Variants for {{ medicine.name }}</div>
@@ -172,7 +186,7 @@
                                 </div>
                             </div>
                         </td>
-                    </tr>
+                    </tr>{% endif %}
 
                     {% empty %}
                     <tr>
@@ -237,14 +251,16 @@
     const searchInput = document.getElementById('searchInput');
     const tableBody   = document.getElementById('tableBody');
     const emptyState  = document.getElementById('emptyState');
+    const incompleteFilter = document.getElementById('incompleteFilter');
+    let incompleteOnly = false;
 
-    searchInput.addEventListener('input', function () {
-        const q = this.value.toLowerCase();
+    function filterMedicineRows() {
+        const q = searchInput.value.toLowerCase();
         const rows = tableBody.querySelectorAll('tr.medicine-main-row');
         let visible = 0;
 
         rows.forEach(row => {
-            const show = row.textContent.toLowerCase().includes(q);
+            const show = row.textContent.toLowerCase().includes(q) && (!incompleteOnly || row.dataset.incomplete === 'true');
             row.style.display = show ? '' : 'none';
             const nextRow = row.nextElementSibling;
             if (nextRow && nextRow.id && nextRow.id.startsWith('variant-row-')) {
@@ -254,7 +270,14 @@
             if (show) visible++;
         });
 
-        emptyState.style.display = visible === 0 && q.length > 0 ? 'block' : 'none';
+        emptyState.style.display = visible === 0 && (q.length > 0 || incompleteOnly) ? 'block' : 'none';
+    }
+    searchInput.addEventListener('input', filterMedicineRows);
+    incompleteFilter.addEventListener('click', function () {
+        incompleteOnly = !incompleteOnly;
+        this.classList.toggle('active', incompleteOnly);
+        this.setAttribute('aria-pressed', String(incompleteOnly));
+        filterMedicineRows();
     });
 
     // SweetAlert delete

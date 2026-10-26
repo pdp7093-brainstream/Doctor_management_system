@@ -293,7 +293,7 @@ document.getElementById('modalSearchInput').addEventListener('input', function (
                     return;
                 }
                 container.innerHTML = data.medicines.map(med => `
-                            <div class="med-result-item">
+                            <div class="med-result-item ${med.price_not_set ? 'opacity-50' : ''}">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <span class="badge bg-primary-subtle text-primary mb-1">${escapeHtml(med.type || '')}</span>
@@ -301,8 +301,8 @@ document.getElementById('modalSearchInput').addEventListener('input', function (
                                         <small class="text-muted">${escapeHtml(med.company || 'Generic')}</small>
                                     </div>
                                 </div>
-                                <div class="variant-grid">
-                                    ${med.variants.map(v => `
+                                <div class="variant-grid" ${med.price_not_set ? 'aria-disabled="true"' : ''}>
+                                    ${med.price_not_set ? '<div class="v-chip out-of-stock" aria-disabled="true"><span class="stock-dot"></span>Price not set</div>' : med.variants.map(v => `
                                         <div class="v-chip ${v.stock <= 0 ? 'out-of-stock' : ''}"
                                              ${v.stock > 0 ? `data-variant-id="${escapeHtml(String(v.id))}" data-name="${escapeHtml(`${med.name || ''} ${v.power || ''}`.trim())}" data-type="${escapeHtml(med.type || '')}"` : ''}>
                                             <span class="stock-dot"></span>
