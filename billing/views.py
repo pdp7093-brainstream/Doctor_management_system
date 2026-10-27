@@ -62,6 +62,12 @@ def generate_bill_from_visit(visit):
     partial/incomplete bills.
     """
     from django.utils import timezone
+    from therapy.models import (
+        BILLING_TYPE_PACKAGE,
+        BILLING_TYPE_PER_SESSION,
+        TherapyBillItem,
+        TherapySession,
+    )
 
     prescription = getattr(visit, 'prescription', None)
 
@@ -74,6 +80,28 @@ def generate_bill_from_visit(visit):
             'medicine_variant__medicine'
         ).filter(billed_on__isnull=True)
     )
+
+    pending_therapy_rows = []
+    for prescribed in prescription.therapies.select_related('therapy').exclude(status='cancelled'):
+        if prescribed.billing_type == BILLING_TYPE_PACKAGE:
+            if not prescribed.package_billed_id and not prescribed.therapy_bill_items.filter(billing_type=BILLING_TYPE_PACKAGE).exists():
+                package_amount = prescribed.package_price or Decimal('0')
+                pending_therapy_rows.append({
+                    'prescribed': prescribed,
+                    'billing_type': BILLING_TYPE_PACKAGE,
+                    'sessions': prescribed.total_sessions,
+                    'unit_price': package_amount,
+                    'amount': package_amount,
+                })
+        elif prescribed.billing_type == BILLING_TYPE_PER_SESSION:
+            if prescribed.session_records.filter(
+                status=TherapySession.STATUS_DONE,
+                bill__isnull=True,
+            ).exists():
+                pending_therapy_rows.append({
+                    'prescribed': prescribed,
+                    'billing_type': BILLING_TYPE_PER_SESSION,
+                })
 
     # Check if a bill already exists
     existing_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
@@ -89,7 +117,7 @@ def generate_bill_from_visit(visit):
     elif appt_type == 'video':
         consultation_fee = getattr(clinic, 'video_consultation_fee', clinic.default_consultation_fee)
 
-    if not new_items:
+    if not new_items and not pending_therapy_rows:
         if not existing_bill:
             # No prescription items — create a consultation-only bill
             with transaction.atomic():
@@ -171,6 +199,48 @@ def generate_bill_from_visit(visit):
                 item.bill_id = bill.id
                 item.save(update_fields=['billed_on', 'bill_id', 'updated_at'])
 
+            for therapy_row in pending_therapy_rows:
+                prescribed = therapy_row['prescribed']
+                if therapy_row['billing_type'] == BILLING_TYPE_PACKAGE:
+                    if prescribed.package_billed_id or prescribed.therapy_bill_items.filter(billing_type=BILLING_TYPE_PACKAGE).exists():
+                        continue
+                    therapy_line = TherapyBillItem.objects.create(
+                        bill=bill,
+                        prescription_therapy=prescribed,
+                        therapy_name=prescribed.therapy.name,
+                        billing_type=BILLING_TYPE_PACKAGE,
+                        sessions=prescribed.total_sessions,
+                        unit_price=therapy_row['unit_price'],
+                        amount=therapy_row['amount'],
+                    )
+                    prescribed.package_billed = bill
+                    prescribed.save(update_fields=['package_billed'])
+                    subtotal += therapy_line.amount
+                else:
+                    unbilled_sessions = list(
+                        prescribed.session_records.select_for_update().filter(
+                            status=TherapySession.STATUS_DONE,
+                            bill__isnull=True,
+                        )
+                    )
+                    if not unbilled_sessions:
+                        continue
+                    session_price = prescribed.session_price or Decimal('0')
+                    amount = len(unbilled_sessions) * session_price
+                    therapy_line = TherapyBillItem.objects.create(
+                        bill=bill,
+                        prescription_therapy=prescribed,
+                        therapy_name=prescribed.therapy.name,
+                        billing_type=BILLING_TYPE_PER_SESSION,
+                        sessions=len(unbilled_sessions),
+                        unit_price=session_price,
+                        amount=amount,
+                    )
+                    for therapy_session in unbilled_sessions:
+                        therapy_session.bill = bill
+                        therapy_session.save(update_fields=['bill'])
+                    subtotal += therapy_line.amount
+
             bill.subtotal = subtotal
             bill.save()
 
@@ -220,6 +290,9 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
 
         # Bill summary - with all bills
         bill_summary = get_bill_summary(visit)
+        from django.db.models import Sum
+        medicine_subtotal = bill.items.aggregate(total=Sum('total_price'))['total'] or Decimal('0')
+        therapy_subtotal = bill.therapy_items.aggregate(total=Sum('amount'))['total'] or Decimal('0')
         combined_subtotal = (bill.subtotal or Decimal('0')) + (bill.consultation_fee or Decimal('0'))
 
         return render(request, 'billing/bill_detail.html', {
@@ -227,6 +300,9 @@ class BillDetailView(LoginRequiredMixin,BillingAccessMixin, View):
             'visit': visit,
             'bill_summary': bill_summary,
             'combined_subtotal': combined_subtotal,
+            'medicine_subtotal': medicine_subtotal,
+            'therapy_subtotal': therapy_subtotal,
+            'therapy_bill_items': bill.therapy_items.all(),
         })
 
     def post(self, request, hid):
@@ -528,11 +604,18 @@ class PrintBillView(LoginRequiredMixin,BillingAccessMixin,View):
         # Clinic settings is a singleton managed by the clinic app.
         settings = ClinicSettings.get()
 
+        from django.db.models import Sum
+        medicine_subtotal = bill.items.aggregate(total=Sum('total_price'))['total'] or Decimal('0')
+        therapy_subtotal = bill.therapy_items.aggregate(total=Sum('amount'))['total'] or Decimal('0')
+
         return render(request, 'billing/bill_print.html', {
             'bill': bill,
             'visit': visit,
             'clinic': settings,
             'settings': settings,
+            'medicine_subtotal': medicine_subtotal,
+            'therapy_subtotal': therapy_subtotal,
+            'therapy_bill_items': bill.therapy_items.all(),
         })
 
 @method_decorator(never_cache, name='dispatch')

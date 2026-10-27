@@ -79,7 +79,7 @@
                         <div class="pc-completion">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="pc-completion-title">Profile {{ profile_completeness }}% complete</span>
-                                <a href="{% url 'profile-setting' %}" class="btn btn-outline-primary btn-sm">Complete profile</a>
+                                <a href="{% url 'profile-setting' %}" class="btn btn-brand btn-sm">Complete profile</a>
                             </div>
                             <div class="pc-progress-track">
                                 <div class="pc-progress-fill" style="width: {{ profile_completeness }}%;"></div>
@@ -99,7 +99,7 @@
                                         <div class="pc-tile-label-row">
                                             <span class="pc-tile-label">Phone</span>
                                             {% if request.user.patient.phone %}
-                                            <button type="button" class="btn btn-outline-primary btn-sm pc-tile-inline-btn changeNumberBtn" data-phone="{{ request.user.patient.phone }}" onclick="event.stopPropagation()">Change</button>
+                                            <button type="button" class="btn btn-outline-brand btn-sm pc-tile-inline-btn changeNumberBtn" data-phone="{{ request.user.patient.phone }}" onclick="event.stopPropagation()">Change</button>
                                             {% endif %}
                                         </div>
                                         <span class="pc-tile-value">
@@ -118,7 +118,7 @@
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Date of Birth</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.dob %}{{ request.user.patient.dob|date:"d M Y" }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
+                                            {% if request.user.patient.dob %}{{ request.user.patient.dob|date:"d M Y" }}{% else %}<span class="pc-add-link">+ Add</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -129,7 +129,7 @@
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Gender</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.gender %}{{ request.user.patient.gender|capfirst }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
+                                            {% if request.user.patient.gender %}{{ request.user.patient.gender|capfirst }}{% else %}<span class="pc-add-link">+ Add</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -151,7 +151,7 @@
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Address</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.address %}{{ request.user.patient.address }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
+                                            {% if request.user.patient.address %}{{ request.user.patient.address }}{% else %}<span class="pc-add-link">+ Add</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
@@ -166,8 +166,8 @@
                             <div class="security-email-label">Login email <span>Managed by you</span></div>
                             <div class="security-email-value">{{ request.user.email|default:"Not added" }}</div>
                             <div class="security-actions">
-                                <a href="{% url 'resetpass' %}" class="btn btn-outline-primary btn-sm">Change password</a>
-                                <a href="{% url 'logout' %}" class="security-logout">Log out</a>
+                                <a href="{% url 'resetpass' %}" class="btn btn-primary btn-sm">Change password</a>
+                                <a href="{% url 'logout' %}" class="security-logout-btn">Log out</a>
                             </div>
                         </div>
                     </div>

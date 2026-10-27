@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('doctor', '0009_alter_doctorleave_unique_together_and_more'),
+        ('appointment', '0002_remove_appointment_create_at_and_more'),
     ]
 
     operations = [

@@ -307,6 +307,29 @@
   color: var(--accent-color, #117A15);
 }
 
+.btn-outline-brand {
+  border: 1px solid #015315 !important;
+  color: #015315 !important;
+  background: transparent !important;
+}
+
+.btn-outline-brand:hover {
+  background: #EAF4EA !important;
+  color: #015315 !important;
+  border-color: #015315 !important;
+}
+
+.btn-brand {
+  background: #015315 !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+.btn-brand:hover {
+  background: #013A0F !important;
+  color: #fff !important;
+}
+
 .pc-change-num-btn {
   font-size: 11px !important;
   padding: 2px 8px !important;
@@ -562,13 +585,18 @@ input.form-control[type="file"]:hover::file-selector-button {
 }
 
 .pc-tile-inline-btn {
-  border: 1px solid var(--brand-primary, #117A15) !important;
-  color: var(--brand-primary, #117A15) !important;
+  border: 1px solid #015315 !important;
+  color: #015315 !important;
   background: #fff !important;
   border-radius: 6px !important;
   padding: 3px 8px !important;
   font-size: 11px !important;
   white-space: nowrap;
+}
+
+.pc-tile-inline-btn:hover {
+  background: #EAF4EA !important;
+  color: #015315 !important;
 }
 
 .account-security-card .card-body {
@@ -597,15 +625,28 @@ input.form-control[type="file"]:hover::file-selector-button {
   align-items: center;
   border-top: 1px solid #e5eee5;
   display: flex;
-  gap: 16px;
+  gap: 8px;
   margin-top: 16px;
   padding-top: 14px;
 }
 
-.security-logout {
-  color: #53645a;
-  font-size: 13px;
+.security-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #AD0002 !important;
+  color: #AD0002 !important;
+  background: transparent !important;
+  padding: 0.25rem 0.5rem !important;
+  font-size: 0.875rem !important;
+  border-radius: 0.375rem !important;
   text-decoration: none;
+  line-height: 1.5;
+}
+
+.security-logout-btn:hover {
+  background: #FBE3E3 !important;
+  color: #AD0002 !important;
+  border-color: #AD0002 !important;
 }
 
 .upload-help,

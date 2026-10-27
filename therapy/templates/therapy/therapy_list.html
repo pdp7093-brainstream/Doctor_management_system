@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load billing_tags %}
 {% block title %}Therapies - Doctor Dashboard{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
@@ -23,19 +24,19 @@
             <h3 class="dc-card-title"><i class="bi bi-droplet-half"></i> Therapy Catalog <span class="dc-count">{{ therapies|length }} total</span></h3>
             <div class="dc-search"><i class="bi bi-search"></i><input type="text" id="therapySearch" class="form-control" placeholder="Search therapies..." autocomplete="off"></div>
         </div>
-        <div class="dc-table-wrap">
-            <table class="table table-hover dc-table" style="min-width:800px;">
-                <thead><tr><th class="col-num">#</th><th>Name</th><th>Duration</th><th>Price / session</th><th>Prescribed</th><th>Status</th><th>Order</th><th class="col-actions text-end">Actions</th></tr></thead>
+        <div class="dc-table-wrap table-responsive">
+            <table class="table table-hover dc-table" style="min-width:760px;">
+                <thead><tr><th class="col-num">#</th><th>Name</th><th>Duration</th><th>Billing</th><th>Pricing</th><th>Prescribed</th><th>Status</th><th class="col-actions text-end">Actions</th></tr></thead>
                 <tbody id="therapyTableBody">
                     {% for therapy in therapies %}
                     <tr class="therapy-row" data-name="{{ therapy.name|lower }}">
                         <td class="col-num">{{ forloop.counter }}</td>
                         <td><span class="dc-name">{{ therapy.name }}</span></td>
                         <td>{{ therapy.duration_minutes }} min</td>
-                        <td>{{ therapy.price_per_session }}</td>
+                        <td>{% if therapy.default_billing_type == 'package' %}<span class="dc-badge" style="background:#FFF3E6;color:#FD6801;white-space:nowrap;">Package</span>{% else %}<span class="dc-badge" style="background:#EAF4EA;color:#015315;white-space:nowrap;">Per session</span>{% endif %}</td>
+                        <td style="white-space:nowrap;">{% if therapy.default_billing_type == 'package' %}{% if therapy.package_price %}<strong>{{ therapy.package_price|money }}</strong> <span class="text-muted small">package</span>{% else %}<span class="dc-badge" style="background:#FDECEA;color:#AD0002;white-space:nowrap;">Price not set</span>{% endif %}{% else %}{% if therapy.session_price %}<strong>{{ therapy.session_price|money }}</strong> <span class="text-muted small">/ session</span>{% else %}<span class="dc-badge" style="background:#FDECEA;color:#AD0002;white-space:nowrap;">Price not set</span>{% endif %}{% endif %}</td>
                         <td><span class="dc-badge grey">{{ therapy.prescribed_count }} prescription{{ therapy.prescribed_count|pluralize }}</span></td>
                         <td>{% if therapy.is_active %}<span class="dc-badge green">Active</span>{% else %}<span class="dc-badge red">Inactive</span>{% endif %}</td>
-                        <td class="dc-muted">{{ therapy.sort_order }}</td>
                         <td class="col-actions text-end">
                             <div class="action-btns">
                                 <a href="{% url 'doctor:therapy:therapy_edit' therapy.pk %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
@@ -50,8 +51,9 @@
                     <tr><td colspan="8" class="dc-empty text-center py-5"><i class="bi bi-droplet-half" style="font-size:2.5rem;color:#ccc;"></i><p class="text-muted mt-3 mb-0">No therapies found.</p></td></tr>
                     {% endfor %}
                 </tbody>
-            </table>
+                </table>
         </div>
+        {% include "partials/pagination.html" with page_obj=page_obj label="therapies" %}
     </div>
 </main>
 
@@ -69,7 +71,10 @@
                     <div class="mb-3"><label class="dc-label" for="new-therapy-description">Description</label><textarea id="new-therapy-description" class="form-control patient-input" name="description" rows="2"></textarea></div>
                     <div class="row g-3">
                         <div class="col-6"><label class="dc-label" for="new-therapy-duration">Duration (minutes)</label><input id="new-therapy-duration" class="form-control patient-input" type="number" name="duration_minutes" value="45" min="0" required></div>
-                        <div class="col-6"><label class="dc-label" for="new-therapy-price">Price / session</label><input id="new-therapy-price" class="form-control patient-input" type="number" name="price_per_session" value="0.00" min="0" step="0.01" required></div>
+                        <div class="col-6"><label class="dc-label" for="new-therapy-billing">Default billing type</label><select id="new-therapy-billing" class="form-select patient-input" name="default_billing_type"><option value="per_session" selected>Per session</option><option value="package">Package</option></select></div>
+                        <div class="col-6"><label class="dc-label" for="new-therapy-session-price">Session price</label><input id="new-therapy-session-price" class="form-control patient-input" type="number" name="session_price" value="0.00" min="0" step="0.01" required></div>
+                        <div class="col-6"><label class="dc-label" for="new-therapy-default-sessions">Default sessions</label><input id="new-therapy-default-sessions" class="form-control patient-input" type="number" name="default_sessions" value="1" min="1" required></div>
+                        <div class="col-6"><label class="dc-label" for="new-therapy-package-price">Package price</label><input id="new-therapy-package-price" class="form-control patient-input" type="number" name="package_price" min="0" step="0.01"></div>
                         <div class="col-6"><label class="dc-label" for="new-therapy-order">Order</label><input id="new-therapy-order" class="form-control patient-input" type="number" name="sort_order" value="0" min="0"></div>
                         <div class="col-6 d-flex align-items-end"><div class="form-check mb-2"><input class="form-check-input" id="new-therapy-active" type="checkbox" name="is_active" checked><label class="form-check-label" for="new-therapy-active">Active</label></div></div>
                     </div>

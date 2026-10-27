@@ -31,6 +31,7 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
+        ('missed', 'Missed'),
     ]
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
@@ -67,6 +68,11 @@ class Appointment(models.Model):
     notes = models.TextField(blank=True, null=True)
     cancellation_reason = models.TextField(blank=True, null=True)
 
+    late_entry = models.BooleanField(default=False)
+    late_entry_reason = models.TextField(blank=True, null=True)
+    late_entry_by = models.ForeignKey(InnerMember, on_delete=models.SET_NULL, null=True, blank=True, related_name='late_entries')
+    late_entry_at = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         indexes = [
             models.Index(fields=['appointment_date', 'time_slot'], name='appt_date_time_idx'),
@@ -84,6 +90,11 @@ class Appointment(models.Model):
                 name='unique_active_appointment_slot',
             ),
         ]
+
+    @property
+    def is_overdue(self):
+        import datetime
+        return self.appointment_date < datetime.date.today() and self.status in ('pending', 'confirmed')
 
     def __str__(self):
         return f"{self.patient.user.username} - {self.appointment_date}"

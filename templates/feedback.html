@@ -4,49 +4,34 @@
 {% block title %}Feedback - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
 {% block meta_description %}Share your experience and help us improve our healthcare services.{% endblock %}
 {% block meta_keywords %}feedback, patient feedback, clinic review{% endblock %}
-{% block fonts %}
-  <link href="https://fonts.googleapis.com" rel="preconnect">
-  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;600;700&family=Lato:wght@300;400;700&display=swap"
-    rel="stylesheet">
-  {% endblock %}
 {% block body_class %}contact-page{% endblock %}
 {% block extra_css %}
+  <link href="{% static 'assets/css/about.css' %}" rel="stylesheet">
   <link href="{% static 'assets/css/feedback.css' %}" rel="stylesheet">
 {% endblock %}
 {% block content %}
 
-    <!-- Page Title -->
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">Feedback</h1>
-              <p class="mb-0">
-                We value your opinion! Share your experience with us and help us
-                improve our healthcare services. Your feedback matters.
-              </p>
-            </div>
-          </div>
+    <section class="about-banner">
+      <div class="container">
+        <div class="banner-content">
+          <h1>Feedback</h1>
+          <p>We value your opinion! Share your experience with us and help us improve our healthcare services. Your feedback matters.</p>
         </div>
       </div>
-    </div><!-- End Page Title -->
+    </section>
 
-    <!-- Feedback Section -->
-    <section id="feedback" class="contact section">
+    <section id="feedback" class="about-section dr-section py-4">
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row g-5">
+        <div class="row g-4 align-items-start">
 
           <!-- Left Info Panel -->
-          <div class="col-lg-5" data-aos="fade-right" data-aos-delay="200">
-            <div class="feedback-info-card">
-              <h3><i class="bi bi-chat-heart me-2"></i> We'd Love to Hear From You</h3>
+          <div class="col-lg-5 align-self-start" data-aos="fade-right" data-aos-delay="200">
+            <div class="dr-vision mt-0 align-self-start text-start">
+              <span class="dr-vision-label"><i class="bi bi-chat-heart"></i> We'd Love to Hear From You</span>
               <p>Your feedback helps us deliver better care. Whether it's a compliment, a suggestion, or a concern — we listen to every word.</p>
 
-              <div class="info-item">
+              <div class="info-item d-flex align-items-start gap-3 mb-3">
                 <i class="bi bi-shield-check"></i>
                 <div>
                   <h4>100% Confidential</h4>
@@ -54,7 +39,7 @@
                 </div>
               </div>
 
-              <div class="info-item">
+              <div class="info-item d-flex align-items-start gap-3 mb-3">
                 <i class="bi bi-clock-history"></i>
                 <div>
                   <h4>Quick Response</h4>
@@ -62,7 +47,7 @@
                 </div>
               </div>
 
-              <div class="info-item">
+              <div class="info-item d-flex align-items-start gap-3 mb-3">
                 <i class="bi bi-heart-pulse"></i>
                 <div>
                   <h4>Continuous Improvement</h4>
@@ -71,8 +56,8 @@
               </div>
 
               {% if clinic.address %}
-              <hr style="opacity:0.2; margin: 24px 0;">
-              <div class="info-item">
+              <hr class="my-3" style="opacity:0.2;">
+              <div class="info-item d-flex align-items-start gap-3 mb-3">
                 <i class="bi bi-geo-alt"></i>
                 <div>
                   <h4>Visit Us</h4>
@@ -82,7 +67,7 @@
               {% endif %}
 
               {% if clinic.email %}
-              <div class="info-item">
+              <div class="info-item d-flex align-items-start gap-3">
                 <i class="bi bi-envelope"></i>
                 <div>
                   <h4>Email</h4>
@@ -95,9 +80,12 @@
 
           <!-- Right Feedback Form -->
           <div class="col-lg-7" data-aos="fade-left" data-aos-delay="300">
-            <div class="feedback-form-card">
-              <h2><i class="bi bi-pencil-square me-2" style="color:var(--brand-green, #117A15);"></i> Share Your Experience</h2>
-              <p class="subtitle">All fields marked with * are required.</p>
+            <div class="dr-card">
+              <div class="dr-card-head">
+                <div class="dr-icon"><i class="bi bi-pencil-square"></i></div>
+                <h3>Share Your Experience</h3>
+              </div>
+              <p class="text-muted small mb-4">All fields marked with * are required.</p>
 
               <form method="POST" action="{% url 'feedback' %}" id="feedbackForm">
                 {% csrf_token %}
@@ -108,7 +96,8 @@
                     <label class="form-label" for="feedbackName">Full Name *</label>
                     <input type="text" class="form-control" name="name" id="feedbackName"
                       placeholder="Your full name" required
-                      value="{% if user.is_authenticated %}{{ user.get_full_name|default:user.username }}{% endif %}">
+                      value="{% if patient_profile %}{{ user.get_full_name|default:user.username }}{% endif %}"
+                      {% if patient_profile %}readonly aria-readonly="true"{% endif %}>
                   </div>
 
                   <!-- Phone -->
@@ -116,7 +105,8 @@
                     <label class="form-label" for="feedbackPhone">Phone</label>
                     <input type="tel" class="form-control" name="phone" id="feedbackPhone"
                       placeholder="e.g. 9876543210" maxlength="15"
-                      value="{% if user.is_authenticated and user.patient %}{{ user.patient.phone|default:'' }}{% endif %}">
+                      value="{% if patient_profile %}{{ patient_profile.phone|default:'' }}{% endif %}"
+                      {% if patient_profile %}readonly aria-readonly="true"{% endif %}>
                   </div>
 
                   <!-- Email -->
@@ -124,29 +114,28 @@
                     <label class="form-label" for="feedbackEmail">Email</label>
                     <input type="email" class="form-control" name="email" id="feedbackEmail"
                       placeholder="your@email.com (optional)"
-                      value="{% if user.is_authenticated %}{{ user.email|default:'' }}{% endif %}">
+                      value="{% if patient_profile %}{{ user.email|default:'' }}{% endif %}"
+                      {% if patient_profile %}readonly aria-readonly="true"{% endif %}>
                   </div>
 
                   <!-- Star Rating -->
                   <div class="col-12">
-                    <p class="rating-label-text mb-1">How would you rate your experience? *</p>
-                    <div class="star-rating">
-                      <input type="radio" name="rating" id="star5" value="5" checked>
-                      <label for="star5" title="Excellent"><i class="bi bi-star-fill"></i></label>
-
-                      <input type="radio" name="rating" id="star4" value="4">
-                      <label for="star4" title="Very Good"><i class="bi bi-star-fill"></i></label>
-
-                      <input type="radio" name="rating" id="star3" value="3">
-                      <label for="star3" title="Good"><i class="bi bi-star-fill"></i></label>
-
-                      <input type="radio" name="rating" id="star2" value="2">
-                      <label for="star2" title="Fair"><i class="bi bi-star-fill"></i></label>
-
-                      <input type="radio" name="rating" id="star1" value="1">
-                      <label for="star1" title="Poor"><i class="bi bi-star-fill"></i></label>
+                    <label class="form-label" id="ratingPrompt">How would you rate your experience? *</label>
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                      <div class="star-rating d-flex flex-row-reverse justify-content-end gap-1" role="radiogroup" aria-labelledby="ratingPrompt">
+                        <input class="visually-hidden" type="radio" name="rating" id="star5" value="5" required>
+                        <label class="fs-4 mb-0" for="star5" data-rating="5" title="Excellent"><i class="bi bi-star-fill"></i></label>
+                        <input class="visually-hidden" type="radio" name="rating" id="star4" value="4">
+                        <label class="fs-4 mb-0" for="star4" data-rating="4" title="Very Good"><i class="bi bi-star-fill"></i></label>
+                        <input class="visually-hidden" type="radio" name="rating" id="star3" value="3">
+                        <label class="fs-4 mb-0" for="star3" data-rating="3" title="Good"><i class="bi bi-star-fill"></i></label>
+                        <input class="visually-hidden" type="radio" name="rating" id="star2" value="2">
+                        <label class="fs-4 mb-0" for="star2" data-rating="2" title="Fair"><i class="bi bi-star-fill"></i></label>
+                        <input class="visually-hidden" type="radio" name="rating" id="star1" value="1">
+                        <label class="fs-4 mb-0" for="star1" data-rating="1" title="Poor"><i class="bi bi-star-fill"></i></label>
+                      </div>
+                      <span class="text-muted small" id="ratingText" aria-live="polite">Select a rating</span>
                     </div>
-                    <p class="rating-hint">Click a star to rate</p>
                   </div>
 
                   <!-- Message -->
@@ -159,7 +148,7 @@
 
                   <!-- Submit -->
                   <div class="col-12">
-                    <button type="submit" class="btn-submit-feedback" id="submitFeedbackBtn">
+                    <button type="submit" class="btn-book w-100" id="submitFeedbackBtn">
                       <i class="bi bi-send"></i> Submit Feedback
                     </button>
                   </div>
@@ -177,6 +166,37 @@
   {% endblock %}
 {% block extra_js %}
   <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const ratingNames = { 1: "Poor", 2: "Fair", 3: "Good", 4: "Very Good", 5: "Excellent" };
+        const ratingLabels = document.querySelectorAll(".star-rating label[data-rating]");
+        const ratingInputs = document.querySelectorAll(".star-rating input[name='rating']");
+        const ratingText = document.getElementById("ratingText");
+        const ratingGroup = document.querySelector(".star-rating");
+        let selectedRating = 0;
+
+        function showRating(rating) {
+          ratingLabels.forEach(function (label) {
+            label.style.color = Number(label.dataset.rating) <= rating ? "var(--brand-accent)" : "";
+          });
+          ratingText.textContent = rating ? rating + "/5 · " + ratingNames[rating] : "Select a rating";
+        }
+
+        ratingLabels.forEach(function (label) {
+          label.addEventListener("mouseenter", function () {
+            showRating(Number(label.dataset.rating));
+          });
+        });
+        ratingGroup.addEventListener("mouseleave", function () {
+          showRating(selectedRating);
+        });
+        ratingInputs.forEach(function (input) {
+          input.addEventListener("change", function () {
+            selectedRating = Number(input.value);
+            showRating(selectedRating);
+          });
+        });
+      });
+
     {% if messages %}
     document.addEventListener("DOMContentLoaded", function () {
       {% for message in messages %}

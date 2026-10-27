@@ -111,12 +111,21 @@
                             <tfoot>
                                 <tr>
                                     <td colspan="5" class="text-end fw-semibold">Medicines total</td>
-                                    <td class="text-end fw-bold dc-mono">₹{{ bill.subtotal|floatformat:2 }}</td>
+                                    <td class="text-end fw-bold dc-mono">₹{{ medicine_subtotal|floatformat:2 }}</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
                 </div>
+
+                {% if therapy_bill_items %}
+                <div class="dc-card mb-3">
+                    <div class="dc-card-header"><h3 class="dc-card-title"><i class="bi bi-droplet-half"></i> Therapy</h3></div>
+                    <div class="dc-table-wrap bill-table-scroll"><table class="table table-hover dc-table mb-0"><thead><tr><th class="col-num">#</th><th>Therapy</th><th>Billing</th><th class="text-end">Sessions</th><th class="text-end">Amount (₹)</th></tr></thead><tbody>
+                        {% for item in therapy_bill_items %}<tr><td class="col-num">{{ forloop.counter }}</td><td class="dc-name">{{ item.therapy_name }}</td><td>{{ item.get_billing_type_display }}</td><td class="text-end dc-mono">{{ item.sessions }}</td><td class="text-end dc-mono">₹{{ item.amount|floatformat:2 }}</td></tr>{% endfor %}
+                    </tbody><tfoot><tr><td colspan="4" class="text-end fw-semibold">Therapy total</td><td class="text-end fw-bold dc-mono">₹{{ therapy_subtotal|floatformat:2 }}</td></tr></tfoot></table></div>
+                </div>
+                {% endif %}
 
                 <div class="dc-card">
                     <div class="dc-card-header">
@@ -194,8 +203,9 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="dc-muted fw-semibold">Medicines</span>
-                            <span class="fw-semibold dc-mono text-end" id="summaryMedicines">₹{{ bill.subtotal|floatformat:2 }}</span>
+                            <span class="fw-semibold dc-mono text-end" id="summaryMedicines">₹{{ medicine_subtotal|floatformat:2 }}</span>
                         </div>
+                        {% if therapy_bill_items %}<div class="d-flex justify-content-between align-items-center mb-3"><span class="dc-muted fw-semibold">Therapy</span><span class="fw-semibold dc-mono text-end" id="summaryTherapy">₹{{ therapy_subtotal|floatformat:2 }}</span></div>{% endif %}
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span class="dc-muted fw-semibold">Consultation Fee</span>
                             <span class="fw-semibold dc-mono text-end" id="summaryConsultation">₹{{ bill.consultation_fee|floatformat:2 }}</span>

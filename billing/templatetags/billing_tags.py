@@ -95,3 +95,30 @@ def doctor_display_name(visit, request_user=None):
     if re.match(r'^Dr\.?\s+', name, re.IGNORECASE):
         return name
     return f"Dr. {name}"
+
+
+def _indian_grouping(n):
+    s = str(int(n))
+    if len(s) <= 3:
+        return s
+    groups = [s[-3:]]
+    rest = s[:-3]
+    while rest:
+        groups.insert(0, rest[-2:])
+        rest = rest[:-2]
+    return ','.join(groups)
+
+@register.filter(name='money')
+def money(value):
+    try:
+        val = Decimal(str(value))
+    except Exception:
+        return value
+    sign = '-' if val < 0 else ''
+    val = abs(val)
+    integer_part = int(val)
+    paise = int(round((val - integer_part) * 100))
+    int_str = _indian_grouping(integer_part)
+    if paise:
+        return f"{sign}₹{int_str}.{paise:02d}"
+    return f"{sign}₹{int_str}"

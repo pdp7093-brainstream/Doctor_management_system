@@ -143,15 +143,28 @@
         </table>
     </div>
 
+    {% if therapy_bill_items %}
+    <div class="table-container">
+        <h6>Therapy</h6>
+        <table>
+            <thead><tr><th width="5%">#</th><th>Therapy</th><th>Billing</th><th class="text-right">Sessions</th><th class="text-right">Amount (₹)</th></tr></thead>
+            <tbody>{% for item in therapy_bill_items %}<tr><td>{{ forloop.counter }}</td><td class="item-name">{{ item.therapy_name }}</td><td>{{ item.get_billing_type_display }}</td><td class="text-right dc-num">{{ item.sessions }}</td><td class="text-right dc-num"><strong>₹{{ item.amount|floatformat:2 }}</strong></td></tr>{% endfor %}</tbody>
+            <tfoot><tr><td colspan="4" class="text-right">Therapy total</td><td class="text-right dc-num">₹{{ therapy_subtotal|floatformat:2 }}</td></tr></tfoot>
+        </table>
+    </div>
+    {% endif %}
+
     <!-- Totals Area -->
     <div class="summary-wrapper">
         <div class="totals-box">
             <div class="total-row">
-                <span>Medicines Subtotal</span>
-                <span class="dc-num">₹{{ bill.subtotal|floatformat:2 }}</span>
+                <span>Medicines</span>
+                <span class="dc-num">₹{{ medicine_subtotal|floatformat:2 }}</span>
             </div>
+            {% if therapy_bill_items %}<div class="total-row"><span>Therapy</span><span class="dc-num">₹{{ therapy_subtotal|floatformat:2 }}</span></div>{% endif %}
+            <div class="total-row"><span>Subtotal</span><span class="dc-num">₹{{ bill.subtotal|floatformat:2 }}</span></div>
             <div class="total-row">
-                <span>GST ({{ bill.gst_percent }}% on medicines)</span>
+                <span>GST ({{ bill.gst_percent }}%)</span>
                 <span class="dc-num">₹{{ bill.gst_amount|floatformat:2 }}</span>
             </div>
             <div class="total-row">

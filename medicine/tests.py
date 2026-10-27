@@ -333,6 +333,27 @@ class MedicineImporterTests(TestCase):
         self.assertEqual(_generate_short_name('Mahanarayan Churna', used), 'MC2')
         self.assertEqual(_generate_short_name('Sunth', used), 'SUNT')
 
+    def test_unknown_type_is_previewed_and_created_in_title_case(self):
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.append(['S.No', 'MEDICINE NAME', 'TYPE', 'COMPANY'])
+        sheet.append([1, 'Neeri Tablet', '  NEERI TABLET  ', 'LOCAL'])
+        output = BytesIO()
+        workbook.save(output)
+        workbook.close()
+        output.seek(0)
+
+        rows = parse_names_only_excel(output)
+
+        self.assertEqual(rows[0]['type'], 'Neeri Tablet')
+        self.assertEqual(rows[0]['type_status'], 'New type will be created: Neeri Tablet')
+        result = import_names_only_rows(rows)
+
+        self.assertEqual(result['success_count'], 1)
+        self.assertTrue(MedicineType.objects.filter(name='Neeri Tablet').exists())
+        medicine = Medicine.objects.get(name='Neeri Tablet')
+        self.assertEqual(medicine.medicine_type.name, 'Neeri Tablet')
+
     def test_names_only_duplicates_are_skipped_and_import_creates_no_variants(self):
         Medicine.objects.create(name='Ashwagandha Churna', short_name='OLD-AS')
         workbook = Workbook()
@@ -362,7 +383,14 @@ class MedicineImporterTests(TestCase):
 
         store_response = self.client.get(reverse('medicine:manage_medicine'))
         self.assertContains(store_response, 'Add pack &amp; price')
-        self.assertContains(store_response, 'Incomplete (1)')
+        self.assertContains(store_response, '<option value="incomplete">Incomplete</option>', html=True)
+        self.assertNotContains(store_response, 'Incomplete (1)')
+
+        filtered_response = self.client.get(reverse('medicine:manage_medicine'), {'pack': 'incomplete'})
+        self.assertEqual(
+            [medicine.pk for medicine in filtered_response.context['medicines'].object_list],
+            [incomplete.pk],
+        )
 
         search_response = self.client.get(
             reverse('medicine:search_medicine'),
@@ -372,3 +400,41 @@ class MedicineImporterTests(TestCase):
         self.assertEqual(medicine_result['id'], incomplete.pk)
         self.assertTrue(medicine_result['price_not_set'])
         self.assertEqual(medicine_result['variants'], [])
+
+    def test_manage_medicine_filters_and_query_context(self):
+        self._login_import_user()
+        med_type = MedicineType.objects.create(name='Filter type')
+        in_stock = Medicine.objects.create(
+            name='In stock medicine', short_name='IN-STOCK', medicine_type=med_type,
+            company='Filter Co', is_active=True,
+        )
+        low_stock = Medicine.objects.create(name='Low stock medicine', short_name='LOW-STOCK')
+        out_of_stock = Medicine.objects.create(name='Out of stock medicine', short_name='OUT-STOCK')
+        for medicine, stock in ((in_stock, 20), (low_stock, 5), (out_of_stock, 0)):
+            MedicineVariant.objects.create(
+                medicine=medicine, power='1 pack', cost_price=10, selling_price=15,
+                stock=stock, low_stock_alert=10,
+            )
+
+        url = reverse('medicine:manage_medicine')
+        response = self.client.get(url, {
+            'type': str(med_type.pk), 'company': 'Filter Co', 'pack': 'complete',
+            'stock': 'in_stock', 'status': 'active',
+        })
+        self.assertEqual(
+            [medicine.pk for medicine in response.context['medicines'].object_list],
+            [in_stock.pk],
+        )
+        self.assertEqual(response.context['active_filter_count'], 5)
+        self.assertIn('type=', response.context['pagination_query'])
+        self.assertIn('company=Filter+Co', response.context['pagination_query'])
+
+        for stock_filter, expected in (
+            ('low', low_stock), ('out', out_of_stock),
+        ):
+            stock_response = self.client.get(url, {'stock': stock_filter})
+            self.assertEqual(
+                [medicine.pk for medicine in stock_response.context['medicines'].object_list],
+                [expected.pk],
+            )
+

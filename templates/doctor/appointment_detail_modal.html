@@ -247,8 +247,8 @@
         <h6 class="fw-semibold mb-3">Therapies</h6>
         <div class="table-responsive">
             <table class="table table-sm align-middle">
-                <thead><tr><th>Therapy</th><th>Sessions</th><th>Frequency</th><th>Start date</th><th>Notes</th></tr></thead>
-                <tbody>{% for item in prescription_therapies %}<tr><td>{{ item.therapy.name }} <span class="text-muted small">{{ item.therapy.duration_minutes }} min</span></td><td>{{ item.sessions }}</td><td>{{ item.get_frequency_display }}</td><td>{% if item.start_date %}{{ item.start_date|date:"d M Y" }}{% else %}—{% endif %}</td><td>{{ item.notes|default:"—" }}</td></tr>{% endfor %}</tbody>
+                <thead><tr><th>Therapy</th><th>Progress</th><th>Frequency</th><th>Start date</th><th>Notes</th></tr></thead>
+                <tbody>{% for item in prescription_therapies %}<tr><td>{{ item.therapy.name }} <span class="text-muted small">{{ item.therapy.duration_minutes }} min</span></td><td><div class="small fw-semibold">{{ item.progress_text }}</div><div class="progress" role="progressbar" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100" style="height:6px;min-width:70px"><div class="progress-bar" style="width:{{ item.progress_percent }}%;background:#117A15"></div></div></td><td>{{ item.get_frequency_display }}</td><td>{% if item.start_date %}{{ item.start_date|date:"d M Y" }}{% else %}—{% endif %}</td><td>{{ item.notes|default:"—" }}</td></tr>{% endfor %}</tbody>
             </table>
         </div>
     </div>

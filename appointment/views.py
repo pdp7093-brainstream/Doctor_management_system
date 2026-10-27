@@ -2,6 +2,7 @@ import logging
 import json
 import re
 from datetime import datetime, time, timedelta
+from decimal import Decimal, InvalidOperation
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404, JsonResponse
@@ -20,7 +21,12 @@ from django.utils.dateparse import parse_date
 
 from medicine.models import *
 from .models import *
-from therapy.models import PrescriptionTherapy, Therapy
+from therapy.models import (
+    BILLING_TYPE_CHOICES,
+    BILLING_TYPE_PER_SESSION,
+    PrescriptionTherapy,
+    Therapy,
+)
 from doctor.decorators import role_required
 from accounts.models import Patient, FamilyMember
 from doctor.models import InnerMember
@@ -39,18 +45,32 @@ def parse_prescription_therapies(post_data, prescription=None):
         'therapy_frequency[]',
         'therapy_start[]',
         'therapy_notes[]',
+        'therapy_billing_type[]',
+        'therapy_session_price[]',
+        'therapy_package_price[]',
     )
     values = [post_data.getlist(field_name) for field_name in field_names]
     if len({len(field_values) for field_values in values}) != 1:
         return None, 'Therapy details are incomplete. Please review the therapy list.'
 
-    therapy_ids, item_ids, sessions_list, frequencies, start_dates, notes_list = values
+    (
+        therapy_ids,
+        item_ids,
+        sessions_list,
+        frequencies,
+        start_dates,
+        notes_list,
+        billing_types,
+        session_prices,
+        package_prices,
+    ) = values
     existing_ids = set(
         prescription.therapies.values_list('id', flat=True)
     ) if prescription else set()
     parsed_rows = []
     submitted_item_ids = set()
     valid_frequencies = dict(PrescriptionTherapy.FREQUENCY_CHOICES)
+    valid_billing_types = dict(BILLING_TYPE_CHOICES)
 
     for index, therapy_id in enumerate(therapy_ids):
         if not therapy_id:
@@ -77,6 +97,17 @@ def parse_prescription_therapies(post_data, prescription=None):
         if not 1 <= sessions <= 60:
             return None, 'Therapy sessions must be between 1 and 60.'
 
+        billing_type = billing_types[index]
+        if billing_type not in valid_billing_types:
+            return None, 'Select a valid therapy billing type.'
+        try:
+            session_price = Decimal(session_prices[index])
+            package_price = Decimal(package_prices[index]) if package_prices[index].strip() else None
+        except (InvalidOperation, ValueError, TypeError):
+            return None, 'Enter valid therapy prices.'
+        if session_price < 0 or (package_price is not None and package_price < 0):
+            return None, 'Therapy prices cannot be negative.'
+
         frequency = frequencies[index]
         if frequency not in valid_frequencies:
             return None, 'Select a valid therapy frequency.'
@@ -86,6 +117,9 @@ def parse_prescription_therapies(post_data, prescription=None):
         if start_value and start_date is None:
             return None, 'Enter a valid therapy start date.'
 
+        if item_id and sessions < PrescriptionTherapy.objects.get(pk=item_id).sessions_done:
+            return None, 'Total sessions cannot be less than completed sessions.'
+
         parsed_rows.append({
             'id': item_id or None,
             'therapy': therapy,
@@ -93,6 +127,10 @@ def parse_prescription_therapies(post_data, prescription=None):
             'frequency': frequency,
             'start_date': start_date,
             'notes': notes_list[index].strip(),
+            'billing_type': billing_type,
+            'total_sessions': sessions,
+            'session_price': session_price,
+            'package_price': package_price,
         })
     return parsed_rows, None
 
@@ -111,10 +149,21 @@ def save_prescription_therapies(prescription, therapy_rows):
         item.frequency = row_data['frequency']
         item.start_date = row_data['start_date']
         item.notes = row_data['notes']
+        item.billing_type = row_data['billing_type']
+        item.total_sessions = row_data['total_sessions']
+        item.sessions = row_data['total_sessions']
+        item.session_price = row_data['session_price']
+        item.package_price = row_data['package_price']
         item.save()
         submitted_ids.add(item.pk)
 
-    prescription.therapies.exclude(pk__in=submitted_ids).delete()
+    for item in prescription.therapies.exclude(pk__in=submitted_ids):
+        if item.session_records.exists() or item.therapy_bill_items.exists():
+            if item.status != 'cancelled':
+                item.status = 'cancelled'
+                item.save(update_fields=['status', 'updated_at'])
+        else:
+            item.delete()
 
 
 def normalize_advice_lines(value):
@@ -479,7 +528,7 @@ def appointment_detail_modal(request, hid):
             prescription_items = prescription.items.select_related(
                 'medicine_variant', 'medicine_variant__medicine'
             ).all()
-            prescription_therapies = prescription.therapies.select_related('therapy').all()
+            prescription_therapies = prescription.therapies.select_related('therapy').prefetch_related('session_records').all()
 
     return render(request, 'doctor/appointment_detail.html', {
         'appointment'       : appointment,
@@ -804,6 +853,15 @@ class PrescriptionView(View):
         today = timezone.now().date()
         is_today = visit.appointment.appointment_date == today
 
+        appt = visit.appointment
+        # Block overdue appointments without prescription from opening prescription page
+        if appt.is_overdue:
+            has_prescription = Prescription.objects.filter(visit=visit).exists()
+            if not has_prescription:
+                from django.contrib import messages
+                messages.error(request, 'Overdue appointment: use Action to mark no-show / reschedule / late entry.')
+                return redirect('appointment:manage_appointments')
+
         if visit.appointment.status == 'completed' and visit.visted_status != 'completed':
             visit.visted_status = 'completed'
             visit.save(update_fields=['visted_status'])
@@ -813,7 +871,7 @@ class PrescriptionView(View):
         items = prescription.items.select_related(
             'medicine_variant', 'medicine_variant__medicine'
         )
-        prescription_therapies = prescription.therapies.select_related('therapy')
+        prescription_therapies = prescription.therapies.select_related('therapy').prefetch_related('session_records')
         therapy_options = Therapy.objects.filter(is_active=True)
         lab_documents = visit.lab_documents.all()
 
@@ -1064,7 +1122,7 @@ def appointment_detail(request, hid):
             ).all()
             prescription_items = list(items_qs)
             prescription_therapies = list(
-                prescription.therapies.select_related('therapy').all()
+                prescription.therapies.select_related('therapy').prefetch_related('session_records').all()
             )
 
             for item in prescription_items:
@@ -1104,7 +1162,7 @@ def print_prescription(request, hid):
     prescription_items = prescription.items.select_related(
         'medicine_variant', 'medicine_variant__medicine'
     ).all()
-    prescription_therapies = prescription.therapies.select_related('therapy').all()
+    prescription_therapies = prescription.therapies.select_related('therapy').prefetch_related('session_records').all()
     
     settings = ClinicSettings.get()
     from doctor.models import InnerMember

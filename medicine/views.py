@@ -3,7 +3,7 @@ from doctor import hashid as _hashid
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
-from django.db.models import Q, Exists, OuterRef, Subquery, Count
+from django.db.models import Q, Exists, OuterRef, Subquery, Count, F
 from .models import *
 from django.core.paginator import Paginator
 from django.db import models as db_models
@@ -44,24 +44,111 @@ class ManageMedicineView(LoginRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
+        selected_type = request.GET.get("type", "").strip()
+        if selected_type:
+            try:
+                selected_type = str(int(selected_type))
+            except ValueError:
+                selected_type = ""
+            if selected_type and not MedicineType.objects.filter(pk=selected_type).exists():
+                selected_type = ""
+        selected_company = request.GET.get("company", "").strip()
+        selected_pack = request.GET.get("pack", "").strip()
+        if selected_pack not in {"complete", "incomplete"}:
+            selected_pack = ""
+        selected_stock = request.GET.get("stock", "").strip()
+        if selected_stock not in {"in_stock", "low", "out"}:
+            selected_stock = ""
+        selected_status = request.GET.get("status", "").strip()
+        if selected_status not in {"active", "inactive"}:
+            selected_status = ""
+
         medicines_list = (
             Medicine.objects.select_related("medicine_type")
             .prefetch_related("variants")
-            .annotate(variant_count=Count("variants"))
+            .annotate(variant_count=Count("variants", distinct=True))
             .all()
             .order_by("-created_at")
         )
+        if selected_type:
+            medicines_list = medicines_list.filter(medicine_type_id=selected_type)
+        if selected_company:
+            medicines_list = medicines_list.filter(company=selected_company)
+        if selected_pack == "complete":
+            medicines_list = medicines_list.filter(variant_count__gt=0)
+        elif selected_pack == "incomplete":
+            medicines_list = medicines_list.filter(variant_count=0)
+        if selected_stock == "in_stock":
+            medicines_list = medicines_list.filter(Exists(
+                MedicineVariant.objects.filter(
+                    medicine_id=OuterRef("pk"), stock__gt=F("low_stock_alert")
+                )
+            ))
+        elif selected_stock == "low":
+            medicines_list = medicines_list.filter(Exists(
+                MedicineVariant.objects.filter(
+                    medicine_id=OuterRef("pk"),
+                    stock__gt=0,
+                    stock__lte=F("low_stock_alert"),
+                )
+            ))
+        elif selected_stock == "out":
+            variants = MedicineVariant.objects.filter(medicine_id=OuterRef("pk"))
+            medicines_list = medicines_list.filter(
+                Exists(variants),
+                ~Exists(variants.filter(stock__gt=0)),
+            )
+        if selected_status:
+            medicines_list = medicines_list.filter(is_active=(selected_status == "active"))
+
         paginator = Paginator(medicines_list, 20)
         page_number = request.GET.get("page")
         medicines = paginator.get_page(page_number)
+        companies = (
+            Medicine.objects.exclude(company="")
+            .order_by("company")
+            .values_list("company", flat=True)
+            .distinct()
+        )
+        medicine_types = MedicineType.objects.order_by("sort_order", "name")
+        type_name = MedicineType.objects.filter(pk=selected_type).values_list("name", flat=True).first() if selected_type else ""
+        stock_labels = {"in_stock": "In stock", "low": "Low", "out": "Out"}
+        chip_values = [
+            ("type", selected_type, "Type: " + type_name),
+            ("company", selected_company, "Company: " + selected_company),
+            ("pack", selected_pack, "Pack & price: " + selected_pack.title()),
+            ("stock", selected_stock, "Stock: " + stock_labels.get(selected_stock, "")),
+            ("status", selected_status, "Status: " + selected_status.title()),
+        ]
+        filter_chips = []
+        for key, value, label in chip_values:
+            if value:
+                params = request.GET.copy()
+                params.pop(key, None)
+                params.pop("page", None)
+                query = params.urlencode()
+                filter_chips.append({
+                    "label": label,
+                    "url": "?" + query if query else request.path,
+                })
+        pagination_params = request.GET.copy()
+        pagination_params.pop("page", None)
         return render(
             request,
             "medicine/manage_medicine.html",
             {
                 "medicines": medicines,
-                "incomplete_count": Medicine.objects.annotate(
-                    variant_count=Count("variants")
-                ).filter(variant_count=0).count(),
+                "medicine_types": medicine_types,
+                "companies": companies,
+                "selected_type": selected_type,
+                "selected_company": selected_company,
+                "selected_pack": selected_pack,
+                "selected_stock": selected_stock,
+                "selected_status": selected_status,
+                "active_filter_count": len(filter_chips),
+                "filter_chips": filter_chips,
+                "clear_filters_url": request.path,
+                "pagination_query": pagination_params.urlencode(),
             },
         )
 

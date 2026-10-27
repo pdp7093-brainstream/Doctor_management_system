@@ -1,0 +1,1188 @@
+{% extends "doctor/main.html" %}
+{% load hashid_tags %}
+{% load billing_tags %}
+{% block title %}Therapy Sessions - Doctor Dashboard{% endblock %}
+{% block extra_css %}
+<style>
+.therapy-sessions { --therapy-green:#015315; --therapy-bright:#117A15; --therapy-soft:#EAF4EA; --therapy-orange:#FD6801; --therapy-red:#AD0002; }
+.therapy-sessions .dc-card { border: 1px solid #E5EDE5; border-radius: 14px; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03); background: #ffffff; }
+.therapy-sessions .dc-card-header { min-height: 64px; padding: 1rem 1.35rem; border-bottom: 1px solid #EAEFEA; }
+.therapy-sessions .dc-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 960px;
+  margin: 0;
+}
+.therapy-sessions .dc-table th,
+.therapy-sessions .dc-table td {
+  vertical-align: middle;
+}
+.therapy-sessions .dc-table thead th {
+  background: #F4F8F4;
+  color: #3b4e40;
+  font-size: 0.73rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E2ECE2;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: left;
+}
+.therapy-sessions .dc-table thead th.th-action,
+.therapy-sessions .dc-table thead th:last-child {
+  text-align: right;
+}
+.therapy-sessions .dc-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+.therapy-sessions .dc-table tbody tr:hover {
+  background-color: #F8FAF8;
+}
+.therapy-sessions .dc-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #EEF3EE;
+  vertical-align: middle;
+  text-align: left;
+}
+.therapy-sessions .dc-table tbody td[data-label="Action"],
+.therapy-sessions .dc-table tbody td:last-child {
+  text-align: right;
+}
+.therapy-sessions .dc-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Patient Cell */
+.therapy-sessions .dc-person { display: flex; align-items: center; gap: 10px; }
+.therapy-sessions .dc-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #117A15, #015315);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(1, 83, 21, 0.2);
+}
+.therapy-sessions .dc-avatar.is-family {
+  background: linear-gradient(135deg, #FD6801, #C75200);
+  box-shadow: 0 2px 6px rgba(253, 104, 1, 0.2);
+}
+.therapy-sessions .therapy-patient-name {
+  color: #1a2a1e;
+  font-weight: 600;
+  font-size: 0.92rem;
+  text-decoration: none;
+  line-height: 1.3;
+}
+.therapy-sessions .therapy-patient-name:hover {
+  color: #015315;
+  text-decoration: underline;
+}
+.therapy-sessions .therapy-patient-phone {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Therapy Cell */
+.therapy-sessions .therapy-link {
+  color: #013A0F;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.therapy-sessions .therapy-link:hover {
+  color: #117A15;
+  text-decoration: underline;
+}
+.therapy-sessions .therapy-duration-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: #64748b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 1px 7px;
+  border-radius: 6px;
+  font-weight: 500;
+  margin-top: 3px;
+}
+
+/* Billing Cell */
+.therapy-sessions .therapy-billing-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+.therapy-sessions .therapy-billing-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-block;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.therapy-sessions .therapy-billing-badge.package {
+  background: #EAF4EA;
+  color: #015315;
+  border: 1px solid #c8dfc8;
+}
+.therapy-sessions .therapy-billing-badge.per_session {
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+}
+.therapy-sessions .therapy-price {
+  color: #0f172a;
+  white-space: nowrap;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.therapy-sessions .btn-bill-action {
+  color: #015315;
+  background: #EAF4EA;
+  border: 1px solid #b7dcb7;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.22rem 0.6rem;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.therapy-sessions .btn-bill-action:hover {
+  background: #015315;
+  color: #fff;
+  border-color: #015315;
+}
+.therapy-sessions .unbilled-badge {
+  color: #9a3412;
+  background: #ffedd5;
+  border: 1px solid #fed7aa;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+}
+.therapy-sessions .billed-badge {
+  color: #015315;
+  background: #EAF4EA;
+  border: 1px solid #c8dfc8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Progress Cell */
+.therapy-sessions .therapy-progress { min-width: 0; width: 100%; max-width: 140px; }
+.therapy-sessions .progress {
+  background: #E8EFE8;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.therapy-sessions .progress-bar {
+  border-radius: 999px;
+  background: linear-gradient(90deg, #117A15, #015315);
+}
+.therapy-sessions .progress-percent-pill {
+  background: #EAF4EA;
+  color: #015315;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+/* Action Buttons */
+.therapy-sessions .action-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  white-space: nowrap;
+}
+.therapy-sessions .btn-record {
+  background: #015315 !important;
+  color: #ffffff !important;
+  border: 1px solid #015315 !important;
+  font-size: 13px !important;
+  font-weight: 600;
+  height: 32px !important;
+  padding: 6px 12px !important;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.therapy-sessions .btn-record:hover {
+  background: #013A0F !important;
+  border-color: #013A0F !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(1, 83, 21, 0.25) !important;
+}
+.therapy-sessions .btn-act-delete,
+.therapy-sessions .btn-delete-session {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+  background: #FDECEC !important;
+  border: 1px solid #F6CACA !important;
+  color: #AD0002 !important;
+  font-size: 0.88rem !important;
+  line-height: 1 !important;
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.therapy-sessions .btn-act-delete:hover,
+.therapy-sessions .btn-delete-session:hover {
+  background: #AD0002 !important;
+  border-color: #AD0002 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+.record-session-modal .btn-save-bill { background:#015315 !important; color:#fff !important; border:1px solid #015315; border-radius:8px; font-weight:600; height:40px; padding:0 1.1rem; display:inline-flex; align-items:center; gap:.35rem; }
+.record-session-modal .btn-save-bill:hover { background:#013A0F !important; border-color:#013A0F; color:#fff !important; }
+.record-session-modal .btn-save-bill:disabled { opacity:.75; cursor:wait; }
+.record-session-modal .modal-dialog { max-width:440px; width:100%; }
+.record-session-modal .modal-content { border:0; border-radius:16px; overflow:hidden; }
+.record-session-modal .modal-header { background:#fff; border:0; padding:1.25rem 1.5rem .25rem; }
+.record-session-modal .modal-title { color:#26352b; font-weight:700; font-size:1.1rem; }
+.record-session-modal .modal-subtitle { color:#6B7B6E; font-size:13px; line-height:1.4; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.record-session-modal .form-label { color:#26352b; font-weight:600; }
+.record-session-modal .modal-body { padding:1rem 1.5rem 1.25rem; }
+.record-session-modal .form-control { height:40px; border:1px solid #D7E6D7; border-radius:8px; color:#26352b; }
+.record-session-modal textarea.form-control { height:auto; min-height:72px; }
+.record-session-modal .form-control:focus { border-color:#117A15; box-shadow:0 0 0 .2rem rgba(17,122,21,.13); }
+.record-session-modal .session-segment { display:flex; width:100%; gap:0; border:1px solid #D7E6D7; border-radius:8px; overflow:hidden; }
+.record-session-modal .session-toggle { flex:1 1 50%; height:40px; border:0; border-radius:0; color:#3D4B40; background:#fff; font-weight:600; }
+.record-session-modal .session-toggle + .session-toggle { border-left:1px solid #D7E6D7; }
+.record-session-modal .session-toggle:hover { background:#EAF4EA; }
+.record-session-modal .session-toggle.active[data-session-status="done"] { color:#fff; background:#015315; }
+.record-session-modal .session-toggle.active[data-session-status="missed"] { color:#FD6801; background:#FFF1E6; box-shadow:inset 0 0 0 1px #FD6801; }
+.record-session-modal .session-toggle:focus-visible { position:relative; z-index:1; outline:2px solid #117A15; outline-offset:-2px; box-shadow:none; }
+.record-session-modal .modal-footer { border-top:1px solid #E5EDE5!important; padding:.9rem 1.5rem 1.25rem; display:flex; justify-content:flex-end; align-items:center; gap:.5rem; }
+.record-session-modal .btn-cancel { color:#015315; border:1px solid #015315; background:#fff; font-weight:600; border-radius:8px; height:40px; padding:0 1rem; }
+.record-session-modal .btn-cancel:hover { background:#EAF4EA; }
+.record-session-modal .btn-save { background:#015315 !important; color:#fff !important; border:1px solid #015315; min-width:135px; border-radius:8px; font-weight:600; height:40px; padding:0 1.25rem; display:inline-flex; align-items:center; gap:.35rem; }
+.record-session-modal .btn-save:hover { background:#013A0F !important; border-color:#013A0F; color:#fff !important; }
+.record-session-modal .btn-save:disabled { opacity:.75; cursor:wait; }
+.therapy-toast { position:fixed; right:1rem; top:1rem; z-index:1090; min-width:min(360px,calc(100vw - 2rem)); box-shadow:0 10px 30px #0002; }
+.therapy-sessions .dc-card, .therapy-sessions .dc-card-header { overflow:visible; }
+.therapy-sessions .therapy-filter-container { position:relative; }
+.therapy-sessions .therapy-filter-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(300px, calc(100vw - 2rem));
+  max-height: 70vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #ffffff;
+  border: 1px solid #dce9dc;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12) !important;
+  padding: 1.15rem 1.25rem;
+  z-index: 1050;
+  text-align: left;
+}
+@media (max-width:767.98px) {
+  .therapy-sessions .dc-table { table-layout:auto; min-width:0; }
+  .therapy-sessions .dc-table th, .therapy-sessions .dc-table td { width:auto!important; }
+  .therapy-sessions .dc-table tbody td { padding:9px 2px; }
+  .therapy-sessions .dc-card-header { flex-direction:column; align-items:stretch; gap:1rem; }
+  .therapy-sessions .therapy-filter { display:grid!important; grid-template-columns:1fr; }
+  .therapy-sessions .therapy-filter > * { width:100%!important; }
+  .therapy-sessions .dc-table-wrap { overflow:visible!important; }
+  .therapy-sessions table, .therapy-sessions tbody { display:block; width:100%; }
+  .therapy-sessions thead { display:none; }
+  .therapy-sessions tbody tr { display:block; margin:0 0 14px; padding:10px 12px; border:1px solid #e1e9e1; border-radius:12px; background:#fff; box-shadow:0 2px 10px #183b1b0a; }
+  .therapy-sessions tbody td { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:9px 2px; border:0; text-align:right!important; }
+  .therapy-sessions tbody td:before { content:attr(data-label); flex:0 0 86px; color:#647168; font-size:.78rem; font-weight:650; text-align:left; }
+  .therapy-sessions tbody td:first-child, .therapy-sessions tbody td:nth-child(2) { display:block; text-align:left!important; }
+  .therapy-sessions tbody td:first-child:before { content:'Patient'; display:block; margin-bottom:3px; }
+  .therapy-sessions tbody td:nth-child(2):before { content:'Therapy'; display:block; margin-bottom:3px; }
+  .therapy-sessions tbody td:last-child { justify-content:flex-end; }
+  .therapy-sessions tbody td:last-child:before { margin-right:auto; }
+  .therapy-sessions .therapy-progress { min-width:0; flex:1; }
+  .record-session-modal .modal-dialog { margin:0; max-width:100%; min-height:100%; }
+  .record-session-modal .modal-content { min-height:100vh; border-radius:0; }
+  .record-session-modal .modal-header, .record-session-modal .modal-body, .record-session-modal .modal-footer { padding-left:1.25rem; padding-right:1.25rem; }
+}
+
+.therapy-sessions table td { vertical-align:middle; }
+.therapy-sessions td[data-label="Action"] { white-space:nowrap; }
+.therapy-sessions td[data-label="Action"] > div.action-cell { display:flex; align-items:center; justify-content:flex-end; gap:8px; white-space:nowrap; }
+.therapy-sessions .btn-act-delete { height:40px; width:40px; display:inline-flex; align-items:center; justify-content:center; }
+.therapy-sessions .therapy-price { white-space:normal; }
+@media (min-width:768px) and (max-width:1100px) {
+  .therapy-sessions .dc-table { min-width:940px; }
+  .therapy-sessions .dc-table thead th, .therapy-sessions .dc-table tbody td { padding-left:9px; padding-right:9px; }
+  .therapy-sessions .btn-page-primary.btn-sm { padding:.35rem .55rem; font-size:.78rem; }
+}
+</style>
+{% endblock %}
+{% block content %}
+<main class="main-content therapy-sessions" id="mainContent">
+  <div class="page-head"><div><h2 class="page-title">Therapy Sessions</h2><p class="page-subtitle">Record each visit and follow therapy progress.</p></div></div>
+  {% if messages %}<div class="therapy-toast" aria-live="polite">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} py-2 mb-2">{{ message }}</div>{% endfor %}</div>{% endif %}
+  <div class="dc-card">
+    <div class="dc-card-header justify-content-between">
+      <h3 class="dc-card-title"><i class="bi bi-droplet-half"></i> Prescribed therapies</h3>
+      <div class="therapy-filter-container">
+        <form method="get" id="therapyFilterForm" class="therapy-filter d-flex align-items-center gap-2 flex-nowrap m-0">
+          <div class="dc-search"><i class="bi bi-search"></i><input class="form-control" type="search" name="search" id="filterSearch" value="{{ search }}" placeholder="Patient name or phone" aria-label="Search patient"></div>
+          <button class="btn-page btn-page-outline" type="button" id="filterToggleBtn" aria-expanded="false" aria-controls="filterPanel"><i class="bi bi-funnel"></i> Filter</button>
+
+          <div id="filterPanel" class="therapy-filter-panel d-none" role="region" aria-label="Filter therapies">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+              <span class="fw-bold" style="color:#013A0F;font-size:0.95rem;"><i class="bi bi-sliders me-1"></i> Filter Therapies</span>
+              <button type="button" class="btn-close btn-sm" id="closeFilterPanel" aria-label="Close"></button>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted mb-1" for="filterStatus">Status</label>
+              <select class="form-select form-select-sm" name="status" id="filterStatus" aria-label="Therapy status">
+                <option value="active" {% if request.GET.status|default:'active' == 'active' %}selected{% endif %}>Active</option>
+                <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted mb-1" for="filterTherapy">Therapy</label>
+              <select class="form-select form-select-sm" name="therapy" id="filterTherapy" aria-label="Therapy">
+                <option value="">All therapies</option>
+                {% for t in all_therapies %}
+                  <option value="{{ t.id }}" {% if selected_therapy == t.id|stringformat:"s" or selected_therapy == t.name %}selected{% endif %}>{{ t.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-muted mb-1" for="filterBillingType">Billing Type</label>
+              <select class="form-select form-select-sm" name="billing_type" id="filterBillingType" aria-label="Billing type">
+                <option value="">All billing types</option>
+                <option value="per_session" {% if selected_billing_type == 'per_session' %}selected{% endif %}>Per session</option>
+                <option value="package" {% if selected_billing_type == 'package' %}selected{% endif %}>Package</option>
+              </select>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="filterResetBtn">Reset</button>
+              <button type="submit" class="btn btn-sm px-3" id="filterApplyBtn" style="background:#015315;border-color:#015315;color:#fff;font-weight:600;">Apply</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="dc-table-wrap">
+      <table class="table table-hover dc-table align-middle mb-0">
+        <colgroup>
+          <col style="width: 20%;">
+          <col style="width: 18%;">
+          <col style="width: 16%;">
+          <col style="width: 16%;">
+          <col style="width: 13%;">
+          <col style="width: 17%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Therapy</th>
+            <th>Billing</th>
+            <th>Progress</th>
+            <th>Last session</th>
+            <th class="th-action text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in therapies %}
+          <tr id="therapy-row-{{ item.pk }}" data-therapy-id="{{ item.pk }}">
+            <td data-label="Patient">
+              <div class="dc-person">
+                <div class="dc-avatar {% if item.prescription.visit.appointment.family_member %}is-family{% endif %}">
+                  {% if item.prescription.visit.appointment.family_member %}
+                    {{ item.prescription.visit.appointment.family_member.name|slice:":1"|upper }}
+                  {% else %}
+                    {{ item.prescription.visit.patient.user.get_full_name|default:item.prescription.visit.patient.user.username|slice:":1"|upper }}
+                  {% endif %}
+                </div>
+                <div class="min-w-0">
+                  <div>
+                    <a class="therapy-patient-name text-truncate d-inline-block" style="max-width:180px;" href="{% url 'doctor:therapy:therapy_session_detail' item.pk %}">
+                      {% if item.prescription.visit.appointment.family_member %}
+                        {{ item.prescription.visit.appointment.family_member.name }}
+                      {% else %}
+                        {{ item.prescription.visit.patient.user.get_full_name|default:item.prescription.visit.patient.user.username }}
+                      {% endif %}
+                    </a>
+                  </div>
+                  {% if item.prescription.visit.patient.phone %}
+                    <div class="therapy-patient-phone">
+                      <i class="bi bi-telephone" style="font-size:0.7rem;"></i>{{ item.prescription.visit.patient.phone }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td data-label="Therapy">
+              <div>
+                <a class="therapy-link" href="{% url 'doctor:therapy:therapy_session_detail' item.pk %}">{{ item.therapy.name }}</a>
+              </div>
+              <div>
+                <span class="therapy-duration-pill">
+                  <i class="bi bi-clock"></i>{{ item.therapy.duration_minutes }} min
+                </span>
+              </div>
+            </td>
+            <td data-label="Billing">
+              <div class="therapy-billing-line mb-1">
+                {% if item.billing_type == 'package' %}
+                  <span class="therapy-billing-badge package">Package</span>
+                  <span class="therapy-price">{{ item.package_price|default_if_none:0|money }}</span>
+                {% else %}
+                  <span class="therapy-billing-badge per_session">Per session</span>
+                  <span class="therapy-price">{{ item.session_price|default_if_none:0|money }}</span>
+                {% endif %}
+              </div>
+              {% if item.billing_type == 'package' %}
+                <div id="package-billing-{{ item.pk }}">
+                  {% if item.package_billed %}
+                    <a href="{% url 'billing:print_bill' item.package_billed.visit.id|hid %}?bill_id={{ item.package_billed.id|hid }}" class="badge rounded-pill billed-badge text-decoration-none" title="View bill"><i class="bi bi-receipt"></i> Billed · {{ item.package_billed.bill_number }}</a>
+                  {% else %}
+                    <button type="button" class="btn btn-bill-action btn-bill-package"
+                      data-therapy-id="{{ item.pk }}"
+                      data-bill-url="{% url 'doctor:therapy:bill_therapy_package' item.pk %}"
+                      data-therapy-name="{{ item.therapy.name|escape }}"
+                      data-total-sessions="{{ item.total_sessions }}"
+                      data-package-price="{{ item.package_price|default_if_none:0|floatformat:0 }}"
+                      data-patient="{% if item.prescription.visit.appointment.family_member %}{{ item.prescription.visit.appointment.family_member.name|escape }}{% else %}{{ item.prescription.visit.patient.user.get_full_name|default:item.prescription.visit.patient.user.username|escape }}{% endif %}">
+                      <i class="bi bi-receipt"></i> Bill package {{ item.package_price|default_if_none:0|money }}
+                    </button>
+                  {% endif %}
+                </div>
+              {% else %}
+                {% if item.unbilled_count %}
+                  <div class="d-flex flex-wrap gap-1 align-items-center mt-1" id="session-billing-{{ item.pk }}">
+                    <span class="badge rounded-pill unbilled-badge">{{ item.unbilled_count }} unbilled</span>
+                    <button type="button" class="btn btn-bill-action btn-bill-sessions"
+                      data-therapy-id="{{ item.pk }}"
+                      data-bill-url="{% url 'doctor:therapy:bill_therapy_sessions' item.pk %}"
+                      data-therapy-name="{{ item.therapy.name|escape }}"
+                      data-unbilled-count="{{ item.unbilled_count }}"
+                      data-session-price="{{ item.session_price|default_if_none:0|floatformat:0 }}"
+                      data-unbilled-total="{{ item.unbilled_total|default_if_none:0|floatformat:0 }}"
+                      data-unbilled-sessions="{{ item.unbilled_session_numbers|join:',' }}"
+                      data-patient="{% if item.prescription.visit.appointment.family_member %}{{ item.prescription.visit.appointment.family_member.name|escape }}{% else %}{{ item.prescription.visit.patient.user.get_full_name|default:item.prescription.visit.patient.user.username|escape }}{% endif %}">
+                      <i class="bi bi-receipt"></i> Bill {{ item.unbilled_total|default_if_none:0|money }}
+                    </button>
+                  </div>
+                {% endif %}
+              {% endif %}
+            </td>
+            <td data-label="Progress">
+              <div class="therapy-progress">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="fw-bold" style="font-size:0.84rem;color:#1e293b;">{{ item.progress_text }}</span>
+                  <span class="progress-percent-pill">{{ item.progress_percent }}%</span>
+                </div>
+                <div class="progress" role="progressbar" aria-valuenow="{{ item.progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" style="width:{{ item.progress_percent }}%;"></div>
+                </div>
+              </div>
+            </td>
+            <td data-label="Last session" style="white-space: nowrap;">
+              {% if item.last_session_date %}
+                <span class="d-inline-flex align-items-center text-dark" style="font-size:0.86rem;font-weight:500;white-space:nowrap;">
+                  <i class="bi bi-calendar3 me-1 text-muted" style="font-size:0.75rem;"></i>{{ item.last_session_date|date:"d M Y" }}
+                </span>
+              {% else %}
+                <span class="text-muted small" style="letter-spacing:1px;white-space:nowrap;">—</span>
+              {% endif %}
+            </td>
+            <td data-label="Action" class="text-end" style="white-space: nowrap;">
+              <div class="action-cell">
+                {% if item.status == 'active' and item.sessions_remaining %}
+                  <button type="button" class="btn btn-record btn-page-primary btn-sm" data-bs-toggle="modal" data-bs-target="#recordSessionModal" data-therapy-id="{{ item.pk }}" data-session-url="{% url 'doctor:therapy:mark_session_done' item.pk %}" data-session-no="{{ item.next_session_no }}" data-session-total="{{ item.total_sessions }}" data-session-therapy="{{ item.therapy.name|escape }}" data-billing-type="{{ item.billing_type }}" data-session-price="{{ item.session_price|default_if_none:0|floatformat:0 }}" data-session-patient="{% if item.prescription.visit.appointment.family_member %}{{ item.prescription.visit.appointment.family_member.name|escape }}{% else %}{{ item.prescription.visit.patient.user.get_full_name|default:item.prescription.visit.patient.user.username|escape }}{% endif %}" title="Record session" aria-label="Record session">
+                    <i class="bi bi-plus-lg"></i> Record
+                  </button>
+                {% else %}
+                  <span class="badge rounded-pill" style="color:#015315;background:#EAF4EA;border:1px solid #c8dfc8;padding:6px 10px;font-size:0.75rem;font-weight:600;white-space:nowrap;"><i class="bi bi-check2-circle me-1"></i>Completed</span>
+                {% endif %}
+                <button type="button" class="btn-delete-session btn-act btn-act-delete" data-bs-toggle="modal" data-bs-target="#deleteSessionModal{{ item.pk }}" title="Delete session" aria-label="Delete session"><i class="bi bi-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+          {% empty %}<tr><td colspan="6" class="dc-empty text-center py-5"><i class="bi bi-droplet-half" style="font-size:2rem;color:#ccc"></i><p class="text-muted mb-0 mt-2">No {{ selected_status }} therapies found.</p></td></tr>{% endfor %}
+        </tbody>
+      </table>
+{% for item in therapies %}
+<div class="modal fade" id="deleteSessionModal{{ item.pk }}" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">
+    <div class="modal-content" style="border:0;border-radius:16px;overflow:hidden;">
+      <div class="modal-header" style="background:#fff;border:0;padding:1.25rem 1.5rem .5rem;">
+        <h5 class="modal-title mb-0" style="color:#26352b;font-weight:700;">Manage therapy</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" style="padding:.75rem 1.5rem 1rem;">
+
+        <!-- Radio option styles (scoped inline so no global pollution) -->
+        <style>
+          .mgt-opt { display:flex; align-items:flex-start; gap:.65rem; padding:.65rem .75rem; border:1.5px solid #DCEBDC; border-radius:10px; margin-bottom:.5rem; cursor:pointer; transition:border-color .15s,background .15s; }
+          .mgt-opt:has(input:checked) { border-color:#015315; background:#EAF4EA; }
+          .mgt-opt input[type=radio] { margin-top:.18rem; accent-color:#015315; flex-shrink:0; }
+          .mgt-opt-title { font-size:.88rem; font-weight:600; color:#1a2a1e; line-height:1.3; }
+          .mgt-opt-desc { font-size:.78rem; color:#6B7B6E; margin-top:2px; line-height:1.4; }
+          .mgt-opt-desc.red { color:#AD0002; }
+        </style>
+
+        <!-- Option 1: Remove a session -->
+        {% if item.session_records.all %}
+        <label class="mgt-opt d-block w-100 mb-0" id="mgt-label-rm-session-{{ item.pk }}">
+          <input type="radio" name="mgt_choice_{{ item.pk }}" value="rm_session" class="mgt-radio" data-for="{{ item.pk }}" {% if item.session_records.all %}checked{% endif %}>
+          <div>
+            <div class="mgt-opt-title"><i class="bi bi-x-circle me-1" style="color:#AD0002;"></i>Remove a session</div>
+            <div class="mgt-opt-desc">Select a session below to delete.</div>
+          </div>
+        </label>
+        {% endif %}
+
+        <!-- Option 2: Complete early -->
+        {% if item.can_complete_early %}
+        <label class="mgt-opt d-block w-100 mb-0" id="mgt-label-complete-{{ item.pk }}">
+          <input type="radio" name="mgt_choice_{{ item.pk }}" value="complete_early" class="mgt-radio" data-for="{{ item.pk }}" {% if not item.session_records.all %}checked{% endif %}>
+          <div>
+            <div class="mgt-opt-title"><i class="bi bi-check2-circle me-1" style="color:#015315;"></i>Complete early</div>
+            <div class="mgt-opt-desc">End at {{ item.sessions_done }} of {{ item.total_sessions }} sessions. Remaining sessions will not be charged.</div>
+          </div>
+        </label>
+        {% endif %}
+
+        <!-- Option 3: Remove / Stop entire therapy -->
+        <label class="mgt-opt d-block w-100 mb-0" id="mgt-label-rm-therapy-{{ item.pk }}">
+          <input type="radio" name="mgt_choice_{{ item.pk }}" value="rm_therapy" class="mgt-radio" data-for="{{ item.pk }}" {% if not item.session_records.all and not item.can_complete_early %}checked{% endif %}>
+          <div>
+            {% if item.can_delete_therapy %}
+            <div class="mgt-opt-title"><i class="bi bi-trash me-1" style="color:#AD0002;"></i>Remove entire therapy</div>
+            <div class="mgt-opt-desc red">Deletes this therapy and all its sessions.</div>
+            {% else %}
+            <div class="mgt-opt-title"><i class="bi bi-slash-circle me-1" style="color:#AD0002;"></i>Stop therapy</div>
+            <div class="mgt-opt-desc red">Billed records are kept; therapy is marked cancelled.</div>
+            {% endif %}
+          </div>
+        </label>
+
+        <!-- Session picker (shown only when rm_session chosen) -->
+        {% if item.session_records.all %}
+        <div id="mgt-sessions-{{ item.pk }}" class="mt-3 ps-1">
+          {% for s in item.session_records.all %}
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="session_id_{{ item.pk }}" id="ds{{ item.pk }}_{{ s.pk }}" value="{{ s.pk }}" {% if s.bill_id %}disabled{% endif %}>
+            <label class="form-check-label small" for="ds{{ item.pk }}_{{ s.pk }}">
+              Session {{ s.session_no }} · {{ s.date }} · {{ s.status|capfirst }}
+              {% if s.bill_id %}<span class="badge ms-1" style="color:#015315;background:#EAF4EA;border:1px solid #c8dfc8;font-size:.7rem;">Billed</span>{% endif %}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-footer" style="border-top:1px solid #E5EDE5;padding:.9rem 1.5rem 1.25rem;display:flex;justify-content:flex-end;gap:.5rem;">
+        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal" style="color:#015315;border:1px solid #015315;background:#fff;font-weight:600;border-radius:8px;height:40px;padding:0 1rem;">Cancel</button>
+
+        <!-- Form: Remove session -->
+        <form id="mgt-form-rm-session-{{ item.pk }}" method="post" action="{% url 'doctor:therapy:delete_session' item.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="return_to" value="{{ request.path }}?{{ request.GET.urlencode }}">
+          <input type="hidden" name="session_id" id="mgt-session-id-{{ item.pk }}" value="">
+          <button type="submit" class="btn mgt-confirm-btn" id="mgt-confirm-{{ item.pk }}"
+            style="background:#AD0002 !important;border-color:#AD0002 !important;color:#fff !important;font-weight:600;border-radius:8px;height:40px;padding:0 1.1rem;display:none;">
+            Delete session
+          </button>
+        </form>
+
+        <!-- Form: Complete early -->
+        <form id="mgt-form-complete-{{ item.pk }}" method="post" action="{% url 'doctor:therapy:complete_early' item.pk %}" style="display:none;">
+          {% csrf_token %}
+          <input type="hidden" name="return_to" value="{{ request.path }}?{{ request.GET.urlencode }}">
+          <button type="submit" class="btn" style="background:#015315 !important;border-color:#015315 !important;color:#fff !important;font-weight:600;border-radius:8px;height:40px;padding:0 1.1rem;">
+            Complete therapy
+          </button>
+        </form>
+
+        <!-- Form: Remove / Stop therapy -->
+        <form id="mgt-form-rm-therapy-{{ item.pk }}" method="post" action="{% url 'doctor:therapy:remove_therapy' item.pk %}" style="display:none;">
+          {% csrf_token %}
+          <input type="hidden" name="return_to" value="{{ request.path }}?{{ request.GET.urlencode }}">
+          <button type="submit" class="btn" style="background:#AD0002 !important;border-color:#AD0002 !important;color:#fff !important;font-weight:600;border-radius:8px;height:40px;padding:0 1.1rem;">
+            {% if item.can_delete_therapy %}Delete therapy{% else %}Stop therapy{% endif %}
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+    </div>
+    {% include "partials/pagination.html" with page_obj=page_obj label="sessions" %}
+  </div>
+</main>
+
+<div class="modal fade record-session-modal" id="recordSessionModal" tabindex="-1" aria-labelledby="recordSessionTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><div><h5 class="modal-title mb-0" id="recordSessionTitle">Record session</h5><div class="modal-subtitle" id="recordSessionSubtitle"></div></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <form method="post" id="recordSessionForm" novalidate>{% csrf_token %}<input type="hidden" name="return_to" value="{{ request.path }}"><input type="hidden" name="return_query" value="{{ request.GET.urlencode }}"><div class="modal-body">
+      <div id="recordSessionError" class="alert alert-danger d-none py-2 px-3 small mb-3" role="alert"></div>
+      <label class="form-label" for="recordSessionDate">Date</label><input class="form-control mb-3" type="date" name="date" id="recordSessionDate" value="{{ today|date:'Y-m-d' }}" max="{{ today|date:'Y-m-d' }}" required>
+      <span class="form-label d-block mb-2">Status</span><input type="hidden" name="status" id="recordSessionStatus" value="done"><div class="session-segment mb-3" role="group" aria-label="Session status"><button class="btn session-toggle active" type="button" data-session-status="done" aria-pressed="true"><i class="bi bi-check-lg"></i> Done</button><button class="btn session-toggle" type="button" data-session-status="missed" aria-pressed="false"><i class="bi bi-dash-lg"></i> Missed</button></div>
+      <label class="form-label" for="recordSessionNotes">Notes <span class="text-muted fw-normal">(optional)</span></label><textarea class="form-control" name="notes" id="recordSessionNotes" rows="2" maxlength="1000" placeholder="Add a note about this session"></textarea>
+    </div><div class="modal-footer"><button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-save" id="recordSessionSubmit" form="recordSessionForm"><i class="bi bi-check-lg"></i> <span>Save session</span></button><button type="button" class="btn btn-save-bill" id="recordSessionAndBillBtn"><i class="bi bi-receipt"></i> <span>Save & create bill</span></button></div></form>
+  </div></div>
+</div>
+
+<div class="modal fade confirm-bill-modal" id="confirmBillModal" tabindex="-1" aria-labelledby="confirmBillTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border:0; border-radius:16px; overflow:hidden;">
+      <div class="modal-header" style="background:#fff; border:0; padding:1.25rem 1.5rem .25rem;">
+        <div>
+          <h5 class="modal-title mb-0" id="confirmBillTitle" style="color:#26352b; font-weight:700;">Confirm Therapy Bill</h5>
+          <div class="modal-subtitle text-muted small mt-1" id="confirmBillSubtitle"></div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="confirmBillForm" novalidate>
+        {% csrf_token %}
+        <div class="modal-body" style="padding:1rem 1.5rem 1.25rem;">
+          <div id="confirmBillError" class="alert alert-danger d-none py-2 px-3 small mb-3" role="alert"></div>
+
+          <label class="form-label text-muted small text-uppercase fw-bold mb-2">Therapy Line Items</label>
+          <div id="confirmBillLines" class="mb-3 p-3 bg-light rounded-3" style="border:1px solid #D7E6D7;">
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center py-2 px-1 border-top border-bottom mb-3">
+            <span class="fw-bold" style="color:#26352b;">Total</span>
+            <span class="fw-bold fs-5" id="confirmBillTotal" style="color:#015315;">₹0</span>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-semibold" for="confirmBillPaymentModeSelect" style="color:#26352b;">Payment mode</label>
+            <select class="form-select" id="confirmBillPaymentModeSelect" style="height:40px; border-radius:8px; border-color:#D7E6D7;">
+              <option value="cash" selected>Cash</option>
+              <option value="card">Card</option>
+              <option value="upi">UPI</option>
+              <option value="online">Online</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:1px solid #E5EDE5; padding:.9rem 1.5rem 1.25rem; display:flex; justify-content:flex-end; align-items:center; gap:.5rem;">
+          <button type="button" class="btn btn-cancel" data-bs-dismiss="modal" style="color:#015315; border:1px solid #015315; background:#fff; font-weight:600; border-radius:8px; height:40px; padding:0 1rem;">Cancel</button>
+          <button type="button" class="btn" id="confirmBillSubmit" style="background:#015315 !important; color:#fff !important; border:1px solid #015315; min-width:130px; border-radius:8px; font-weight:600; height:40px; padding:0 1.25rem; display:inline-flex; align-items:center; justify-content:center; gap:.35rem;">
+            <i class="bi bi-check-lg"></i> <span>Confirm</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block page_scripts %}
+<script>
+(() => {
+  const modal = document.getElementById('recordSessionModal');
+  const form = document.getElementById('recordSessionForm');
+  const statusField = document.getElementById('recordSessionStatus');
+  const submitBtn = document.getElementById('recordSessionSubmit');
+  const saveAndBillBtn = document.getElementById('recordSessionAndBillBtn');
+  const errorBox = document.getElementById('recordSessionError');
+  let activeRow = null;
+  let activeRecordButton = null;
+
+  // Confirmation modal elements
+  const confirmModalEl = document.getElementById('confirmBillModal');
+  const confirmModal = confirmModalEl ? new bootstrap.Modal(confirmModalEl) : null;
+  const confirmErrorBox = document.getElementById('confirmBillError');
+  const confirmLinesContainer = document.getElementById('confirmBillLines');
+  const confirmTotalEl = document.getElementById('confirmBillTotal');
+  const confirmSubtitleEl = document.getElementById('confirmBillSubtitle');
+  const confirmPaymentSelect = document.getElementById('confirmBillPaymentModeSelect');
+  const confirmSubmitBtn = document.getElementById('confirmBillSubmit');
+
+  let pendingBillingConfig = null;
+
+  function resetFormErrors() {
+    if (errorBox) {
+      errorBox.classList.add('d-none');
+      errorBox.textContent = '';
+    }
+  }
+
+  function resetConfirmErrors() {
+    if (confirmErrorBox) {
+      confirmErrorBox.classList.add('d-none');
+      confirmErrorBox.textContent = '';
+    }
+  }
+
+  function resetSubmitState() {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.removeAttribute('aria-busy');
+      submitBtn.innerHTML = '<i class="bi bi-check-lg"></i> <span>Save session</span>';
+    }
+    if (saveAndBillBtn) {
+      saveAndBillBtn.disabled = false;
+      saveAndBillBtn.removeAttribute('aria-busy');
+      saveAndBillBtn.innerHTML = '<i class="bi bi-receipt"></i> <span>Save & create bill</span>';
+    }
+  }
+
+  function resetConfirmSubmitState() {
+    if (confirmSubmitBtn) {
+      confirmSubmitBtn.disabled = false;
+      confirmSubmitBtn.removeAttribute('aria-busy');
+      confirmSubmitBtn.innerHTML = '<i class="bi bi-check-lg"></i> <span>Confirm</span>';
+    }
+  }
+
+  function formatCurrency(val) {
+    const num = parseFloat(val) || 0;
+    return '₹' + num.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+  }
+
+  function showConfirmModal(config) {
+    pendingBillingConfig = config;
+    resetConfirmErrors();
+    resetConfirmSubmitState();
+
+    if (confirmSubtitleEl) {
+      confirmSubtitleEl.textContent = config.subtitle || '';
+    }
+    if (confirmPaymentSelect) {
+      confirmPaymentSelect.value = 'cash';
+    }
+    if (confirmTotalEl) {
+      confirmTotalEl.textContent = formatCurrency(config.total);
+    }
+    if (confirmLinesContainer) {
+      confirmLinesContainer.innerHTML = (config.lines || []).map(line => `
+        <div class="d-flex justify-content-between align-items-center py-1">
+          <span class="text-dark fw-medium">${line.name}</span>
+          <span class="fw-semibold text-dark">${formatCurrency(line.amount)}</span>
+        </div>
+      `).join('');
+    }
+    confirmModal?.show();
+  }
+
+  modal?.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget;
+    if (!button) return;
+
+    activeButton = button;
+    activeRecordButton = button;
+    activeRow = button.closest('tr');
+    form.action = button.dataset.sessionUrl || '';
+    form.dataset.therapyId = button.dataset.therapyId || '';
+
+    const subtitle = document.getElementById('recordSessionSubtitle');
+    if (subtitle) {
+      subtitle.textContent = `Session ${button.dataset.sessionNo || ''} of ${button.dataset.sessionTotal || ''} · ${button.dataset.sessionTherapy || ''} · ${button.dataset.sessionPatient || ''}`;
+    }
+
+    const dateField = document.getElementById('recordSessionDate');
+    if (dateField) {
+      dateField.value = '{{ today|date:"Y-m-d" }}';
+    }
+
+    const notesField = document.getElementById('recordSessionNotes');
+    if (notesField) {
+      notesField.value = '';
+    }
+
+    if (statusField) {
+      statusField.value = 'done';
+    }
+
+    // Toggle save & create bill button based on billing type
+    if (saveAndBillBtn) {
+      const isPackage = button.dataset.billingType === 'package';
+      saveAndBillBtn.style.display = isPackage ? 'none' : 'inline-flex';
+    }
+
+    modal.querySelectorAll('[data-session-status]').forEach(toggle => {
+      const active = toggle.dataset.sessionStatus === 'done';
+      toggle.classList.toggle('active', active);
+      toggle.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+
+    resetFormErrors();
+    resetSubmitState();
+  });
+
+  modal?.querySelectorAll('[data-session-status]').forEach(toggle => {
+    toggle.addEventListener('click', () => {
+      const statusVal = toggle.dataset.sessionStatus;
+      if (statusField) {
+        statusField.value = statusVal;
+      }
+      modal.querySelectorAll('[data-session-status]').forEach(item => {
+        const active = item === toggle;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', active ? 'true' : 'false');
+      });
+      if (saveAndBillBtn && activeRecordButton?.dataset?.billingType !== 'package') {
+        saveAndBillBtn.disabled = statusVal !== 'done';
+      }
+    });
+  });
+
+  // Handle "Save & create bill" button from record session modal
+  saveAndBillBtn?.addEventListener('click', () => {
+    resetFormErrors();
+    const dateField = document.getElementById('recordSessionDate');
+    if (!dateField || !dateField.value) {
+      if (errorBox) {
+        errorBox.textContent = 'Please choose a session date.';
+        errorBox.classList.remove('d-none');
+      }
+      return;
+    }
+    if (statusField && statusField.value !== 'done') {
+      if (errorBox) {
+        errorBox.textContent = 'Only completed (Done) sessions can be billed.';
+        errorBox.classList.remove('d-none');
+      }
+      return;
+    }
+
+    const therapyName = activeRecordButton?.dataset?.sessionTherapy || '';
+    const sessionNo = activeRecordButton?.dataset?.sessionNo || '1';
+    const patientName = activeRecordButton?.dataset?.sessionPatient || '';
+    const price = parseFloat(activeRecordButton?.dataset?.sessionPrice) || 0;
+
+    // Hide record session modal
+    bootstrap.Modal.getInstance(modal)?.hide();
+
+    // Show confirmation modal
+    showConfirmModal({
+      type: 'record_and_bill',
+      subtitle: `${patientName} · ${therapyName}`,
+      lines: [
+        { name: `${therapyName} · Session ${sessionNo}`, amount: price }
+      ],
+      total: price,
+    });
+  });
+
+  // Handle list row "Bill ₹..." button (unbilled done sessions)
+  document.addEventListener('click', event => {
+    const billBtn = event.target.closest('.btn-bill-sessions');
+    if (!billBtn) return;
+    event.preventDefault();
+
+    const therapyName = billBtn.dataset.therapyName || '';
+    const patientName = billBtn.dataset.patient || '';
+    const sessionPrice = parseFloat(billBtn.dataset.sessionPrice) || 0;
+    const total = parseFloat(billBtn.dataset.unbilledTotal) || 0;
+    const sessionNumbers = (billBtn.dataset.unbilledSessions || '').split(',').filter(Boolean);
+
+    const lines = sessionNumbers.map(no => ({
+      name: `${therapyName} · Session ${no.trim()}`,
+      amount: sessionPrice,
+    }));
+
+    showConfirmModal({
+      type: 'direct_url',
+      url: billBtn.dataset.billUrl,
+      subtitle: `${patientName} · ${therapyName}`,
+      lines: lines,
+      total: total,
+    });
+  });
+
+  // Handle list row "Bill package ₹..." button
+  document.addEventListener('click', event => {
+    const pkgBtn = event.target.closest('.btn-bill-package');
+    if (!pkgBtn) return;
+    event.preventDefault();
+
+    const therapyName = pkgBtn.dataset.therapyName || '';
+    const patientName = pkgBtn.dataset.patient || '';
+    const totalSessions = pkgBtn.dataset.totalSessions || '1';
+    const total = parseFloat(pkgBtn.dataset.packagePrice) || 0;
+    const sessionsLabel = totalSessions == 1 ? '1 session' : `${totalSessions} sessions`;
+
+    showConfirmModal({
+      type: 'direct_url',
+      url: pkgBtn.dataset.billUrl,
+      subtitle: `${patientName} · ${therapyName}`,
+      lines: [
+        { name: `${therapyName} · Package (${sessionsLabel})`, amount: total }
+      ],
+      total: total,
+    });
+  });
+
+  // Confirmation modal submit
+  confirmSubmitBtn?.addEventListener('click', async () => {
+    if (!pendingBillingConfig || confirmSubmitBtn.disabled) return;
+    resetConfirmErrors();
+
+    confirmSubmitBtn.disabled = true;
+    confirmSubmitBtn.setAttribute('aria-busy', 'true');
+    confirmSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span>Creating bill…</span>';
+
+    const paymentMethod = confirmPaymentSelect?.value || 'cash';
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    try {
+      let response;
+      if (pendingBillingConfig.type === 'record_and_bill') {
+        const formData = new FormData(form);
+        formData.set('create_bill', 'true');
+        formData.set('payment_method', paymentMethod);
+
+        response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+          },
+        });
+      } else {
+        const formData = new FormData();
+        formData.append('payment_method', paymentMethod);
+
+        response = await fetch(pendingBillingConfig.url, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': csrfToken,
+          },
+        });
+      }
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        const errorMessage = data.error || 'Failed to create bill. Please try again.';
+        if (confirmErrorBox) {
+          confirmErrorBox.textContent = errorMessage;
+          confirmErrorBox.classList.remove('d-none');
+        }
+        resetConfirmSubmitState();
+        return;
+      }
+
+      // Success: redirect to bill print page
+      if (data.redirect_url) {
+        window.location.href = data.redirect_url;
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      if (confirmErrorBox) {
+        confirmErrorBox.textContent = 'An unexpected error occurred. Please try again.';
+        confirmErrorBox.classList.remove('d-none');
+      }
+      resetConfirmSubmitState();
+    }
+  });
+
+  form?.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    if (submitBtn.disabled) return;
+    resetFormErrors();
+
+    // Show loading state
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('aria-busy', 'true');
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span><span>Saving…</span>';
+
+    const formData = new FormData(form);
+    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': csrfToken,
+        },
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const errorMessage = data.error || 'Failed to record session. Please check input.';
+        if (errorBox) {
+          errorBox.textContent = errorMessage;
+          errorBox.classList.remove('d-none');
+        }
+        resetSubmitState();
+        return;
+      }
+
+      // Success: close modal
+      const bsModal = bootstrap.Modal.getInstance(modal);
+      if (bsModal) {
+        bsModal.hide();
+      }
+
+      // Reload page or update row
+      window.location.reload();
+    } catch (err) {
+      if (errorBox) {
+        errorBox.textContent = 'An unexpected error occurred. Please try again.';
+        errorBox.classList.remove('d-none');
+      }
+      resetSubmitState();
+    }
+  });
+
+  // Filter panel interactions
+  const filterToggleBtn = document.getElementById('filterToggleBtn');
+  const filterPanel = document.getElementById('filterPanel');
+  const closeFilterPanelBtn = document.getElementById('closeFilterPanel');
+  const filterResetBtn = document.getElementById('filterResetBtn');
+
+  function openFilterPanel() {
+    if (!filterPanel || !filterToggleBtn) return;
+    filterPanel.classList.remove('d-none');
+    filterToggleBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeFilterPanel() {
+    if (!filterPanel || !filterToggleBtn) return;
+    filterPanel.classList.add('d-none');
+    filterToggleBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  function toggleFilterPanel() {
+    if (!filterPanel) return;
+    const isExpanded = filterToggleBtn?.getAttribute('aria-expanded') === 'true';
+    if (isExpanded) {
+      closeFilterPanel();
+    } else {
+      openFilterPanel();
+    }
+  }
+
+  filterToggleBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleFilterPanel();
+  });
+
+  closeFilterPanelBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeFilterPanel();
+  });
+
+  filterPanel?.addEventListener('click', (e) => {
+    e.stopPropagation();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (filterPanel && !filterPanel.classList.contains('d-none')) {
+      if (!filterPanel.contains(e.target) && !filterToggleBtn?.contains(e.target)) {
+        closeFilterPanel();
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      if (filterPanel && !filterPanel.classList.contains('d-none')) {
+        closeFilterPanel();
+      }
+    }
+  });
+
+  filterResetBtn?.addEventListener('click', () => {
+    const searchInput = document.getElementById('filterSearch');
+    if (searchInput) searchInput.value = '';
+    const statusSelect = document.getElementById('filterStatus');
+    if (statusSelect) statusSelect.value = 'active';
+    const therapySelect = document.getElementById('filterTherapy');
+    if (therapySelect) therapySelect.value = '';
+    const billingTypeSelect = document.getElementById('filterBillingType');
+    if (billingTypeSelect) billingTypeSelect.value = '';
+  });
+
+  window.setTimeout(() => document.querySelectorAll('.therapy-toast').forEach(toast => toast.remove()), 5000);
+
+  // Manage therapy modal: radio-card switching
+  document.querySelectorAll('.mgt-radio').forEach(radio => {
+    radio.addEventListener('change', () => {
+      const pk = radio.dataset.for;
+      const choice = radio.value;
+      const formRmSession  = document.getElementById(`mgt-form-rm-session-${pk}`);
+      const formComplete   = document.getElementById(`mgt-form-complete-${pk}`);
+      const formRmTherapy  = document.getElementById(`mgt-form-rm-therapy-${pk}`);
+      const sessionsPicker = document.getElementById(`mgt-sessions-${pk}`);
+      if (formRmSession)  formRmSession.querySelector('button[type=submit]').style.display  = choice === 'rm_session'     ? '' : 'none';
+      if (formComplete)   formComplete.style.display   = choice === 'complete_early' ? '' : 'none';
+      if (formRmTherapy)  formRmTherapy.style.display  = choice === 'rm_therapy'     ? '' : 'none';
+      if (sessionsPicker) sessionsPicker.style.display = choice === 'rm_session'     ? '' : 'none';
+    });
+  });
+
+  // On modal show: trigger change for the default-checked radio
+  document.querySelectorAll('[id^="deleteSessionModal"]').forEach(modalEl => {
+    modalEl.addEventListener('show.bs.modal', () => {
+      const checked = modalEl.querySelector('.mgt-radio:checked');
+      if (checked) checked.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  });
+
+  // Keep hidden session_id in sync with session picker selection
+  document.querySelectorAll('[id^="mgt-sessions-"]').forEach(picker => {
+    const pk = picker.id.replace('mgt-sessions-', '');
+    const hiddenInput = document.getElementById(`mgt-session-id-${pk}`);
+    picker.querySelectorAll('input[type=radio]').forEach(r => {
+      r.addEventListener('change', () => { if (hiddenInput) hiddenInput.value = r.value; });
+    });
+  });
+})();
+</script>
+{% endblock %}

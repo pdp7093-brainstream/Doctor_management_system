@@ -99,7 +99,11 @@ def feedback(request):
         messages.success(request, 'Thank you for your feedback! We truly appreciate it.')
         return redirect('feedback')
 
-    return render(request, 'feedback.html')
+    patient_profile = None
+    if request.user.is_authenticated:
+        patient_profile = Patient.objects.filter(user=request.user).first()
+
+    return render(request, 'feedback.html', {'patient_profile': patient_profile})
 
 def login(request):
     return render(request, 'authentication/login.html')
@@ -352,6 +356,13 @@ def logout_view(request):
 def dashboard(request):
     """Patient dashboard"""
     patient = Patient.objects.get(user=request.user)
+    from therapy.models import PrescriptionTherapy
+
+    my_therapies = PrescriptionTherapy.objects.filter(
+        prescription__visit__patient=patient,
+    ).exclude(status='cancelled').select_related(
+        'therapy', 'prescription__visit__appointment__family_member'
+    ).prefetch_related('session_records').order_by('-created_at')
     
     base_appointments = Appointment.objects.filter(
         patient__user=request.user,
@@ -461,6 +472,7 @@ def dashboard(request):
         'has_any_appointments': appointment_counts['total_visits'] > 0,
         'next_appointment': next_appointment,
         'total_spent': total_spent,
+        'my_therapies': my_therapies,
     }
     return render(request, 'pdashboard/dashboard.html', context)
 

@@ -150,11 +150,22 @@
         </table>
     </div>
 
+    {% if bill.therapy_items.all %}
+    <div class="prescribed-medicines-scroll">
+        <h3>Therapy</h3>
+        <table class="medicines-table bill-prescribed-medicines">
+            <thead><tr><th>#</th><th>Therapy</th><th>Billing</th><th style="text-align:right;">Sessions</th><th style="text-align:right;">Amount (₹)</th></tr></thead>
+            <tbody>{% for item in bill.therapy_items.all %}<tr><td>{{ forloop.counter }}</td><td><strong>{{ item.therapy_name }}</strong></td><td>{{ item.get_billing_type_display }}</td><td style="text-align:right;">{{ item.sessions }}</td><td style="text-align:right;"><strong>₹{{ item.amount|floatformat:2 }}</strong></td></tr>{% endfor %}</tbody>
+            <tfoot><tr><td colspan="4" style="text-align:right;font-weight:600;">Therapy total</td><td style="text-align:right;font-weight:700;">₹{{ therapy_subtotal|floatformat:2 }}</td></tr></tfoot>
+        </table>
+    </div>
+    {% endif %}
+
     <!-- Totals -->
     <div class="totals-section">
         <div class="totals-box">
             <div class="total-row">
-                <span>Medicines</span>
+                <span>Subtotal (medicines and therapy)</span>
                 <span>₹{{ bill.subtotal }}</span>
             </div>
             <div class="total-row">

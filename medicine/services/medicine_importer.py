@@ -405,7 +405,7 @@ def parse_names_only_excel(file):
                     if matched_type:
                         medicine_type = matched_type.name
                     else:
-                        type_status = 'will be created'
+                        type_status = f'New type will be created: {medicine_type}'
 
                 parsed_rows.append({
                     'sheet_name': sheet.title,

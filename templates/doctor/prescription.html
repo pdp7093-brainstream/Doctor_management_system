@@ -301,18 +301,31 @@
                     <button type="button" class="btn-page btn-page-primary" data-bs-toggle="modal" data-bs-target="#therapyModal"><i class="bi bi-plus-lg me-2"></i>Add Therapy</button>
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table align-middle mb-0">
-                            <thead><tr><th>Therapy</th><th>Sessions</th><th>Frequency</th><th>Start date</th><th>Notes</th><th class="text-end">Action</th></tr></thead>
+                            <div class="table-responsive therapy-table-wrap">
+                        <table class="table align-middle mb-0 therapy-prescription-table">
+                            <thead><tr><th>Therapy</th><th>Billing</th><th>Sessions</th><th>Price</th><th>Amount</th><th>Frequency</th><th>Start date</th><th>Notes</th><th>Progress</th><th class="text-end">Action</th></tr></thead>
                             <tbody id="therapyList">
                                 {% for item in prescription_therapies %}
-                                <tr class="therapy-prescription-row">
-                                    <td><div class="fw-semibold">{{ item.therapy.name }}</div><small class="text-muted">{{ item.therapy.duration_minutes }} min</small><input type="hidden" name="therapy_id[]" value="{{ item.therapy_id }}"><input type="hidden" name="therapy_item_id[]" value="{{ item.id }}"></td>
-                                    <td>{{ item.sessions }}<input type="hidden" name="therapy_sessions[]" value="{{ item.sessions }}"></td>
-                                    <td>{{ item.get_frequency_display }}<input type="hidden" name="therapy_frequency[]" value="{{ item.frequency }}"></td>
-                                    <td>{% if item.start_date %}{{ item.start_date|date:"d M Y" }}{% else %}—{% endif %}<input type="hidden" name="therapy_start[]" value="{{ item.start_date|date:'Y-m-d' }}"></td>
-                                    <td>{{ item.notes|default:"—" }}<input type="hidden" name="therapy_notes[]" value="{{ item.notes }}"></td>
-                                    <td class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
+                                <tr class="therapy-prescription-row" data-billing-type="{{ item.billing_type }}">
+                                    <td data-label="Therapy"><div class="fw-semibold">{{ item.therapy.name }}</div><small class="text-muted">{{ item.therapy.duration_minutes }} min</small><input type="hidden" name="therapy_id[]" value="{{ item.therapy_id }}"><input type="hidden" name="therapy_item_id[]" value="{{ item.id }}"></td>
+                                    <td data-label="Billing"><select class="form-select form-select-sm therapy-billing-select" name="therapy_billing_type[]"><option value="per_session" {% if item.billing_type == 'per_session' %}selected{% endif %}>Per session</option><option value="package" {% if item.billing_type == 'package' %}selected{% endif %}>Package</option></select></td>
+                                    <td data-label="Sessions"><input class="form-control form-control-sm therapy-sessions-input" type="number" name="therapy_sessions[]" value="{{ item.total_sessions }}" min="1" max="60" required></td>
+                                    <td data-label="Price">
+                                        <div class="therapy-price-option" data-price-type="per_session" {% if item.billing_type == 'package' %}hidden{% endif %}>
+                                            <input class="form-control form-control-sm therapy-price-input" type="number" name="therapy_session_price[]" value="{{ item.session_price|default_if_none:'0' }}" min="0" step="0.01" required>
+                                            <small class="therapy-price-helper">per session</small><small class="therapy-price-warning" hidden>Price not set</small>
+                                        </div>
+                                        <div class="therapy-price-option" data-price-type="package" {% if item.billing_type != 'package' %}hidden{% endif %}>
+                                            <input class="form-control form-control-sm therapy-price-input" type="number" name="therapy_package_price[]" value="{{ item.package_price|default_if_none:'' }}" min="0" step="0.01">
+                                            <small class="therapy-price-helper">Package · one-time</small><small class="therapy-price-warning" hidden>Price not set</small>
+                                        </div>
+                                    </td>
+                                    <td data-label="Amount" class="therapy-amount-cell"><strong class="therapy-amount"></strong></td>
+                                    <td data-label="Frequency"><select class="form-select form-select-sm" name="therapy_frequency[]"><option value="daily" {% if item.frequency == 'daily' %}selected{% endif %}>Daily</option><option value="alternate" {% if item.frequency == 'alternate' %}selected{% endif %}>Alternate days</option><option value="twice_week" {% if item.frequency == 'twice_week' %}selected{% endif %}>Twice a week</option><option value="weekly" {% if item.frequency == 'weekly' %}selected{% endif %}>Weekly</option></select></td>
+                                    <td data-label="Start date"><input class="form-control form-control-sm therapy-start-input" type="date" name="therapy_start[]" value="{{ item.start_date|date:'Y-m-d' }}"></td>
+                                    <td data-label="Notes"><details class="therapy-notes"><summary class="btn btn-sm btn-outline-secondary" title="Edit notes" aria-label="Edit notes"><i class="bi bi-pencil-square"></i></summary><input class="form-control form-control-sm" name="therapy_notes[]" value="{{ item.notes }}" aria-label="Therapy notes"></details></td>
+                                    <td data-label="Progress"><span class="small text-muted">{{ item.progress_text }}</span><div class="progress therapy-progress" style="height:5px"><div class="progress-bar" role="progressbar" style="width:{{ item.progress_percent }}%;background:#117A15"></div></div></td>
+                                    <td data-label="Action" class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -351,18 +364,32 @@
     </style>
     <div class="modal fade" id="therapyModal" tabindex="-1" aria-labelledby="therapyModalTitle" aria-hidden="true" data-visit-date="{{ visit.appointment.appointment_date|date:'Y-m-d' }}">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg rounded-4">
-                <div class="modal-header border-bottom-0 px-4 pt-4"><h5 class="modal-title fw-bold" id="therapyModalTitle">Add Therapy</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-                <div class="modal-body px-4">
-                    <div class="mb-3"><label for="therapySearchInput" class="form-label fw-semibold">Therapy</label><input type="search" class="form-control mb-2" id="therapySearchInput" placeholder="Search active therapies..." autocomplete="off"><select class="form-select" id="therapySelect"><option value="">Select therapy</option>{% for therapy in therapy_options %}<option value="{{ therapy.id }}" data-duration="{{ therapy.duration_minutes }}">{{ therapy.name }}</option>{% endfor %}</select></div>
-                    <div class="row g-3">
-                        <div class="col-md-6"><label for="therapySessionsInput" class="form-label fw-semibold">Sessions</label><input type="number" class="form-control" id="therapySessionsInput" value="7" min="1" max="60" required></div>
-                        <div class="col-md-6"><label for="therapyFrequencyInput" class="form-label fw-semibold">Frequency</label><select class="form-select" id="therapyFrequencyInput"><option value="daily">Daily</option><option value="alternate">Alternate days</option><option value="twice_week">Twice a week</option><option value="weekly">Weekly</option></select></div>
-                        <div class="col-12"><label for="therapyStartInput" class="form-label fw-semibold">Start date</label><input type="date" class="form-control" id="therapyStartInput" value="{{ visit.appointment.appointment_date|date:'Y-m-d' }}"></div>
-                        <div class="col-12"><label for="therapyNotesInput" class="form-label fw-semibold">Notes</label><textarea class="form-control" id="therapyNotesInput" rows="2"></textarea></div>
+            <div class="modal-content border-0 shadow-lg rounded-4" style="max-height:90vh;display:flex;flex-direction:column;">
+                <div class="modal-header border-bottom-0 px-4 pt-4 sticky-top bg-white"><h5 class="modal-title fw-bold" id="therapyModalTitle">Add Therapy</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+                <div class="modal-body px-4" style="overflow-y:auto;flex:1 1 auto;">
+                    <div class="mb-3 position-relative">
+                        <label class="form-label" style="font-size:13px;color:#3D4B40;">Therapy</label>
+                        <input type="text" class="form-control" id="therapySearchInput" placeholder="Search therapies..." autocomplete="off" style="height:40px;border-radius:8px;">
+                        <div id="therapyDropdown" class="list-group position-absolute w-100 shadow-sm" style="z-index:1050;max-height:220px;overflow:auto;display:none;"></div>
+                        <input type="hidden" id="therapySelect" value="">
+<select id="therapyOptionsSource" style="display:none;"><option value="">Select therapy</option>{% for therapy in therapy_options %}<option value="{{ therapy.id }}" data-duration="{{ therapy.duration_minutes }}" data-billing-type="{{ therapy.default_billing_type }}" data-default-sessions="{{ therapy.default_sessions }}" data-session-price="{{ therapy.session_price }}" data-package-price="{{ therapy.package_price|default_if_none:'' }}" data-name="{{ therapy.name }}">{{ therapy.name }}</option>{% endfor %}</select>
+                        <div id="therapySummaryChip" class="mt-2" style="display:none;"><span class="badge" style="background:#EAF4EA;color:#015315;"></span></div>
                     </div>
+                    <div class="row g-3">
+                        <div class="col-6"><label class="form-label" style="font-size:13px;color:#3D4B40;">Billing type</label><div class="billing-toggle" role="radiogroup" aria-label="Billing type"><button type="button" class="billing-toggle-seg active" role="radio" aria-checked="true" data-billing="per_session">Per session</button><button type="button" class="billing-toggle-seg" role="radio" aria-checked="false" data-billing="package">Package</button></div><input type="hidden" id="therapyBillingTypeInput" value="per_session"></div>
+                        <div class="col-6"><label class="form-label" style="font-size:13px;color:#3D4B40;">Sessions</label><input type="number" class="form-control" id="therapySessionsInput" value="1" min="1" max="60" style="height:40px;border-radius:8px;"></div>
+                        <div class="col-6" id="sessionPriceWrap"><label class="form-label" style="font-size:13px;color:#3D4B40;">Session price</label><input type="number" class="form-control" id="therapySessionPriceInput" value="0.00" min="0" step="0.01" style="height:40px;border-radius:8px;"></div>
+                        <div class="col-6" id="packagePriceWrap" style="display:none;"><label class="form-label" style="font-size:13px;color:#3D4B40;">Package price</label><input type="number" class="form-control" id="therapyPackagePriceInput" min="0" step="0.01" style="height:40px;border-radius:8px;"></div>
+                        <div class="col-6"><label class="form-label" style="font-size:13px;color:#3D4B40;">Frequency</label><select class="form-select" id="therapyFrequencyInput" style="height:40px;border-radius:8px;"><option value="daily">Daily</option><option value="alternate">Alternate days</option><option value="twice_week">Twice a week</option><option value="weekly">Weekly</option></select></div>
+                        <div class="col-6"><label class="form-label" style="font-size:13px;color:#3D4B40;">Start date</label><input type="date" class="form-control" id="therapyStartInput" value="{{ visit.appointment.appointment_date|date:'Y-m-d' }}" style="height:40px;border-radius:8px;"></div>
+                        <div class="col-12"><label class="form-label" style="font-size:13px;color:#3D4B40;">Notes</label><textarea class="form-control" id="therapyNotesInput" rows="2" style="border-radius:8px;"></textarea></div>
+                    </div>
+                    <div id="therapyTotalPreview" class="mt-3 p-2 rounded" style="background:#EAF4EA;color:#015315;font-size:13px;"></div>
                 </div>
-                <div class="modal-footer border-top-0 px-4 pb-4"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-primary" onclick="addTherapyRow()">Add Therapy</button></div>
+                <div class="modal-footer border-top-0 px-4 pb-4 sticky-bottom bg-white" style="justify-content:flex-end;gap:8px;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn" id="addTherapyBtn" onclick="addTherapyRow()" disabled style="background:#015315;color:#fff;">Add Therapy</button>
+                </div>
             </div>
         </div>
     </div>
@@ -505,7 +532,7 @@
 
     <!-- ===== STYLES ===== -->
 
-    <link rel="stylesheet" href="{% static 'assets/css/prescription.css' %}?v=5">
+    <link rel="stylesheet" href="{% static 'assets/css/prescription.css' %}?v=6">
 
 
     <!-- ===== Toast Notification Container ===== -->
@@ -514,6 +541,6 @@
         style="top: 20px; right: 20px; z-index: 9999;"></div>
 
     <!-- ===== SCRIPTS ===== -->
-    <script src="{% static 'assets/js/prescription.js' %}?v=7"></script>
+    <script src="{% static 'assets/js/prescription.js' %}?v=8"></script>
 </main>
 {% endblock %}

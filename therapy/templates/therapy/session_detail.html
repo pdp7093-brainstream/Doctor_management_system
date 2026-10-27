@@ -1,0 +1,46 @@
+{% extends "doctor/main.html" %}
+{% block title %}Session History - {{ prescribed.therapy.name }}{% endblock %}
+{% block extra_css %}
+<style>
+.therapy-history { --therapy-green:#015315; --therapy-bright:#117A15; --therapy-soft:#EAF4EA; --therapy-orange:#FD6801; --therapy-red:#AD0002; }
+.therapy-history .history-header { border:0; border-radius:16px; background:linear-gradient(135deg,#EAF4EA,#fff); }
+.therapy-history .history-title { color:var(--therapy-green); }
+.therapy-history .history-meta { color:#536359; }
+.therapy-history .history-progress { height:9px; background:#dce9dc; }
+.therapy-history .history-progress .progress-bar { background:var(--therapy-bright); }
+.therapy-history .session-timeline { position:relative; }
+.therapy-history .session-row { display:grid; grid-template-columns:64px minmax(120px,1fr) auto; gap:16px; align-items:start; padding:18px 4px; border-bottom:1px solid #e8eee8; }
+.therapy-history .session-row:last-child { border-bottom:0; }
+.therapy-history .session-number { color:var(--therapy-green); font-weight:700; }
+.therapy-history .status-done { color:#075c17; background:#EAF4EA; }
+.therapy-history .status-missed { color:#8a3900; background:#fff0e5; }
+.therapy-history .status-pending { color:#58645b; background:#eef1ee; }
+.therapy-history .billed-badge { color:#015315; background:#EAF4EA; border:1px solid #c8dfc8; }
+.therapy-history .btn-undo { color:#AD0002; border-color:#AD0002; }
+@media(max-width:575.98px) { .therapy-history .session-row { grid-template-columns:1fr; gap:7px; } .therapy-history .session-row .session-action { justify-self:start; } }
+</style>
+{% endblock %}
+{% block content %}
+<main class="main-content therapy-history" id="mainContent">
+  <div class="page-head d-flex justify-content-between align-items-start gap-3"><div><h2 class="page-title">Session history</h2><p class="page-subtitle">{{ patient_name }} · {{ prescribed.therapy.name }}</p></div><a href="{% url 'doctor:therapy:therapy_sessions' %}" class="btn-page btn-page-outline"><i class="bi bi-arrow-left"></i> Back to sessions</a></div>
+  {% if messages %}<div class="mb-3">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} py-2">{{ message }}</div>{% endfor %}</div>{% endif %}
+  <section class="dc-card history-header mb-4"><div class="dc-card-body p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3"><div><div class="small text-uppercase fw-semibold history-meta">Patient</div><h3 class="history-title mb-1">{{ patient_name }}</h3><div class="history-meta">{{ prescribed.therapy.name }}</div></div>
+      <div class="text-sm-end"><span class="badge rounded-pill" style="background:#EAF4EA;color:#015315">{{ prescribed.get_billing_type_display }}</span><div class="fw-semibold mt-2">{% if prescribed.billing_type == 'package' %}₹{{ prescribed.package_price|default_if_none:0|floatformat:0 }} package{% else %}₹{{ prescribed.session_price|default_if_none:0|floatformat:0 }} / session{% endif %}</div></div></div>
+    <div class="d-flex justify-content-between small mt-4 mb-1"><span class="fw-semibold">Progress</span><span>{{ prescribed.progress_text }} sessions</span></div><div class="progress history-progress" role="progressbar" aria-valuenow="{{ prescribed.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ prescribed.progress_percent }}%"></div></div>
+  </div></section>
+  <section class="dc-card"><div class="dc-card-header"><h3 class="dc-card-title mb-0"><i class="bi bi-clock-history"></i> Timeline</h3></div><div class="dc-card-body session-timeline">
+    {% for entry in timeline %}{% with session=entry.session %}
+    <article class="session-row">
+      <div class="session-number">Session {{ entry.number }}</div>
+      <div>
+        {% if session %}<div class="d-flex flex-wrap align-items-center gap-2 mb-1"><span class="badge rounded-pill {% if session.status == 'done' %}status-done{% else %}status-missed{% endif %}">{% if session.status == 'done' %}Done{% else %}Missed{% endif %}</span><span class="small text-muted">{{ session.date|date:"d M Y" }}</span>{% if session.bill %}<span class="badge rounded-pill billed-badge"><i class="bi bi-receipt"></i> Billed · {{ session.bill.bill_number }}</span>{% endif %}</div>
+          <div class="small text-muted">{% if session.done_by %}Recorded by {{ session.done_by.user.get_full_name|default:session.done_by.user.username }}{% else %}Recorded by —{% endif %}</div>{% if session.notes %}<div class="mt-2">{{ session.notes|linebreaksbr }}</div>{% endif %}
+        {% else %}<span class="badge rounded-pill status-pending">Pending</span>{% endif %}
+      </div>
+      <div class="session-action">{% if session and session.pk == undo_session_id %}<form method="post" action="{% url 'doctor:therapy:undo_session' session.pk %}" onsubmit="return confirm('Undo this latest unbilled done session?');">{% csrf_token %}<input type="hidden" name="return_to" value="{{ request.META.HTTP_REFERER|default:request.path }}"><button type="submit" class="btn btn-sm btn-outline-danger btn-undo"><i class="bi bi-arrow-counterclockwise"></i> Undo</button></form>{% endif %}</div>
+    </article>
+    {% endwith %}{% endfor %}
+  </div></section>
+</main>
+{% endblock %}

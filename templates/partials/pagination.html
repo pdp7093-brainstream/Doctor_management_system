@@ -1,0 +1,46 @@
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+<style>
+.dc-pagination{border-top:1px solid #E6EFE6;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.dc-pagination .dc-page-info{font-size:13px;color:#6B7B6E}
+.dc-pagination .dc-page-btns{display:flex;align-items:center;gap:6px}
+.dc-page-btn{height:34px;min-width:34px;padding:0 10px;border:1px solid #D7E6D7;border-radius:8px;background:#fff;color:#015315;font-size:13px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;opacity:1}
+.dc-page-btn:hover{background:#EAF4EA}
+.dc-page-btn.active{background:#015315;color:#fff;border-color:#015315}
+.dc-page-btn:disabled{opacity:.45;pointer-events:none}
+.dc-page-btn:focus-visible{outline:2px solid #117A15;outline-offset:1px}
+.dc-page-ellipsis{color:#6B7B6E;padding:0 4px}
+@media (max-width:767.98px){
+  .dc-pagination{flex-direction:column;align-items:center;text-align:center}
+  .dc-pagination .dc-page-btns .dc-page-num{display:none}
+  .dc-pagination .dc-page-mobile{display:inline-flex;align-items:center;gap:8px}
+}
+.dc-page-mobile{display:none}
+</style>
+<div class="dc-pagination">
+  <div class="dc-page-info">Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ page_obj.paginator.count }} {{ label|default:"items" }}</div>
+  <div class="dc-page-btns">
+    {% if page_obj.has_previous %}
+      <a class="dc-page-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">« Prev</a>
+    {% else %}
+      <button class="dc-page-btn" disabled>« Prev</button>
+    {% endif %}
+    <span class="dc-page-mobile"><span class="dc-page-btn active" style="pointer-events:none">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></span>
+    <span class="dc-page-num">
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <span class="dc-page-btn active">{{ num }}</span>
+        {% elif num == 1 or num == page_obj.paginator.num_pages or num >= page_obj.number|add:'-2' and num <= page_obj.number|add:'2' %}
+          <a class="dc-page-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a>
+        {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+          <span class="dc-page-ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+    </span>
+    {% if page_obj.has_next %}
+      <a class="dc-page-btn" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v|urlencode }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Next »</a>
+    {% else %}
+      <button class="dc-page-btn" disabled>Next »</button>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
