@@ -15,10 +15,6 @@
     justify-content: center;
 }
 
-@media (max-width: 768px) {
-    .about-banner { height: 220px; }
-}
-
 .about-banner .banner-content {
     max-width: 640px;
     text-align: left;
@@ -37,6 +33,17 @@
     font-size: 1.1rem;
     margin: 0;
     line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .about-banner {
+        height: auto;
+        min-height: 220px;
+        padding: calc(var(--header-h, 76px) + 24px) 20px 28px;
+    }
+    .about-banner .banner-content { margin: auto; }
+    .about-banner .banner-content h1 { font-size: clamp(30px, 8vw, 32px); line-height: 1.2; }
+    .about-banner .banner-content p { font-size: 15px; }
 }
 
 /* ── Shared section spacing ─────────────────────────── */

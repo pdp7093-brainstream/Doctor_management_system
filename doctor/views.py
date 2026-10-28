@@ -2,6 +2,7 @@ import json
 import logging
 import random
 import re
+from datetime import date, timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import OperationalError, ProgrammingError, transaction
@@ -14,6 +15,7 @@ from django.views.decorators.cache import never_cache
 from django.views import View
 from .decorators import role_required, owner_required
 from .models import InnerMember
+from .utils import get_default_doctor
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument, PatientOldDocument
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -179,21 +181,22 @@ def logout_view(request):
 class DashboardView(View):
     def get(self, request):
         today  = timezone.localdate()
+        default_doctor = get_default_doctor()
 
-        # Show all appointments for today so doctor can handle any booked slot.
-        # This includes appointments booked by patients and unassigned doctor slots.
         today_appointments = Appointment.objects.filter(
             appointment_date=today,
-            is_archived=False
-        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('time_slot')
+            is_archived=False,
+            doctor=default_doctor,
+        ).select_related('patient__user', 'family_member', 'doctor__user', 'booked_by').order_by('time_slot') if default_doctor else Appointment.objects.none()
 
         today_counts = Appointment.objects.filter(
             appointment_date=today,
-            is_archived=False
+            is_archived=False,
+            doctor=default_doctor,
         ).aggregate(
             total=Count('id'),
             remaining_today=Count('id', filter=Q(status='pending')),
-        )
+        ) if default_doctor else {'total': 0, 'remaining_today': 0}
         total_staff = InnerMember.objects.filter(role='biller').count()
 
         context = {
@@ -248,13 +251,15 @@ def cancel_appointment(request, hid):
     appointment.save(update_fields=['status', 'cancellation_reason'])
 
     today = timezone.localdate()
+    default_doctor = get_default_doctor()
     today_counts = Appointment.objects.filter(
         appointment_date=today,
-        is_archived=False
+        is_archived=False,
+        doctor=default_doctor,
     ).aggregate(
         total=Count('id'),
         remaining_today=Count('id', filter=Q(status='pending')),
-    )
+    ) if default_doctor else {'total': 0, 'remaining_today': 0}
     
     return JsonResponse({
         'success': True,
@@ -665,9 +670,15 @@ def add_patient(request):
 @role_required('doctor')
 def staff_view(request):
     billers = InnerMember.objects.filter(role='biller').select_related('user')
+    doctors = InnerMember.objects.filter(role='doctor', user__is_active=True).select_related('user')
     pending_doctors = InnerMember.objects.filter(role='doctor', user__is_active=False).select_related('user')
     is_owner = hasattr(request.user, 'innermember') and request.user.innermember.is_owner
-    return render(request, 'doctor/staff.html', {'billers': billers, 'pending_doctors': pending_doctors, 'is_owner': is_owner})
+    return render(request, 'doctor/staff.html', {
+        'billers': billers,
+        'doctors': doctors,
+        'pending_doctors': pending_doctors,
+        'is_owner': is_owner,
+    })
 
 # ─────────────────────────────────────────
 # Add Staff (biller)
@@ -770,8 +781,16 @@ def edit_staff(request, member_id):
         return JsonResponse({'success': False, 'error': 'Invalid method'})
 
     try:
-        member = get_object_or_404(InnerMember, id=member_id, role='biller')
+        member = get_object_or_404(InnerMember, id=member_id, role__in=['biller', 'doctor'])
         data   = json.loads(request.body)
+        is_owner = request.user.innermember.is_owner
+
+        if member.role == 'doctor' and not is_owner:
+            return JsonResponse({'success': False, 'error': 'Only the clinic owner can edit doctors.'}, status=403)
+        if 'is_default_doctor' in data:
+            if not is_owner or member.role != 'doctor':
+                return JsonResponse({'success': False, 'error': 'Only the clinic owner can set the default doctor.'}, status=403)
+            member.is_default_doctor = data['is_default_doctor'] is True
 
         name     = data.get('name', '').strip()
         email    = data.get('email', '').strip()
@@ -914,60 +933,165 @@ from django.db.models import Q
 
 @login_required(login_url='doctor:login')
 @role_required('doctor')
+def leave_appointment_preview(request):
+    if request.method != 'GET':
+        return JsonResponse({'error': 'Invalid method.'}, status=405)
+
+    try:
+        start_date = date.fromisoformat(request.GET.get('from_date', ''))
+        end_date = date.fromisoformat(request.GET.get('to_date', ''))
+    except (TypeError, ValueError):
+        return JsonResponse({'error': 'Please choose a valid date range.'}, status=400)
+
+    day_count = (end_date - start_date).days + 1
+    if start_date < timezone.localdate():
+        return JsonResponse({'error': 'Leave cannot be added for a past date.'}, status=400)
+    if day_count < 1 or day_count > 60:
+        return JsonResponse({'error': 'Please choose a valid range of up to 60 days.'}, status=400)
+
+    leave_type = request.GET.get('leave_type')
+    if leave_type not in dict(DoctorLeave.LEAVE_CHOICES):
+        return JsonResponse({'error': 'Please select a leave type.'}, status=400)
+
+    doctor = get_default_doctor()
+    existing_dates = DoctorLeave.objects.filter(
+        doctor=doctor,
+        date__range=(start_date, end_date),
+    ).values_list('date', flat=True)
+    dates_without_leave = [
+        start_date + timedelta(days=offset)
+        for offset in range(day_count)
+        if start_date + timedelta(days=offset) not in existing_dates
+    ]
+
+    appointments = Appointment.objects.filter(
+        doctor=doctor,
+        appointment_date__in=dates_without_leave,
+        status__in=['pending', 'confirmed'],
+        is_archived=False,
+    ).select_related('patient__user', 'family_member').order_by('appointment_date', 'time_slot')
+
+    clinic = ClinicSettings.objects.first()
+    if not clinic or not clinic.lunch_start:
+        appointments = appointments.none()
+    elif leave_type == 'first_half':
+        appointments = appointments.filter(time_slot__lt=clinic.lunch_start)
+    elif leave_type == 'second_half':
+        appointments = appointments.filter(time_slot__gte=clinic.lunch_start)
+
+    count = appointments.count()
+    preview = []
+    for appointment in appointments[:10]:
+        patient_name = (
+            appointment.family_member.name
+            if appointment.family_member_id
+            else appointment.patient.user.get_full_name() or appointment.patient.user.username
+        )
+        preview.append({
+            'patient': patient_name,
+            'date': appointment.appointment_date.strftime('%d %b %Y'),
+            'time': appointment.time_slot.strftime('%I:%M %p').lstrip('0'),
+        })
+
+    return JsonResponse({
+        'count': count,
+        'appointments': preview,
+        'more': max(count - len(preview), 0),
+    })
+
+
+@login_required(login_url='doctor:login')
+@role_required('doctor')
 def manage_leaves(request):
-    doctor = request.user.innermember
+    doctor = get_default_doctor()
     leaves = DoctorLeave.objects.filter(doctor=doctor).order_by('-date')
 
     if request.method == 'POST':
-        date = request.POST.get('date')
+        start_date = request.POST.get('from_date')
+        end_date = request.POST.get('to_date') or start_date
         leave_type = request.POST.get('leave_type')
         reason = request.POST.get('reason')
 
-        if DoctorLeave.objects.filter(doctor=doctor, date=date).exists():
-            messages.error(request, f"Leave already exists for {date}.")
-        else:
-            leave = DoctorLeave.objects.create(
+        try:
+            start_date = date.fromisoformat(start_date)
+            end_date = date.fromisoformat(end_date)
+        except (TypeError, ValueError):
+            messages.error(request, 'Please enter a valid leave date range.')
+            return redirect('doctor:manage_leaves')
+
+        day_count = (end_date - start_date).days + 1
+        if start_date < timezone.localdate():
+            messages.error(request, 'Leave cannot be added for a past date')
+            return redirect('doctor:manage_leaves')
+        if day_count < 1:
+            messages.error(request, 'To date cannot be before From date.')
+            return redirect('doctor:manage_leaves')
+        if day_count > 60:
+            messages.error(request, 'A leave range cannot exceed 60 days.')
+            return redirect('doctor:manage_leaves')
+
+        dates = [start_date + timedelta(days=offset) for offset in range(day_count)]
+        added_dates = []
+        cancelled_count = 0
+        clinic = ClinicSettings.objects.first()
+
+        for leave_date in dates:
+            _, created = DoctorLeave.objects.get_or_create(
                 doctor=doctor,
-                date=date,
-                leave_type=leave_type,
-                reason=reason
+                date=leave_date,
+                defaults={'leave_type': leave_type, 'reason': reason},
             )
-            
-            # Cancel overlapping appointments
-            clinic = ClinicSettings.objects.first()
+            if not created:
+                continue
+            added_dates.append(leave_date)
+
+            # Cancel overlapping appointments using the same half-day rules as single-day leave.
             if clinic and clinic.lunch_start:
-                lunch_time = clinic.lunch_start
                 overlapping = Appointment.objects.filter(
                     doctor=doctor,
-                    appointment_date=date,
+                    appointment_date=leave_date,
                     status__in=['pending', 'confirmed'],
-                    is_archived=False
+                    is_archived=False,
                 )
-                
                 if leave_type == 'first_half':
-                    overlapping = overlapping.filter(time_slot__lt=lunch_time)
+                    overlapping = overlapping.filter(time_slot__lt=clinic.lunch_start)
                 elif leave_type == 'second_half':
-                    overlapping = overlapping.filter(time_slot__gte=lunch_time)
-                
-                count = overlapping.count()
+                    overlapping = overlapping.filter(time_slot__gte=clinic.lunch_start)
+                cancelled_count += overlapping.count()
                 overlapping.update(status='cancelled', cancellation_reason=reason)
-                
-                msg = "Leave added successfully."
-                if count > 0:
-                    msg += f" {count} appointment(s) were automatically cancelled."
-                messages.success(request, msg)
+
+        if added_dates:
+            if start_date == end_date:
+                date_label = f'{start_date.day} {start_date.strftime("%b")}'
+            elif start_date.year == end_date.year and start_date.month == end_date.month:
+                date_label = f'{start_date.day}–{end_date.day} {end_date.strftime("%b")}'
             else:
-                messages.success(request, "Leave added successfully. (Note: Please set clinic lunch time in settings for accurate half-day tracking).")
+                date_label = f'{start_date.day} {start_date.strftime("%b")}–{end_date.day} {end_date.strftime("%b")}'
+                if start_date.year != end_date.year:
+                    date_label = f'{start_date.day} {start_date.strftime("%b %Y")}–{end_date.day} {end_date.strftime("%b %Y")}'
+            msg = f"Leave added for {len(added_dates)} {'day' if len(added_dates) == 1 else 'days'} ({date_label})."
+            if len(added_dates) != day_count:
+                msg += ' Existing leave dates were skipped.'
+            if cancelled_count:
+                msg += f' {cancelled_count} appointment(s) were automatically cancelled.'
+            elif not (clinic and clinic.lunch_start):
+                msg += ' Please set clinic lunch time in settings for accurate half-day tracking.'
+            messages.success(request, msg)
+        else:
+            messages.warning(request, 'Leave already exists for all selected dates.')
             
         return redirect('doctor:manage_leaves')
 
-    return render(request, 'doctor/manage_leaves.html', {'leaves': leaves})
+    return render(request, 'doctor/manage_leaves.html', {
+        'leaves': leaves,
+        'today': timezone.localdate(),
+    })
 
 
 @login_required(login_url='doctor:login')
 @role_required('doctor')
 def delete_leave(request, pk):
-    doctor = request.user.innermember
+    doctor = get_default_doctor()
     leave = get_object_or_404(DoctorLeave, pk=pk, doctor=doctor)
     if request.method == 'POST':
         leave.delete()

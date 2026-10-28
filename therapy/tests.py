@@ -570,6 +570,74 @@ class TherapyTests(TestCase):
         self.assertRedirects(post_resp, reverse('doctor:therapy:therapy_sessions'))
         self.assertTrue(PrescriptionTherapy.objects.filter(pk=prescribed.pk).exists())
 
+    def test_reduce_plan_marks_completed_at_done_count(self):
+        prescribed = self.make_prescribed_therapy(total_sessions=2)
+        TherapySession.objects.create(
+            prescription_therapy=prescribed,
+            session_no=1,
+            status=TherapySession.STATUS_DONE,
+        )
+        self.client.force_login(self.doctor_user)
+        detail_url = reverse('doctor:therapy:therapy_session_detail', args=[prescribed.pk])
+
+        response = self.client.post(
+            reverse('doctor:therapy:reduce_therapy_plan', args=[prescribed.pk]),
+            {'return_to': detail_url},
+        )
+
+        self.assertRedirects(response, detail_url)
+        prescribed.refresh_from_db()
+        self.assertEqual(prescribed.total_sessions, 1)
+        self.assertEqual(prescribed.status, 'completed')
+
+    def test_reduce_plan_never_goes_below_done_count(self):
+        prescribed = self.make_prescribed_therapy(total_sessions=1)
+        TherapySession.objects.create(
+            prescription_therapy=prescribed,
+            session_no=1,
+            status=TherapySession.STATUS_DONE,
+        )
+        self.client.force_login(self.doctor_user)
+
+        response = self.client.post(
+            reverse('doctor:therapy:reduce_therapy_plan', args=[prescribed.pk]),
+        )
+
+        prescribed.refresh_from_db()
+        self.assertEqual(prescribed.total_sessions, 1)
+        self.assertEqual(prescribed.status, 'active')
+        self.assertRedirects(
+            response,
+            reverse('doctor:therapy:therapy_session_detail', args=[prescribed.pk]),
+        )
+
+    def test_biller_cannot_reduce_plan_or_delete_session(self):
+        from doctor.models import InnerMember
+        biller_user = User.objects.create_user(username='therapy-action-biller')
+        InnerMember.objects.create(user=biller_user, role='biller', is_owner=False)
+        prescribed = self.make_prescribed_therapy(total_sessions=2)
+        session = TherapySession.objects.create(
+            prescription_therapy=prescribed,
+            session_no=1,
+            status=TherapySession.STATUS_DONE,
+        )
+        self.client.force_login(biller_user)
+        detail_url = reverse('doctor:therapy:therapy_session_detail', args=[prescribed.pk])
+
+        reduce_response = self.client.post(
+            reverse('doctor:therapy:reduce_therapy_plan', args=[prescribed.pk]),
+        )
+        delete_response = self.client.post(
+            reverse('doctor:therapy:delete_session', args=[prescribed.pk]),
+            {'session_id': session.pk},
+        )
+
+        prescribed.refresh_from_db()
+        self.assertRedirects(reduce_response, detail_url)
+        self.assertRedirects(delete_response, detail_url)
+        self.assertEqual(prescribed.total_sessions, 2)
+        self.assertTrue(TherapySession.objects.filter(pk=session.pk).exists())
+
     def test_can_delete_therapy_flag_in_session_list(self):
         unbilled = self.make_prescribed_therapy(status='active', therapy_name='Unbilled Therapy')
         billed = self.make_prescribed_therapy(status='active', therapy_name='Billed Therapy')

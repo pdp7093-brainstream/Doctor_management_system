@@ -11,6 +11,7 @@ urlpatterns = [
     path('sessions/<int:session_pk>/undo/', views.UndoTherapySessionView.as_view(), name='undo_session'),
     path('sessions/<int:pk>/record/', views.MarkTherapySessionDoneView.as_view(), name='mark_session_done'),
     path('sessions/<int:pk>/delete-session/', views.DeleteTherapySessionView.as_view(), name='delete_session'),
+    path('sessions/<int:pk>/reduce-plan/', views.ReduceTherapyPlanView.as_view(), name='reduce_therapy_plan'),
     path('sessions/<int:pk>/remove/', views.RemoveTherapyView.as_view(), name='remove_therapy'),
     path('sessions/<int:pk>/complete-early/', views.CompleteEarlyView.as_view(), name='complete_early'),
     path('sessions/<int:pk>/bill-sessions/', views.BillTherapySessionsView.as_view(), name='bill_therapy_sessions'),

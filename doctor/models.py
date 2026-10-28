@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.contrib.auth.models import User
 # Create your models here.
 
@@ -11,6 +11,7 @@ class InnerMember(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     is_owner = models.BooleanField(default=False, help_text='Clinic owner / main doctor — only they can view Clinic Settings')
+    is_default_doctor = models.BooleanField(default=False)
     phone  = models.CharField(max_length=15, blank=True, default='') 
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
 
@@ -21,6 +22,23 @@ class InnerMember(models.Model):
         blank=True,
         related_name='staff'
     )
+
+    def save(self, *args, **kwargs):
+        update_fields = kwargs.get('update_fields')
+        if self.role != 'doctor' and self.is_default_doctor:
+            self.is_default_doctor = False
+            if update_fields is not None:
+                kwargs['update_fields'] = set(update_fields) | {'is_default_doctor'}
+
+        if self.is_default_doctor:
+            if update_fields is not None:
+                kwargs['update_fields'] = set(update_fields) | {'is_default_doctor'}
+            with transaction.atomic():
+                type(self).objects.exclude(pk=self.pk).filter(is_default_doctor=True).update(
+                    is_default_doctor=False
+                )
+                return super().save(*args, **kwargs)
+        return super().save(*args, **kwargs)
 
     def get_full_name(self):
         return f"{self.user.first_name} {self.user.last_name}"

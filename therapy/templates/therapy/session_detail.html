@@ -1,4 +1,5 @@
 {% extends "doctor/main.html" %}
+{% load billing_tags %}
 {% block title %}Session History - {{ prescribed.therapy.name }}{% endblock %}
 {% block extra_css %}
 <style>
@@ -9,14 +10,17 @@
 .therapy-history .history-progress { height:9px; background:#dce9dc; }
 .therapy-history .history-progress .progress-bar { background:var(--therapy-bright); }
 .therapy-history .session-timeline { position:relative; }
-.therapy-history .session-row { display:grid; grid-template-columns:64px minmax(120px,1fr) auto; gap:16px; align-items:start; padding:18px 4px; border-bottom:1px solid #e8eee8; }
+.therapy-history .session-row { display:grid; grid-template-columns:max-content minmax(120px,1fr) auto; gap:16px; align-items:start; padding:18px 4px; border-bottom:1px solid #e8eee8; }
 .therapy-history .session-row:last-child { border-bottom:0; }
-.therapy-history .session-number { color:var(--therapy-green); font-weight:700; }
+.therapy-history .session-number { color:var(--therapy-green); font-weight:700; white-space:nowrap; }
 .therapy-history .status-done { color:#075c17; background:#EAF4EA; }
 .therapy-history .status-missed { color:#8a3900; background:#fff0e5; }
 .therapy-history .status-pending { color:#58645b; background:#eef1ee; }
 .therapy-history .billed-badge { color:#015315; background:#EAF4EA; border:1px solid #c8dfc8; }
 .therapy-history .btn-undo { color:#AD0002; border-color:#AD0002; }
+.therapy-history .btn-complete { color:var(--therapy-green); border-color:var(--therapy-green); background:transparent; }
+.therapy-history .btn-complete:hover { color:#fff; background:var(--therapy-green); }
+.therapy-history .session-action .btn-act { width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center; }
 @media(max-width:575.98px) { .therapy-history .session-row { grid-template-columns:1fr; gap:7px; } .therapy-history .session-row .session-action { justify-self:start; } }
 </style>
 {% endblock %}
@@ -26,7 +30,9 @@
   {% if messages %}<div class="mb-3">{% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} py-2">{{ message }}</div>{% endfor %}</div>{% endif %}
   <section class="dc-card history-header mb-4"><div class="dc-card-body p-4">
     <div class="d-flex flex-wrap justify-content-between align-items-start gap-3"><div><div class="small text-uppercase fw-semibold history-meta">Patient</div><h3 class="history-title mb-1">{{ patient_name }}</h3><div class="history-meta">{{ prescribed.therapy.name }}</div></div>
-      <div class="text-sm-end"><span class="badge rounded-pill" style="background:#EAF4EA;color:#015315">{{ prescribed.get_billing_type_display }}</span><div class="fw-semibold mt-2">{% if prescribed.billing_type == 'package' %}₹{{ prescribed.package_price|default_if_none:0|floatformat:0 }} package{% else %}₹{{ prescribed.session_price|default_if_none:0|floatformat:0 }} / session{% endif %}</div></div></div>
+      <div class="text-sm-end"><span class="badge rounded-pill" style="background:#EAF4EA;color:#015315">{{ prescribed.get_billing_type_display }}</span><div class="fw-semibold mt-2">{% if prescribed.billing_type == 'package' %}{{ prescribed.package_price|default_if_none:0|money }} package{% else %}{{ prescribed.session_price|default_if_none:0|money }} / session{% endif %}</div>
+        {% if can_manage and prescribed.status == 'active' and prescribed.sessions_done >= 1 %}<form method="post" action="{% url 'doctor:therapy:complete_early' prescribed.pk %}" class="mt-2">{% csrf_token %}<input type="hidden" name="return_to" value="{{ request.path }}"><button type="submit" class="btn btn-sm btn-outline-success btn-complete">Complete therapy</button></form>{% endif %}
+      </div></div>
     <div class="d-flex justify-content-between small mt-4 mb-1"><span class="fw-semibold">Progress</span><span>{{ prescribed.progress_text }} sessions</span></div><div class="progress history-progress" role="progressbar" aria-valuenow="{{ prescribed.progress_percent }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:{{ prescribed.progress_percent }}%"></div></div>
   </div></section>
   <section class="dc-card"><div class="dc-card-header"><h3 class="dc-card-title mb-0"><i class="bi bi-clock-history"></i> Timeline</h3></div><div class="dc-card-body session-timeline">
@@ -34,13 +40,40 @@
     <article class="session-row">
       <div class="session-number">Session {{ entry.number }}</div>
       <div>
-        {% if session %}<div class="d-flex flex-wrap align-items-center gap-2 mb-1"><span class="badge rounded-pill {% if session.status == 'done' %}status-done{% else %}status-missed{% endif %}">{% if session.status == 'done' %}Done{% else %}Missed{% endif %}</span><span class="small text-muted">{{ session.date|date:"d M Y" }}</span>{% if session.bill %}<span class="badge rounded-pill billed-badge"><i class="bi bi-receipt"></i> Billed · {{ session.bill.bill_number }}</span>{% endif %}</div>
+        {% if session %}<div class="d-flex flex-wrap align-items-center gap-2 mb-1"><span class="badge rounded-pill {% if session.status == 'done' %}status-done{% else %}status-missed{% endif %}">{% if session.status == 'done' %}Done{% else %}Missed{% endif %}</span><span class="small text-muted">{{ session.date|date:"d M Y" }}</span>{% if session.bill %}<span class="badge rounded-pill billed-badge"><i class="bi bi-lock-fill"></i> Billed · {{ session.bill.bill_number }}</span>{% endif %}</div>
           <div class="small text-muted">{% if session.done_by %}Recorded by {{ session.done_by.user.get_full_name|default:session.done_by.user.username }}{% else %}Recorded by —{% endif %}</div>{% if session.notes %}<div class="mt-2">{{ session.notes|linebreaksbr }}</div>{% endif %}
         {% else %}<span class="badge rounded-pill status-pending">Pending</span>{% endif %}
       </div>
-      <div class="session-action">{% if session and session.pk == undo_session_id %}<form method="post" action="{% url 'doctor:therapy:undo_session' session.pk %}" onsubmit="return confirm('Undo this latest unbilled done session?');">{% csrf_token %}<input type="hidden" name="return_to" value="{{ request.META.HTTP_REFERER|default:request.path }}"><button type="submit" class="btn btn-sm btn-outline-danger btn-undo"><i class="bi bi-arrow-counterclockwise"></i> Undo</button></form>{% endif %}</div>
+      <div class="session-action">
+        {% if can_manage and session.status == 'done' and not session.bill %}<button type="button" class="btn-act btn-act-delete" data-bs-toggle="modal" data-bs-target="#sessionActionModal" data-action-url="{% url 'doctor:therapy:delete_session' prescribed.pk %}" data-session-id="{{ session.pk }}" data-action-kind="delete" data-session-number="{{ entry.number }}" title="Delete session" aria-label="Delete session"><i class="bi bi-trash"></i></button>
+        {% elif can_manage and not session and entry.number == prescribed.total_sessions and prescribed.status == 'active' and prescribed.total_sessions > prescribed.sessions_done %}<button type="button" class="btn-act btn-act-delete" data-bs-toggle="modal" data-bs-target="#sessionActionModal" data-action-url="{% url 'doctor:therapy:reduce_therapy_plan' prescribed.pk %}" data-action-kind="reduce" data-current-total="{{ prescribed.total_sessions }}" data-next-total="{{ prescribed.total_sessions|add:'-1' }}" title="Remove from plan" aria-label="Remove from plan"><i class="bi bi-x-lg"></i></button>{% endif %}
+      </div>
     </article>
     {% endwith %}{% endfor %}
   </div></section>
+  <div class="modal fade" id="sessionActionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="sessionActionTitle">Confirm action</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body" id="sessionActionMessage"></div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button><form method="post" id="sessionActionForm">{% csrf_token %}<input type="hidden" name="session_id" id="sessionActionSessionId"><input type="hidden" name="return_to" value="{{ request.path }}"><button type="submit" class="btn btn-danger" id="sessionActionSubmit">Confirm</button></form></div>
+    </div></div>
+  </div>
 </main>
+<script>
+document.getElementById('sessionActionModal').addEventListener('show.bs.modal', function (event) {
+  const trigger = event.relatedTarget;
+  const kind = trigger.dataset.actionKind;
+  const form = document.getElementById('sessionActionForm');
+  const title = document.getElementById('sessionActionTitle');
+  const message = document.getElementById('sessionActionMessage');
+  const sessionId = document.getElementById('sessionActionSessionId');
+  form.action = trigger.dataset.actionUrl;
+  sessionId.value = trigger.dataset.sessionId || '';
+  sessionId.disabled = kind !== 'delete';
+  title.textContent = kind === 'delete' ? 'Delete session?' : 'Reduce therapy plan?';
+  message.textContent = kind === 'delete'
+    ? `Delete Session ${trigger.dataset.sessionNumber}?`
+    : `Reduce plan from ${trigger.dataset.currentTotal} to ${trigger.dataset.nextTotal} sessions?`;
+});
+</script>
 {% endblock %}

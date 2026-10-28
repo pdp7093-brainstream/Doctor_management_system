@@ -76,10 +76,16 @@ document.getElementById('saveAddStaff').addEventListener('click', function () {
 document.querySelectorAll('.btn-edit-staff').forEach(btn => {
     btn.addEventListener('click', function () {
         document.getElementById('editStaffId').value = this.dataset.id;
+        document.getElementById('editStaffId').dataset.role = this.dataset.role || 'biller';
         document.getElementById('editStaffName').value = this.dataset.name;
         document.getElementById('editStaffEmail').value = this.dataset.email;
         document.getElementById('editStaffPhone').value = this.dataset.phone;
         document.getElementById('editStaffActive').value = this.dataset.active;
+        const defaultDoctorField = document.getElementById('defaultDoctorField');
+        if (defaultDoctorField) {
+            defaultDoctorField.style.display = this.dataset.role === 'doctor' ? '' : 'none';
+            document.getElementById('editStaffDefaultDoctor').checked = this.dataset.default === 'true';
+        }
         clearErr('editErr');
         openModal('editStaffModal');
     });
@@ -92,16 +98,22 @@ document.getElementById('saveEditStaff').addEventListener('click', function () {
     const email = document.getElementById('editStaffEmail').value.trim();
     const phone = document.getElementById('editStaffPhone').value.trim();
     const is_active = document.getElementById('editStaffActive').value === 'true';
+    const role = document.getElementById('editStaffId').dataset.role;
 
     clearErr('editErr');
     if (!name) { showErr('editErr', 'Name is required.'); return; }
 
     this.disabled = true; this.textContent = 'Saving...';
 
+    const payload = { name, email, phone, is_active };
+    if (role === 'doctor') {
+        payload.is_default_doctor = document.getElementById('editStaffDefaultDoctor').checked;
+    }
+
     fetch(`/doctor/staff/edit/${id}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-        body: JSON.stringify({ name, email, phone, is_active }),
+        body: JSON.stringify(payload),
     })
         .then(r => r.json())
         .then(data => {

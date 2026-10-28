@@ -14,7 +14,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="{% static 'assets/img/ayurveda/favicon_io/favicon-32x32.png' %}">
   <link rel="icon" type="image/png" sizes="16x16" href="{% static 'assets/img/ayurveda/favicon_io/favicon-16x16.png' %}">
   <link rel="apple-touch-icon" sizes="180x180" href="{% static 'assets/img/ayurveda/favicon_io/apple-touch-icon.png' %}">
-  <link rel="manifest" href="{% static 'assets/img/ayurveda/favicon_io/site.webmanifest' %}">
+  <link rel="manifest" href="{% static 'assets/img/ayurveda/favicon_io/site.webmanifest' %}" crossorigin="use-credentials">
 
   <!-- Fonts -->
   {% block fonts %}
@@ -59,6 +59,19 @@
   {% endblock %}
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.publicSwalCustomClass = {
+      popup: 'swal-site-popup',
+      title: 'swal-site-title',
+      confirmButton: 'swal-site-confirm',
+      cancelButton: 'swal-site-cancel',
+      denyButton: 'swal-site-confirm',
+    };
+    window.Swal = window.Swal.mixin({
+      customClass: window.publicSwalCustomClass,
+      buttonsStyling: false,
+    });
+  </script>
   {% block vendor_js %}
   <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'assets/aos/aos.js' %}"></script>

@@ -2,6 +2,8 @@ import json
 import re
 import random
 import logging
+import calendar
+from datetime import date, timedelta
 from .models import *
 from .forms import *
 from django.http import JsonResponse
@@ -12,7 +14,6 @@ from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.contrib.auth.forms import SetPasswordForm
-from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from django.utils.encoding import force_str
@@ -20,6 +21,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.urls import reverse
 from django.views.decorators.cache import never_cache
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument
 from doctor.models import InnerMember
@@ -32,6 +34,24 @@ from appointment.file_validation import validate_uploaded_document
 from .emails import send_welcome_email
 
 security_logger = logging.getLogger('accounts.security')
+
+def _patient_dob_bounds():
+    today = timezone.localdate()
+    min_year = today.year - 120
+    min_day = min(today.day, calendar.monthrange(min_year, today.month)[1])
+    return date(min_year, today.month, min_day), today - timedelta(days=1)
+
+
+def _valid_patient_dob(value):
+    if not value:
+        return True
+    try:
+        dob = date.fromisoformat(value)
+    except (TypeError, ValueError):
+        return False
+    dob_min, dob_max = _patient_dob_bounds()
+    return dob_min <= dob <= dob_max
+
 
 def activate_patient(request, uidb64, token):
     from .tokens import patient_invite_token_generator
@@ -127,6 +147,13 @@ def add_family_member(request):
         dob = data.get('dob', '').strip() or None
         bld_grop = data.get('bld_grop', '').strip() or None
 
+        if not _valid_patient_dob(dob):
+            return JsonResponse({
+                'success': False,
+                'field': 'dob',
+                'error': 'Please enter a valid date of birth',
+            })
+
         if not name or not relation:
             return JsonResponse({'success': False, 'error': 'Name and relation are required.'})
 
@@ -186,6 +213,14 @@ def update_family_member(request, hid):
         data = json.loads(request.body)
         name = data.get('name', '').strip()
         relation = data.get('relation', '').strip()
+        dob = data.get('dob') or None
+
+        if not _valid_patient_dob(dob):
+            return JsonResponse({
+                'success': False,
+                'field': 'dob',
+                'error': 'Please enter a valid date of birth',
+            })
 
         if not name or not relation:
             return JsonResponse({'success': False, 'error': 'Name and relation are required.'})
@@ -201,7 +236,7 @@ def update_family_member(request, hid):
         member.name = name
         member.relation = relation
         member.gender = data.get('gender') or None
-        member.dob = data.get('dob') or None
+        member.dob = dob
         member.bld_grop = data.get('bld_grop') or None
         member.phone = data.get('phone', '').strip() or None
         member.save()
@@ -482,6 +517,9 @@ def dashboard(request):
 def profile(request):
     """Patient profile page"""
     patient, created = Patient.objects.get_or_create(user=request.user)
+    dob_min, dob_max = _patient_dob_bounds()
+    profile_dob_error = request.session.pop('profile_dob_error', False)
+    profile_dob_value = request.session.pop('profile_dob_value', '')
     family_members = FamilyMember.objects.filter(patient=patient)
     lab_documents = LabDocument.objects.filter(
         visit__patient=patient
@@ -520,6 +558,10 @@ def profile(request):
         'uploaded_documents': uploaded_documents,
         'profile_completeness': profile_completeness,
         'missing_profile_fields': missing_profile_fields,
+        'dob_min': dob_min.isoformat(),
+        'dob_max': dob_max.isoformat(),
+        'profile_dob_error': profile_dob_error,
+        'profile_dob_value': profile_dob_value,
     })
 
 @login_required
@@ -645,89 +687,68 @@ def profile_settings(request):
     user = request.user
     patient, created = Patient.objects.get_or_create(user=user)
 
-    if request.method == 'POST':
-        # Get form data
-        first_name = request.POST.get('first_name', '').strip()
-        email = request.POST.get('email', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        address = request.POST.get('address', '').strip() or None
-        dob = request.POST.get('dob') or None
-        gender = request.POST.get('gender') or None
-        bld_grop = request.POST.get('bld_grop') or None
+    if request.method != 'POST':
+        focus_field = request.GET.get('field', '')
+        if focus_field not in {'full_name', 'phone', 'dob', 'gender', 'bld_grop', 'address'}:
+            focus_field = ''
+        return redirect(f"{reverse('profile')}?edit=1&field={focus_field}")
 
-        errors = []
-        old_email = user.email
-        email_changed = (email or old_email or '').casefold() != (old_email or '').casefold()
-        if email_changed and not user.check_password(request.POST.get('current_password', '')):
-            errors.append('Enter your current password to change your email.')
+    full_name = request.POST.get('full_name', request.POST.get('first_name', '')).strip()
+    phone = request.POST.get('phone', '').strip()
+    address = request.POST.get('address', '').strip() or None
+    dob = request.POST.get('dob') or None
+    gender = request.POST.get('gender') or None
+    bld_grop = request.POST.get('bld_grop') or None
+
+    errors = []
+    if not _valid_patient_dob(dob):
+        request.session['profile_dob_error'] = True
+        request.session['profile_dob_value'] = dob
+        return redirect(f"{reverse('profile')}?edit=1&field=dob")
+
+    if not full_name:
+        errors.append('Full name is required.')
 
         # Validate phone if provided
-        if phone:
-            import re
-            cleaned_phone = re.sub(r'[\s\-\+\(\)]', '', phone)
-            if not re.match(r'^\d{10,15}$', cleaned_phone):
-                errors.append('Invalid phone number format.')
-            #  Check uniqueness in Patient table (exclude current user's patient)
-            elif Patient.objects.filter(phone=cleaned_phone).exclude(user=user).exists():
-                errors.append('This phone number is already registered!')
-            phone = cleaned_phone
+    if phone:
+        import re
+        cleaned_phone = re.sub(r'[\s\-\+\(\)]', '', phone)
+        if not re.match(r'^\d{10,15}$', cleaned_phone):
+            errors.append('Invalid phone number format.')
+        elif Patient.objects.filter(phone=cleaned_phone).exclude(user=user).exists():
+            errors.append('This phone number is already registered!')
+        phone = cleaned_phone
 
-        # Validate email if provided
-        if email:
-            if User.objects.filter(
-                Q(email__iexact=email) | Q(username__iexact=email)
-            ).exclude(pk=user.pk).exists():
-                errors.append('Email already in use.')
+    if errors:
+        for error in errors:
+            messages.error(request, error)
+        return redirect(f"{reverse('profile')}?edit=1&field=full_name")
 
-        if errors:
-            for error in errors:
-                messages.error(request, error)
-            return redirect('profile-setting')
+    name_parts = full_name.split(maxsplit=1)
+    user.first_name = name_parts[0]
+    user.last_name = name_parts[1] if len(name_parts) > 1 else ''
+    user.save()
 
-        #  Update User (email as username)
-        user.first_name = first_name
-        if email:
-            user.email = email
-            user.username = email
-        user.save()
-        if email_changed:
-            if old_email:
-                try:
-                    send_mail(
-                        'Your Hitshree account email was changed',
-                        'Your Hitshree account email was changed. If you did not make this change, please contact the clinic.',
-                        settings.DEFAULT_FROM_EMAIL,
-                        [old_email],
-                        fail_silently=False,
-                    )
-                except Exception:
-                    logging.getLogger(__name__).exception('Could not send patient email change notification user_id=%s', user.pk)
-            security_logger.info('patient_email_changed user_id=%s actor_user_id=%s', user.pk, request.user.pk)
+    patient.phone = phone
+    patient.address = address
+    patient.dob = dob
+    patient.gender = gender
+    patient.bld_grop = bld_grop
 
-        #  Update Patient - store phone here
-        patient.phone = phone  # Phone goes to Patient table only
-        patient.address = address
-        patient.dob = dob
-        patient.gender = gender
-        patient.bld_grop = bld_grop
-        
-        # Handle profile picture
-        remove_photo = request.POST.get('remove_photo') == 'true'
-        if remove_photo:
-            if patient.profile_picture and patient.profile_picture.name != 'profile_pictures/default-avatar.png':
-                try:
-                    patient.profile_picture.delete(save=False)
-                except Exception:
-                    pass
-            patient.profile_picture = 'profile_pictures/default-avatar.png'
-        elif 'profile_picture' in request.FILES:
-            patient.profile_picture = request.FILES['profile_picture']
-        
-        patient.save()
+    remove_photo = request.POST.get('remove_photo') == 'true'
+    if remove_photo:
+        if patient.profile_picture and patient.profile_picture.name != 'profile_pictures/default-avatar.png':
+            try:
+                patient.profile_picture.delete(save=False)
+            except Exception:
+                pass
+        patient.profile_picture = 'profile_pictures/default-avatar.png'
+    elif 'profile_picture' in request.FILES:
+        patient.profile_picture = request.FILES['profile_picture']
 
-        return redirect('profile')
-
-    return render(request, 'pdashboard/profile.html')
+    patient.save()
+    messages.success(request, 'Profile updated successfully.')
+    return redirect('profile')
 
 @login_required
 def remove_profile_picture(request):

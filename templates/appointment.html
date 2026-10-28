@@ -473,18 +473,38 @@
         return;
       }
 
+      const dateText = new Intl.DateTimeFormat('en-GB', {
+        weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+      }).format(new Date(`${date}T00:00:00`));
+      const summary = document.createElement('div');
+      summary.className = 'appointment-booking-summary';
+      [['For', name], ['Date', dateText], ['Time', time]].forEach(([labelText, valueText]) => {
+        const row = document.createElement('div');
+        row.className = 'appointment-booking-summary-row';
+        const label = document.createElement('span');
+        label.className = 'appointment-booking-summary-label';
+        label.textContent = labelText;
+        const value = document.createElement('span');
+        value.className = 'appointment-booking-summary-value';
+        value.textContent = valueText;
+        row.append(label, value);
+        summary.appendChild(row);
+      });
+
       Swal.fire({
-        title: 'Confirm Appointment',
-        html: `<p><strong>For:</strong> ${name}</p><p><strong>Date:</strong> ${date}</p><p><strong>Time:</strong> ${time}</p>`,
+        title: 'Confirm your appointment',
+        html: summary,
         icon: 'info',
+        iconHtml: '<i class="bi bi-calendar-check-fill" aria-hidden="true"></i>',
+        customClass: {...window.publicSwalCustomClass, icon: 'swal-site-calendar'},
         showCancelButton: true,
         confirmButtonText: 'Confirm Booking',
-        confirmButtonColor: '#28a745',
+        cancelButtonText: 'Cancel',
       }).then(result => {
         if (result.isConfirmed) {
           Swal.fire({
-            title: 'Booking...',
-            html: '❤️ Processing your appointment...',
+            title: 'Booking your appointment…',
+            text: 'Please wait while we process your appointment.',
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => Swal.showLoading(),

@@ -31,7 +31,7 @@
             <div class="summary-row">
                 <div class="summary-left">
                     <div class="summary-date">{{ appointment.appointment_date|date:"d M Y" }}</div>
-                    <span class="slot-badge">{{ appointment.time_slot|default:"—" }}</span>
+                    <span class="slot-badge">{{ appointment.time_slot|time:"h:i A"|default:"—" }}</span>
                     <div class="status-badge
                         {% if appointment.status == 'completed' %}status-completed
                         {% elif appointment.status == 'cancelled' %}status-cancelled
@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div class="summary-right">
-                    <div class="booked-on">Booked on {{ appointment.created_at|default:appointment.appointment_date|date:"d M Y" }}</div>
+                    {% if appointment.created_at %}<div class="booked-on">Booked on {{ appointment.created_at|date:"d M Y" }}</div>{% endif %}
                     {% if prescription and prescription_items or prescription and prescription_therapies %}
                     <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank" class="btn-print">
                         <i class="fas fa-print"></i> Print

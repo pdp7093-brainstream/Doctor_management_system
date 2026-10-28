@@ -72,6 +72,32 @@
     </div>
     {% endif %}
 
+    {% if is_owner %}
+    <div class="dc-card mb-4">
+        <div class="dc-card-header">
+            <h3 class="dc-card-title"><i class="bi bi-person-badge"></i> Doctors</h3>
+            <span class="dc-count">{{ doctors|length }} active</span>
+        </div>
+        <div class="dc-table-wrap">
+            <table class="table table-hover dc-table" style="min-width:800px;">
+                <thead><tr><th>Doctor</th><th>Username</th><th>Email</th><th>Phone</th><th>Default</th><th class="text-end">Actions</th></tr></thead>
+                <tbody>
+                    {% for member in doctors %}
+                    <tr>
+                        <td><div class="dc-person"><div class="dc-avatar">{{ member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper }}</div><div class="dc-name">{{ member.user.get_full_name|default:member.user.username }}</div></div></td>
+                        <td class="dc-mono">{{ member.user.username }}</td>
+                        <td>{{ member.user.email|default:"—" }}</td>
+                        <td class="dc-mono">{{ member.phone|default:"—" }}</td>
+                        <td>{% if member.is_default_doctor %}<span class="dc-badge green">Default</span>{% else %}—{% endif %}</td>
+                        <td class="text-end"><button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}" data-role="doctor" data-default="{{ member.is_default_doctor|lower }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" data-email="{{ member.user.email }}" data-phone="{{ member.phone }}" data-active="{{ member.user.is_active|lower }}" title="Edit doctor" aria-label="Edit doctor"><i class="bi bi-pencil"></i></button></td>
+                    </tr>
+                    {% empty %}<tr><td colspan="6" class="dc-empty">No active doctors found.</td></tr>{% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="dc-card">
         <div class="dc-card-header">
             <h3 class="dc-card-title"><i class="bi bi-person-lines-fill"></i> Billers</h3>
@@ -119,6 +145,7 @@
                             <td class="text-end">
                                 <div class="action-btns">
                                     <button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}"
+                                        data-role="biller"
                                         data-name="{{ member.user.get_full_name|default:member.user.username }}"
                                         data-email="{{ member.user.email }}" data-phone="{{ member.phone }}"
                                         data-active="{{ member.user.is_active|lower }}" title="Edit" aria-label="Edit">
@@ -222,6 +249,12 @@
                     <option value="false">Inactive</option>
                 </select>
             </div>
+            {% if is_owner %}
+            <div class="form-check mb-3" id="defaultDoctorField" style="display:none;">
+                <input class="form-check-input" type="checkbox" id="editStaffDefaultDoctor">
+                <label class="form-check-label" for="editStaffDefaultDoctor">Default doctor (gets all appointments and leaves)</label>
+            </div>
+            {% endif %}
 
             <div class="modal-err" id="editErr"></div>
             <div class="d-flex gap-2 mt-3">

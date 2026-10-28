@@ -122,6 +122,18 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
 }
 
+.appointment-booking-summary {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #DCEBDC;
+  border-radius: 8px;
+  background: #EAF4EA;
+  text-align: left;
+}
+.appointment-booking-summary-row { display: flex; justify-content: space-between; gap: 16px; padding: 5px 0; }
+.appointment-booking-summary-label { color: var(--bs-secondary-color); }
+.appointment-booking-summary-value { color: var(--bs-body-color); font-weight: 700; text-align: right; }
+
 /* ── Form Inputs ── */
 .patient-selector-label,
 .modal-field label {

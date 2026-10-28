@@ -115,11 +115,15 @@
                     <i class="bi bi-calendar-x"></i> Add Leave
                 </div>
                 <div class="card-body">
-                    <form method="post" action="{% url 'doctor:manage_leaves' %}">
+                    <form method="post" action="{% url 'doctor:manage_leaves' %}" id="addLeaveForm" data-preview-url="{% url 'doctor:leave_appointment_preview' %}">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label class="form-label">Date</label>
-                            <input type="date" name="date" class="form-control" required min="{{ today|date:'Y-m-d' }}">
+                            <label class="form-label" for="leaveFrom">From</label>
+                            <input type="date" name="from_date" id="leaveFrom" class="form-control" required min="{{ today|date:'Y-m-d' }}" value="{{ today|date:'Y-m-d' }}">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="leaveTo">To</label>
+                            <input type="date" name="to_date" id="leaveTo" class="form-control" required min="{{ today|date:'Y-m-d' }}" value="{{ today|date:'Y-m-d' }}">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Leave Type</label>
@@ -176,12 +180,14 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="action-btns">
+                                        {% if leave.date >= today %}
                                         <form method="post" action="{% url 'doctor:delete_leave' leave.id %}" style="display:inline;" class="delete-leave-form">
                                             {% csrf_token %}
                                             <button type="submit" class="btn-act btn-act-delete btn-delete-leave" title="Delete" aria-label="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
+                                        {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -204,13 +210,107 @@
 </main>
 
 <script>
-    // Set min date to today for the date input
     document.addEventListener("DOMContentLoaded", function() {
-        const dateInput = document.querySelector('input[type="date"]');
-        if (dateInput && !dateInput.min) {
-            const today = new Date().toISOString().split('T')[0];
-            dateInput.min = today;
-        }
+        const fromInput = document.getElementById('leaveFrom');
+        const toInput = document.getElementById('leaveTo');
+        let toWasChanged = false;
+        const maximumDate = (dateValue) => {
+            const [year, month, day] = dateValue.split('-').map(Number);
+            const max = new Date(year, month - 1, day + 59);
+            return `${max.getFullYear()}-${String(max.getMonth() + 1).padStart(2, '0')}-${String(max.getDate()).padStart(2, '0')}`;
+        };
+        toInput.addEventListener('change', () => { toWasChanged = true; });
+        fromInput.addEventListener('change', () => {
+            toInput.min = fromInput.value;
+            toInput.max = maximumDate(fromInput.value);
+            if (!toWasChanged || toInput.value < fromInput.value || toInput.value > toInput.max) {
+                toInput.value = fromInput.value;
+                toWasChanged = false;
+            }
+        });
+        toInput.min = fromInput.value;
+        toInput.max = maximumDate(fromInput.value);
+
+        const leaveForm = document.getElementById('addLeaveForm');
+        const submitButton = leaveForm.querySelector('button[type="submit"]');
+        let previewInProgress = false;
+        let leaveSubmitted = false;
+        leaveForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            if (previewInProgress) return;
+            if (!leaveForm.reportValidity()) return;
+
+            previewInProgress = true;
+            const params = new URLSearchParams({
+                from_date: fromInput.value,
+                to_date: toInput.value,
+                leave_type: leaveForm.elements.leave_type.value,
+            });
+            submitButton.disabled = true;
+            try {
+                const response = await fetch(`${leaveForm.dataset.previewUrl}?${params}`, {
+                    credentials: 'same-origin',
+                    headers: {'X-Requested-With': 'XMLHttpRequest'},
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Unable to check appointments.');
+                if (!data.count) {
+                    leaveSubmitted = true;
+                    HTMLFormElement.prototype.submit.call(leaveForm);
+                    return;
+                }
+
+                const content = document.createElement('div');
+                const summary = document.createElement('p');
+                summary.textContent = `${data.count} ${data.count === 1 ? 'appointment' : 'appointments'} will be cancelled and patients will see your reason`;
+                content.appendChild(summary);
+                const table = document.createElement('table');
+                table.className = 'table table-sm text-start mb-2';
+                data.appointments.forEach((appointment) => {
+                    const row = table.insertRow();
+                    [appointment.patient, appointment.date, appointment.time].forEach((value) => {
+                        row.insertCell().textContent = value;
+                    });
+                });
+                content.appendChild(table);
+                if (data.more) {
+                    const more = document.createElement('p');
+                    more.className = 'small text-muted mb-0';
+                    more.textContent = `+${data.more} more`;
+                    content.appendChild(more);
+                }
+
+                const result = await Swal.fire({
+                    title: 'Confirm leave',
+                    html: content,
+                    showCancelButton: true,
+                    confirmButtonText: 'Add leave & cancel appointments',
+                    cancelButtonText: 'Cancel',
+                    buttonsStyling: false,
+                    customClass: {
+                        confirmButton: 'btn btn-danger',
+                        cancelButton: 'btn btn-outline-secondary',
+                        actions: 'gap-2',
+                    },
+                    didOpen: () => {
+                        const confirmButton = Swal.getConfirmButton();
+                        confirmButton.style.backgroundColor = '#AD0002';
+                        confirmButton.style.borderColor = '#AD0002';
+                    },
+                });
+                if (result.isConfirmed) {
+                    leaveSubmitted = true;
+                    HTMLFormElement.prototype.submit.call(leaveForm);
+                }
+            } catch (error) {
+                await Swal.fire({icon: 'error', title: 'Could not check appointments', text: error.message});
+            } finally {
+                if (!leaveSubmitted) {
+                    previewInProgress = false;
+                    submitButton.disabled = false;
+                }
+            }
+        });
     });
 
     document.addEventListener('submit', function(e) {

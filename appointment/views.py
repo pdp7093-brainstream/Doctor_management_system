@@ -30,6 +30,7 @@ from therapy.models import (
 from doctor.decorators import role_required
 from accounts.models import Patient, FamilyMember
 from doctor.models import InnerMember
+from doctor.utils import get_default_doctor
 from billing.views import generate_bill_from_visit
 from clinic.models import ClinicSettings
 from .file_validation import validate_uploaded_document
@@ -352,8 +353,8 @@ def get_slots(request):
         current += timedelta(minutes=interval)
 
     # Apply Doctor Leave filtering
-    from doctor.models import DoctorLeave, InnerMember
-    doctor = InnerMember.objects.filter(role='doctor').first()
+    from doctor.models import DoctorLeave
+    doctor = get_default_doctor()
     if doctor:
         leave = DoctorLeave.objects.filter(doctor=doctor, date=selected_date).first()
         if leave:
@@ -468,9 +469,7 @@ def delete_appointment(request, hid):
 @method_decorator([never_cache, role_required("doctor")], name="dispatch")
 class Manage_appointments(View):
     def get(self, request):
-        # Scope to the currently authenticated doctor — prevents data leakage
-        # between doctors in multi-doctor setups.
-        doctor = get_object_or_404(InnerMember, user=request.user)
+        doctor = get_default_doctor()
 
         search           = request.GET.get('search', '')
         appointment_date = request.GET.get('appointment_date', '')
@@ -478,8 +477,8 @@ class Manage_appointments(View):
 
         appointments = Appointment.objects.filter(
             is_archived=False,
-            doctor=doctor,  # Only this doctor's appointments
-        )
+            doctor=doctor,
+        ) if doctor else Appointment.objects.none()
 
         if search:
             appointments = appointments.filter(
@@ -548,7 +547,7 @@ class Add_appointment(View):
         appointment_date = request.POST.get("appointment_date")
         time_slot_raw    = request.POST.get("time_slot", "").strip()
         notes            = request.POST.get("notes")
-        doctor           = InnerMember.objects.get(user=request.user)
+        doctor           = get_default_doctor()
 
         # Parse patient_selection
         if not patient_selection or '_' not in patient_selection:
@@ -713,9 +712,7 @@ class Book_appointment(View):
             return redirect('appointment:appointment')
 
         # Doctor fetch
-        doctor = InnerMember.objects.filter(
-            role='doctor'
-        ).first()
+        doctor = get_default_doctor()
 
         # Double booking prevention
         if Appointment.booked_slots().filter(
@@ -1129,8 +1126,7 @@ def appointment_detail(request, hid):
                 item.parsed_sevan_kaal_label = item.get_sevan_kaal_display()
                 item.parsed_anupana = item.anupana
 
-    from doctor.models import InnerMember
-    default_doctor = InnerMember.objects.filter(role='doctor').first()
+    default_doctor = get_default_doctor()
 
     return render(request, 'pdashboard/appointment_details.html', {
         'appointment'       : appointment,
@@ -1165,8 +1161,7 @@ def print_prescription(request, hid):
     prescription_therapies = prescription.therapies.select_related('therapy').prefetch_related('session_records').all()
     
     settings = ClinicSettings.get()
-    from doctor.models import InnerMember
-    default_doctor = InnerMember.objects.filter(role='doctor').first()
+    default_doctor = get_default_doctor()
 
     def display_value(value):
         if value is None:

@@ -40,6 +40,7 @@ urlpatterns = [
     path('staff/reset-password/<int:member_id>/', views.reset_staff_password, name='reset_staff_password'),
 
     path("leaves/", views.manage_leaves, name="manage_leaves"),
+    path("leaves/appointment-preview/", views.leave_appointment_preview, name="leave_appointment_preview"),
     path("leaves/<int:pk>/delete/", views.delete_leave, name="delete_leave"),
 
     path('settings/', RedirectView.as_view(pattern_name='clinic:settings', permanent=False), name='settings'),

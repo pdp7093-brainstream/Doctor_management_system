@@ -26,6 +26,11 @@ from .models import (
 )
 
 
+def _is_doctor_or_owner(user):
+    member = getattr(user, 'innermember', None)
+    return bool(member and (member.role == 'doctor' or member.is_owner))
+
+
 def create_direct_therapy_bill(visit, payment_method, line_items, notes=''):
     original_bill = Bill.objects.filter(visit=visit, is_addon=False, is_archived=False).first()
     is_addon = bool(original_bill)
@@ -546,11 +551,6 @@ class TherapySessionDetailView(LoginRequiredMixin, BillingAccessMixin, View):
             {'number': number, 'session': sessions_by_number.get(number)}
             for number in range(1, last_number + 1)
         ]
-        last_done = next(
-            (session for session in reversed(sessions) if session.status == TherapySession.STATUS_DONE),
-            None,
-        )
-        undo_session_id = last_done.pk if last_done and not last_done.bill_id else None
         patient_name = (
             prescribed.prescription.visit.appointment.family_member.name
             if prescribed.prescription.visit.appointment.family_member
@@ -561,7 +561,7 @@ class TherapySessionDetailView(LoginRequiredMixin, BillingAccessMixin, View):
             'prescribed': prescribed,
             'timeline': timeline,
             'patient_name': patient_name,
-            'undo_session_id': undo_session_id,
+            'can_manage': _is_doctor_or_owner(request.user),
         })
 
 
@@ -607,13 +607,17 @@ class UndoTherapySessionView(LoginRequiredMixin, BillingAccessMixin, View):
         return redirect(return_to)
 
 
-class DeleteTherapySessionView(LoginRequiredMixin, BillingAccessMixin, View):
+class DeleteTherapySessionView(LoginRequiredMixin, View):
     login_url = 'doctor:login'
 
     def post(self, request, pk):
+        detail_url = reverse('doctor:therapy:therapy_session_detail', kwargs={'pk': pk})
+        if not _is_doctor_or_owner(request.user):
+            messages.error(request, 'Only a doctor or clinic owner can delete sessions.')
+            return redirect(detail_url)
+
         prescribed = get_object_or_404(PrescriptionTherapy, pk=pk)
         session_pk = request.POST.get('session_id')
-        detail_url = redirect('doctor:therapy:therapy_session_detail', pk=pk).url
         return_to = request.POST.get('return_to', request.GET.get('return_to', '/doctor/therapies/sessions/'))
         if not return_to.startswith('/') or return_to.startswith('//'):
             return_to = '/doctor/therapies/sessions/'
@@ -635,6 +639,47 @@ class DeleteTherapySessionView(LoginRequiredMixin, BillingAccessMixin, View):
         return redirect(return_to)
 
 
+class ReduceTherapyPlanView(LoginRequiredMixin, View):
+    login_url = 'doctor:login'
+
+    def get(self, request, pk):
+        return HttpResponseNotAllowed(['POST'])
+
+    def post(self, request, pk):
+        detail_url = reverse('doctor:therapy:therapy_session_detail', kwargs={'pk': pk})
+        if not _is_doctor_or_owner(request.user):
+            messages.error(request, 'Only a doctor or clinic owner can change therapy plans.')
+            return redirect(detail_url)
+
+        with transaction.atomic():
+            prescribed = get_object_or_404(
+                PrescriptionTherapy.objects.select_for_update(), pk=pk
+            )
+            done_count = prescribed.session_records.filter(
+                status=TherapySession.STATUS_DONE
+            ).count()
+            last_session_exists = prescribed.session_records.filter(
+                session_no=prescribed.total_sessions
+            ).exists()
+
+            if prescribed.status != 'active' or prescribed.total_sessions <= done_count or last_session_exists:
+                messages.error(request, 'There is no pending final session to remove.')
+                return redirect(detail_url)
+
+            prescribed.total_sessions -= 1
+            fields = ['total_sessions', 'updated_at']
+            if prescribed.total_sessions == done_count:
+                prescribed.status = 'completed'
+                fields.append('status')
+            prescribed.save(update_fields=fields)
+
+        if prescribed.status == 'completed':
+            messages.success(request, f'Therapy completed at {done_count}/{done_count} sessions.')
+        else:
+            messages.success(request, f'Therapy plan reduced to {prescribed.total_sessions} sessions.')
+        return redirect(detail_url)
+
+
 class RemoveTherapyView(LoginRequiredMixin, View):
     login_url = 'doctor:login'
 
@@ -642,8 +687,7 @@ class RemoveTherapyView(LoginRequiredMixin, View):
         return HttpResponseNotAllowed(['POST'])
 
     def post(self, request, pk):
-        member = getattr(request.user, 'innermember', None)
-        if not member or (member.role != 'doctor' and not member.is_owner):
+        if not _is_doctor_or_owner(request.user):
             messages.error(request, 'Only a doctor or clinic owner can remove therapies.')
             return redirect('doctor:therapy:therapy_sessions')
 

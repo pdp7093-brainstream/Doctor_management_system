@@ -69,7 +69,7 @@
                             </button>
                             <div class="pc-name">{{ request.user.get_full_name|default:request.user.username }}</div>
                             <div class="pc-email">{{ request.user.email }}</div>
-                            <a href="{% url 'profile-setting' %}" class="btn btn-primary btn-sm pc-primary-btn">
+                            <a id="openEditProfile" href="{% url 'profile-setting' %}" class="btn btn-primary btn-sm pc-primary-btn">
                                 <i class="fas fa-edit"></i> Edit profile
                             </a>
                         </div>
@@ -93,7 +93,7 @@
                             <div class="pc-fields-grid">
 
                                 <!-- Phone -->
-                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}?field=phone'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}?field=phone'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-phone"></i></div>
                                     <div class="pc-tile-content">
                                         <div class="pc-tile-label-row">
@@ -113,7 +113,7 @@
                                 </div>
 
                                 <!-- Date of Birth -->
-                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}?field=dob'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}?field=dob'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-cake-candles"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Date of Birth</span>
@@ -124,7 +124,7 @@
                                 </div>
 
                                 <!-- Gender -->
-                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}?field=gender'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}?field=gender'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-venus-mars"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Gender</span>
@@ -135,18 +135,18 @@
                                 </div>
 
                                 <!-- Blood Group -->
-                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
+                                <div class="pc-tile" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}?field=bld_grop'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}?field=bld_grop'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-droplet"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Blood Group</span>
                                         <span class="pc-tile-value">
-                                            {% if request.user.patient.bld_grop %}{{ request.user.patient.bld_grop }}{% else %}<span class="pc-not-added">Not added</span>{% endif %}
+                                            {% if request.user.patient.bld_grop %}{{ request.user.patient.bld_grop }}{% else %}<span class="pc-add-link">+ Add</span>{% endif %}
                                         </span>
                                     </div>
                                 </div>
 
                                 <!-- Address – spans both columns -->
-                                <div class="pc-tile pc-tile--full" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}'}">
+                                <div class="pc-tile pc-tile--full" role="link" tabindex="0" onclick="window.location.href='{% url 'profile-setting' %}?field=address'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{% url 'profile-setting' %}?field=address'}">
                                     <div class="pc-tile-icon"><i class="fa-solid fa-location-dot"></i></div>
                                     <div class="pc-tile-content">
                                         <span class="pc-tile-label">Address</span>
@@ -528,12 +528,15 @@
 
                     <div class="modal-field">
                         <label>Full Name</label>
-                        <input type="text" name="first_name" id="pName" value="{{ request.user.first_name }}">
+                        <input type="text" name="full_name" id="pName" value="{{ request.user.get_full_name|default:request.user.username }}" required>
                     </div>
                     <div class="modal-field">
                         <label>Date of Birth</label>
                         <input type="date" name="dob" id="pDob"
-                            value="{% if request.user.patient.dob %}{{ request.user.patient.dob|date:'Y-m-d' }}{% endif %}">
+                            min="{{ dob_min }}" max="{{ dob_max }}"
+                            value="{% if profile_dob_error %}{{ profile_dob_value }}{% elif request.user.patient.dob %}{{ request.user.patient.dob|date:'Y-m-d' }}{% endif %}"
+                            aria-describedby="profileDobError">
+                        <div class="modal-error" id="profileDobError" {% if not profile_dob_error %}style="display:none"{% endif %}>Please enter a valid date of birth</div>
                     </div>
                     <div class="modal-field">
                         <label>Gender</label>
@@ -581,11 +584,7 @@
                     </div>
                     <div class="modal-field">
                         <label>Email</label>
-                        <input type="email" name="email" id="pEmail" value="{{ request.user.email }}">
-                    </div>
-                    <div class="modal-field">
-                        <label>Current password <small>(required to change email)</small></label>
-                        <input type="password" name="current_password" autocomplete="current-password">
+                        <input type="email" id="pEmail" value="{{ request.user.email }}" readonly>
                     </div>
                     <div class="modal-field">
                         <label>Address</label>
@@ -644,7 +643,8 @@
                 </div>
                 <div class="modal-field">
                     <label>Date of Birth</label>
-                    <input type="date" id="memberDob">
+                    <input type="date" id="memberDob" min="{{ dob_min }}" max="{{ dob_max }}" aria-describedby="memberDobError">
+                    <div class="modal-error" id="memberDobError">Please enter a valid date of birth</div>
                 </div>
                 <div class="modal-field">
                     <label>Blood Group</label>
@@ -708,7 +708,8 @@
                 </div>
                 <div class="modal-field">
                     <label>Date of Birth</label>
-                    <input type="date" id="editDob">
+                    <input type="date" id="editDob" min="{{ dob_min }}" max="{{ dob_max }}" aria-describedby="editDobError">
+                    <div class="modal-error" id="editDobError">Please enter a valid date of birth</div>
                 </div>
                 <div class="modal-field">
                     <label>Blood Group</label>
@@ -752,6 +753,21 @@
                 });
             }
 
+            const profileParams = new URLSearchParams(window.location.search);
+            if (profileParams.get('edit') === '1' && profilePhotoModal) {
+                profilePhotoModal.classList.add('active');
+                const focusTargets = {
+                    full_name: 'pName',
+                    phone: 'pPhone',
+                    dob: 'pDob',
+                    gender: 'pGender',
+                    bld_grop: 'pBldGrop',
+                    address: 'pAddress'
+                };
+                const focusTarget = document.getElementById(focusTargets[profileParams.get('field')] || 'pName');
+                if (focusTarget) focusTarget.focus();
+            }
+
             const profileDocumentInput = document.getElementById('profileDocumentInput');
             const profileDocumentName = document.getElementById('profileDocumentName');
             if (profileDocumentInput && profileDocumentName) {
@@ -771,6 +787,12 @@
             const closeAddMemberBtn = document.getElementById('closeAddMember');
             const saveAddMemberBtn = document.getElementById('saveAddMember');
             const addMemberError = document.getElementById('memberError');
+            const memberDobInput = document.getElementById('memberDob');
+            const memberDobError = document.getElementById('memberDobError');
+
+            memberDobInput.addEventListener('input', () => {
+                memberDobError.style.display = 'none';
+            });
 
             function resetAddMemberForm() {
                 document.getElementById('memberName').value = '';
@@ -779,6 +801,7 @@
                 document.getElementById('memberGender').value = '';
                 document.getElementById('memberDob').value = '';
                 document.getElementById('memberBloodGroup').value = '';
+                memberDobError.style.display = 'none';
                 addMemberError.textContent = '';
                 addMemberError.style.display = 'none';
                 saveAddMemberBtn.disabled = false;
@@ -821,6 +844,11 @@
                         return;
                     }
 
+                    if (dob && (dob < memberDobInput.min || dob > memberDobInput.max)) {
+                        memberDobError.style.display = 'block';
+                        return;
+                    }
+
                     addMemberError.style.display = 'none';
                     saveAddMemberBtn.disabled = true;
                     saveAddMemberBtn.textContent = 'Saving...';
@@ -850,6 +878,9 @@
                             }).then(() => {
                                 location.reload();
                             });
+                        } else if (data.field === 'dob') {
+                            memberDobError.textContent = data.error;
+                            memberDobError.style.display = 'block';
                         } else {
                             addMemberError.textContent = data.error || 'Unable to add family member.';
                             addMemberError.style.display = 'block';
