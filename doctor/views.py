@@ -36,6 +36,7 @@ from appointment.file_validation import validate_uploaded_document
 logger = logging.getLogger(__name__)
 
 def login_view(request):
+    request.session.pop("_doctor_logout_redirect", None)
     patient_logged_in = request.user.is_authenticated and Patient.objects.filter(user=request.user).exists()
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -174,6 +175,7 @@ def forgot_password(request):
 # Logout 
 def logout_view(request):
     auth_logout(request)
+    request.session["_doctor_logout_redirect"] = True
     messages.success(request, 'You have been logged out.')
     return redirect('doctor:login')
 

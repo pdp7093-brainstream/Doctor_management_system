@@ -38,7 +38,7 @@
           </li>
 
           <li class="nav-item d-flex align-items-center">
-            <a href="{% url 'appointment:appointment' %}" style="background-color: #FD6801; color: white; border-radius: 50px; font-weight: 500; text-decoration: none; display: inline-block; transition: 0.3s; margin-left: 10px;" onmouseover="this.style.backgroundColor='#E25C00'" onmouseout="this.style.backgroundColor='#FD6801'">
+            <a href="{% url 'appointment:appointment' %}" style="background-color: #FD6801; color: white; border-radius: 50px; font-weight: 500; text-decoration: none; display: inline-flex; align-items: center; transition: 0.3s; margin-left: 10px; padding: 8px 20px; height: 40px; line-height: 24px; font-size: 0.95rem;" onmouseover="this.style.backgroundColor='#E25C00'" onmouseout="this.style.backgroundColor='#FD6801'">
               Book Appointment
             </a>
           </li>
@@ -67,7 +67,7 @@
             </ul>
           </li>
           {% else %}
-          <li><a href="{% url 'login' %}">Login</a></li>
+          <li><a href="{% url 'login' %}" class="btn-login"><i class="bi bi-person"></i> Login</a></li>
           {% endif %}
 
 

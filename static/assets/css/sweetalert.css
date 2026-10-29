@@ -1,0 +1,30 @@
+.swal2-popup .swal-actions {
+  gap: 10px !important;
+}
+
+.swal2-popup .swal-btn-confirm {
+  background: #015315 !important;
+  color: #fff !important;
+  border: 1.5px solid #015315 !important;
+  padding: 10px 24px !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+}
+
+.swal2-popup .swal-btn-confirm:hover {
+  background: #013A0F !important;
+  border-color: #013A0F !important;
+}
+
+.swal2-popup .swal-btn-cancel {
+  background: #fff !important;
+  color: #015315 !important;
+  border: 1.5px solid #015315 !important;
+  padding: 10px 24px !important;
+  border-radius: 50px !important;
+  font-weight: 600 !important;
+}
+
+.swal2-popup .swal-btn-cancel:hover {
+  background: #EAF4EA !important;
+}

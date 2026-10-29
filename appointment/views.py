@@ -664,7 +664,8 @@ class Book_appointment(View):
 
 
         return render(request, "appointment.html", {
-            'family_members': family_members
+            'family_members': family_members,
+            'member_dob_max': (timezone.localdate() - timedelta(days=1)).isoformat(),
         })
 
     def post(self, request):

@@ -38,7 +38,9 @@
   <!-- Main CSS File -->
   <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
   <link href="{% static 'assets/css/header.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/sweetalert.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
+  <link href="{% static 'assets/css/mobile.css' %}" rel="stylesheet">
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
@@ -59,19 +61,7 @@
   {% endblock %}
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script>
-    window.publicSwalCustomClass = {
-      popup: 'swal-site-popup',
-      title: 'swal-site-title',
-      confirmButton: 'swal-site-confirm',
-      cancelButton: 'swal-site-cancel',
-      denyButton: 'swal-site-confirm',
-    };
-    window.Swal = window.Swal.mixin({
-      customClass: window.publicSwalCustomClass,
-      buttonsStyling: false,
-    });
-  </script>
+  <script src="{% static 'assets/js/sweetalert-config.js' %}"></script>
   {% block vendor_js %}
   <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'assets/aos/aos.js' %}"></script>

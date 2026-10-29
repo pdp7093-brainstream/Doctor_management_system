@@ -192,9 +192,6 @@
                     <button type="button" id="submitBtn" class="btn btn-primary btn-lg w-100">
                       Book Appointment
                     </button>
-                    <div class="emergency-info mt-3">
-                      <p class="mb-0"><i class="bi bi-exclamation-triangle"></i> For medical emergencies, please call 112 or go to the nearest hospital.</p>
-                    </div>
                   </div>
 
                 </div>
@@ -211,60 +208,66 @@
     ══════════════════════════════════════ -->
   <div class="modal-overlay" id="addMemberModal">
     <div class="modal-box">
-      <h5><i class="bi bi-person-plus-fill"></i> Add Family Member</h5>
-
-      <div class="modal-field">
-        <label>Full Name *</label>
-        <input type="text" id="memberName" placeholder="e.g. Priya Shah">
-      </div>
-      <div class="modal-field">
-        <label>Relation *</label>
-        <select id="memberRelation">
-          <option value="">Select Relation</option>
-          <option value="Wife">Wife</option>
-          <option value="Husband">Husband</option>
-          <option value="Son">Son</option>
-          <option value="Daughter">Daughter</option>
-          <option value="Father">Father</option>
-          <option value="Mother">Mother</option>
-          <option value="Brother">Brother</option>
-          <option value="Sister">Sister</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Phone Number</label>
-        <input type="tel" id="memberPhone" placeholder="e.g. 9876543210" maxlength="15">
-      </div>
-      <div class="modal-field">
-        <label>Gender</label>
-        <select id="memberGender">
-          <option value="">Select Gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div class="modal-field">
-        <label>Date of Birth</label>
-        <input type="date" id="memberDob">
-      </div>
-      <div class="modal-field">
-        <label>Blood Group</label>
-        <select id="memberBloodGroup">
-          <option value="">Select Blood Group</option>
-          <option value="A+">A+</option>
-          <option value="A-">A-</option>
-          <option value="B+">B+</option>
-          <option value="B-">B-</option>
-          <option value="O+">O+</option>
-          <option value="O-">O-</option>
-          <option value="AB+">AB+</option>
-          <option value="AB-">AB-</option>
-        </select>
+      <div class="modal-header">
+        <h5><i class="bi bi-person-plus-fill"></i> Add Family Member</h5>
+        <button type="button" class="modal-header-close" id="closeAddMemberHeader" aria-label="Close">&times;</button>
       </div>
 
-      <div id="memberError" style="color:#dc2626; font-size:0.85rem; display:none; margin-top:6px;"></div>
+      <div class="modal-body">
+        <div class="modal-form-grid">
+          <div class="modal-field modal-field-full">
+            <label>Full Name *</label>
+            <input type="text" id="memberName" placeholder="e.g. Priya Shah">
+          </div>
+          <div class="modal-field">
+            <label>Relation *</label>
+            <select id="memberRelation">
+              <option value="">Select Relation</option>
+              <option value="Wife">Wife</option>
+              <option value="Husband">Husband</option>
+              <option value="Son">Son</option>
+              <option value="Daughter">Daughter</option>
+              <option value="Father">Father</option>
+              <option value="Mother">Mother</option>
+              <option value="Brother">Brother</option>
+              <option value="Sister">Sister</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>Phone Number</label>
+            <input type="tel" id="memberPhone" placeholder="e.g. 9876543210" maxlength="15">
+          </div>
+          <div class="modal-field">
+            <label>Gender</label>
+            <select id="memberGender">
+              <option value="">Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="modal-field">
+            <label>Date of Birth</label>
+            <input type="date" id="memberDob" max="{{ member_dob_max }}">
+          </div>
+          <div class="modal-field">
+            <label>Blood Group</label>
+            <select id="memberBloodGroup">
+              <option value="">Select Blood Group</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+        </div>
+        <div id="memberError" style="color:#dc2626; font-size:0.85rem; display:none; margin-top:6px;"></div>
+      </div>
 
       <div class="modal-actions">
         <button class="btn-close-modal" id="closeAddMember">Cancel</button>
@@ -368,6 +371,7 @@
     const modal = document.getElementById('addMemberModal');
     const openBtn = document.getElementById('openAddMember');
     const closeBtn = document.getElementById('closeAddMember');
+    const closeHeaderBtn = document.getElementById('closeAddMemberHeader');
     const saveBtn = document.getElementById('saveMember');
     const memberError = document.getElementById('memberError');
 
@@ -379,7 +383,9 @@
       memberError.style.display = 'none';
     });
 
-    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    const closeModal = () => modal.classList.remove('active');
+    closeBtn.addEventListener('click', closeModal);
+    closeHeaderBtn.addEventListener('click', closeModal);
 
     modal.addEventListener('click', (e) => {
       if (e.target === modal) modal.classList.remove('active');
@@ -496,7 +502,7 @@
         html: summary,
         icon: 'info',
         iconHtml: '<i class="bi bi-calendar-check-fill" aria-hidden="true"></i>',
-        customClass: {...window.publicSwalCustomClass, icon: 'swal-site-calendar'},
+        customClass: {...window.swalSharedCustomClass, icon: 'swal-site-calendar'},
         showCancelButton: true,
         confirmButtonText: 'Confirm Booking',
         cancelButtonText: 'Cancel',

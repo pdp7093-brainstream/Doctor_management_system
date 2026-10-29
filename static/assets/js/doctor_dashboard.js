@@ -41,9 +41,8 @@ document.querySelectorAll('.btn-cancel-appointment').forEach(button => {
             cancelButtonColor: '#6c757d',
             reverseButtons: true,
             customClass: {
+                ...window.swalSharedCustomClass,
                 popup: 'rounded-4 shadow-lg',
-                confirmButton: 'px-4 py-2',
-                cancelButton: 'px-4 py-2'
             }
         });
 

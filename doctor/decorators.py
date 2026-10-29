@@ -13,13 +13,18 @@ def _redirect_without_member(request):
     return redirect('login')
 
 
+def _redirect_unauthenticated_doctor(request):
+    if not request.session.pop("_doctor_logout_redirect", False):
+        messages.error(request, "Please login first")
+    return redirect('doctor:login')
+
+
 def role_required(required_role):
     def decorator(view_func):
         def wrapper(request, *args, **kwargs):
 
             if not request.user.is_authenticated:
-                messages.error(request, "Please login first")
-                return redirect('doctor:login')
+                return _redirect_unauthenticated_doctor(request)
 
             try:
                 member = InnerMember.objects.get(user=request.user)
@@ -47,8 +52,7 @@ def owner_required(view_func):
     def wrapper(request, *args, **kwargs):
 
         if not request.user.is_authenticated:
-            messages.error(request, "Please login first")
-            return redirect('doctor:login')
+            return _redirect_unauthenticated_doctor(request)
 
         try:
             member = InnerMember.objects.get(user=request.user)

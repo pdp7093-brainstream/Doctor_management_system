@@ -123,6 +123,26 @@
 
 {% endblock %}
 {% block extra_js %}
+{% if messages %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let messageQueue = Promise.resolve();
+    {% for message in messages %}
+    messageQueue = messageQueue.then(function () {
+      return Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: '{% if message.tags == "error" %}error{% elif message.tags == "warning" %}warning{% elif message.tags == "info" %}info{% else %}success{% endif %}',
+        title: '{{ message|escapejs }}',
+        showConfirmButton: false,
+        timer: 4000,
+        timerProgressBar: true,
+      });
+    });
+    {% endfor %}
+  });
+</script>
+{% endif %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const eyeOpenSVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="20" height="20" fill="currentColor"><path d="M16 8s-3.5-5.5-8-5.5S0 8 0 8s3.5 5.5 8 5.5S16 8 16 8zm-8 4A4 4 0 1 1 8 4a4 4 0 0 1 0 8z"/><path d="M8 5a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg>';

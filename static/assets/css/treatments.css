@@ -22,6 +22,29 @@
     .treatments-banner .banner-content { margin: auto; }
     .treatments-banner .banner-content h1 { font-size: clamp(30px, 8vw, 32px); line-height: 1.2; }
     .treatments-banner .banner-content p { font-size: 15px; }
+    .group-header {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 16px;
+    }
+    .group-header-text {
+        width: 100%;
+    }
+    .group-title {
+        font-size: clamp(26px, 7vw, 30px);
+        line-height: 1.2;
+    }
+    .group-subtitle {
+        font-size: 15px;
+        width: 100%;
+        max-width: 100%;
+    }
+    .group-nav {
+        width: 100%;
+        justify-content: flex-end;
+        margin-bottom: 0 !important;
+        gap: 12px !important;
+    }
 }
 
 .banner-content {

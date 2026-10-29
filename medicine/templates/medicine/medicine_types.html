@@ -132,7 +132,6 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     // Search filter
     const searchInput = document.getElementById('searchInput');
@@ -175,7 +174,7 @@
                 confirmButtonText: 'Yes, Delete',
                 cancelButtonText: 'Cancel',
                 reverseButtons: true,
-                customClass: { popup: 'rounded-4 shadow-lg' }
+                customClass: { ...window.swalSharedCustomClass, popup: 'rounded-4 shadow-lg' }
             }).then(result => {
                 if (result.isConfirmed) {
                     form.submit();

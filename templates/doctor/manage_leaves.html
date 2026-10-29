@@ -286,17 +286,7 @@
                     showCancelButton: true,
                     confirmButtonText: 'Add leave & cancel appointments',
                     cancelButtonText: 'Cancel',
-                    buttonsStyling: false,
-                    customClass: {
-                        confirmButton: 'btn btn-danger',
-                        cancelButton: 'btn btn-outline-secondary',
-                        actions: 'gap-2',
-                    },
-                    didOpen: () => {
-                        const confirmButton = Swal.getConfirmButton();
-                        confirmButton.style.backgroundColor = '#AD0002';
-                        confirmButton.style.borderColor = '#AD0002';
-                    },
+                    customClass: window.swalSharedCustomClass,
                 });
                 if (result.isConfirmed) {
                     leaveSubmitted = true;

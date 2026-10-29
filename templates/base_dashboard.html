@@ -36,6 +36,7 @@
   <!-- Main CSS -->
   <link href="{% static 'assets/css/main.css' %}" rel="stylesheet">
   <link href="{% static 'assets/css/header.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/sweetalert.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
 </head>
 
@@ -57,6 +58,7 @@
   {% endblock %}
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="{% static 'assets/js/sweetalert-config.js' %}"></script>
   {% block vendor_js %}
   <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
   <script src="{% static 'assets/aos/aos.js' %}"></script>

@@ -363,6 +363,16 @@ class LoginView(View):
                 'email': email,
             })
 
+        pending_messages = list(messages.get_messages(request))
+        for pending_message in pending_messages:
+            if pending_message.message != 'You have been logged out.':
+                messages.add_message(
+                    request,
+                    pending_message.level,
+                    pending_message.message,
+                    extra_tags=pending_message.extra_tags,
+                )
+
         auth_login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
         next_url = request.POST.get('next') or request.GET.get('next')

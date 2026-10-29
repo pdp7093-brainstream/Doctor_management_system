@@ -851,22 +851,23 @@ h6 {
   right: 15px;
   bottom: -15px;
   z-index: 99999;
-  background-color: var(--accent-color);
+  background-color: #015315;
   width: 44px;
   height: 44px;
   border-radius: 50px;
   transition: all 0.4s;
+  box-shadow: 0 4px 12px rgba(1, 83, 21, 0.25);
 }
 
 .scroll-top i {
   font-size: 24px;
-  color: var(--contrast-color);
+  color: #ffffff;
   line-height: 0;
 }
 
 .scroll-top:hover {
-  background-color: color-mix(in srgb, var(--accent-color), transparent 20%);
-  color: var(--contrast-color);
+  background-color: #013d10;
+  color: #ffffff;
 }
 
 .scroll-top.active {
@@ -1708,6 +1709,61 @@ section,
 
   .home-about .about-content .stats-grid {
     margin: 2rem 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .home-about .about-content .lead-text {
+    font-size: 16px;
+    line-height: 1.7;
+    text-align: left;
+  }
+
+  .home-about .about-content > .row.g-3.mb-4 {
+    --bs-gutter-y: 12px;
+  }
+
+  .home-about .about-content > .row.g-3.mb-4 > .col-6 {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .home-about .about-content .about-point {
+    align-items: center !important;
+    gap: 10px !important;
+    text-align: left;
+  }
+
+  .home-about .about-content .about-point > i {
+    margin-top: 0 !important;
+  }
+
+  .home-about .about-content .about-point > span {
+    font-size: 15px !important;
+    text-align: left;
+  }
+
+  .home-about .about-content .cta-section {
+    display: block;
+  }
+
+  .home-about .about-content .cta-section .btn-primary {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  .home-about .about-visual {
+    margin-top: 24px;
+    padding-bottom: 0;
+  }
+
+  .home-about .about-visual .floating-card {
+    position: static;
+    margin-top: 16px;
+    right: auto;
+    bottom: auto;
   }
 }
 

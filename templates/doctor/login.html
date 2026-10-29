@@ -75,10 +75,11 @@
     <!-- Login Container - Square Card -->
     <div style="width: 100%; max-width: 420px; aspect-ratio: 1 / 1.15; padding: 1rem;">
         {% for message in messages %}
-            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% else %}alert-danger{% endif %}">
+            <div class="alert alert-dismissible fade show rounded-3 mb-2 small shadow-sm login-flash-alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% elif message.tags == 'warning' %}alert-warning{% else %}alert-danger{% endif %}" role="alert">
                 {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            {% endfor %}
+        {% endfor %}
         {% if patient_logged_in %}
             <div class="alert alert-info small">
                 You are logged in as a patient. Log out to sign in with a staff account.
@@ -168,6 +169,14 @@
 
     <!-- Bootstrap JS -->
     <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    <script>
+        document.querySelectorAll('.login-flash-alert').forEach(function(alert) {
+            window.setTimeout(function() {
+                alert.classList.remove('show');
+                window.setTimeout(function() { alert.remove(); }, 150);
+            }, 4000);
+        });
+    </script>
 
     <!-- Input Focus Effects -->
     <script>
