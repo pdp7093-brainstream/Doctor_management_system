@@ -1,0 +1,324 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    font-size: 13px;
+    color: #333;
+    background: #fff;
+    padding: 20px;
+}
+
+/* Header */
+.clinic-header {
+    text-align: center;
+    border-bottom: 2px solid #0d6efd;
+    padding-bottom: 14px;
+    margin-bottom: 20px;
+}
+
+.clinic-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.clinic-sub {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+/* Bill Info */
+.bill-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
+}
+
+.info-box {
+    flex: 1;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.info-box h6 {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+
+.info-label {
+    color: #666;
+}
+
+.info-value {
+    font-weight: 600;
+}
+
+/* Table */
+.medicines-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.medicines-table th {
+    background: #0d6efd;
+    color: #fff;
+    padding: 9px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.medicines-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 12px;
+}
+
+.medicines-table tr:nth-child(even) td {
+    background: #f8f9fa;
+}
+
+/* Page width: full content width override */
+.dc-form-shell.bill-form-shell,
+.bill-form-shell {
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+/* Sticky Payment Summary on desktop */
+@media (min-width: 992px) {
+    .bill-payment-summary-card {
+        position: sticky !important;
+        top: calc(var(--navbar-height, 70px) + 20px) !important;
+        z-index: 10;
+    }
+}
+
+/* Prescribed Medicines table & wrapper rules */
+.bill-table-scroll,
+.dc-card .dc-table-wrap.bill-table-scroll,
+html body .prescribed-medicines-scroll,
+body .prescribed-medicines-scroll,
+.prescribed-medicines-scroll {
+    width: 100% !important;
+}
+
+@media (min-width: 576px) {
+    .bill-table-scroll,
+    .dc-card .dc-table-wrap.bill-table-scroll,
+    html body .prescribed-medicines-scroll,
+    body .prescribed-medicines-scroll,
+    .prescribed-medicines-scroll {
+        overflow-x: visible !important;
+    }
+
+    .bill-medicines-table,
+    .dc-card table.dc-table.bill-medicines-table,
+    html body table.medicines-table.bill-prescribed-medicines,
+    html body .prescribed-medicines-scroll > table.bill-prescribed-medicines,
+    body .prescribed-medicines-scroll > table.bill-prescribed-medicines,
+    .prescribed-medicines-scroll .bill-prescribed-medicines,
+    .bill-prescribed-medicines {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        table-layout: fixed !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .bill-table-scroll,
+    .dc-card .dc-table-wrap.bill-table-scroll,
+    html body .prescribed-medicines-scroll,
+    body .prescribed-medicines-scroll,
+    .prescribed-medicines-scroll {
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .bill-medicines-table,
+    .dc-card table.dc-table.bill-medicines-table,
+    html body table.medicines-table.bill-prescribed-medicines,
+    body .prescribed-medicines-scroll > table.bill-prescribed-medicines,
+    .bill-prescribed-medicines {
+        width: 560px !important;
+        min-width: 560px !important;
+    }
+}
+
+/* Columns for bill medicines table */
+.bill-medicines-table th:nth-child(1),
+.bill-medicines-table td:nth-child(1),
+.bill-prescribed-medicines th:nth-child(1),
+.bill-prescribed-medicines td:nth-child(1) {
+    width: 5%;
+}
+
+.bill-medicines-table th:nth-child(2),
+.bill-medicines-table td:nth-child(2),
+.bill-prescribed-medicines th:nth-child(2),
+.bill-prescribed-medicines td:nth-child(2) {
+    width: 33%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.bill-medicines-table th:nth-child(3),
+.bill-medicines-table td:nth-child(3),
+.bill-prescribed-medicines th:nth-child(3),
+.bill-prescribed-medicines td:nth-child(3) {
+    width: 16%;
+}
+
+.bill-medicines-table th:nth-child(4),
+.bill-medicines-table td:nth-child(4),
+.bill-prescribed-medicines th:nth-child(4),
+.bill-prescribed-medicines td:nth-child(4) {
+    width: 12%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.bill-medicines-table th:nth-child(5),
+.bill-medicines-table td:nth-child(5),
+.bill-prescribed-medicines th:nth-child(5),
+.bill-prescribed-medicines td:nth-child(5) {
+    width: 17%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.bill-medicines-table th:nth-child(6),
+.bill-medicines-table td:nth-child(6),
+.bill-prescribed-medicines th:nth-child(6),
+.bill-prescribed-medicines td:nth-child(6) {
+    width: 17%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tabular numbers & right align in footer */
+.bill-medicines-table tfoot td,
+.bill-prescribed-medicines tfoot td {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-top: 2px solid #dee2e6;
+}
+
+/* Totals */
+.totals-section {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+.totals-box {
+    width: 280px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 14px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+}
+
+.total-row.grand {
+    background: #0d6efd;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 14px;
+}
+
+/* Payment Info */
+.payment-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+}
+
+.payment-badge {
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.badge-paid {
+    background: #198754;
+    color: #fff;
+}
+
+.badge-unpaid {
+    background: #dc3545;
+    color: #fff;
+}
+
+.badge-partial {
+    background: #ffc107;
+    color: #000;
+}
+
+/* Footer */
+.bill-footer {
+    text-align: center;
+    border-top: 1px solid #e9ecef;
+    padding-top: 14px;
+    font-size: 11px;
+    color: #888;
+}
+
+/* Print Button */
+.print-btn {
+    display: block;
+    width: 160px;
+    margin: 0 auto 20px;
+    padding: 10px;
+    background: #0d6efd;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+}
+
+@media print {
+    .print-btn {
+        display: none !important;
+    }
+
+    body {
+        padding: 0;
+    }
+}

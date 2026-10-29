@@ -18,9 +18,12 @@ const csrfToken = getCookie('csrftoken');
 // ── Edit Profile Modal ──────────────────────────────────
 const editProfileModal = document.getElementById('editProfileModal');
 
-document.getElementById('openEditProfile').addEventListener('click', () => {
-    editProfileModal.classList.add('active');
-});
+const openEditProfileButton = document.getElementById('openEditProfile');
+if (openEditProfileButton) {
+    openEditProfileButton.addEventListener('click', () => {
+        editProfileModal.classList.add('active');
+    });
+}
 document.getElementById('closeEditProfile').addEventListener('click', () => {
     editProfileModal.classList.remove('active');
 });
@@ -165,6 +168,12 @@ function executePhotoRemoval() {
 // ── Edit Family Member Modal ────────────────────────────
 const editModal = document.getElementById('editMemberModal');
 const editError = document.getElementById('editError');
+const editDobInput = document.getElementById('editDob');
+const editDobError = document.getElementById('editDobError');
+
+editDobInput.addEventListener('input', () => {
+    editDobError.style.display = 'none';
+});
 
 document.querySelectorAll('.btn-edit-fm').forEach(btn => {
     btn.addEventListener('click', function () {
@@ -176,6 +185,7 @@ document.querySelectorAll('.btn-edit-fm').forEach(btn => {
         document.getElementById('editBldGrop').value   = this.dataset.bldgrop;
         document.getElementById('editPhone').value     = this.dataset.phone;
         editError.style.display = 'none';
+        editDobError.style.display = 'none';
         editModal.classList.add('active');
     });
 });
@@ -191,6 +201,11 @@ document.getElementById('saveEditMember').addEventListener('click', function () 
     const dob      = document.getElementById('editDob').value;
     const bld_grop = document.getElementById('editBldGrop').value;
     const phone    = document.getElementById('editPhone').value.trim();
+
+    if (dob && (dob < editDobInput.min || dob > editDobInput.max)) {
+        editDobError.style.display = 'block';
+        return;
+    }
 
     if (!name || !relation) {
         editError.textContent   = 'Name and Relation are required.';
@@ -215,8 +230,13 @@ document.getElementById('saveEditMember').addEventListener('click', function () 
     .then(data => {
         if (data.success) { location.reload(); }
         else {
-            editError.textContent   = data.error || 'Something went wrong.';
-            editError.style.display = 'block';
+            if (data.field === 'dob') {
+                editDobError.textContent = data.error;
+                editDobError.style.display = 'block';
+            } else {
+                editError.textContent   = data.error || 'Something went wrong.';
+                editError.style.display = 'block';
+            }
         }
     })
     .catch(() => {

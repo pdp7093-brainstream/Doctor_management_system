@@ -15,8 +15,13 @@
 
 @media (max-width: 768px) {
     .treatments-banner {
-        height: 200px;
+        height: auto;
+        min-height: 220px;
+        padding: calc(var(--header-h, 76px) + 24px) 20px 28px;
     }
+    .treatments-banner .banner-content { margin: auto; }
+    .treatments-banner .banner-content h1 { font-size: clamp(30px, 8vw, 32px); line-height: 1.2; }
+    .treatments-banner .banner-content p { font-size: 15px; }
 }
 
 .banner-content {

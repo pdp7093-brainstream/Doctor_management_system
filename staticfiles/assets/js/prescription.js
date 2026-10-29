@@ -616,7 +616,10 @@ function resetTherapyModal() {
     const modal = document.getElementById('therapyModal');
     document.getElementById('therapySearchInput').value = '';
     document.getElementById('therapySelect').value = '';
-    document.getElementById('therapySessionsInput').value = '7';
+    document.getElementById('therapyBillingTypeInput').value = 'per_session';
+    document.getElementById('therapySessionsInput').value = '1';
+    document.getElementById('therapySessionPriceInput').value = '0.00';
+    document.getElementById('therapyPackagePriceInput').value = '';
     document.getElementById('therapyFrequencyInput').value = 'daily';
     document.getElementById('therapyStartInput').value = modal.dataset.visitDate || '';
     document.getElementById('therapyNotesInput').value = '';
@@ -629,7 +632,11 @@ function addTherapyRow() {
     const select = document.getElementById('therapySelect');
     const option = select.selectedOptions[0];
     const therapyId = select.value;
+    const billingTypeSelect = document.getElementById('therapyBillingTypeInput');
+    const billingType = billingTypeSelect.value;
     const sessions = Number(document.getElementById('therapySessionsInput').value);
+    const sessionPrice = document.getElementById('therapySessionPriceInput').value;
+    const packagePrice = document.getElementById('therapyPackagePriceInput').value;
     const frequencySelect = document.getElementById('therapyFrequencyInput');
     const frequency = frequencySelect.value;
     const startDate = document.getElementById('therapyStartInput').value;
@@ -650,10 +657,14 @@ function addTherapyRow() {
     const row = `
         <tr class="therapy-prescription-row">
             <td><div class="fw-semibold">${escapeHtml(option.textContent.trim())}</div><small class="text-muted">${escapeHtml(option.dataset.duration)} min</small><input type="hidden" name="therapy_id[]" value="${escapeAttr(therapyId)}"><input type="hidden" name="therapy_item_id[]" value=""></td>
-            <td>${sessions}<input type="hidden" name="therapy_sessions[]" value="${sessions}"></td>
-            <td>${escapeHtml(frequencySelect.selectedOptions[0].textContent)}<input type="hidden" name="therapy_frequency[]" value="${escapeAttr(frequency)}"></td>
-            <td>${escapeHtml(dateLabel)}<input type="hidden" name="therapy_start[]" value="${escapeAttr(startDate)}"></td>
-            <td>${notes ? escapeHtml(notes) : '—'}<input type="hidden" name="therapy_notes[]" value="${escapeAttr(notes)}"></td>
+            <td><select class="form-select form-select-sm" name="therapy_billing_type[]"><option value="per_session" ${billingType === 'per_session' ? 'selected' : ''}>Per session</option><option value="package" ${billingType === 'package' ? 'selected' : ''}>Package</option></select></td>
+            <td><input class="form-control form-control-sm" type="number" name="therapy_sessions[]" value="${sessions}" min="1" max="60" required></td>
+            <td><input class="form-control form-control-sm" type="number" name="therapy_session_price[]" value="${escapeAttr(sessionPrice)}" min="0" step="0.01" required></td>
+            <td><input class="form-control form-control-sm" type="number" name="therapy_package_price[]" value="${escapeAttr(packagePrice)}" min="0" step="0.01"></td>
+            <td><select class="form-select form-select-sm" name="therapy_frequency[]"><option value="daily" ${frequency === 'daily' ? 'selected' : ''}>Daily</option><option value="alternate" ${frequency === 'alternate' ? 'selected' : ''}>Alternate days</option><option value="twice_week" ${frequency === 'twice_week' ? 'selected' : ''}>Twice a week</option><option value="weekly" ${frequency === 'weekly' ? 'selected' : ''}>Weekly</option></select></td>
+            <td><input class="form-control form-control-sm" type="date" name="therapy_start[]" value="${escapeAttr(startDate)}"></td>
+            <td><input class="form-control form-control-sm" name="therapy_notes[]" value="${escapeAttr(notes)}"></td>
+            <td><span class="small text-muted">0/${sessions}</span><div class="progress" style="height:5px;min-width:48px"><div class="progress-bar" style="width:0%;background:#117A15"></div></div></td>
             <td class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
         </tr>`;
     document.getElementById('therapyList').insertAdjacentHTML('beforeend', row);
@@ -662,15 +673,203 @@ function addTherapyRow() {
     bootstrap.Modal.getInstance(document.getElementById('therapyModal'))?.hide();
 }
 
+function getTherapyOption(id) {
+    return Array.from(document.querySelectorAll('#therapyOptionsSource option')).find(o => o.value === String(id));
+}
+
+let therapyHighlighted = -1;
 const therapySearchInput = document.getElementById('therapySearchInput');
+const therapyDropdown = document.getElementById('therapyDropdown');
+const therapySelect = document.getElementById('therapySelect');
+
+function renderTherapyDropdown(query) {
+    const q = (query || '').toLowerCase();
+    const opts = Array.from(document.querySelectorAll('#therapyOptionsSource option')).filter(o => o.value);
+    const filtered = opts.filter(o => !q || (o.dataset.name || o.textContent).toLowerCase().includes(q));
+    therapyDropdown.innerHTML = filtered.map((o, i) => {
+        const price = Number(o.dataset.sessionPrice || 0);
+        const pkg = Number(o.dataset.packagePrice || 0);
+        const hint = price > 0 ? `₹${price}/session` : (pkg > 0 ? `₹${pkg} package` : '<span style="color:#dc3545;">Price not set</span>');
+        return `<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-id="${o.value}" data-idx="${i}"><span>${o.dataset.name}</span><small class="text-muted">${o.dataset.duration} min · ${hint}</small></button>`;
+    }).join('');
+    therapyDropdown.style.display = filtered.length ? 'block' : 'none';
+    therapyHighlighted = -1;
+}
+
 if (therapySearchInput) {
     therapySearchInput.addEventListener('input', () => {
-        const query = therapySearchInput.value.trim().toLowerCase();
-        document.querySelectorAll('#therapySelect option').forEach(option => {
-            option.hidden = Boolean(option.value) && !option.textContent.toLowerCase().includes(query);
-        });
-        document.getElementById('therapySelect').value = '';
+        renderTherapyDropdown(therapySearchInput.value);
+        therapySelect.value = '';
+        document.getElementById('therapySummaryChip').style.display = 'none';
+        document.getElementById('addTherapyBtn').disabled = true;
+        updateTherapyTotal();
     });
+    therapySearchInput.addEventListener('focus', () => renderTherapyDropdown(therapySearchInput.value));
+    therapySearchInput.addEventListener('keydown', (e) => {
+        const items = Array.from(therapyDropdown.querySelectorAll('button'));
+        if (e.key === 'ArrowDown') { therapyHighlighted = Math.min(items.length - 1, therapyHighlighted + 1); highlightTherapy(items); e.preventDefault(); }
+        else if (e.key === 'ArrowUp') { therapyHighlighted = Math.max(0, therapyHighlighted - 1); highlightTherapy(items); e.preventDefault(); }
+        else if (e.key === 'Enter') {
+            if (therapyHighlighted >= 0 && items[therapyHighlighted]) items[therapyHighlighted].click();
+            e.preventDefault();
+        }
+    });
+    document.addEventListener('click', (e) => {
+        if (!therapyDropdown.contains(e.target) && e.target !== therapySearchInput) therapyDropdown.style.display = 'none';
+    });
+}
+function highlightTherapy(items) {
+    items.forEach((it, i) => it.classList.toggle('active', i === therapyHighlighted));
+}
+therapyDropdown?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-id]');
+    if (!btn) return;
+    selectTherapy(btn.dataset.id);
+    therapyDropdown.style.display = 'none';
+});
+
+function selectTherapy(id) {
+    const option = getTherapyOption(id);
+    if (!option) return;
+    therapySelect.value = id;
+    therapySearchInput.value = option.dataset.name;
+    document.getElementById('therapyBillingTypeInput').value = option.dataset.billingType || 'per_session';
+    document.getElementById('therapySessionsInput').value = option.dataset.defaultSessions || '1';
+    document.getElementById('therapySessionPriceInput').value = option.dataset.sessionPrice || '0.00';
+    document.getElementById('therapyPackagePriceInput').value = option.dataset.packagePrice || '';
+    // sync segmented toggle
+    setBillingType(option.dataset.billingType || 'per_session');
+    const chip = document.getElementById('therapySummaryChip');
+    chip.style.display = 'block';
+    chip.querySelector('span').textContent = `${option.dataset.duration} min · ${option.dataset.billingType === 'package' ? 'Package' : 'Per session'} · ${option.dataset.defaultSessions || 1} sessions`;
+    document.getElementById('addTherapyBtn').disabled = false;
+    updateTherapyTotal();
+}
+
+// segmented billing toggle
+function setBillingType(type) {
+    document.getElementById('therapyBillingTypeInput').value = type;
+    document.querySelectorAll('.billing-toggle-seg').forEach(b => {
+        const active = b.dataset.billing === type;
+        b.classList.toggle('active', active);
+        b.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+    document.getElementById('sessionPriceWrap').style.display = type === 'per_session' ? '' : 'none';
+    document.getElementById('packagePriceWrap').style.display = type === 'package' ? '' : 'none';
+    updateTherapyTotal();
+}
+document.querySelectorAll('.billing-toggle-seg').forEach(b => b.addEventListener('click', () => setBillingType(b.dataset.billing)));
+
+function updateTherapyTotal() {
+    const type = document.getElementById('therapyBillingTypeInput').value;
+    const sessions = Number(document.getElementById('therapySessionsInput').value) || 0;
+    const sp = Number(document.getElementById('therapySessionPriceInput').value) || 0;
+    const pp = Number(document.getElementById('therapyPackagePriceInput').value) || 0;
+    const el = document.getElementById('therapyTotalPreview');
+    if (type === 'per_session') el.textContent = `${sessions} sessions × ₹${sp} = ₹${sessions * sp}`;
+    else el.textContent = `Package: ₹${pp} for ${sessions} sessions`;
+}
+['therapySessionsInput','therapySessionPriceInput','therapyPackagePriceInput'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateTherapyTotal);
+});
+
+// patch addTherapyRow to use hidden input + option source
+const _origAddTherapyRow = addTherapyRow;
+// redefine
+function formatTherapyMoney(value) {
+    return `₹${Number(value || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+}
+
+function updateTherapyPrescriptionRow(row) {
+    if (!row) return;
+    const billingType = row.querySelector('.therapy-billing-select')?.value || 'per_session';
+    const sessions = Number(row.querySelector('.therapy-sessions-input')?.value) || 0;
+    const activePrice = row.querySelector(`.therapy-price-option[data-price-type="${billingType}"]`);
+    row.dataset.billingType = billingType;
+    row.querySelectorAll('.therapy-price-option').forEach(option => {
+        option.hidden = option !== activePrice;
+    });
+    const priceInput = activePrice?.querySelector('.therapy-price-input');
+    const price = Number(priceInput?.value) || 0;
+    const warning = activePrice?.querySelector('.therapy-price-warning');
+    if (warning) warning.hidden = price > 0;
+
+    const amount = row.querySelector('.therapy-amount');
+    if (amount) {
+        amount.textContent = billingType === 'package'
+            ? formatTherapyMoney(price)
+            : `${sessions} × ${formatTherapyMoney(price)} = ${formatTherapyMoney(sessions * price)}`;
+    }
+}
+
+const therapyList = document.getElementById('therapyList');
+therapyList?.addEventListener('input', event => {
+    if (event.target.matches('.therapy-sessions-input, .therapy-price-input')) {
+        updateTherapyPrescriptionRow(event.target.closest('.therapy-prescription-row'));
+    }
+});
+therapyList?.addEventListener('change', event => {
+    if (event.target.matches('.therapy-billing-select')) {
+        updateTherapyPrescriptionRow(event.target.closest('.therapy-prescription-row'));
+    }
+});
+document.querySelectorAll('#therapyList .therapy-prescription-row').forEach(updateTherapyPrescriptionRow);
+
+function addTherapyRow() {
+    const therapyId = therapySelect.value;
+    const option = getTherapyOption(therapyId);
+    if (!therapyId || !option) { showToast('Select a therapy first.', 'warning'); return; }
+    const billingType = document.getElementById('therapyBillingTypeInput').value;
+    const sessions = Number(document.getElementById('therapySessionsInput').value);
+    if (!Number.isInteger(sessions) || sessions < 1 || sessions > 60) { showToast('Therapy sessions must be between 1 and 60.', 'warning'); return; }
+    const sessionPrice = document.getElementById('therapySessionPriceInput').value;
+    const packagePrice = document.getElementById('therapyPackagePriceInput').value;
+    const frequency = document.getElementById('therapyFrequencyInput').value;
+    const startDate = document.getElementById('therapyStartInput').value;
+    const notes = document.getElementById('therapyNotesInput').value.trim();
+    const name = option.dataset.name;
+    const duration = option.dataset.duration;
+    const dateLabel = startDate ? new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(`${startDate}T00:00:00`)) : '—';
+    const row = `
+        <tr class="therapy-prescription-row" data-billing-type="${escapeAttr(billingType)}">
+            <td data-label="Therapy"><div class="fw-semibold">${escapeHtml(name)}</div><small class="text-muted">${escapeHtml(duration)} min</small><input type="hidden" name="therapy_id[]" value="${escapeAttr(therapyId)}"><input type="hidden" name="therapy_item_id[]" value=""></td>
+            <td data-label="Billing"><select class="form-select form-select-sm therapy-billing-select" name="therapy_billing_type[]"><option value="per_session" ${billingType === 'per_session' ? 'selected' : ''}>Per session</option><option value="package" ${billingType === 'package' ? 'selected' : ''}>Package</option></select></td>
+            <td data-label="Sessions"><input class="form-control form-control-sm therapy-sessions-input" type="number" name="therapy_sessions[]" value="${sessions}" min="1" max="60" required></td>
+            <td data-label="Price">
+                <div class="therapy-price-option" data-price-type="per_session" ${billingType === 'package' ? 'hidden' : ''}><input class="form-control form-control-sm therapy-price-input" type="number" name="therapy_session_price[]" value="${escapeAttr(sessionPrice || '0')}" min="0" step="0.01"><small class="therapy-price-helper">per session</small><small class="therapy-price-warning" hidden>Price not set</small></div>
+                <div class="therapy-price-option" data-price-type="package" ${billingType !== 'package' ? 'hidden' : ''}><input class="form-control form-control-sm therapy-price-input" type="number" name="therapy_package_price[]" value="${escapeAttr(packagePrice)}" min="0" step="0.01"><small class="therapy-price-helper">Package · one-time</small><small class="therapy-price-warning" hidden>Price not set</small></div>
+            </td>
+            <td data-label="Amount" class="therapy-amount-cell"><strong class="therapy-amount"></strong></td>
+            <td data-label="Frequency"><select class="form-select form-select-sm" name="therapy_frequency[]"><option value="daily" ${frequency === 'daily' ? 'selected' : ''}>Daily</option><option value="alternate" ${frequency === 'alternate' ? 'selected' : ''}>Alternate days</option><option value="twice_week" ${frequency === 'twice_week' ? 'selected' : ''}>Twice a week</option><option value="weekly" ${frequency === 'weekly' ? 'selected' : ''}>Weekly</option></select></td>
+            <td data-label="Start date"><input class="form-control form-control-sm therapy-start-input" type="date" name="therapy_start[]" value="${escapeAttr(startDate)}"></td>
+            <td data-label="Notes"><details class="therapy-notes"><summary class="btn btn-sm btn-outline-secondary" title="Edit notes" aria-label="Edit notes"><i class="bi bi-pencil-square"></i></summary><input class="form-control form-control-sm" name="therapy_notes[]" value="${escapeAttr(notes)}" aria-label="Therapy notes"></details></td>
+            <td data-label="Progress"><span class="small text-muted">0/${sessions}</span><div class="progress therapy-progress"><div class="progress-bar" style="width:0%;background:#117A15"></div></div></td>
+            <td data-label="Action" class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
+        </tr>`;
+    document.getElementById('therapyList').insertAdjacentHTML('beforeend', row);
+    updateTherapyPrescriptionRow(document.getElementById('therapyList').lastElementChild);
+    updateTherapyCount();
+    resetTherapyModal();
+    bootstrap.Modal.getInstance(document.getElementById('therapyModal'))?.hide();
+}
+
+function resetTherapyModal() {
+    const modal = document.getElementById('therapyModal');
+    if (therapySearchInput) therapySearchInput.value = '';
+    therapySelect.value = '';
+    document.getElementById('therapyBillingTypeInput').value = 'per_session';
+    document.getElementById('therapySessionsInput').value = '1';
+    document.getElementById('therapySessionPriceInput').value = '0.00';
+    document.getElementById('therapyPackagePriceInput').value = '';
+    document.getElementById('therapyFrequencyInput').value = 'daily';
+    document.getElementById('therapyStartInput').value = modal.dataset.visitDate || '';
+    document.getElementById('therapyNotesInput').value = '';
+    document.getElementById('therapySummaryChip').style.display = 'none';
+    document.getElementById('addTherapyBtn').disabled = true;
+    if (therapyDropdown) therapyDropdown.style.display = 'none';
+    setBillingType('per_session');
+    updateTherapyTotal();
 }
 
 document.getElementById('therapyModal')?.addEventListener('hidden.bs.modal', resetTherapyModal);

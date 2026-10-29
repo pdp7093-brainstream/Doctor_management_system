@@ -788,6 +788,7 @@ h6 {
 
   .footer-16 .footer-bottom {
     text-align: center;
+    padding-bottom: 72px;
   }
 
   .footer-16 .footer-bottom .legal-links {
@@ -6224,9 +6225,43 @@ section,
   border-radius: 12px !important;
 }
 
+.swal2-popup.swal-site-popup { border-radius: 12px !important; }
+.swal2-popup .swal-site-title { color: #015315 !important; }
+
 .swal2-popup .swal2-title {
   color: #015315 !important;
 }
+
+.swal2-popup .swal-site-confirm {
+  background: #015315 !important;
+  border: 1px solid #015315 !important;
+  border-radius: 6px !important;
+  color: #fff !important;
+  padding: .625em 1.25em !important;
+}
+.swal2-popup .swal-site-confirm:hover { background: #013d10 !important; border-color: #013d10 !important; }
+.swal2-popup .swal-site-cancel {
+  background: #fff !important;
+  border: 1px solid #015315 !important;
+  border-radius: 6px !important;
+  color: #015315 !important;
+  padding: .625em 1.25em !important;
+}
+.swal2-popup .swal-site-cancel:hover { background: #EAF4EA !important; }
+.swal2-loader { border-color: #117A15 transparent #117A15 transparent !important; }
+.swal2-icon.swal2-success { border-color: #015315 !important; color: #015315 !important; }
+.swal2-icon.swal2-success .swal2-success-ring { border-color: #015315 !important; }
+.swal2-icon.swal2-success [class^="swal2-success-line"] { background-color: #015315 !important; }
+.swal2-icon.swal2-error { border-color: #AD0002 !important; color: #AD0002 !important; }
+.swal2-icon.swal2-error [class^="swal2-x-mark-line"] { background-color: #AD0002 !important; }
+.swal2-icon.swal-site-calendar {
+  width: 4.5em !important;
+  height: 4.5em !important;
+  border: 0 !important;
+  background: #EAF4EA !important;
+  color: #015315 !important;
+}
+.swal-site-calendar .bi { font-size: 2rem; }
 
 .swal2-styled.swal2-confirm {
   background: #015315 !important;

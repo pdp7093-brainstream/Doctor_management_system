@@ -1,0 +1,349 @@
+/* about.css */
+
+/* ── Header: solid white (same as treatments page) ──── */
+
+/* ── Banner ─────────────────────────────────────────── */
+.about-banner {
+    width: 100%;
+    height: 340px;
+    background-image: linear-gradient(rgba(1, 83, 21, 0.82), rgba(1, 83, 21, 0.30)),
+                      url("../img/ayurveda/about-banner.7fcc1dff434c.webp");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-banner .banner-content {
+    max-width: 640px;
+    text-align: left;
+}
+
+.about-banner .banner-content h1 {
+    color: #ffffff;
+    font-size: 2.75rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    line-height: 1.2;
+}
+
+.about-banner .banner-content p {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1rem;
+    margin: 0;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .about-banner {
+        height: auto;
+        min-height: 220px;
+        padding: calc(var(--header-h, 76px) + 24px) 20px 28px;
+    }
+    .about-banner .banner-content { margin: auto; }
+    .about-banner .banner-content h1 { font-size: clamp(30px, 8vw, 32px); line-height: 1.2; }
+    .about-banner .banner-content p { font-size: 15px; }
+}
+
+/* ── Shared section spacing ─────────────────────────── */
+.about-section {
+    padding: 80px 0;
+}
+
+@media (max-width: 768px) {
+    .about-section { padding: 56px 0; }
+}
+
+/* ── Section heading block (centered) ─────────────── */
+.section-heading-block {
+    margin-bottom: 48px;
+    text-align: center;
+}
+
+.section-label {
+    display: inline-block;
+    color: #ff9933;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--heading-color, #222);
+    margin-bottom: 0;
+    line-height: 1.25;
+}
+
+/* Ensure story section headings stay left-aligned */
+.story-text .section-label,
+.story-text .section-title {
+    text-align: left;
+}
+
+.story-text .section-title {
+    margin-bottom: 20px !important;
+}
+
+/* ── Story section ───────────────────────────────────── */
+.story-section { background: #ffffff; }
+
+.story-img-wrap {
+    position: relative;
+}
+
+.story-img {
+    border-radius: 20px;
+    box-shadow: 0 16px 48px rgba(17, 122, 21, 0.13);
+    width: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* subtle green accent bar behind image */
+.story-img-wrap::before {
+    content: "";
+    position: absolute;
+    bottom: -16px;
+    right: -16px;
+    width: 60%;
+    height: 60%;
+    background: var(--bg-tint, #F3F8F2);
+    border-radius: 20px;
+    z-index: -1;
+}
+
+.story-text p {
+    color: #555;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-bottom: 1.1rem;
+}
+
+.btn-outline-green {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 28px;
+    border-radius: 50px;
+    border: 2px solid var(--accent-color, #117A15);
+    color: var(--accent-color, #117A15);
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: 12px;
+}
+
+.btn-outline-green:hover {
+    background-color: var(--accent-color, #117A15);
+    color: #ffffff;
+}
+
+/* ── Approach steps ──────────────────────────────────── */
+.approach-section {
+    background-color: var(--bg-tint, #F3F8F2);
+}
+
+.steps-row {
+    display: flex;
+    gap: 0;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.step-item {
+    flex: 1;
+    text-align: center;
+    padding: 32px 20px;
+    position: relative;
+    background: #ffffff;
+    border-radius: 16px;
+    margin: 0 10px;
+    border: 1px solid #DCEBDC;
+    box-shadow: 0 4px 16px rgba(17, 122, 21, 0.06);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 28px rgba(17, 122, 21, 0.10);
+}
+
+/* dotted connector line between steps on desktop */
+.step-connector {
+    display: flex;
+    align-items: center;
+    padding-top: 28px; /* align with icon center */
+    flex-shrink: 0;
+}
+
+.step-connector span {
+    display: block;
+    width: 32px;
+    border-top: 2px dashed #BDDCBD;
+}
+
+@media (max-width: 991px) {
+    .steps-row { flex-wrap: wrap; gap: 16px; }
+    .step-item { flex: 0 0 calc(50% - 8px); margin: 0; }
+    .step-connector { display: none; }
+}
+
+@media (max-width: 575px) {
+    .step-item { flex: 0 0 100%; }
+}
+
+.step-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #EAF4EA, #d4ead4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+}
+
+.step-icon i {
+    font-size: 22px;
+    color: #117A15;
+}
+
+.step-number {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #ffffff;
+    background-color: #ff9933;
+    border-radius: 50px;
+    padding: 2px 10px;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+}
+
+.step-title {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--heading-color, #222);
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.step-desc {
+    font-size: 0.875rem;
+    color: #777;
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* ── Values cards ────────────────────────────────────── */
+.values-section { background: #ffffff; }
+
+.values-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    justify-content: flex-start;
+}
+
+.value-card-wrapper {
+    width: calc((100% - 72px) / 4);
+}
+
+@media (max-width: 991px) {
+    .value-card-wrapper { width: calc((100% - 24px) / 2); }
+}
+
+@media (max-width: 575px) {
+    .value-card-wrapper { width: 100%; }
+}
+
+/* ── Value card itself ───────────────────────────────── */
+.value-card {
+    background: #ffffff;
+    border: 1px solid #DCEBDC;
+    border-radius: 18px;
+    padding: 28px 24px;
+    box-shadow: 0 6px 20px rgba(17, 122, 21, 0.07);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+}
+
+.value-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(17, 122, 21, 0.12);
+}
+
+.value-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #EAF4EA, #d4ead4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+
+.value-icon i {
+    font-size: 22px;
+    color: #117A15;
+}
+
+.value-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--heading-color, #222);
+    margin-bottom: 8px;
+}
+
+.value-desc {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.55;
+    margin: 0;
+}
+/* Story heading spacing fix */
+.story-text .section-title {
+    padding-bottom: 0;
+    margin-bottom: 20px !important;
+}
+/* Healing Journey alignment fix */
+.steps-row { align-items: stretch; }
+.step-item { display: flex; flex-direction: column; align-items: center; }
+.step-item:hover { transform: translateY(-3px); }
+.step-title {
+    min-height: 2.6em;
+    display: flex; align-items: center; justify-content: center;
+}
+.step-desc { flex-grow: 1; }
+.step-connector { align-items: flex-start; padding-top: 60px; }
+
+/* Founder section */
+.dr-section { background: #fff; }
+.dr-photo-wrap { position: relative; }
+.dr-photo { width: 100%; aspect-ratio: 4/5; object-fit: cover; border-radius: 20px; box-shadow: 0 16px 40px rgba(1,83,21,.12); }
+.dr-exp-badge { position: absolute; right: -12px; bottom: 24px; background: #015315; color: #fff; border-radius: 14px; padding: 12px 18px; text-align: center; box-shadow: 0 10px 24px rgba(1,83,21,.25); }
+.dr-exp-badge strong { display: block; font-size: 1.5rem; line-height: 1; }
+.dr-exp-badge span { font-size: .75rem; opacity: .9; }
+.dr-name { font-size: 2.2rem; font-weight: 700; color: #015315; margin: 6px 0 10px; }
+.dr-tag { display: inline-flex; align-items: center; gap: 8px; background: #EAF4EA; color: #015315; font-weight: 600; font-size: .9rem; padding: 6px 14px; border-radius: 50px; margin-bottom: 18px; }
+.dr-intro { font-size: 1rem; line-height: 1.8; color: #555; margin-bottom: 24px; }
+.dr-card { width: 100%; background: #F7FBF7; border: 1px solid rgba(1,83,21,.10); border-radius: 16px; padding: 26px; transition: transform .25s ease, box-shadow .25s ease; }
+.dr-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(1,83,21,.08); }
+.dr-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.dr-icon { width: 46px; height: 46px; flex-shrink: 0; border-radius: 12px; background: #015315; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; }
+.dr-card h3 { font-size: 1.05rem; font-weight: 700; color: #015315; margin: 0; line-height: 1.35; }
+.dr-card p { font-size: .92rem; line-height: 1.7; color: #555; margin: 0; }
+.dr-vision { margin-top: 40px; background: linear-gradient(135deg, #015315, #117A15); color: #fff; border-radius: 20px; padding: 36px 40px; text-align: center; }
+.dr-vision-label { display: inline-flex; align-items: center; gap: 8px; font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #FFD2B0; margin-bottom: 12px; }
+.dr-vision p { max-width: 760px; margin: 0 auto 14px; font-size: 1.05rem; line-height: 1.8; color: rgba(255,255,255,.92); }
+.dr-vision-tagline { display: block; font-size: 1.1rem; color: #fff; }
+@media (max-width: 991px) { .dr-exp-badge { right: 12px; } }
+@media (max-width: 767px) { .dr-name { font-size: 1.8rem; } .dr-vision { padding: 28px 20px; } }
