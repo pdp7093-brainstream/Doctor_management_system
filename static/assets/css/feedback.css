@@ -1,3 +1,12 @@
+@media (min-width: 992px) {
+    .contact-page #feedback > .container > .row.g-4.align-items-start {
+        align-items: center !important;
+    }
+
+    .contact-page #feedback > .container > .row.g-4.align-items-start > .col-lg-5.align-self-start {
+        align-self: center !important;
+    }
+}
 .feedback-card {
     background: var(--white);
     border-radius: 12px;

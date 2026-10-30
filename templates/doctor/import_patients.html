@@ -115,7 +115,7 @@
                             <span class="text-muted">Full name of the patient (split into first &amp; last name).</span>
                         </li>
                         <li class="mb-2 pb-2 border-bottom">
-                            <strong class="text-success">phone *</strong> <span class="badge bg-danger ms-1">Required</span><br>
+                            <strong class="text-success">phone</strong> <span class="badge bg-secondary ms-1">Optional</span><br>
                             <span class="text-muted">10-digit mobile number (leading +91, 0, spaces, and dashes are stripped).</span>
                         </li>
                         <li class="mb-2 pb-2 border-bottom">
@@ -217,7 +217,7 @@
                             {% if r.status == 'New' %}
                             <span class="dc-badge green"><i class="bi bi-plus-circle"></i> New</span>
                             {% elif r.status == 'Duplicate' %}
-                            <span class="dc-badge peach"><i class="bi bi-copy"></i> Duplicate</span>
+                            <span class="dc-badge peach"><i class="bi bi-copy"></i> {% if r.reason == 'Duplicate (same name, no phone)' %}Duplicate (same name, no phone){% else %}Duplicate{% endif %}</span>
                             {% else %}
                             <span class="dc-badge red"><i class="bi bi-x-circle"></i> Error</span>
                             {% endif %}

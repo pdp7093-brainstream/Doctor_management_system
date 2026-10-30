@@ -89,7 +89,28 @@ class PatientImportTests(TestCase):
 
         phone, err = clean_phone("")
         self.assertEqual(phone, "")
-        self.assertTrue("Missing phone" in err)
+        self.assertEqual(err, "")
+
+    def test_name_only_patient_import_sets_null_and_skips_reupload(self):
+        rows = [{"_row_num": 2, "name": "Name Only Patient", "phone": ""}]
+
+        validated = validate_patient_rows(rows)
+        self.assertEqual(validated[0]["status"], "New")
+        self.assertEqual(validated[0]["reason"], "Ready (no phone)")
+
+        first_import = create_patients_from_rows(validated)
+        self.assertEqual(first_import["created_count"], 1)
+        patient = Patient.objects.get(user__first_name="Name", user__last_name="Only Patient")
+        self.assertIsNone(patient.phone)
+
+        revalidated = validate_patient_rows(rows)
+        self.assertEqual(revalidated[0]["status"], "Duplicate")
+        self.assertEqual(revalidated[0]["reason"], "Duplicate (same name, no phone)")
+
+        second_import = create_patients_from_rows(revalidated)
+        self.assertEqual(second_import["created_count"], 0)
+        self.assertEqual(second_import["duplicate_count"], 1)
+        self.assertEqual(Patient.objects.filter(user__first_name="Name", user__last_name="Only Patient").count(), 1)
 
     def test_three_date_formats(self):
         # dd/mm/yyyy

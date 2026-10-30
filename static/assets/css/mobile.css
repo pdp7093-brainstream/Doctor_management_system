@@ -153,10 +153,15 @@
     text-align: left !important;
   }
 
-  /* Scroll to top button visibility over footer */
-  .scroll-top {
-    border: 2px solid #ffffff !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  /* Ayurveda wisdom section spacing */
+  #ayurveda-wisdom.aw-section {
+    padding-bottom: 32px !important;
+  }
+
+  /* CTA spacing between sections */
+  .cta-banner {
+    margin-top: -30px !important;
+    padding-top: 32px !important;
   }
 
   #main .table-responsive,

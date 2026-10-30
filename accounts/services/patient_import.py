@@ -1,12 +1,14 @@
 import csv
 import io
 import re
+from uuid import uuid4
 from datetime import datetime
 from typing import Dict, List, Tuple, Any
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
+from django.db.models import Q
 from django.contrib.auth.models import User
 from accounts.models import Patient
 
@@ -21,11 +23,11 @@ def clean_phone(raw_phone: Any) -> Tuple[str, str]:
     Returns (cleaned_phone, error_message).
     """
     if raw_phone is None:
-        return "", "Missing phone number"
+        return "", ""
 
     s = str(raw_phone).strip()
     if not s:
-        return "", "Missing phone number"
+        return "", ""
 
     # Remove floating point suffix if read from Excel as number (e.g. 9876543210.0)
     if s.endswith(".0"):
@@ -189,6 +191,12 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
         .exclude(phone__exact="")
         .values_list("phone", flat=True)
     )
+    existing_name_only_patients = {
+        f"{first_name} {last_name}".strip()
+        for first_name, last_name in Patient.objects.filter(
+            Q(phone__isnull=True) | Q(phone="")
+        ).values_list("user__first_name", "user__last_name")
+    }
 
     existing_emails = set(
         User.objects.exclude(email__isnull=True)
@@ -198,6 +206,7 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
     existing_usernames = set(User.objects.values_list("username", flat=True))
 
     seen_phones_in_file = set()
+    seen_name_only_in_file = set()
     seen_emails_in_file = set()
 
     validated_rows = []
@@ -218,7 +227,7 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
         if not name:
             errors.append("Missing name")
 
-        # Required: phone
+        # Optional: phone
         phone, phone_err = clean_phone(raw_phone)
         if phone_err:
             errors.append(phone_err)
@@ -245,12 +254,16 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
             dup_reasons = []
 
             # Check phone
-            if phone in seen_phones_in_file:
+            if phone:
+                if phone in seen_phones_in_file:
+                    is_dup = True
+                    dup_reasons.append(f"Phone {phone} appears multiple times in file")
+                elif phone in existing_phones:
+                    is_dup = True
+                    dup_reasons.append(f"Patient with phone {phone} already exists")
+            elif name in seen_name_only_in_file or name in existing_name_only_patients:
                 is_dup = True
-                dup_reasons.append(f"Phone {phone} appears multiple times in file")
-            elif phone in existing_phones:
-                is_dup = True
-                dup_reasons.append(f"Patient with phone {phone} already exists")
+                dup_reasons.append("Duplicate (same name, no phone)")
 
             # Check email if provided
             if email:
@@ -266,8 +279,11 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
                 reason = "; ".join(dup_reasons)
             else:
                 status = "New"
-                reason = ""
-                seen_phones_in_file.add(phone)
+                reason = "Ready (no phone)" if not phone else ""
+                if phone:
+                    seen_phones_in_file.add(phone)
+                else:
+                    seen_name_only_in_file.add(name)
                 if email:
                     seen_emails_in_file.add(email)
 
@@ -319,7 +335,7 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
             continue
 
         # If it was 'New', create it (or simulate if dry_run)
-        phone = r.get("phone", "")
+        phone = r.get("phone") or None
         email = r.get("email", "")
         name = r.get("name", "")
         gender = r.get("gender", "") or None
@@ -328,15 +344,29 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
         address = r.get("address", "") or ""
 
         # Runtime duplicate re-check
-        if Patient.objects.filter(phone=phone).exists():
+        name_parts = name.split(" ", 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ""
+        if phone and Patient.objects.filter(phone=phone).exists():
             duplicate_count += 1
             r_skipped = dict(r)
             r_skipped["status"] = "Duplicate"
             r_skipped["reason"] = f"Patient with phone {phone} already exists"
             skipped_rows.append(r_skipped)
             continue
+        if not phone and Patient.objects.filter(
+            Q(phone__isnull=True) | Q(phone=""),
+            user__first_name=first_name,
+            user__last_name=last_name,
+        ).exists():
+            duplicate_count += 1
+            r_skipped = dict(r)
+            r_skipped["status"] = "Duplicate"
+            r_skipped["reason"] = "Duplicate (same name, no phone)"
+            skipped_rows.append(r_skipped)
+            continue
 
-        username = email if email else f"pt-{phone}"
+        username = email if email else f"pt-{phone}" if phone else f"pt-{uuid4().hex}"
         if email and (User.objects.filter(email__iexact=email).exists() or User.objects.filter(username__iexact=email).exists()):
             duplicate_count += 1
             r_skipped = dict(r)
@@ -361,10 +391,6 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
         # Execute creation inside transaction.atomic()
         try:
             with transaction.atomic():
-                name_parts = name.split(" ", 1)
-                first_name = name_parts[0]
-                last_name = name_parts[1] if len(name_parts) > 1 else ""
-
                 user = User.objects.create_user(
                     username=username,
                     email=email,
