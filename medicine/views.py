@@ -2,13 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from doctor import hashid as _hashid
 from django.views import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse, HttpResponseNotAllowed
 from django.db.models import Q, Exists, OuterRef, Subquery, Count, F
 from .models import *
 from django.core.paginator import Paginator
 from django.db import models as db_models
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from doctor.mixins import StaffRequiredMixin, has_staff_access
 from django.utils import timezone
 from decimal import Decimal
 import hashlib
@@ -40,7 +41,7 @@ def variant_price_error(cost_prices, selling_prices, free_samples, powers):
             return f"Variant {index + 1}: selling price must be greater than zero; unless marked Free / sample, it must not be less than cost price."
     return None
 
-class ManageMedicineView(LoginRequiredMixin, View):
+class ManageMedicineView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -153,7 +154,7 @@ class ManageMedicineView(LoginRequiredMixin, View):
         )
 
 
-class AddMedicineView(LoginRequiredMixin, View):
+class AddMedicineView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -240,7 +241,7 @@ class AddMedicineView(LoginRequiredMixin, View):
         return redirect("medicine:manage_medicine")
 
 
-class DeleteMedicineView(LoginRequiredMixin, View):
+class DeleteMedicineView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     def post(self, request, hid):
         try:
@@ -253,7 +254,7 @@ class DeleteMedicineView(LoginRequiredMixin, View):
         return redirect("medicine:manage_medicine")
 
 
-class EditMedicineView(LoginRequiredMixin, View):
+class EditMedicineView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     def get(self, request, hid):
         try:
@@ -377,7 +378,7 @@ class EditMedicineView(LoginRequiredMixin, View):
         return redirect("medicine:manage_medicine")
 
 
-class MedicineSearchView(LoginRequiredMixin, View):
+class MedicineSearchView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -527,7 +528,7 @@ def search_medicine(request):
     return JsonResponse(data, safe=False)
 
 
-class LowStockView(LoginRequiredMixin, View):
+class LowStockView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -563,7 +564,10 @@ class LowStockView(LoginRequiredMixin, View):
             },
         )
 
+@login_required(login_url='doctor:login')
 def low_stock_count(request):
+    if not has_staff_access(request.user):
+        return HttpResponseForbidden()
     # Fixed: 'low_stock_alerts' changed to 'low_stock_alert'
     count = MedicineVariant.objects.filter(
         stock__lte=db_models.F("low_stock_alert"), medicine__is_active=True
@@ -571,7 +575,10 @@ def low_stock_count(request):
     return JsonResponse({"count": count})
 
 
+@login_required(login_url='doctor:login')
 def low_stock_list(request):
+    if not has_staff_access(request.user):
+        return HttpResponseForbidden()
     # Base queryset
     base_query = MedicineVariant.objects.filter(
         stock__lte=db_models.F("low_stock_alert"), medicine__is_active=True
@@ -599,7 +606,7 @@ def low_stock_list(request):
     )
 
 
-class VendorListView(LoginRequiredMixin, View):
+class VendorListView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -607,7 +614,7 @@ class VendorListView(LoginRequiredMixin, View):
         return render(request, "medicine/vendor_list.html", {"vendors": vendors})
 
 
-class AddVendorView(LoginRequiredMixin, View):
+class AddVendorView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -629,7 +636,7 @@ class AddVendorView(LoginRequiredMixin, View):
         return redirect("medicine:vendor_list")
 
 
-class EditVendorView(LoginRequiredMixin, View):
+class EditVendorView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     def get(self, request, hid):
         try:
@@ -656,7 +663,7 @@ class EditVendorView(LoginRequiredMixin, View):
         return redirect("medicine:vendor_list")
 
 
-class DeleteVendorView(LoginRequiredMixin, View):
+class DeleteVendorView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     def post(self, request, hid):
         try:
@@ -672,7 +679,7 @@ class DeleteVendorView(LoginRequiredMixin, View):
 
 
 # Purchase Views
-class PurchaseListView(LoginRequiredMixin, View):
+class PurchaseListView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -723,7 +730,7 @@ class PurchaseListView(LoginRequiredMixin, View):
         return render(request, "medicine/purchase_list.html", context)
 
 
-class DeletePurchaseView(LoginRequiredMixin, View):
+class DeletePurchaseView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     def post(self, request, hid):
         try:
@@ -737,7 +744,7 @@ class DeletePurchaseView(LoginRequiredMixin, View):
         return redirect("medicine:purchase_list")
 
 
-class AddPurchaseView(LoginRequiredMixin, View):
+class AddPurchaseView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -896,7 +903,7 @@ class AddPurchaseView(LoginRequiredMixin, View):
         messages.success(request,f"Purchase order created successfully. Total ₹{grand_total}",)
         return redirect("medicine:purchase_list")
 
-class ReceivePurchaseView(LoginRequiredMixin, View):
+class ReceivePurchaseView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request, hid):
@@ -1033,7 +1040,7 @@ class ReceivePurchaseView(LoginRequiredMixin, View):
 
         return redirect("medicine:purchase_detail", hid=_hashid.encode_id(purchase.pk))
 
-class PurchaseDetailView(LoginRequiredMixin, View):
+class PurchaseDetailView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     def get(self, request, hid):
         try:
@@ -1048,7 +1055,7 @@ class PurchaseDetailView(LoginRequiredMixin, View):
         return render(request, "medicine/purchase_detail.html", {"purchase": purchase})
 
 # Medicine Import 
-class ImportMedicineView(LoginRequiredMixin, View):
+class ImportMedicineView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
     MAX_UPLOAD_SIZE = 5 * 1024 * 1024
     STOCK_OPTIONS = {'add', 'replace', 'keep'}
@@ -1233,7 +1240,7 @@ class ImportMedicineView(LoginRequiredMixin, View):
         return render(request, 'medicine/import_medicine.html', {'step': 'upload'})
 
 
-class MedicineTypeListView(LoginRequiredMixin, View):
+class MedicineTypeListView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request):
@@ -1274,7 +1281,7 @@ class MedicineTypeListView(LoginRequiredMixin, View):
         return redirect("medicine:medicine_types")
 
 
-class EditMedicineTypeView(LoginRequiredMixin, View):
+class EditMedicineTypeView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request, pk):
@@ -1313,7 +1320,7 @@ class EditMedicineTypeView(LoginRequiredMixin, View):
         return redirect("medicine:medicine_types")
 
 
-class DeleteMedicineTypeView(LoginRequiredMixin, View):
+class DeleteMedicineTypeView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = "doctor:login"
 
     def get(self, request, pk):

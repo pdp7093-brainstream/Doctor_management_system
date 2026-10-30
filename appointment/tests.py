@@ -118,7 +118,7 @@ class PrescriptionAdviceTests(TestCase):
             'default_doctor': None,
         }
         without_advice = render_to_string('appointment/prescription_print.html', context)
-        self.assertNotIn('Pathya (Take)', without_advice)
+        self.assertNotIn('Pathya – Take', without_advice)
 
         self.prescription.pathya = 'Warm water'
         self.prescription.apathya = 'Fried food'
@@ -126,8 +126,8 @@ class PrescriptionAdviceTests(TestCase):
         self.prescription.save()
         context['prescription'] = self.prescription
         with_advice = render_to_string('appointment/prescription_print.html', context)
-        self.assertIn('Pathya (Take)', with_advice)
-        self.assertIn('Apathya (Avoid)', with_advice)
+        self.assertIn('Pathya – Take', with_advice)
+        self.assertIn('Apathya – Avoid', with_advice)
         self.assertIn('Walk daily', with_advice)
 
 

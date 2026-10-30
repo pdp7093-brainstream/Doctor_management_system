@@ -20,9 +20,8 @@
                 reverseButtons: true,
                 backdrop: 'rgba(0,0,0,0.45)',
                 customClass: {
+                    ...window.swalSharedCustomClass,
                     popup: 'rounded-4 shadow-lg',
-                    confirmButton: 'px-4 py-2',
-                    cancelButton: 'px-4 py-2'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {

@@ -4,6 +4,11 @@ from accounts.models import *
 from django.contrib.auth.models import User
 from accounts.models import Patient, FamilyMember
 from .file_validation import clean_original_filename, validate_uploaded_document
+from .upload_paths import (
+    lab_document_upload_path,
+    patient_old_document_upload_path,
+    patient_uploaded_document_upload_path,
+)
 
 
 def parse_dosage(dosage):
@@ -145,7 +150,7 @@ class Prescription(models.Model):
 
 class LabDocument(models.Model):
     visit = models.ForeignKey(Visit, on_delete=models.CASCADE, related_name='lab_documents')
-    file = models.FileField(upload_to='lab_documents/%Y/%m/')
+    file = models.FileField(upload_to=lab_document_upload_path)
     original_name = models.CharField(max_length=255)
     uploaded_by = models.ForeignKey(
         User,
@@ -172,7 +177,7 @@ class LabDocument(models.Model):
 class PatientUploadedDocument(models.Model):
     patient = models.ForeignKey(Patient,on_delete=models.CASCADE,related_name='uploaded_documents')
     family_member = models.ForeignKey(FamilyMember,on_delete=models.SET_NULL,null=True,blank=True,related_name='uploaded_documents')
-    file = models.FileField(upload_to='patient_documents/%Y/%m/')
+    file = models.FileField(upload_to=patient_uploaded_document_upload_path)
     original_name = models.CharField(max_length=255)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL,null=True,blank=True,related_name='patient_uploaded_documents')
     uploaded_at = models.DateTimeField(auto_now_add=True)
@@ -229,7 +234,7 @@ class PrescriptionItem(models.Model):
 class PatientOldDocument(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='old_documents')
     family_member = models.ForeignKey(FamilyMember, on_delete=models.SET_NULL, null=True, blank=True, related_name='old_documents')
-    file = models.FileField(upload_to='old_patient_data/%Y/%m/')
+    file = models.FileField(upload_to=patient_old_document_upload_path)
     original_name = models.CharField(max_length=255)
     uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='uploaded_old_documents')
     uploaded_at = models.DateTimeField(auto_now_add=True)

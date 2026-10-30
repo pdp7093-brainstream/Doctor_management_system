@@ -1,6 +1,6 @@
 {% extends "doctor/main.html" %}
 {% load hashid_tags %}
-{% block title %}Patient Visit & Prescription - Doctor Dashboard{% endblock %}
+{% block title %}Patient Visit & Prescription - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block content %}
 {% load static  %}
 <main class="main-content" id="mainContent">

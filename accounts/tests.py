@@ -25,9 +25,9 @@ from accounts.services.patient_import import (
 class RoleRedirectMiddlewareTests(TestCase):
     def setUp(self):
         self.patient_user = User.objects.create_user(username='role-patient', password='pass')
-        Patient.objects.create(user=self.patient_user, phone='9000000001')
+        Patient.objects.get_or_create(user=self.patient_user)
         self.staff_user = User.objects.create_user(username='role-staff', password='pass')
-        InnerMember.objects.create(user=self.staff_user, role='doctor')
+        InnerMember.objects.create(user=self.staff_user, role='doctor', is_owner=True)
 
     def test_patient_login_redirects_to_dashboard(self):
         self.client.force_login(self.patient_user)
@@ -263,7 +263,7 @@ class PatientImportTests(TestCase):
 class PatientInviteTests(TestCase):
     def setUp(self):
         self.doctor = User.objects.create_user(username='doctor-test', password='doctor-pass')
-        InnerMember.objects.create(user=self.doctor, role='doctor')
+        InnerMember.objects.create(user=self.doctor, role='doctor', is_owner=True)
         self.patient_user = User.objects.create_user(username='invitee@example.com', email='invitee@example.com')
         self.patient_user.set_unusable_password()
         self.patient_user.save()

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from appointment.upload_paths import patient_profile_picture_upload_path
 
 class Patient(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -12,7 +13,7 @@ class Patient(models.Model):
     bld_grop = models.CharField(max_length=10, null=True, blank=True)
     
     profile_picture = models.ImageField(
-        upload_to='profile_pictures/', 
+        upload_to=patient_profile_picture_upload_path,
         null=True, 
         blank=True, 
         default='profile_pictures/default-avatar.png'

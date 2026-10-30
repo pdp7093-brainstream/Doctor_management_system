@@ -46,6 +46,7 @@ class RoleRedirectMiddleware:
             return self.get_response(request)
 
         namespace = match.namespace
+        top_level_namespace = match.namespaces[0] if match.namespaces else ''
         name = match.url_name
         if name in self.SKIPPED_NAMES or (namespace == 'doctor' and name == 'logout'):
             return self.get_response(request)
@@ -71,20 +72,20 @@ class RoleRedirectMiddleware:
 
         auth_url = (namespace, name) in self.AUTH_URLS
         if auth_url:
-            if patient:
-                return redirect('dashboard')
             if member:
                 return redirect('billing:bill_list' if member.role == 'biller' else 'doctor:dashboard')
+            if patient:
+                return redirect('dashboard')
 
         if patient and not member:
-            staff_panel = namespace in self.STAFF_NAMESPACES or (
+            staff_panel = top_level_namespace in self.STAFF_NAMESPACES or (
                 namespace == 'appointment' and name not in self.PATIENT_APPOINTMENT_URLS
             )
             if staff_panel:
                 messages.info(request, 'That page is only for clinic staff.')
                 return redirect('dashboard')
 
-        if member and not patient and namespace == '' and name in self.PATIENT_ONLY_URLS:
+        if member and namespace == '' and name in self.PATIENT_ONLY_URLS:
             return redirect('billing:bill_list' if member.role == 'biller' else 'doctor:dashboard')
 
         return self.get_response(request)

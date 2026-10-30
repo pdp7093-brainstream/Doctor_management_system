@@ -1,5 +1,23 @@
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.http import HttpResponseForbidden
+from .models import InnerMember
+
+
+def has_staff_access(user):
+    return user.is_superuser or InnerMember.objects.filter(user=user).exists()
+
+
+class StaffRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if has_staff_access(request.user):
+            return super().dispatch(request, *args, **kwargs)
+        if (
+            request.method == 'POST'
+            or request.headers.get('x-requested-with') == 'XMLHttpRequest'
+        ):
+            return HttpResponseForbidden()
+        return redirect('dashboard')
 
 
 class BillingAccessMixin:

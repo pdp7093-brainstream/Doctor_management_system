@@ -393,7 +393,7 @@
             </button>
             <h1 class="navbar-brand-text">
                 <i class="bi bi-stethoscope"></i>
-                Doctor Dashboard
+                {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}
             </h1>
         </div>
 

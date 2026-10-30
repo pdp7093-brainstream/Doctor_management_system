@@ -1,5 +1,6 @@
 from django.db import models, transaction
 from django.contrib.auth.models import User
+from appointment.upload_paths import staff_profile_picture_upload_path
 # Create your models here.
 
 class InnerMember(models.Model):
@@ -13,7 +14,7 @@ class InnerMember(models.Model):
     is_owner = models.BooleanField(default=False, help_text='Clinic owner / main doctor — only they can view Clinic Settings')
     is_default_doctor = models.BooleanField(default=False)
     phone  = models.CharField(max_length=15, blank=True, default='') 
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    profile_picture = models.ImageField(upload_to=staff_profile_picture_upload_path, blank=True, null=True)
 
     doctor = models.ForeignKey(
         User,

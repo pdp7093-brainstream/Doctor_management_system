@@ -1,6 +1,6 @@
 {% extends "doctor/main.html" %}
 {% load billing_tags %}
-{% block title %}Therapies - Doctor Dashboard{% endblock %}
+{% block title %}Therapies - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="page-head">

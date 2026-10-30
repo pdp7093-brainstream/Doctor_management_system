@@ -1,7 +1,7 @@
 {% extends "doctor/main.html" %}
 {% load hashid_tags %}
 {% load static %}
-{% block title %}Add Medicine - Doctor Dashboard{% endblock %}
+{% block title %}Add Medicine - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="dc-form-shell">

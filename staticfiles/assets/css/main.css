@@ -851,22 +851,23 @@ h6 {
   right: 15px;
   bottom: -15px;
   z-index: 99999;
-  background-color: var(--accent-color);
+  background-color: #015315;
   width: 44px;
   height: 44px;
   border-radius: 50px;
   transition: all 0.4s;
+  box-shadow: 0 4px 12px rgba(1, 83, 21, 0.25);
 }
 
 .scroll-top i {
   font-size: 24px;
-  color: var(--contrast-color);
+  color: #ffffff;
   line-height: 0;
 }
 
 .scroll-top:hover {
-  background-color: color-mix(in srgb, var(--accent-color), transparent 20%);
-  color: var(--contrast-color);
+  background-color: #013d10;
+  color: #ffffff;
 }
 
 .scroll-top.active {
@@ -1708,6 +1709,132 @@ section,
 
   .home-about .about-content .stats-grid {
     margin: 2rem 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .home-about .about-content .lead-text {
+    font-size: 16px;
+    line-height: 1.7;
+    text-align: left;
+  }
+
+  .home-about .about-content > .row.g-3.mb-4 {
+    --bs-gutter-y: 12px;
+  }
+
+  .home-about .about-content > .row.g-3.mb-4 > .col-6 {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .home-about .about-content .about-point {
+    align-items: center !important;
+    gap: 10px !important;
+    text-align: left;
+  }
+
+  .home-about .about-content .about-point > i {
+    margin-top: 0 !important;
+  }
+
+  .home-about .about-content .about-point > span {
+    font-size: 15px !important;
+    text-align: left;
+  }
+
+  .home-about .about-content .cta-section {
+    display: block;
+  }
+
+  .home-about .about-content .cta-section .btn-primary {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+
+  .home-about .about-visual {
+    margin-top: 24px;
+    padding-bottom: 0;
+  }
+
+  .home-about .about-visual .floating-card {
+    position: static;
+    margin-top: 16px;
+    right: auto;
+    bottom: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .home-about > .container > .row {
+    align-items: center !important;
+  }
+
+  .home-about .about-content .section-heading {
+    font-family: var(--heading-font);
+    font-weight: 700;
+  }
+
+  .home-about .about-content .lead-text {
+    font-family: var(--default-font);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: color-mix(in srgb, var(--default-color), transparent 20%);
+  }
+
+  .home-about .about-content > .row.g-3.mb-4 {
+    --bs-gutter-y: 14px;
+  }
+
+  .home-about .about-content .about-point {
+    align-items: center !important;
+    gap: 12px !important;
+    font-family: var(--default-font);
+  }
+
+  .home-about .about-content .about-point > i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin-top: 0 !important;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent-color), transparent 88%);
+    font-size: 1rem !important;
+    flex-shrink: 0;
+  }
+
+  .home-about .about-content .about-point > span {
+    font-family: var(--default-font);
+    font-size: 15px !important;
+    font-weight: 600 !important;
+  }
+
+  .hero .hero-content h1 {
+    font-size: clamp(34px, 4.2vw, 46px);
+    margin: 0.75rem 0 1rem;
+  }
+
+  .hero .hero-visual .background-elements .element {
+    opacity: 0.16;
+  }
+
+  .hero .hero-visual .background-elements .element.element-1 {
+    top: 24px;
+    left: 24px;
+  }
+
+  .hero .hero-visual .background-elements .element.element-2 {
+    right: 24px;
+    bottom: 24px;
+  }
+
+  .hero .hero-visual .background-elements .element.element-3 {
+    left: 24px;
   }
 }
 
@@ -6362,12 +6489,24 @@ section,
 .aw-therapies-points strong { color: var(--brand-primary); }
 .aw-therapies-note { font-size: .85rem; font-style: italic; color: #777; margin: 0 0 22px; padding-left: 12px; border-left: 3px solid var(--brand-accent); }
 .aw-therapies-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--brand-primary); color: #fff; font-weight: 600;
-  padding: 12px 28px; border-radius: 50px; text-decoration: none;
-  transition: background .25s ease, transform .25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  color: #013A0F;
+  border: 1.5px solid #013A0F;
+  font-weight: 700;
+  padding: 12px 28px;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: background .25s ease, color .25s ease, transform .25s ease;
 }
-.aw-therapies-btn:hover { background: var(--brand-primary-hover); color: #fff; transform: translateY(-2px); }
+.aw-therapies-btn:hover {
+  background: #013A0F;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 991px) { .aw-therapies-title { font-size: 1.5rem; } }
 @media (max-width: 767px) { .aw-therapies { margin-top: 44px; padding-top: 36px; } .aw-therapies-frame { padding: 12px; border-radius: 16px; } }
 

@@ -9,11 +9,9 @@
         <div>
             <h2 class="page-title">Bill <span class="dc-mono">#{{ bill.bill_number }}</span></h2>
             <p class="page-subtitle">
-                {% if visit.appointment.family_member %}
-                    {{ visit.appointment.family_member.name }}
-                {% else %}
-                    {{ visit.appointment.patient.user.get_full_name }}
-                {% endif %}
+                {% with display_name=visit.appointment.family_member.name|default:visit.patient.user.get_full_name|default:visit.patient.user.username %}
+                    {{ display_name }}
+                {% endwith %}
                 <span class="mx-2">·</span>
                 <span class="dc-mono">{{ visit.appointment.appointment_date|date:"d M, Y" }}</span>
             </p>
@@ -43,11 +41,9 @@
                             <div class="col-6 col-md-3">
                                 <div class="dc-muted small fw-semibold mb-1">Patient Name</div>
                                 <div class="fw-semibold">
-                                    {% if visit.appointment.family_member %}
-                                        {{ visit.appointment.family_member.name }}
-                                    {% else %}
-                                        {{ visit.appointment.patient.user.get_full_name }}
-                                    {% endif %}
+                                    {% with display_name=visit.appointment.family_member.name|default:visit.patient.user.get_full_name|default:visit.patient.user.username %}
+                                        {{ display_name }}
+                                    {% endwith %}
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">

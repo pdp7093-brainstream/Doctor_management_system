@@ -1,5 +1,5 @@
 {% extends "doctor/main.html" %}
-{% block title %}Import Medicines - Doctor Dashboard{% endblock %}
+{% block title %}Import Medicines - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="page-head">

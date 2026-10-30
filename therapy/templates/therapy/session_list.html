@@ -1,7 +1,7 @@
 {% extends "doctor/main.html" %}
 {% load hashid_tags %}
 {% load billing_tags %}
-{% block title %}Therapy Sessions - Doctor Dashboard{% endblock %}
+{% block title %}Therapy Sessions - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block extra_css %}
 <style>
 .therapy-sessions { --therapy-green:#015315; --therapy-bright:#117A15; --therapy-soft:#EAF4EA; --therapy-orange:#FD6801; --therapy-red:#AD0002; }

@@ -1,5 +1,5 @@
 {% extends "doctor/main.html" %}
-{% block title %}Edit Therapy - Doctor Dashboard{% endblock %}
+{% block title %}Edit Therapy - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block content %}
 <main class="main-content" id="mainContent">
     <div class="dc-form-shell">

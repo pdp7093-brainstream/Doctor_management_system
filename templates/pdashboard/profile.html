@@ -264,7 +264,7 @@
                                         <label class="form-label mb-1">Document File</label>
                                         <input type="file" id="profileDocumentInput" name="document" class="form-control"
                                             accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx" required>
-                                        <small class="upload-help">PDF, JPG or PNG, up to 5 MB</small>
+                                        <small class="upload-help">PDF, JPG, JPEG, PNG, GIF, WEBP, DOC or DOCX, up to 10 MB</small>
                                         <small class="upload-file-name" id="profileDocumentName" aria-live="polite"></small>
                                     </div>
                                     <div class="profile-upload-actions">
@@ -434,7 +434,7 @@
                     })
                         .then(data => {
                             if (data && data.success) {
-                                const row = btn.closest('tr');
+                                const row = btn.closest('tr, .lab-document-row, .profile-list-item');
                                 if (row) row.remove();
                                 if (window.refreshProfilePagination) window.refreshProfilePagination();
                                 (typeof Swal !== 'undefined') && Swal.fire({ icon: 'success', title: 'Deleted', timer: 1200, showConfirmButton: false });

@@ -60,11 +60,9 @@
             <div class="info-row">
                 <span class="info-label">Name</span>
                 <span class="info-value">
-                    {% if visit.appointment.family_member %}
-                        {{ visit.appointment.family_member.name|default_if_none:"—"|default:"—" }}
-                    {% else %}
-                        {{ visit.appointment.patient.user.get_full_name|default_if_none:"—"|default:"—" }}
-                    {% endif %}
+                    {% with display_name=visit.appointment.family_member.name|default:visit.patient.user.get_full_name|default:visit.patient.user.username %}
+                        {{ display_name|default_if_none:"—"|default:"—" }}
+                    {% endwith %}
                 </span>
             </div>
             <div class="info-row">

@@ -1,7 +1,7 @@
 {% extends "doctor/main.html" %}
 {% load hashid_tags %}
 {% load static %}
-{% block title %}Billing - Doctor Dashboard{% endblock %}
+{% block title %}Billing - {% if request.user.innermember.role == 'biller' %}Billing Dashboard{% else %}Doctor Dashboard{% endif %}{% endblock %}
 {% block content %}
 
 <main class="main-content" id="mainContent">
@@ -151,16 +151,12 @@
                                 <td class="col-num">{{ forloop.counter }}</td>
                                 <td class="dc-mono">{{ bill.bill_number }}</td>
                                 <td>
+                                    {% with display_name=bill.visit.appointment.family_member.name|default:bill.visit.patient.user.get_full_name|default:bill.visit.patient.user.username %}
                                     <div class="dc-person">
-                                        <div class="dc-avatar">{{ bill.visit.patient.user.get_full_name|first|upper }}</div>
-                                        <span class="dc-name">
-                                            {% if bill.visit.appointment.family_member %}
-                                                {{ bill.visit.appointment.family_member.name }}
-                                            {% else %}
-                                                {{ bill.visit.appointment.patient.user.get_full_name }}
-                                            {% endif %}
-                                        </span>
+                                        <div class="dc-avatar">{{ display_name|first|upper }}</div>
+                                        <span class="dc-name">{{ display_name }}</span>
                                     </div>
+                                    {% endwith %}
                                 </td>
                                 <td class="dc-mono">{{ bill.bill_date|date:"d M Y" }}</td>
                                 <td class="text-end dc-mono">₹{{ bill.total|floatformat:2 }}</td>

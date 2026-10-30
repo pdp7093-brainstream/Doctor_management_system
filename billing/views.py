@@ -370,8 +370,11 @@ class BillListView(LoginRequiredMixin, BillingAccessMixin, View):
             from django.db.models import Q
             bills = bills.filter(
                 Q(bill_number__icontains=search) |
+                Q(visit__appointment__family_member__name__icontains=search) |
                 Q(visit__patient__user__first_name__icontains=search) |
-                Q(visit__patient__user__last_name__icontains=search)
+                Q(visit__patient__user__last_name__icontains=search) |
+                Q(visit__patient__user__username__icontains=search) |
+                Q(visit__patient__phone__icontains=search)
             )
 
         # Date filter

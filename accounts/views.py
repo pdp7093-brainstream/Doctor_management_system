@@ -387,6 +387,7 @@ class LoginView(View):
 
 def logout_view(request):
     """Logout user"""
+    list(messages.get_messages(request))
     auth_logout(request)
     messages.success(request, 'You have been logged out.')
     return redirect('login')

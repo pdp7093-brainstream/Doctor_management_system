@@ -1,0 +1,218 @@
+:root { --header-h: 96px; }
+@media (max-width: 991px) { :root { --header-h: 76px; } }
+.header .branding { min-height: var(--header-h); height: var(--header-h); padding: 0; }
+.header .logo img { height: 84px; width: auto; max-height: none; max-width: none; object-fit: contain; border-radius: 0; mix-blend-mode: multiply; }
+.scrolled .header .logo img { height: 72px; }
+@media (max-width: 991px) { .header .logo img { height: 62px; } .scrolled .header .logo img { height: 56px; } }
+
+.navmenu > ul {
+  align-items: center;
+}
+
+.header .nav-item > a[href*="appointment"] {
+  padding: 10px 22px !important;
+  font-size: 15px !important;
+  border-radius: 999px !important;
+  line-height: 1.2 !important;
+}
+
+.profile-avatar {
+  width: 42px !important;
+  height: 42px !important;
+  background-color: var(--brand-green, #117A15);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 15px !important;
+  border: 2px solid #fff !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.14);
+  transition: 0.3s;
+  overflow: hidden;
+  position: relative;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-nav:hover .profile-avatar {
+  background-color: var(--brand-primary, #015315);
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(1, 83, 21, 0.15);
+}
+
+.navmenu .profile-nav ul {
+  right: 0;
+  left: auto;
+}
+
+.navmenu .profile-nav > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navmenu .profile-nav > a .toggle-dropdown {
+  width: auto;
+  height: auto;
+  margin-left: 0;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1;
+}
+
+@media (max-width: 1199px) {
+  .navmenu .profile-nav > a {
+    justify-content: flex-start;
+    white-space: normal;
+  }
+  .navmenu .profile-nav > a .toggle-dropdown {
+    margin-left: auto;
+    color: var(--nav-dropdown-color);
+  }
+  .mobile-nav-active .navmenu .profile-nav > a .toggle-dropdown {
+    color: var(--nav-dropdown-hover-color);
+  }
+  .navmenu .profile-nav.dropdown-active > ul {
+    display: block;
+  }
+}
+
+/* Pages that need a solid white header (they have a banner immediately below) */
+.treatments-page .header,
+.about-page .header {
+  --background-color: #ffffff;
+  background-color: #ffffff !important;
+}
+
+/* Pages that use .profile-page-shell, .patient-page-shell, .appointment-page-shell
+   already set their own padding-top via those classes in dashboard.css.
+   The single header-height source is --header-h above. */
+
+/* Navbar polish */
+/* remove the thin coloured line at the very top */
+.header, .header .branding { border-top: 0 !important; }
+.header .topbar { display: none !important; }
+
+/* header surface */
+.header { background: #fff; box-shadow: 0 2px 14px rgba(1, 83, 21, .07); }
+.header .branding .container { gap: 24px; }
+
+/* menu links (desktop) */
+@media (min-width: 1200px) {
+  .navmenu > ul { gap: 6px; }
+  .navmenu > ul > li > a,
+  .navmenu > ul > li > a:focus {
+    font-size: 15.5px; font-weight: 500; color: #2b2b2b;
+    padding: 10px 14px; position: relative; transition: color .2s ease;
+  }
+  .navmenu > ul > li > a::after {
+    content: ""; position: absolute; left: 14px; right: 14px; bottom: 2px;
+    height: 2px; border-radius: 2px; background: #015315;
+    transform: scaleX(0); transition: transform .2s ease;
+  }
+  .navmenu > ul > li > a:hover,
+  .navmenu > ul > li > a.active { color: #015315; }
+  .navmenu > ul > li > a:hover::after,
+  .navmenu > ul > li > a.active::after { transform: scaleX(1); }
+}
+
+.header .navmenu a.btn-login,
+.header .navmenu a.btn-login:focus {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px !important;
+  border: 1.5px solid #015315;
+  border-radius: 50px;
+  color: #015315;
+  background: #ffffff;
+  font-size: 0.95rem !important;
+  font-weight: 600;
+  text-decoration: none !important;
+  height: 40px !important;
+  line-height: 1.2 !important;
+  position: relative;
+  margin: 0 0 0 12px;
+  border: 1.5px solid #015315 !important;
+  transition: background-color 0.3s;
+}
+
+.header .navmenu a.btn-login:hover {
+  background: #EAF4EA;
+  color: #015315;
+}
+
+.header .navmenu a.btn-login::before,
+.header .navmenu a.btn-login::after {
+  display: none !important;
+  content: none !important;
+}
+
+.header .navmenu a.btn-login i {
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  color: #015315;
+  background: none !important;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.mobile-nav-active .header .navmenu a.btn-login {
+  width: 100%;
+  justify-content: center;
+  margin: 0;
+}
+
+/* profile avatar */
+.profile-avatar { width: 40px !important; height: 40px !important; box-shadow: 0 0 0 3px #EAF4EA !important; margin-left: 8px; }
+
+/* space so page banners don't sit right under the fixed header */
+.about-banner, .treatments-banner { padding-top: calc(var(--header-h) + 36px) !important; }
+
+/* Book Appointment button */
+.header .nav-item > a[href*="appointment"] {
+  height: 40px;
+  display: inline-flex !important;
+  align-items: center;
+  padding: 8px 20px !important;
+  margin-left: 10px;
+  font-size: 0.95rem !important;
+  font-weight: 500;
+  box-shadow: 0 6px 16px rgba(253, 104, 1, .25);
+  border-radius: 50px;
+}
+.header .nav-item > a[href*="appointment"]::after { display: none; }
+
+
+@media (min-width: 1200px) {
+  .navmenu > ul > li > a::before { display: none !important; content: none !important; }
+  .navmenu > ul > li > a,
+  .navmenu > ul > li > a.active,
+  .navmenu > ul > li > a:hover {
+    border-bottom: 0 !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+  }
+  .navmenu > ul > li > a::after {
+    left: 14px; right: 14px; bottom: 4px;
+    height: 2px; background: #015315;
+  }
+}
+
+/* Remove the thin line at the very top */
+body { border-top: 0 !important; }
+.header { border: 0 !important; }

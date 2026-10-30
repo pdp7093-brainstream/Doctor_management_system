@@ -293,6 +293,60 @@ def generate_slots(selected_date=None):
     return slots
 
 
+def get_available_slots(selected_date, doctor):
+    clinic = ClinicSettings.get()
+    today = timezone.localdate()
+
+    if selected_date < today or selected_date > today + timedelta(days=30):
+        return []
+
+    day_map = {
+        0: 'mon', 1: 'tue', 2: 'wed', 3: 'thu',
+        4: 'fri', 5: 'sat', 6: 'sun',
+    }
+    selected_day = day_map[selected_date.weekday()]
+    if not clinic.is_working_day(selected_day):
+        return []
+
+    start_time = clinic.start_time
+    end_time = clinic.end_time
+    lunch_start = clinic.lunch_start
+    lunch_end = clinic.lunch_end
+    interval = clinic.slot_duration
+
+    slots = []
+    current = datetime.combine(datetime.today(), start_time)
+    end_dt = datetime.combine(datetime.today(), end_time)
+
+    while current < end_dt:
+        current_time = current.time()
+        if lunch_start and lunch_end and lunch_start <= current_time < lunch_end:
+            current += timedelta(minutes=interval)
+            continue
+        slots.append(current_time)
+        current += timedelta(minutes=interval)
+
+    from doctor.models import DoctorLeave
+    if doctor:
+        leave = DoctorLeave.objects.filter(doctor=doctor, date=selected_date).first()
+        if leave:
+            slots = [slot for slot in slots if not leave.covers_time_slot(slot)]
+
+    booked_slots = Appointment.booked_slots().filter(
+        appointment_date=selected_date,
+        doctor=doctor,
+        is_archived=False
+    ).values_list('time_slot', flat=True)
+    booked_slots = {slot.strftime("%H:%M") for slot in booked_slots}
+
+    now = timezone.localtime()
+    return [
+        slot for slot in slots
+        if not (selected_date == now.date() and slot <= now.time())
+        and slot.strftime("%H:%M") not in booked_slots
+    ]
+
+
 def get_slots(request):
     date_str = request.GET.get('appointment_date')
 
@@ -333,59 +387,8 @@ def get_slots(request):
             'message': 'Clinic is closed on this day'
         })
 
-    start_time   = clinic.start_time
-    end_time     = clinic.end_time
-    lunch_start  = clinic.lunch_start
-    lunch_end    = clinic.lunch_end
-    interval     = clinic.slot_duration
-
-    slots = []
-    current = datetime.combine(datetime.today(), start_time)
-    end_dt = datetime.combine(datetime.today(), end_time)
-
-    while current < end_dt:
-        current_time = current.time()
-        if lunch_start and lunch_end:
-            if lunch_start <= current_time < lunch_end:
-                current += timedelta(minutes=interval)
-                continue
-        slots.append(current_time)
-        current += timedelta(minutes=interval)
-
-    # Apply Doctor Leave filtering
-    from doctor.models import DoctorLeave
     doctor = get_default_doctor()
-    if doctor:
-        leave = DoctorLeave.objects.filter(doctor=doctor, date=selected_date).first()
-        if leave:
-            slots = [s for s in slots if not leave.covers_time_slot(s)]
-
-    booked_slots = Appointment.booked_slots().filter(
-        appointment_date=selected_date,
-        doctor=doctor,
-        is_archived=False
-    ).values_list('time_slot', flat=True)
-
-    booked_slots = [t.strftime("%H:%M") for t in booked_slots]
-
-    now = timezone.localtime()
-    filtered_slots = []
-
-    for slot in slots:
-        slot_str = slot.strftime("%H:%M")
-
-        if (selected_date == now.date() and slot <= now.time()):
-            continue
-
-        if slot_str in booked_slots:
-            continue
-
-        display_time = datetime.strptime(
-            slot_str, "%H:%M"
-        ).strftime("%I:%M %p")
-
-        filtered_slots.append(display_time)
-
+    filtered_slots = [slot.strftime("%I:%M %p") for slot in get_available_slots(selected_date, doctor)]
     return JsonResponse({'slots': filtered_slots})
 
 # Cancel Appointment (User Side)
@@ -671,7 +674,10 @@ class Book_appointment(View):
     def post(self, request):
 
         name             = request.POST.get('name', '').strip()
-        appointment_date = request.POST.get("date")
+        appointment_date = parse_date(request.POST.get("date", ""))
+        if appointment_date is None:
+            messages.error(request, "Invalid appointment date")
+            return redirect('appointment:appointment')
         time_slot        = request.POST.get("time_slot", "").strip()
         notes            = request.POST.get("message")
         family_member_id = request.POST.get("family_member_id")
@@ -715,26 +721,8 @@ class Book_appointment(View):
         # Doctor fetch
         doctor = get_default_doctor()
 
-        # Double booking prevention
-        if Appointment.booked_slots().filter(
-            is_archived=False,
-            doctor=doctor,
-            appointment_date=appointment_date,
-            time_slot=time_24
-        ).exists():
-
-            messages.error(
-                request,
-                "This slot is already booked"
-            )
-
-            return redirect('appointment:appointment')
-
-        # Doctor Leave Check
-        from doctor.models import DoctorLeave
-        leave = DoctorLeave.objects.filter(doctor=doctor, date=appointment_date).first()
-        if leave and leave.covers_time_slot(time_24):
-            messages.error(request, leave.get_error_message())
+        if time_24 not in get_available_slots(appointment_date, doctor):
+            messages.error(request, "Selected slot is not available")
             return redirect('appointment:appointment')
 
         # Family member resolve

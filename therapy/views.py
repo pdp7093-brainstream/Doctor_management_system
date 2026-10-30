@@ -14,7 +14,7 @@ from django.views import View
 
 from billing.models import Bill
 from doctor.hashid import encode_id
-from doctor.mixins import BillingAccessMixin
+from doctor.mixins import BillingAccessMixin, StaffRequiredMixin
 from .models import (
     BILLING_TYPE_CHOICES,
     BILLING_TYPE_PACKAGE,
@@ -110,7 +110,7 @@ def therapy_sessions_redirect(request, query=''):
     return f'{url}?{query}' if query else url
 
 
-class TherapyListView(LoginRequiredMixin, View):
+class TherapyListView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request):
@@ -139,7 +139,7 @@ class TherapyListView(LoginRequiredMixin, View):
         return redirect('doctor:therapy:therapy_list')
 
 
-class TherapyEditView(LoginRequiredMixin, View):
+class TherapyEditView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, pk):
@@ -163,7 +163,7 @@ class TherapyEditView(LoginRequiredMixin, View):
         return redirect('doctor:therapy:therapy_edit', pk=pk)
 
 
-class TherapyDeleteView(LoginRequiredMixin, View):
+class TherapyDeleteView(LoginRequiredMixin, StaffRequiredMixin, View):
     login_url = 'doctor:login'
 
     def get(self, request, pk):
