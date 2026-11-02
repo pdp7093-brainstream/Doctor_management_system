@@ -78,7 +78,7 @@
             <h3 class="dc-card-title"><i class="bi bi-person-badge"></i> Doctors</h3>
             <span class="dc-count">{{ doctors|length }} active</span>
         </div>
-        <div class="dc-table-wrap">
+        <div class="dc-table-wrap{% if not doctors %} d-none{% endif %}">
             <table class="table table-hover dc-table" style="min-width:800px;">
                 <thead><tr><th>Doctor</th><th>Username</th><th>Email</th><th>Phone</th><th>Default</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
@@ -91,10 +91,16 @@
                         <td>{% if member.is_default_doctor %}<span class="dc-badge green">Default</span>{% else %}—{% endif %}</td>
                         <td class="text-end"><button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}" data-role="doctor" data-default="{{ member.is_default_doctor|lower }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" data-email="{{ member.user.email }}" data-phone="{{ member.phone }}" data-active="{{ member.user.is_active|lower }}" title="Edit doctor" aria-label="Edit doctor"><i class="bi bi-pencil"></i></button></td>
                     </tr>
-                    {% empty %}<tr><td colspan="6" class="dc-empty">No active doctors found.</td></tr>{% endfor %}
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if not doctors %}
+        <div class="dc-empty dashboard-list-empty-state">
+            <i class="bi bi-person-x"></i>
+            <p class="dc-empty-text">No active doctors found.</p>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 

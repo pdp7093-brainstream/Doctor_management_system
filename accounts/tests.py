@@ -7,9 +7,13 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.contrib.auth.models import User
+from django.contrib.messages import get_messages
 from django.http import HttpResponse
 from django.test import RequestFactory
-from accounts.models import Patient
+from django.core import signing
+from django.core.cache import cache
+from accounts.models import Patient, PatientFeedback
+import time
 from accounts.middleware import RoleRedirectMiddleware
 from doctor.models import InnerMember
 from doctor.hashid import encode_id
@@ -44,6 +48,33 @@ class RoleRedirectMiddlewareTests(TestCase):
         response = self.client.get('/login/')
         self.assertRedirects(response, reverse('doctor:dashboard'), fetch_redirect_response=False)
 
+    def test_staff_redirects_from_patient_only_pages(self):
+        staff_admin = User.objects.create_user(
+            username='role-staff-admin', password='pass', is_staff=True,
+        )
+        patient_only_paths = (
+            '/user-profile/', '/profile-setting/', '/appointment/',
+            '/appointment/appointment/example/', '/add-family-member/',
+            '/upload-profile-document/',
+        )
+        for user in (self.staff_user, staff_admin):
+            self.client.force_login(user)
+            for path in patient_only_paths:
+                with self.subTest(username=user.username, path=path):
+                    response = self.client.get(path)
+                    self.assertRedirects(
+                        response, reverse('doctor:dashboard'), fetch_redirect_response=False,
+                    )
+
+    def test_staff_can_open_public_pages(self):
+        factory = RequestFactory()
+        middleware = RoleRedirectMiddleware(lambda request: HttpResponse('passed'))
+        for path in ('/', '/about/', '/treatments/', '/feedback/'):
+            with self.subTest(path=path):
+                request = factory.get(path)
+                request.user = self.staff_user
+                self.assertEqual(middleware(request).content, b'passed')
+
     def test_anonymous_login_shows_patient_login_page(self):
         response = self.client.get('/login/')
         self.assertEqual(response.status_code, 200)
@@ -57,6 +88,61 @@ class RoleRedirectMiddlewareTests(TestCase):
         ajax_request.user = self.patient_user
         self.assertEqual(middleware(static_request).content, b'passed')
         self.assertEqual(middleware(ajax_request).content, b'passed')
+
+
+class ProfilePhoneUpdateTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='profile-phone-user', password='pass')
+        self.patient, _ = Patient.objects.get_or_create(user=self.user)
+        owner = User.objects.create_user(username='profile-phone-owner', password='pass')
+        InnerMember.objects.create(user=owner, role='doctor', is_owner=True)
+        self.client.force_login(self.user)
+
+    def post_profile(self, phone):
+        return self.client.post(reverse('profile-setting'), {
+            'full_name': 'Profile Phone User',
+            'phone': phone,
+        })
+
+    def test_phone_requires_exactly_ten_ascii_digits(self):
+        for phone in ('123456789', '12345678901', '12345abc90', '+1234567890'):
+            with self.subTest(phone=phone):
+                response = self.post_profile(phone)
+                self.assertEqual(response.status_code, 302)
+                errors = [message.message for message in get_messages(response.wsgi_request)]
+                self.assertIn('Phone number must contain exactly 10 digits.', errors)
+                self.patient.refresh_from_db()
+                self.assertIsNone(self.patient.phone)
+
+    def test_duplicate_phone_shows_requested_error(self):
+        other_user = User.objects.create_user(username='existing-phone-user', password='pass')
+        other_patient, _ = Patient.objects.get_or_create(user=other_user)
+        other_patient.phone = '9876543210'
+        other_patient.save()
+
+        response = self.post_profile('9876543210')
+        errors = [message.message for message in get_messages(response.wsgi_request)]
+
+        self.assertIn('This number is already registered', errors)
+        self.patient.refresh_from_db()
+        self.assertIsNone(self.patient.phone)
+
+    def test_empty_phone_is_saved_as_null(self):
+        self.patient.phone = '9876543210'
+        self.patient.save()
+
+        response = self.post_profile('')
+
+        self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
+        self.patient.refresh_from_db()
+        self.assertIsNone(self.patient.phone)
+
+    def test_valid_phone_is_saved(self):
+        response = self.post_profile('0123456789')
+
+        self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
+        self.patient.refresh_from_db()
+        self.assertEqual(self.patient.phone, '0123456789')
 
 
 class PatientImportTests(TestCase):
@@ -326,3 +412,60 @@ class PatientInviteTests(TestCase):
         self.assertEqual(response.status_code, 302)
         from django.core import mail
         self.assertEqual(len(mail.outbox), 1)
+
+
+class PublicFeedbackProtectionTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        owner = User.objects.create_user(username='feedback-test-owner', password='pass')
+        InnerMember.objects.create(user=owner, role='doctor', is_owner=True)
+
+    def feedback_payload(self, **overrides):
+        from accounts.views import FEEDBACK_FORM_SIGNING_SALT
+
+        payload = {
+            'name': 'Feedback User',
+            'email': 'feedback@example.com',
+            'phone': '',
+            'rating': '5',
+            'message': 'This is useful feedback.',
+            'feedback_timestamp': signing.dumps(time.time() - 4, salt=FEEDBACK_FORM_SIGNING_SALT),
+        }
+        payload.update(overrides)
+        return payload
+
+    def test_honeypot_submission_silently_succeeds_without_saving(self):
+        response = self.client.post(
+            reverse('feedback'),
+            self.feedback_payload(website='spam'),
+            REMOTE_ADDR='192.0.2.10',
+        )
+
+        self.assertRedirects(response, reverse('feedback'), fetch_redirect_response=False)
+        self.assertEqual(PatientFeedback.objects.count(), 0)
+        self.assertIn(
+            'Thank you for your feedback! We truly appreciate it.',
+            [message.message for message in get_messages(response.wsgi_request)],
+        )
+
+    def test_feedback_rate_limit_rejects_submission_after_three(self):
+        for _ in range(3):
+            response = self.client.post(
+                reverse('feedback'),
+                self.feedback_payload(),
+                REMOTE_ADDR='192.0.2.11',
+            )
+            self.assertEqual(response.status_code, 302)
+
+        response = self.client.post(
+            reverse('feedback'),
+            self.feedback_payload(),
+            REMOTE_ADDR='192.0.2.11',
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(
+            'Too many submissions, please try again later.',
+            [message.message for message in get_messages(response.wsgi_request)],
+        )
+        self.assertEqual(PatientFeedback.objects.count(), 3)

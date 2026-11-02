@@ -20,7 +20,7 @@
         <div class="dc-card-header">
             <h3 class="dc-card-title"><i class="bi bi-clock-history"></i> Awaiting review <span class="dc-count">{{ expenses|length }} pending</span></h3>
         </div>
-        <div class="dc-table-wrap">
+        <div class="dc-table-wrap{% if not expenses %} d-none{% endif %}">
             <table class="table table-hover dc-table" style="min-width:900px;">
                 <thead>
                     <tr>
@@ -81,20 +81,19 @@
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="dc-empty">
-                            <i class="bi bi-check2-all"></i>
-                            <p class="dc-empty-text">All caught up! No pending approvals.</p>
-                            <a href="{% url 'expenses:expense_list' %}" class="btn-page btn-page-outline">
-                                <i class="bi bi-wallet2"></i> View All Expenses
-                            </a>
-                        </td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if not expenses %}
+        <div class="dc-empty dashboard-list-empty-state">
+            <i class="bi bi-check2-all"></i>
+            <p class="dc-empty-text">All caught up! No pending approvals.</p>
+            <a href="{% url 'expenses:expense_list' %}" class="btn-page btn-page-outline">
+                <i class="bi bi-wallet2"></i> View All Expenses
+            </a>
+        </div>
+        {% endif %}
     </div>
 </main>
 

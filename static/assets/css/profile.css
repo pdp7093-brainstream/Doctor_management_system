@@ -762,3 +762,70 @@ input.form-control[type="file"]:hover::file-selector-button {
     padding: 5px 7px;
   }
 }
+
+@media (max-width: 767px) {
+  .profile-page-shell .patient-hero {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .profile-page-shell .patient-hero__title {
+    font-family: inherit;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  .profile-page-shell .patient-actions .btn-book-appointment {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pc-fields-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .pc-fields-grid > .pc-tile,
+  .pc-fields-grid > .pc-tile--full {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .pc-fields-grid > .pc-tile:first-child .pc-tile-label-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .pc-fields-grid > .pc-tile:first-child .pc-tile-label,
+  .pc-fields-grid > .pc-tile:first-child .pc-tile-inline-btn {
+    white-space: nowrap;
+  }
+
+  .pc-fields-grid > .pc-tile:first-child .pc-tile-label {
+    margin-bottom: 0;
+  }
+
+  .pc-tile-content,
+  .pc-tile-value {
+    min-width: 0;
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .pc-fields-grid > .pc-tile:first-child .pc-tile-value,
+  .pc-fields-grid > .pc-tile:first-child #profilePhone {
+    white-space: nowrap;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+
+  @media (max-width: 576px) {
+    .profile-page-shell .patient-hero {
+      margin-left: 8px;
+      margin-right: 8px;
+    }
+  }
+}

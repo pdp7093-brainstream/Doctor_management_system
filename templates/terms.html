@@ -1,321 +1,364 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Terms - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
+{% block title %}Terms & Privacy - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
 {% block body_class %}terms-page{% endblock %}
+{% block extra_css %}
+  <link href="{% static 'assets/css/about.css' %}" rel="stylesheet">
+  <link href="{% static 'assets/css/treatments.css' %}" rel="stylesheet">
+{% endblock %}
 {% block content %}
 
-    <!-- Page Title -->
-    <div class="page-title">
-      <div class="heading">
-        <div class="container">
-          <div class="row d-flex justify-content-center text-center">
-            <div class="col-lg-8">
-              <h1 class="heading-title">Terms</h1>
-              <p class="mb-0">
-                Please review our terms and privacy policy carefully to understand how we protect your information and govern the use of our services.
-              </p>
-            </div>
-          </div>
+    <section class="about-banner">
+      <div class="container">
+        <div class="banner-content">
+          <h1>Terms &amp; Privacy</h1>
+          <p>How we care for your information and our services</p>
+          <nav class="terms-breadcrumbs" aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+              <li class="breadcrumb-item"><a href="{% url 'index' %}">Home</a></li>
+              <li class="breadcrumb-item active" aria-current="page">Terms &amp; Privacy</li>
+            </ol>
+          </nav>
         </div>
       </div>
-      <!-- <nav class="breadcrumbs">
-        <div class="container">
-          <ol>
-            <li><a href="{% url 'index' %}">Home</a></li>
-            <li class="current">Terms</li>
-          </ol>
-        </div>
-      </nav> -->
-    </div><!-- End Page Title -->
+    </section>
 
-    <!-- Terms Of Service Section -->
-    <section id="terms-of-service" class="terms-of-service section">
+    <section class="about-section dr-section py-4">
+      <div class="container">
+        <nav class="nav nav-pills terms-tabs" aria-label="Policy sections">
+          <a class="nav-link active" href="#terms-of-service" data-policy-tab="terms">Terms of Service</a>
+          <a class="nav-link" href="#privacy" data-policy-tab="privacy">Privacy Policy</a>
+        </nav>
 
-      <div class="container" data-aos="fade-up">
+        <div class="row g-4 align-items-start terms-layout">
+          <aside class="col-lg-3 d-none d-lg-block">
+            <div class="treatment-card terms-toc sticky-top" id="terms-toc">
+              <h2>On this page</h2>
+              <nav aria-label="Current policy sections">
+                <div class="terms-toc-list is-active" data-policy-toc="terms">
+                  <a class="active" href="#agreement">1. About our services</a>
+                  <a href="#intellectual-property">2. Not for emergencies</a>
+                  <a href="#user-accounts">3. Your account</a>
+                  <a href="#prohibited">4. Appointments</a>
+                  <a href="#disclaimer">5. Fees and payments</a>
+                  <a href="#limitation">6. Medicines and therapies</a>
+                  <a href="#indemnification">7. Documents you upload</a>
+                  <a href="#termination">8. Feedback</a>
+                  <a href="#governing-law">9. Proper use</a>
+                  <a href="#changes">10. Limitation of liability</a>
+                  <a href="#terms-changes">11. Changes and suspension</a>
+                  <a href="#terms-law">12. Governing law</a>
+                  <a href="#terms-contact-card">13. Contact</a>
+                </div>
+                <div class="terms-toc-list" data-policy-toc="privacy" hidden>
+                  <a href="#privacy-1">1. Data we collect</a>
+                  <a href="#privacy-2">2. Why we use it</a>
+                  <a href="#privacy-3">3. Who can see your data</a>
+                  <a href="#privacy-4">4. How we protect it</a>
+                  <a href="#privacy-5">5. How long we keep it</a>
+                  <a href="#privacy-6">6. Your rights</a>
+                  <a href="#privacy-7">7. Children</a>
+                  <a href="#privacy-8">8. Changes to this policy</a>
+                  <a href="#terms-contact-card">9. Grievance Officer / Contact</a>
+                </div>
+              </nav>
+            </div>
+          </aside>
+
+          <div class="col-lg-9">
+            <section id="terms-of-service" class="terms-of-service" data-policy-group="terms">
         <!-- Page Header -->
-        <div class="tos-header text-center" data-aos="fade-up">
-          <span class="last-updated">Last Updated: February 27, 2025</span>
+        <div class="tos-header" data-aos="fade-up">
           <h2>Terms of Service</h2>
-          <p>Please read these terms of service carefully before using our services</p>
+          <span class="last-updated">Last updated: 2 November 2026</span>
+          <p>These terms apply to the website hsdbayurveda.com and the online services of {{ clinic.clinic_name }}, Ahmedabad ("the Hospital", "we", "us"). By using the website, creating an account or booking an appointment, you agree to these terms.</p>
         </div>
 
         <!-- Content -->
         <div class="tos-content" data-aos="fade-up" data-aos-delay="200">
           <!-- Agreement Section -->
-          <div id="agreement" class="content-section">
-            <h3>1. Agreement to Terms</h3>
-            <p>By accessing our website and services, you agree to be bound by these Terms of Service and all applicable
-              laws and regulations. If you do not agree with any of these terms, you are prohibited from using or
-              accessing our services.</p>
+          <div id="agreement" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">1.</span><span>About our services</span></h3>
+            <p>The website lets you learn about our Ayurvedic treatments, book appointments, view your prescriptions, bills and therapy progress, add family members and upload medical documents.</p>
             <div class="info-box">
               <i class="bi bi-info-circle"></i>
-              <p>These terms apply to all users, visitors, and others who access or use our services.</p>
+              <p>Information on this website (treatments, shlokas, articles) is for general awareness only. It is not a diagnosis or a substitute for a consultation with our doctor. Treatment, medicines, diet advice (Pathya–Apathya) and therapies are decided only after a personal consultation and Nadi Pariksha.</p>
             </div>
           </div>
 
           <!-- Intellectual Property -->
-          <div id="intellectual-property" class="content-section">
-            <h3>2. Intellectual Property Rights</h3>
-            <p>Our service and its original content, features, and functionality are owned by us and are protected by
-              international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
-            <ul class="list-items">
-              <li>All content is our exclusive property</li>
-              <li>You may not copy or modify the content</li>
-              <li>Our trademarks may not be used without permission</li>
-              <li>Content is for personal, non-commercial use only</li>
-            </ul>
+          <div id="intellectual-property" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">2.</span><span>Not for emergencies</span></h3>
+            <p>This website is not meant for medical emergencies. In an emergency, call 112 or go to the nearest hospital immediately. Do not wait for a reply to a booking, message or feedback.</p>
           </div>
 
           <!-- User Accounts -->
-          <div id="user-accounts" class="content-section">
-            <h3>3. User Accounts</h3>
-            <p>When you create an account with us, you must provide accurate, complete, and current information. Failure
-              to do so constitutes a breach of the Terms, which may result in immediate termination of your account.</p>
+          <div id="user-accounts" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">3.</span><span>Your account</span></h3>
+            <p>You log in with your email address and password. Your account may be created by you (Sign Up) or by the Hospital, in which case you receive an email link to set your own password. The link is valid for 48 hours.</p>
             <div class="alert-box">
               <i class="bi bi-exclamation-triangle"></i>
               <div class="alert-content">
-                <h5>Important Notice</h5>
-                <p>You are responsible for safeguarding the password and for all activities that occur under your
-                  account.</p>
+                <h5>Account Security</h5>
+                <p>Hospital staff never ask for or see your password. Keep it private. You are responsible for activity under your account.</p>
               </div>
             </div>
+            <ul class="list-items">
+              <li>Please give correct details (name, phone, date of birth, etc.). Wrong details can lead to wrong records.</li>
+              <li>If you add family members, you confirm that you are allowed to share their details and book on their behalf. For a minor, a parent or guardian must manage the booking.</li>
+            </ul>
           </div>
 
           <!-- Prohibited Activities -->
-          <div id="prohibited" class="content-section">
-            <h3>4. Prohibited Activities</h3>
-            <p>You may not access or use the Service for any purpose other than that for which we make it available.</p>
+          <div id="prohibited" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">4.</span><span>Appointments</span></h3>
+            <p>Appointments are booked for available time slots, subject to the doctor's schedule.</p>
             <div class="prohibited-list">
               <div class="prohibited-item">
                 <i class="bi bi-x-circle"></i>
-                <span>Systematic retrieval of data or content</span>
+                <span>You can cancel a pending appointment from your account up to 24 hours before the appointment time. Within 24 hours, please contact the Hospital.</span>
               </div>
               <div class="prohibited-item">
                 <i class="bi bi-x-circle"></i>
-                <span>Publishing malicious content</span>
+                <span>If the doctor is on leave or unavailable, the Hospital may cancel or reschedule your appointment. You will see the reason in your account.</span>
               </div>
               <div class="prohibited-item">
                 <i class="bi bi-x-circle"></i>
-                <span>Engaging in unauthorized framing</span>
-              </div>
-              <div class="prohibited-item">
-                <i class="bi bi-x-circle"></i>
-                <span>Attempting to gain unauthorized access</span>
+                <span>If you do not attend, the appointment may be marked as missed.</span>
               </div>
             </div>
           </div>
 
           <!-- Disclaimers -->
-          <div id="disclaimer" class="content-section">
-            <h3>5. Disclaimers</h3>
-            <p>Your use of our service is at your sole risk. The service is provided "AS IS" and "AS AVAILABLE" without
-              warranties of any kind, whether express or implied.</p>
+          <div id="disclaimer" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">5.</span><span>Fees and payments</span></h3>
+            <p>Consultation, medicine and therapy charges are as per the Hospital's current rates, shown at the Hospital or on your bill.</p>
             <div class="disclaimer-box">
-              <p>We do not guarantee that:</p>
+              <p>Payments are made at the Hospital (cash, UPI or other modes accepted there). The website does not collect card or bank details.</p>
               <ul>
-                <li>The service will meet your requirements</li>
-                <li>The service will be uninterrupted or error-free</li>
-                <li>Results from using the service will be accurate</li>
-                <li>Any errors will be corrected</li>
+                <li>Therapies may be billed per session or as a package, as agreed at the time of prescribing. Questions about refunds or package changes should be discussed with the Hospital.</li>
               </ul>
             </div>
           </div>
 
           <!-- Limitation of Liability -->
-          <div id="limitation" class="content-section">
-            <h3>6. Limitation of Liability</h3>
-            <p>In no event shall we be liable for any indirect, punitive, incidental, special, consequential, or
-              exemplary damages arising out of or in connection with your use of the service.</p>
+          <div id="limitation" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">6.</span><span>Medicines and therapies</span></h3>
+            <p>Take medicines only as prescribed, with the advised Anupana and timing (Sevan Kaal). Tell the doctor about allergies, pregnancy, other medicines or health conditions.</p>
+            <p>Results of Ayurvedic treatment differ from person to person. The Hospital does not guarantee a specific result or time to recover.</p>
           </div>
 
           <!-- Indemnification -->
-          <div id="indemnification" class="content-section">
-            <h3>7. Indemnification</h3>
-            <p>You agree to defend, indemnify, and hold us harmless from and against any claims, liabilities, damages,
-              losses, and expenses arising out of your use of the service.</p>
+          <div id="indemnification" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">7.</span><span>Documents you upload</span></h3>
+            <p>You may upload reports and documents (PDF, JPG or PNG, up to 5 MB each) to help the doctor.</p>
+            <ul class="list-items">
+              <li>Upload only your own or your family members' documents. Do not upload anything unlawful or unrelated to treatment.</li>
+            </ul>
           </div>
 
           <!-- Termination -->
-          <div id="termination" class="content-section">
-            <h3>8. Termination</h3>
-            <p>We may terminate or suspend your account immediately, without prior notice or liability, for any reason
-              whatsoever, including without limitation if you breach the Terms.</p>
+          <div id="termination" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">8.</span><span>Feedback</span></h3>
+            <p>Feedback helps us improve. We will not publish your name or feedback publicly without your permission.</p>
           </div>
 
           <!-- Governing Law -->
-          <div id="governing-law" class="content-section">
-            <h3>9. Governing Law</h3>
-            <p>These Terms shall be governed by and construed in accordance with the laws of [Your Country], without
-              regard to its conflict of law provisions.</p>
+          <div id="governing-law" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">9.</span><span>Proper use</span></h3>
+            <p>Do not misuse the website: no false bookings, no access to other people's accounts or data, no attempts to break or overload the system.</p>
           </div>
 
           <!-- Changes -->
-          <div id="changes" class="content-section">
-            <h3>10. Changes to Terms</h3>
-            <p>We reserve the right to modify or replace these Terms at any time. We will provide notice of any changes
-              by posting the new Terms on this page.</p>
-            <div class="notice-box">
-              <i class="bi bi-bell"></i>
-              <p>By continuing to access or use our service after those revisions become effective, you agree to be
-                bound by the revised terms.</p>
-            </div>
+          <div id="changes" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">10.</span><span>Limitation of liability</span></h3>
+            <p>We try to keep the website accurate and available, but it may sometimes be unavailable or contain errors. To the extent allowed by law, the Hospital is not liable for losses caused by website downtime or by relying on general information on the website instead of a consultation.</p>
+          </div>
+
+          <div id="terms-changes" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">11.</span><span>Changes and suspension</span></h3>
+            <p>We may update these terms or our services. We may suspend an account that is misused.</p>
+          </div>
+
+          <div id="terms-law" class="content-section treatment-card terms-policy-card" data-policy-card="terms">
+            <h3><span class="terms-number">12.</span><span>Governing law</span></h3>
+            <p>These terms are governed by the laws of India. Courts in Ahmedabad, Gujarat have jurisdiction.</p>
           </div>
         </div>
 
-        <!-- Contact Section -->
-        <div class="tos-contact" data-aos="fade-up" data-aos-delay="300">
-          <div class="contact-box">
-            <div class="contact-icon">
-              <i class="bi bi-envelope"></i>
-            </div>
-            <div class="contact-content">
-              <h4>Questions About Terms?</h4>
-              <p>If you have any questions about these Terms, please contact us.</p>
-              <a href="#!" class="contact-link">Contact Support</a>
-            </div>
-          </div>
-        </div>
-      </div>
+            </section>
 
-    </section><!-- /Terms Of Service Section -->
-
-     <!-- Privacy Section -->
-    <section id="privacy" class="privacy section">
-
-      <div class="container" data-aos="fade-up">
+            <section id="privacy" class="privacy" data-policy-group="privacy">
         <!-- Header -->
-        <div class="privacy-header" data-aos="fade-up">
+          <div class="privacy-header" data-aos="fade-up">
           <div class="header-content">
-            <div class="last-updated">Effective Date: February 27, 2025</div>
             <h1>Privacy Policy</h1>
-            <p class="intro-text">This Privacy Policy describes how we collect, use, process, and disclose your
-              information, including personal information, in conjunction with your access to and use of our services.
-            </p>
+            <div class="last-updated">Last updated: 2 November 2026</div>
+            <p class="intro-text">We respect your privacy. This policy explains what personal data we collect, why, and your rights under the Digital Personal Data Protection Act, 2023 (India).</p>
           </div>
         </div>
 
         <!-- Main Content -->
         <div class="privacy-content" data-aos="fade-up">
-          <!-- Introduction -->
-          <div class="content-section">
-            <h2>1. Introduction</h2>
-            <p>When you use our services, you're trusting us with your information. We understand this is a big
-              responsibility and work hard to protect your information and put you in control.</p>
-            <p>This Privacy Policy is meant to help you understand what information we collect, why we collect it, and
-              how you can update, manage, export, and delete your information.</p>
-          </div>
-
-          <!-- Information Collection -->
-          <div class="content-section">
-            <h2>2. Information We Collect</h2>
-            <p>We collect information to provide better services to our users. The types of information we collect
-              include:</p>
-
-            <h3>2.1 Information You Provide</h3>
-            <p>When you create an account or use our services, you provide us with personal information that includes:
-            </p>
+          <div id="privacy-1" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">1.</span><span>Data we collect</span></h2>
             <ul>
-              <li>Your name and contact information</li>
-              <li>Account credentials</li>
-              <li>Payment information when required</li>
-              <li>Communication preferences</li>
-            </ul>
-
-            <h3>2.2 Automatic Information</h3>
-            <p>We automatically collect and store certain information when you use our services:</p>
-            <ul>
-              <li>Device information and identifiers</li>
-              <li>Log information and usage statistics</li>
-              <li>Location information when enabled</li>
-              <li>Browser type and settings</li>
+              <li><strong>Account and contact details:</strong> name, email, phone number, address, date of birth, gender, blood group, profile photo.</li>
+              <li><strong>Family members you add:</strong> name, relation, phone, gender, date of birth, blood group.</li>
+              <li><strong>Health and treatment records:</strong> appointments, consultation notes, diagnosis, prescriptions (medicines, dosage, Anupana, Sevan Kaal), diet and lifestyle advice, therapy sessions, and documents uploaded by you or the doctor.</li>
+              <li><strong>Billing records:</strong> bills, amounts, payment mode and status. We do not store card or bank details.</li>
+              <li><strong>Old records:</strong> details from the Hospital's earlier paper registers may be added to your digital record.</li>
+              <li><strong>Feedback:</strong> name, contact details, rating and message.</li>
+              <li><strong>Technical data:</strong> essential cookies needed for login and security. We do not use advertising or tracking cookies.</li>
             </ul>
           </div>
 
-          <!-- Use of Information -->
-          <div class="content-section">
-            <h2>3. How We Use Your Information</h2>
-            <p>We use the information we collect to provide, maintain, and improve our services. Specifically, we use
-              your information to:</p>
+          <div id="privacy-2" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">2.</span><span>Why we use it</span></h2>
             <ul>
-              <li>Provide and personalize our services</li>
-              <li>Process transactions and send related information</li>
-              <li>Send notifications and updates about our services</li>
-              <li>Maintain security and verify identity</li>
-              <li>Analyze and improve our services</li>
+              <li>To book and manage appointments and send you account, password and appointment emails.</li>
+              <li>To provide treatment: prescriptions, therapies, follow-ups and medical history.</li>
+              <li>To prepare bills and keep financial records.</li>
+              <li>To improve our services using feedback.</li>
+              <li>To meet legal and medical record-keeping requirements.</li>
             </ul>
           </div>
 
-          <!-- Information Sharing -->
-          <div class="content-section">
-            <h2>4. Information Sharing and Disclosure</h2>
-            <p>We do not share personal information with companies, organizations, or individuals outside of our company
-              except in the following cases:</p>
-
-            <h3>4.1 With Your Consent</h3>
-            <p>We will share personal information with companies, organizations, or individuals outside of our company
-              when we have your consent to do so.</p>
-
-            <h3>4.2 For Legal Reasons</h3>
-            <p>We will share personal information if we have a good-faith belief that access, use, preservation, or
-              disclosure of the information is reasonably necessary to:</p>
+          <div id="privacy-3" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">3.</span><span>Who can see your data</span></h2>
             <ul>
-              <li>Meet any applicable law, regulation, legal process, or enforceable governmental request</li>
-              <li>Enforce applicable Terms of Service</li>
-              <li>Detect, prevent, or otherwise address fraud, security, or technical issues</li>
-              <li>Protect against harm to the rights, property, or safety of our users</li>
+              <li>Only authorised Hospital staff, according to their role: doctors for treatment, billing staff for bills.</li>
+              <li>Service providers that help run the website (server hosting, email delivery), only as needed to provide the service.</li>
+              <li>Government or legal authorities, when required by law.</li>
+            </ul>
+            <p>We never sell or rent your personal data.</p>
+          </div>
+
+          <div id="privacy-4" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">4.</span><span>How we protect it</span></h2>
+            <ul>
+              <li>The website uses HTTPS (encrypted connection).</li>
+              <li>Passwords are stored in encrypted (hashed) form. Staff cannot see them.</li>
+              <li>Access to records is limited by staff role, and data is regularly backed up.</li>
             </ul>
           </div>
 
-          <!-- Data Security -->
-          <div class="content-section">
-            <h2>5. Data Security</h2>
-            <p>We work hard to protect our users from unauthorized access to or unauthorized alteration, disclosure, or
-              destruction of information we hold. In particular:</p>
+          <div id="privacy-5" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">5.</span><span>How long we keep it</span></h2>
+            <p>Medical and billing records are kept for as long as required by applicable medical and legal rules, and as long as needed for your continued care. Other data (such as feedback) is deleted when it is no longer needed.</p>
+          </div>
+
+          <div id="privacy-6" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">6.</span><span>Your rights</span></h2>
+            <p>You can:</p>
             <ul>
-              <li>We encrypt our services using SSL</li>
-              <li>We review our information collection, storage, and processing practices</li>
-              <li>We restrict access to personal information to employees who need that information</li>
+              <li>view and update your profile details from your account;</li>
+              <li>ask for a copy or summary of your personal data;</li>
+              <li>ask us to correct wrong or incomplete data;</li>
+              <li>ask us to delete data that is no longer needed (medical records required by law may be kept);</li>
+              <li>withdraw consent for optional uses;</li>
+              <li>nominate a person to exercise your rights in case of death or incapacity;</li>
+              <li>raise a complaint with our Grievance Officer, and if not resolved, with the Data Protection Board of India.</li>
             </ul>
           </div>
 
-          <!-- Your Rights -->
-          <div class="content-section">
-            <h2>6. Your Rights and Choices</h2>
-            <p>You have certain rights regarding your personal information, including:</p>
-            <ul>
-              <li>The right to access your personal information</li>
-              <li>The right to correct inaccurate information</li>
-              <li>The right to request deletion of your information</li>
-              <li>The right to restrict or object to our processing of your information</li>
-            </ul>
+          <div id="privacy-7" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">7.</span><span>Children</span></h2>
+            <p>Details of children under 18 are added and managed by a parent or guardian.</p>
           </div>
 
-          <!-- Policy Updates -->
-          <div class="content-section">
-            <h2>7. Changes to This Policy</h2>
-            <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new
-              Privacy Policy on this page and updating the effective date at the top.</p>
-            <p>Your continued use of our services after any changes to this Privacy Policy constitutes your acceptance
-              of such changes.</p>
+          <div id="privacy-8" class="content-section treatment-card terms-policy-card" data-policy-card="privacy">
+            <h2><span class="terms-number">8.</span><span>Changes to this policy</span></h2>
+            <p>We may update this policy.</p>
           </div>
         </div>
 
-        <!-- Contact Section -->
-        <div class="privacy-contact" data-aos="fade-up">
-          <h2>Contact Us</h2>
-          <p>If you have any questions about this Privacy Policy or our practices, please contact us:</p>
-          <div class="contact-details">
-            <p><strong>Email:</strong> privacy@example.com</p>
-            <p><strong>Address:</strong> 123 Privacy Street, Security City, 12345</p>
+            </section>
+
+            <section id="terms-contact-card" class="terms-contact-card dr-card" data-policy-card="privacy">
+              <h2><span class="terms-number">13.</span><span>Contact</span></h2>
+              <h2><span class="terms-number">9.</span><span>Grievance Officer / Contact</span></h2>
+              <p>{{ clinic.clinic_name }}</p>
+              <p>{{ clinic.doctor_name|default:clinic.clinic_name }}, {{ clinic.clinic_name }}</p>
+              <div class="terms-contact-lines">
+                {% if clinic.address %}
+                <div class="info-item d-flex align-items-start gap-3 mb-3">
+                  <i class="bi bi-geo-alt"></i>
+                  <span>{{ clinic.address }}</span>
+                </div>
+                {% endif %}
+                {% if clinic.email %}
+                <div class="info-item d-flex align-items-start gap-3 mb-3">
+                  <i class="bi bi-envelope"></i>
+                  <span>Email: <a href="mailto:{{ clinic.email }}">{{ clinic.email }}</a></span>
+                </div>
+                {% endif %}
+                {% if clinic.phone %}
+                <div class="info-item d-flex align-items-start gap-3 mb-3">
+                  <i class="bi bi-telephone"></i>
+                  <span>Phone: <a href="tel:{{ clinic.phone }}">{{ clinic.phone }}</a></span>
+                </div>
+                {% endif %}
+              </div>
+              <p>We will respond to requests within a reasonable time.</p>
+            </section>
           </div>
         </div>
-
       </div>
-
-    </section><!-- /Privacy Section -->
+    </section>
 
   {% endblock %}
 {% block extra_js %}
+    <script>
+      (() => {
+        const tabs = [...document.querySelectorAll('[data-policy-tab]')];
+        const lists = [...document.querySelectorAll('[data-policy-toc]')];
+        const tocLinks = [...document.querySelectorAll('.terms-toc-list a')];
+        const cards = [...document.querySelectorAll('[data-policy-card]')];
+        const visibleCards = new Set();
+
+        const activatePolicy = (policy, activeId = null) => {
+          tabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.policyTab === policy));
+          lists.forEach((list) => {
+            const isActive = list.dataset.policyToc === policy;
+            list.hidden = !isActive;
+            list.classList.toggle('is-active', isActive);
+          });
+          if (activeId) {
+            tocLinks.forEach((link) => link.classList.toggle('active', link.hash === `#${activeId}`));
+          } else {
+            const firstLink = tocLinks.find((link) =>
+              link.closest('[data-policy-toc]').dataset.policyToc === policy
+            );
+            tocLinks.forEach((link) => link.classList.toggle('active', link === firstLink));
+          }
+        };
+
+        tabs.forEach((tab) => {
+          tab.addEventListener('click', () => activatePolicy(tab.dataset.policyTab));
+        });
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              visibleCards.add(entry.target);
+            } else {
+              visibleCards.delete(entry.target);
+            }
+          });
+          const currentCard = [...visibleCards].sort((a, b) =>
+            Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top)
+          )[0];
+          if (currentCard) {
+            activatePolicy(currentCard.dataset.policyCard, currentCard.id);
+          }
+        }, {
+          rootMargin: `-${Math.round(window.innerHeight * 0.12)}px 0px -${Math.round(window.innerHeight * 0.7)}px 0px`
+        });
+
+        cards.forEach((card) => observer.observe(card));
+      })();
+    </script>
   <script src="{% static 'assets/vendor/php-email-form/validate.js' %}"></script>
 {% endblock %}

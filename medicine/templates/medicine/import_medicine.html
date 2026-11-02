@@ -52,20 +52,20 @@
             </div>
         </div>
         <div class="col-lg-5">
-            <div class="dc-card"><div class="dc-card-header"><h3 class="dc-card-title"><i class="bi bi-card-checklist"></i> Workbook columns</h3></div><div class="p-3 px-4"><p class="small text-muted">Headers are case-insensitive and can be in any order. Aliases are accepted.</p>
-                <div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Header</th><th>Required</th><th>Accepted aliases / notes</th></tr></thead><tbody>
-                    <tr><td><code>name</code></td><td>Yes</td><td>medicine, medicine name</td></tr>
-                    <tr><td><code>short_name</code></td><td>Yes</td><td>short, code</td></tr>
-                    <tr><td><code>pack_size</code></td><td>Yes</td><td>power, strength, pack size</td></tr>
-                    <tr><td><code>cost_price</code></td><td>Yes</td><td></td></tr>
-                    <tr><td><code>selling_price</code></td><td>Yes</td><td>Must be greater than 0</td></tr>
-                    <tr><td><code>type</code></td><td>No</td><td>medicine type</td></tr>
-                    <tr><td><code>company</code></td><td>No</td><td>manufacturer</td></tr>
-                    <tr><td><code>unit</code></td><td>No</td><td>piece, tablet, bottle, jar, box, packet, tube, sachet, ml, gm; defaults to piece</td></tr>
-                    <tr><td><code>units_per_pack</code></td><td>No</td><td>unit_per_strip</td></tr>
-                    <tr><td><code>packs</code></td><td>No</td><td>total packs, strips, stock_strips</td></tr>
-                    <tr><td><code>low_stock_alert</code></td><td>No</td><td>Defaults to 10</td></tr>
-                    <tr><td><code>mfg_date</code>, <code>exp_date</code></td><td>No</td><td>Dates: dd/mm/yyyy, dd-mm-yyyy, yyyy-mm-dd, or Excel date</td></tr>
+            <div class="dc-card"><div class="dc-card-header"><h3 class="dc-card-title"><i class="bi bi-card-checklist"></i> Workbook columns</h3></div><div class="p-3 px-4"><p class="small text-muted" id="columnGuideNote">Headers are case-insensitive and can be in any order. Aliases are accepted.</p>
+                <div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>Header</th><th>Required</th><th>Accepted aliases / notes</th></tr></thead><tbody id="columnGuideRows">
+                    <tr data-required="true"><td><code>name</code></td><td>Yes</td><td>medicine, medicine name</td></tr>
+                    <tr data-required="true"><td><code>short_name</code></td><td>Yes</td><td>short, code</td></tr>
+                    <tr data-required="true"><td><code>pack_size</code></td><td>Yes</td><td>power, strength, pack size</td></tr>
+                    <tr data-required="true"><td><code>cost_price</code></td><td>Yes</td><td></td></tr>
+                    <tr data-required="true"><td><code>selling_price</code></td><td>Yes</td><td>Must be greater than 0</td></tr>
+                    <tr data-required="false"><td><code>type</code></td><td>No</td><td>medicine type</td></tr>
+                    <tr data-required="false"><td><code>company</code></td><td>No</td><td>manufacturer</td></tr>
+                    <tr data-required="false"><td><code>unit</code></td><td>No</td><td>piece, tablet, bottle, jar, box, packet, tube, sachet, ml, gm; defaults to piece</td></tr>
+                    <tr data-required="false"><td><code>units_per_pack</code></td><td>No</td><td>unit_per_strip</td></tr>
+                    <tr data-required="false"><td><code>packs</code></td><td>No</td><td>total packs, strips, stock_strips</td></tr>
+                    <tr data-required="false"><td><code>low_stock_alert</code></td><td>No</td><td>Defaults to 10</td></tr>
+                    <tr data-required="false"><td><code>mfg_date</code>, <code>exp_date</code></td><td>No</td><td>Dates: dd/mm/yyyy, dd-mm-yyyy, yyyy-mm-dd, or Excel date</td></tr>
                 </tbody></table></div>
             </div></div>
         </div>
@@ -110,12 +110,51 @@
     const stockOptionFields = document.getElementById('stockOptionFields');
     const stockOptionNote = document.getElementById('stockOptionNote');
     const namesOnlyNote = document.getElementById('namesOnlyNote');
+    const columnGuideRows = document.getElementById('columnGuideRows');
+    const columnGuideNote = document.getElementById('columnGuideNote');
+    const fullColumnGuideRows = Array.from(columnGuideRows?.rows || [], row => row.cloneNode(true));
+    const fullColumnGuideNote = columnGuideNote?.textContent || '';
+
+    function updateColumnGuide(isNamesOnly) {
+        if (!columnGuideRows) return;
+        if (!isNamesOnly) {
+            columnGuideRows.replaceChildren(...fullColumnGuideRows.map(row => row.cloneNode(true)));
+            if (columnGuideNote) columnGuideNote.textContent = fullColumnGuideNote;
+            return;
+        }
+
+        const namesOnlyRows = [
+            ['name', true, 'medicine, medicine name'],
+            ['type', false, 'medicine type, or taken from the sheet name / section rows'],
+            ['company', false, 'manufacturer']
+        ];
+        const rows = namesOnlyRows.map(([name, required, aliases]) => {
+            const row = document.createElement('tr');
+            row.dataset.required = String(required);
+            const nameCell = document.createElement('td');
+            const code = document.createElement('code');
+            code.textContent = name;
+            nameCell.append(code);
+            const requiredCell = document.createElement('td');
+            requiredCell.textContent = required ? 'Yes' : 'No';
+            const aliasesCell = document.createElement('td');
+            aliasesCell.textContent = aliases;
+            row.append(nameCell, requiredCell, aliasesCell);
+            return row;
+        });
+        columnGuideRows.replaceChildren(...rows);
+        if (columnGuideNote) {
+            columnGuideNote.textContent = 'short_name is generated automatically; pack size and price can be added later.';
+        }
+    }
+
     function updateImportModeFields() {
         const isNamesOnly = namesOnlyMode?.checked;
         stockOptionFields?.classList.toggle('d-none', isNamesOnly);
         stockOptionNote?.classList.toggle('d-none', isNamesOnly);
         if (namesOnlyNote) namesOnlyNote.style.display = isNamesOnly ? '' : 'none';
         document.querySelectorAll('input[name="stock_option"]').forEach(input => input.disabled = isNamesOnly);
+        updateColumnGuide(isNamesOnly);
     }
     namesOnlyMode?.addEventListener('change', updateImportModeFields);
     fullImportMode?.addEventListener('change', updateImportModeFields);

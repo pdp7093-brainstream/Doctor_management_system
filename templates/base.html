@@ -41,6 +41,7 @@
   <link href="{% static 'assets/css/sweetalert.css' %}" rel="stylesheet">
   {% block extra_css %}{% endblock %}
   <link href="{% static 'assets/css/mobile.css' %}" rel="stylesheet">
+  {% block extra_css_after %}{% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}">

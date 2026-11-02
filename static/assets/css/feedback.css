@@ -7,6 +7,14 @@
         align-self: center !important;
     }
 }
+.feedback-honeypot {
+    position: absolute !important;
+    left: -10000px !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+}
+
 .feedback-card {
     background: var(--white);
     border-radius: 12px;
@@ -196,6 +204,28 @@
     border-radius: 16px;
     padding: 36px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+@media (max-width: 767px) {
+    .contact-page #feedback .dr-card {
+        padding: 20px;
+    }
+
+    .contact-page #feedback .dr-card-head {
+        gap: 12px;
+        align-items: center;
+    }
+
+    .contact-page #feedback .dr-card-head .dr-icon {
+        width: 40px;
+        height: 40px;
+        flex: 0 0 40px;
+    }
+
+    .contact-page #feedback .dr-card-head h3 {
+        font-size: 20px;
+        white-space: nowrap;
+    }
 }
 
 .feedback-form-card h2 {

@@ -81,4 +81,8 @@ body {
             .patient-hero {
                 padding: 22px 18px;
             }
+
+            .patient-page-shell section.card.page-card[aria-labelledby="myTherapiesTitle"] {
+                padding: 0;
+            }
         }

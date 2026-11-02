@@ -5659,6 +5659,14 @@ section,
 /*--------------------------------------------------------------
 # Terms Of Service Section
 --------------------------------------------------------------*/
+.terms-page .page-title .heading {
+  padding-bottom: 24px;
+}
+
+.terms-page #terms-of-service {
+  padding-top: 24px;
+}
+
 .terms-of-service .tos-header {
   margin-bottom: 60px;
 }
@@ -5971,6 +5979,194 @@ section,
 .privacy .privacy-header .header-content {
   max-width: 800px;
   margin: 0 auto;
+}
+
+.terms-page .privacy .privacy-header .header-content {
+  max-width: none;
+  margin: 0;
+}
+
+.terms-page .privacy .privacy-header {
+  text-align: left;
+}
+
+.terms-page .privacy .privacy-content,
+.terms-page .privacy .privacy-contact {
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.terms-page .terms-breadcrumbs {
+  margin-top: 16px;
+}
+
+.terms-page .terms-breadcrumbs .breadcrumb {
+  background: transparent;
+  padding: 0;
+}
+
+.terms-page .terms-breadcrumbs .breadcrumb-item,
+.terms-page .terms-breadcrumbs .breadcrumb-item a {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+}
+
+.terms-page .terms-tabs {
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.terms-page .terms-tabs .nav-link {
+  border-radius: 50px;
+  color: var(--default-color);
+  font-weight: 600;
+  padding: 10px 18px;
+}
+
+.terms-page .terms-tabs .nav-link.active {
+  background-color: var(--accent-color);
+  color: var(--contrast-color);
+}
+
+.terms-page #terms-of-service,
+.terms-page #privacy {
+  scroll-margin-top: calc(var(--header-h, 76px) + 16px);
+}
+
+.terms-page .terms-toc {
+  top: calc(var(--header-h, 76px) + 16px);
+  max-height: calc(100vh - var(--header-h, 76px) - 32px);
+  overflow-y: auto;
+  padding: 22px;
+}
+
+.terms-page .terms-toc h2 {
+  color: var(--heading-color);
+  font-size: 1.05rem;
+  margin-bottom: 14px;
+}
+
+.terms-page .terms-toc-list[hidden] {
+  display: none !important;
+}
+
+.terms-page .terms-toc-list a {
+  border-radius: 6px;
+  color: var(--default-color);
+  display: block;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  padding: 8px 10px;
+  text-decoration: none;
+}
+
+.terms-page .terms-toc-list a:hover,
+.terms-page .terms-toc-list a.active {
+  background-color: color-mix(in srgb, var(--accent-color), transparent 90%);
+  color: var(--accent-color);
+}
+
+.terms-page .terms-of-service .tos-header {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.terms-page .terms-of-service .tos-header h2,
+.terms-page .privacy .privacy-header .header-content h1 {
+  color: var(--heading-color);
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.terms-page .terms-of-service .tos-header p {
+  margin: 0;
+  max-width: none;
+}
+
+.terms-page .privacy .privacy-content {
+  margin-bottom: 0;
+}
+
+.terms-page .terms-of-service .tos-header .last-updated,
+.terms-page .privacy .privacy-header .header-content .last-updated {
+  background-color: color-mix(in srgb, var(--accent-color), transparent 90%);
+  border-radius: 50px;
+  color: var(--accent-color);
+  display: inline-block;
+  font-size: 0.85rem;
+  margin: 0 0 16px;
+  padding: 6px 12px;
+}
+
+.terms-page .privacy .privacy-header {
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.terms-page .privacy .privacy-header .header-content .intro-text {
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.terms-page .terms-of-service .tos-content .terms-policy-card,
+.terms-page .privacy .privacy-content .terms-policy-card {
+  margin-bottom: 16px;
+  scroll-margin-top: calc(var(--header-h, 76px) + 20px);
+}
+
+.terms-page .terms-of-service .tos-content .terms-policy-card h3,
+.terms-page .privacy .privacy-content .terms-policy-card h2,
+.terms-page .terms-contact-card h2 {
+  align-items: center;
+  color: var(--heading-color);
+  display: flex;
+  font-size: 1.25rem;
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.terms-page .terms-number {
+  align-items: center;
+  background-color: var(--accent-color);
+  border-radius: 50%;
+  color: var(--contrast-color);
+  display: inline-flex;
+  flex: 0 0 32px;
+  font-size: 0.85rem;
+  height: 32px;
+  justify-content: center;
+  line-height: 1;
+  width: 32px;
+}
+
+.terms-page .terms-contact-card {
+  margin-top: 24px;
+  scroll-margin-top: calc(var(--header-h, 76px) + 20px);
+}
+
+.terms-page .terms-contact-lines .info-item {
+  color: var(--default-color);
+  line-height: 1.6;
+}
+
+.terms-page .terms-contact-lines .info-item i {
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  flex: 0 0 20px;
+  margin-top: 3px;
+}
+
+.terms-page .terms-contact-lines a {
+  color: var(--accent-color);
+}
+
+@media (max-width: 991.98px) {
+  .terms-page .terms-toc {
+    display: none;
+  }
 }
 
 .privacy .privacy-header .header-content .last-updated {

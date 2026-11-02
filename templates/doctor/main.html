@@ -103,6 +103,7 @@
             }
         }
     </style>
+    <link href="{% static 'assets/css/dashboard-mobile.css' %}" rel="stylesheet">
 </head>
 
 <body data-user-initials="{{ request.user.get_full_name|default:request.user.username|slice:':1'|upper }}">

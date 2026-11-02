@@ -328,6 +328,20 @@ textarea.form-control {
   background-color: #E25C00 !important;
 }
 
+@media (max-width: 767px) {
+  .appointment-page #appointmnet.appointmnet.section.appointment-section {
+    padding-bottom: 48px !important;
+  }
+
+  .appointment-page #appointmnet .row.align-items-stretch {
+    row-gap: 24px !important;
+  }
+
+  .appointment-page #appointmnet .clinic-info-panel {
+    margin-bottom: 0 !important;
+  }
+}
+
 /* Time slot buttons and form focus overrides (replacing blue) */
 #time_buttons_container .time-btn.btn-outline-primary {
   color: var(--accent-color) !important;
@@ -342,4 +356,27 @@ textarea.form-control {
   background-color: var(--accent-color) !important;
   border-color: var(--accent-color) !important;
   color: #fff !important;
+}
+
+@media (max-width: 767px) {
+  .appointment-page #appointmnet.appointment-section {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding-bottom: 48px !important;
+  }
+
+  .appointment-page #appointmnet .clinic-info-panel {
+    position: static !important;
+    top: auto !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    margin-bottom: 0 !important;
+  }
+
+  .appointment-page #appointmnet .clinic-info-panel::before,
+  .appointment-page #appointmnet .clinic-info-panel .cta-pattern {
+    display: none !important;
+  }
 }

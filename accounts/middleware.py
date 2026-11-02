@@ -18,7 +18,7 @@ class RoleRedirectMiddleware:
     }
     PATIENT_ONLY_URLS = {
         'dashboard', 'profile', 'profile-setting', 'add_family_member',
-        'update_family_member', 'delete_family_member',
+        'update_family_member', 'delete_family_member', 'upload_profile_document',
     }
     SKIPPED_NAMES = {
         'logout', 'activate_patient', 'password_reset', 'password_reset_done',
@@ -85,7 +85,16 @@ class RoleRedirectMiddleware:
                 messages.info(request, 'That page is only for clinic staff.')
                 return redirect('dashboard')
 
-        if member and namespace == '' and name in self.PATIENT_ONLY_URLS:
-            return redirect('billing:bill_list' if member.role == 'biller' else 'doctor:dashboard')
+        patient_only_page = (
+            namespace == '' and name in self.PATIENT_ONLY_URLS
+        ) or (
+            namespace == 'appointment' and name in self.PATIENT_APPOINTMENT_URLS
+        )
+        if (member or request.user.is_staff) and patient_only_page:
+            return redirect(
+                'billing:bill_list'
+                if member and member.role == 'biller'
+                else 'doctor:dashboard'
+            )
 
         return self.get_response(request)

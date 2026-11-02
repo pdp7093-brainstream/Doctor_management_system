@@ -1697,6 +1697,8 @@ a.action-btn:hover { color: #fff; }
 
 /* Empty state */
 .dc-empty { padding: 48px 16px !important; text-align: center; color: #6c757d; }
+.dc-empty.archive-empty-state,
+.dc-empty.dashboard-list-empty-state { padding: 32px !important; }
 .dc-empty > i { display: block; font-size: 2.2rem; color: var(--accent-color); opacity: 0.4; margin-bottom: 8px; }
 
 @media (max-width: 768px) {

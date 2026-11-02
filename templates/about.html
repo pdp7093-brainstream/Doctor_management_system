@@ -5,7 +5,7 @@
 {% block meta_description %}Learn about {{ clinic.clinic_name|default:'our clinic' }}, our Ayurvedic approach and the values that guide our care.{% endblock %}
 {% block body_class %}about-page{% endblock %}
 
-{% block extra_css %}
+{% block extra_css_after %}
 <link href="{% static 'assets/css/about.css' %}" rel="stylesheet">
 {% endblock %}
 

@@ -89,6 +89,11 @@
 
               <form method="POST" action="{% url 'feedback' %}" id="feedbackForm">
                 {% csrf_token %}
+                <div class="feedback-honeypot" aria-hidden="true">
+                  <label for="feedbackWebsite">Website</label>
+                  <input type="text" name="website" id="feedbackWebsite" tabindex="-1" autocomplete="off">
+                </div>
+                <input type="hidden" name="feedback_timestamp" value="{{ feedback_timestamp }}">
                 <div class="row g-4">
 
                   <!-- Name -->

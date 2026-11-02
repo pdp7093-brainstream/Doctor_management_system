@@ -44,6 +44,9 @@
           </li>
 
           {% if user.is_authenticated %}
+          {% if user.is_staff or user.innermember %}
+          <li><a href="{% if user.innermember.role == 'biller' %}/billing/{% else %}/doctor/dashboard/{% endif %}" class="btn-login">Go to Dashboard</a></li>
+          {% else %}
           <li class="dropdown profile-nav">
             <a href="#" class="profile-nav-trigger" aria-expanded="false">
               <div class="profile-avatar" {% if user.patient.profile_picture and user.patient.profile_picture.name != 'profile_pictures/default-avatar.png' %}style="background-color: #ffffff;"{% endif %}>
@@ -53,19 +56,18 @@
                     {{ user.first_name|default:user.username|slice:":1"|upper }}
                 {% endif %}
               </div>
+              <span class="profile-nav-name">{{ user.first_name|default:user.username }}</span>
               <i class="bi toggle-dropdown"></i>
             </a>
             <ul>
               <li><a href="{% url 'profile' %}">Profile</a></li>
               <li><a href="{% url 'dashboard' %}">Appointments</a></li>
               <li><a href="{% url 'resetpass' %}">Password</a></li>
-              <li>
-                <hr style="margin: 5px 0; opacity: 0.1;">
-              </li>
-              <li><a href="{% url 'logout' %}" id="logoutBtn">Logout</a>
-              </li>
+              <li class="profile-nav-divider" aria-hidden="true"><hr></li>
+              <li><a href="{% url 'logout' %}" id="logoutBtn">Logout</a></li>
             </ul>
           </li>
+          {% endif %}
           {% else %}
           <li><a href="{% url 'login' %}" class="btn-login"><i class="bi bi-person"></i> Login</a></li>
           {% endif %}

@@ -3,6 +3,8 @@ import re
 import random
 import logging
 import calendar
+import hashlib
+import time
 from datetime import date, timedelta
 from .models import *
 from .forms import *
@@ -26,6 +28,8 @@ from django.views.decorators.cache import never_cache
 from appointment.models import Appointment, LabDocument, PatientUploadedDocument
 from doctor.models import InnerMember
 from django.core.exceptions import ValidationError
+from django.core import signing
+from django.core.cache import cache
 from django.db import OperationalError, ProgrammingError
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
@@ -88,6 +92,25 @@ def treatments(request):
 def terms(request):
     return render(request, 'terms.html')
 
+FEEDBACK_FORM_SIGNING_SALT = 'accounts.feedback_form'
+FEEDBACK_FORM_MAX_AGE = 24 * 60 * 60
+FEEDBACK_RATE_LIMIT = 3
+FEEDBACK_RATE_WINDOW = 60 * 60
+
+
+def _feedback_rate_limit_exceeded(request):
+    ip_address = request.META.get('REMOTE_ADDR', '')
+    ip_digest = hashlib.sha256(ip_address.encode('utf-8')).hexdigest()
+    cache_key = f'feedback-submissions:{ip_digest}'
+    cache.add(cache_key, 0, timeout=FEEDBACK_RATE_WINDOW)
+    try:
+        submissions = cache.incr(cache_key)
+    except ValueError:
+        cache.add(cache_key, 0, timeout=FEEDBACK_RATE_WINDOW)
+        submissions = cache.incr(cache_key)
+    return submissions > FEEDBACK_RATE_LIMIT
+
+
 def feedback(request):
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -96,8 +119,35 @@ def feedback(request):
         rating = request.POST.get('rating', '5')
         message = request.POST.get('message', '').strip()
 
+        is_patient = request.user.is_authenticated and Patient.objects.filter(user=request.user).exists()
+        if not is_patient:
+            is_bot = bool(request.POST.get('website', ''))
+            timestamp_token = request.POST.get('feedback_timestamp', '')
+            try:
+                form_started_at = float(signing.loads(
+                    timestamp_token,
+                    salt=FEEDBACK_FORM_SIGNING_SALT,
+                    max_age=FEEDBACK_FORM_MAX_AGE,
+                ))
+                elapsed = time.time() - form_started_at
+                is_bot = is_bot or not 3 <= elapsed <= FEEDBACK_FORM_MAX_AGE
+            except (signing.BadSignature, TypeError, ValueError, OverflowError):
+                is_bot = True
+
+            if is_bot:
+                messages.success(request, 'Thank you for your feedback! We truly appreciate it.')
+                return redirect('feedback')
+
+        if _feedback_rate_limit_exceeded(request):
+            messages.error(request, 'Too many submissions, please try again later.')
+            return redirect('feedback')
+
         if not name or not message:
             messages.error(request, 'Name and feedback message are required.')
+            return redirect('feedback')
+
+        if len(message) < 10 or (len(message) > 25 and not any(character.isspace() for character in message)):
+            messages.error(request, 'Please enter a message of at least 10 characters. Messages over 25 characters must include spaces.')
             return redirect('feedback')
 
         try:
@@ -123,7 +173,10 @@ def feedback(request):
     if request.user.is_authenticated:
         patient_profile = Patient.objects.filter(user=request.user).first()
 
-    return render(request, 'feedback.html', {'patient_profile': patient_profile})
+    return render(request, 'feedback.html', {
+        'patient_profile': patient_profile,
+        'feedback_timestamp': signing.dumps(time.time(), salt=FEEDBACK_FORM_SIGNING_SALT),
+    })
 
 def login(request):
     return render(request, 'authentication/login.html')
@@ -705,7 +758,7 @@ def profile_settings(request):
         return redirect(f"{reverse('profile')}?edit=1&field={focus_field}")
 
     full_name = request.POST.get('full_name', request.POST.get('first_name', '')).strip()
-    phone = request.POST.get('phone', '').strip()
+    phone = request.POST.get('phone', '') or None
     address = request.POST.get('address', '').strip() or None
     dob = request.POST.get('dob') or None
     gender = request.POST.get('gender') or None
@@ -720,15 +773,11 @@ def profile_settings(request):
     if not full_name:
         errors.append('Full name is required.')
 
-        # Validate phone if provided
-    if phone:
-        import re
-        cleaned_phone = re.sub(r'[\s\-\+\(\)]', '', phone)
-        if not re.match(r'^\d{10,15}$', cleaned_phone):
-            errors.append('Invalid phone number format.')
-        elif Patient.objects.filter(phone=cleaned_phone).exclude(user=user).exists():
-            errors.append('This phone number is already registered!')
-        phone = cleaned_phone
+    if phone is not None:
+        if not re.fullmatch(r'[0-9]{10}', phone):
+            errors.append('Phone number must contain exactly 10 digits.')
+        elif Patient.objects.filter(phone=phone).exclude(user=user).exists():
+            errors.append('This number is already registered')
 
     if errors:
         for error in errors:
@@ -801,59 +850,3 @@ class ChangePasswordView(LoginRequiredMixin, View):
                 messages.error(request, 'The old password you entered is incorrect.')
 
         return render(request, 'authentication/change_password.html', {'form': form})
-
-# CHANGEING THE PHONE NUMBER
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-import json
-
-@login_required
-def change_phone(request):
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        try:
-            # Check authentication
-            if not request.user.is_authenticated or not hasattr(request.user, 'patient'):
-                return JsonResponse({'success': False, 'error': 'User not authenticated'}, status=401)
-            
-            data = json.loads(request.body or '{}')
-            new_phone = data.get('phone', '').strip()
-            otp = data.get('otp', '').strip()
-            
-            # Validate phone number
-            if not new_phone:
-                return JsonResponse({'success': False, 'error': 'Phone number is required'}, status=400)
-            
-            if not otp:
-                return JsonResponse({'success': False, 'error': 'OTP is required'}, status=400)
-            
-            # Phone format validation - exactly 10 digits
-            if not re.match(r'^\d{10}$', new_phone):
-                return JsonResponse({'success': False, 'error': 'Phone number must contain exactly 10 digits'}, status=400)
-            
-            # Check if phone is same as current
-            if new_phone == request.user.patient.phone:
-                return JsonResponse({'success': False, 'error': 'New phone number must be different from current number'}, status=400)
-            
-            # Check for duplicate phone in database
-            from .models import Patient
-            if Patient.objects.filter(phone=new_phone).exclude(user=request.user).exists():
-                return JsonResponse({'success': False, 'error': 'This phone number is already registered with another account'}, status=400)
-            
-            # Update phone number
-            request.user.patient.phone = new_phone
-            request.user.patient.save()
-            
-            return JsonResponse({
-                'success': True, 
-                'message': 'Phone number updated successfully',
-                'phone': new_phone
-            }, status=200)
-            
-        except json.JSONDecodeError:
-            return JsonResponse({'success': False, 'error': 'Invalid request format'}, status=400)
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            return JsonResponse({'success': False, 'error': f'An error occurred: {str(e)}'}, status=400)
-    
-    return JsonResponse({'success': False, 'error': 'Invalid request method'}, status=405)

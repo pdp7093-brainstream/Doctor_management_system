@@ -409,7 +409,7 @@
         </form>
       </div>
     </div>
-    <div class="dc-table-wrap">
+    <div class="dc-table-wrap{% if not therapies %} d-none{% endif %}">
       <table class="table table-hover dc-table align-middle mb-0">
         <colgroup>
           <col style="width: 20%;">
@@ -547,9 +547,17 @@
               </div>
             </td>
           </tr>
-          {% empty %}<tr><td colspan="6" class="dc-empty text-center py-5"><i class="bi bi-droplet-half" style="font-size:2rem;color:#ccc"></i><p class="text-muted mb-0 mt-2">No {{ selected_status }} therapies found.</p></td></tr>{% endfor %}
+          {% endfor %}
         </tbody>
       </table>
+    </div>
+    {% if not therapies %}
+    <div class="dc-empty dashboard-list-empty-state">
+      <i class="bi bi-droplet-half"></i>
+      <p class="dc-empty-text">No {{ selected_status }} therapies found.</p>
+    </div>
+    {% endif %}
+  </div>
 {% for item in therapies %}
 <div class="modal fade" id="deleteSessionModal{{ item.pk }}" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" style="max-width:480px;">

@@ -72,7 +72,7 @@
         <div class="dc-card-header">
             <h3 class="dc-card-title"><i class="bi bi-receipt"></i> Purchase records</h3>
         </div>
-        <div id="tableContainer" class="dc-table-wrap">
+        <div id="tableContainer" class="dc-table-wrap{% if not purchases %} d-none{% endif %}">
             <table class="table table-hover dc-table" style="min-width: 950px;">
                 <thead>
                     <tr>
@@ -155,21 +155,20 @@
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="7" class="dc-empty purchase-empty">
-                            <i class="bi bi-receipt"></i>
-                            <div class="dc-name mb-2">No purchase orders yet.</div>
-                            <div class="mt-2"><a href="{% url 'medicine:add_purchase' %}" class="btn-page btn-page-primary">
-                                    <i class="bi bi-plus-lg"></i> Create Purchase Order
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        {% if not purchases %}
+        <div class="dc-empty dashboard-list-empty-state">
+            <i class="bi bi-receipt"></i>
+            <p class="dc-empty-text">No purchase orders yet.</p>
+            <a href="{% url 'medicine:add_purchase' %}" class="btn-page btn-page-primary">
+                <i class="bi bi-plus-lg"></i> Create Purchase Order
+            </a>
+        </div>
+        {% endif %}
 
         {% if purchases %}
         <div id="paginationContainer">

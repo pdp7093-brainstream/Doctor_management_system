@@ -36,7 +36,7 @@
             </div>
         </div>
 
-        <div class="dc-table-wrap">
+        <div class="dc-table-wrap{% if not patients %} d-none{% endif %}">
             <table class="table table-hover dc-table" style="min-width:680px;">
                 <thead>
                     <tr>
@@ -114,17 +114,16 @@
                             </div>
                         </td>
                     </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="dc-empty">
-                            <i class="bi bi-person-x"></i>
-                            No patients found. Add one to get started.
-                        </td>
-                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+        {% if not patients %}
+        <div class="dc-empty dashboard-list-empty-state">
+            <i class="bi bi-person-x"></i>
+            <p class="dc-empty-text">No patients found. Add one to get started.</p>
+        </div>
+        {% endif %}
 
         <div id="paginationContainer">
             {% if page_obj.paginator.count > 10 %}
