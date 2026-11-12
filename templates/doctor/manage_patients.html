@@ -4,6 +4,31 @@
 {% block title %}Manage Patients{% endblock %}
 
 {% block content %}
+
+<style>
+    .dc-card, .dc-card-header { overflow: visible; }
+    .medicine-filter-container { position: relative; }
+    .medicine-filter-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        z-index: 1050;
+        width: min(320px, calc(100vw - 2rem));
+        max-height: 70vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 1.15rem 1.25rem;
+        background: #fff;
+        border: 1px solid #dce9dc;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+    }
+    .medicine-active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: 0 1rem 1rem; }
+    .medicine-filter-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .6rem; border: 1px solid #dce9dc; border-radius: 999px; background: #f5f8f5; color: #344638; font-size: .8rem; text-decoration: none; }
+    .medicine-filter-chip:hover { background: #eaf4ea; color: #015315; }
+    .medicine-clear-filters { color: #015315; font-size: .85rem; font-weight: 600; }
+</style>
+
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
@@ -34,7 +59,67 @@
                 <input type="text" id="searchInput" class="form-control"
                     placeholder="Search by name or phone..." value="{{ search }}" autocomplete="off">
             </div>
+            <div class="medicine-filter-container">
+                <form method="get" id="medicineFilterForm" class="m-0">
+                    {% if search %}<input type="hidden" name="search" value="{{ search }}">{% endif %}
+                    <button class="btn-page btn-page-outline" type="button" id="filterToggleBtn" aria-expanded="false" aria-controls="filterPanel">
+                        <i class="bi bi-funnel"></i> Filter{% if active_filter_count %} ({{ active_filter_count }}){% endif %}
+                    </button>
+                    <div id="filterPanel" class="medicine-filter-panel d-none" role="region" aria-label="Filter patients">
+                        <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                            <span class="fw-bold" style="color:#013A0F;font-size:0.95rem;"><i class="bi bi-sliders me-1"></i> Filter Patients</span>
+                            <button type="button" class="btn-close btn-sm" id="closeFilterPanel" aria-label="Close"></button>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1" for="filterLoginStatus">Login status</label>
+                            <select class="form-select form-select-sm" name="login_status" id="filterLoginStatus">
+                                <option value="">All login statuses</option>
+                                <option value="active" {% if selected_login_status == 'active' %}selected{% endif %}>Active</option>
+                                <option value="invited" {% if selected_login_status == 'invited' %}selected{% endif %}>Invited</option>
+                                <option value="none" {% if selected_login_status == 'none' %}selected{% endif %}>No login</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1" for="filterPhone">Phone</label>
+                            <select class="form-select form-select-sm" name="phone" id="filterPhone">
+                                <option value="">All</option>
+                                <option value="has_phone" {% if selected_phone == 'has_phone' %}selected{% endif %}>Has phone</option>
+                                <option value="no_phone" {% if selected_phone == 'no_phone' %}selected{% endif %}>No phone</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1" for="filterGender">Gender</label>
+                            <select class="form-select form-select-sm" name="gender" id="filterGender">
+                                <option value="">All genders</option>
+                                <option value="male" {% if selected_gender == 'male' %}selected{% endif %}>Male</option>
+                                <option value="female" {% if selected_gender == 'female' %}selected{% endif %}>Female</option>
+                                <option value="other" {% if selected_gender == 'other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-muted mb-1" for="filterLetter">First letter</label>
+                            <select class="form-select form-select-sm" name="letter" id="filterLetter">
+                                <option value="">All</option>
+                                {% for letter in alphabet %}
+                                <option value="{{ letter }}" {% if selected_letter == letter %}selected{% endif %}>{{ letter }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="filterResetBtn">Reset</button>
+                            <button type="submit" class="btn btn-sm px-3" style="background:#015315;border-color:#015315;color:#fff;font-weight:600;">Apply</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
+
+        {% if filter_chips %}
+        <div class="medicine-active-filters" aria-label="Active filters">
+            {% for chip in filter_chips %}<a class="medicine-filter-chip" href="{{ chip.url }}">{{ chip.label }} <i class="bi bi-x-lg" aria-hidden="true"></i></a>{% endfor %}
+            <a class="medicine-clear-filters" href="{{ clear_filters_url }}">Clear all</a>
+        </div>
+        {% endif %}
 
         <div class="dc-table-wrap{% if not patients %} d-none{% endif %}">
             <table class="table table-hover dc-table" style="min-width:680px;">
@@ -135,13 +220,13 @@
                 <nav aria-label="Patients pagination">
                     <ul class="pagination pagination-sm mb-0 gap-1">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
-                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}"{% endif %} href="#">Prev</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_previous %}data-page="{{ page_obj.previous_page_number }}" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"{% else %}href="#" tabindex="-1" aria-disabled="true"{% endif %}>Prev</a>
                         </li>
                         <li class="page-item active">
                             <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
                         </li>
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
-                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}"{% endif %} href="#">Next</a>
+                            <a class="page-link pagination-link" {% if page_obj.has_next %}data-page="{{ page_obj.next_page_number }}" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}"{% else %}href="#" tabindex="-1" aria-disabled="true"{% endif %}>Next</a>
                         </li>
                     </ul>
                 </nav>

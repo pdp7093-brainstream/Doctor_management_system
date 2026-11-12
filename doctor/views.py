@@ -2,6 +2,7 @@ import json
 import logging
 import random
 import re
+import string
 from datetime import date, timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -281,6 +282,23 @@ def billing(request):
 @role_required('doctor')
 def manage_patients(request):
     search = request.GET.get('search', '').strip()
+    selected_login_status = request.GET.get('login_status', '').strip().lower()
+    if selected_login_status == 'no_login':
+        selected_login_status = 'none'
+    if selected_login_status not in {'active', 'invited', 'none'}:
+        selected_login_status = ''
+
+    selected_phone = request.GET.get('phone', '').strip().lower()
+    if selected_phone not in {'has_phone', 'no_phone'}:
+        selected_phone = ''
+
+    selected_gender = request.GET.get('gender', '').strip().lower()
+    if selected_gender not in {'male', 'female', 'other'}:
+        selected_gender = ''
+
+    selected_letter = request.GET.get('letter', '').strip().upper()
+    if len(selected_letter) != 1 or selected_letter not in string.ascii_uppercase:
+        selected_letter = ''
 
     # Exclude patients whose user account belongs to any staff (doctor, biller, etc.)
     patients = Patient.objects.select_related('user').exclude(user__innermember__isnull=False)
@@ -290,9 +308,10 @@ def manage_patients(request):
 
     # Main Patients
     for p in patients:
+        full_name = f"{p.user.first_name} {p.user.last_name}".strip() or (p.user.get_full_name() or p.user.username)
         combined.append({
             'id': p.id,
-            'name': f"{p.user.first_name} {p.user.last_name}",
+            'name': full_name,
             'phone': p.phone,
             'gender': p.gender,
             'type': 'main',
@@ -308,8 +327,24 @@ def manage_patients(request):
             'name': f.name,
             'phone': f.phone,
             'gender': f.gender,
-            'type': 'family'
+            'type': 'family',
+            'login_status': 'none',
         })
+
+    # Filters
+    if selected_login_status:
+        combined = [p for p in combined if p.get('login_status') == selected_login_status]
+
+    if selected_phone == 'has_phone':
+        combined = [p for p in combined if p.get('phone') and str(p['phone']).strip()]
+    elif selected_phone == 'no_phone':
+        combined = [p for p in combined if not (p.get('phone') and str(p['phone']).strip())]
+
+    if selected_gender:
+        combined = [p for p in combined if (p.get('gender') or '').strip().lower() == selected_gender]
+
+    if selected_letter:
+        combined = [p for p in combined if (p.get('name') or '').strip()[:1].upper() == selected_letter]
 
     # Sorting (important UX)
     combined = sorted(combined, key=lambda x: x['name'].lower())
@@ -325,10 +360,52 @@ def manage_patients(request):
     paginator = Paginator(combined, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
+    login_status_labels = {'active': 'Active', 'invited': 'Invited', 'none': 'No login'}
+    phone_labels = {'has_phone': 'Has phone', 'no_phone': 'No phone'}
+    gender_labels = {'male': 'Male', 'female': 'Female', 'other': 'Other'}
+
+    chip_values = [
+        ('login_status', selected_login_status, 'Login status: ' + login_status_labels.get(selected_login_status, '')),
+        ('phone', selected_phone, 'Phone: ' + phone_labels.get(selected_phone, '')),
+        ('gender', selected_gender, 'Gender: ' + gender_labels.get(selected_gender, selected_gender.capitalize())),
+        ('letter', selected_letter, 'First letter: ' + selected_letter),
+    ]
+
+    filter_chips = []
+    for key, value, label in chip_values:
+        if value:
+            params = request.GET.copy()
+            params.pop(key, None)
+            params.pop('page', None)
+            query = params.urlencode()
+            filter_chips.append({
+                'label': label,
+                'url': '?' + query if query else request.path,
+            })
+
+    clear_params = request.GET.copy()
+    for key, _, _ in chip_values:
+        clear_params.pop(key, None)
+    clear_params.pop('page', None)
+    clear_query = clear_params.urlencode()
+    clear_filters_url = ('?' + clear_query) if clear_query else request.path
+
+    pagination_params = request.GET.copy()
+    pagination_params.pop('page', None)
+
     return render(request, 'doctor/manage_patients.html', {
         'patients': page_obj,
         'page_obj': page_obj,
         'search': search,
+        'selected_login_status': selected_login_status,
+        'selected_phone': selected_phone,
+        'selected_gender': selected_gender,
+        'selected_letter': selected_letter,
+        'alphabet': list(string.ascii_uppercase),
+        'active_filter_count': len(filter_chips),
+        'filter_chips': filter_chips,
+        'clear_filters_url': clear_filters_url,
+        'pagination_query': pagination_params.urlencode(),
     }) 
 
 
