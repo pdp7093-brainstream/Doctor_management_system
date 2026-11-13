@@ -875,3 +875,19 @@
         display: none !important;
     }
 }
+
+@media (max-width: 767.98px) {
+    .dashboard-stats .stat-label {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+        line-height: 1.3;
+    }
+    .dashboard-stats .dashboard-stat-item:last-child:nth-child(odd) {
+        grid-column: 1 / -1 !important;
+        max-width: 100% !important;
+    }
+    .table-section .table-custom.table-cards {
+        min-width: 0 !important;
+    }
+}

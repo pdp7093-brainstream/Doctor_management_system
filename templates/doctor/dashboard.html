@@ -55,8 +55,8 @@
         <h3 class="table-title">
             <i class="bi bi-calendar-event"></i> Today's Appointments
         </h3>
-        <div style="overflow-x:auto; width:100%; display:block;">
-            <table class="table table-custom" style="min-width:750px; width:100%;">
+        <div class="table-cards-wrap" style="overflow-x:auto; width:100%; display:block;">
+            <table class="table table-custom table-cards" style="min-width:750px; width:100%;">
                 <thead>
                     <tr>
                         <th>Patient</th>
@@ -72,7 +72,7 @@
                     <tr>
 
                         <!-- Patient -->
-                        <td class="patient-name">
+                        <td class="patient-name" data-label="Patient">
                             {% if appointment.family_member %}
                                 {{ appointment.family_member.name }}
                             {% else %}
@@ -82,7 +82,7 @@
                         </td>
 
                         <!-- Relation -->
-                        <td>
+                        <td data-label="Relation">
                             {% if appointment.family_member %}
                                 <span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(13,110,253,0.1);color:#0d6efd;">
                                     {{ appointment.family_member.relation }}
@@ -95,7 +95,7 @@
                         </td>
 
                         <!-- Booked By -->
-                      <td style="color:#6c757d;font-size:13px;">
+                      <td style="color:#6c757d;font-size:13px;" data-label="Booked By">
 
                             {% if appointment.booked_by %}
 
@@ -128,17 +128,17 @@
                             {% endif %}
 
                         </td>
-                        <td class="appointment-time">{{ appointment.time_slot|time:"h:i A" }}</td>
+                        <td class="appointment-time" data-label="Time">{{ appointment.time_slot|time:"h:i A" }}</td>
 
                         <!-- Status -->
-                        <td>
+                        <td data-label="Status">
                             <span class="status-badge appointment-status status-{{ appointment.status|lower }}">
                                 {{ appointment.status|capfirst }}
                             </span>
                         </td>
 
                         <!-- Action -->
-                        <td class="text-end">
+                        <td class="text-end" data-label="Action">
                             <div class="action-btns">
                                 {% if appointment.status == 'pending' %}
                                 <a href="{% url 'appointment:start_visit' appointment.id|hid %}" class="btn-act btn-act-view btn-start-visit" title="Start Visit" aria-label="Start Visit">
