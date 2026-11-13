@@ -4,6 +4,26 @@
 {% block title %}Expenses List{% endblock %}
 {% block content %}
 
+<style>
+    .dc-card, .dc-card-header { overflow: visible; }
+    .medicine-filter-container { position: relative; }
+    .medicine-filter-panel {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        z-index: 1050;
+        width: min(320px, calc(100vw - 2rem));
+        max-height: 70vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 1.15rem 1.25rem;
+        background: #fff;
+        border: 1px solid #dce9dc;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+    }
+</style>
+
 <main class="main-content" id="mainContent">
     <!-- Page Header -->
     <div class="page-head">
@@ -25,9 +45,38 @@
                     <input type="text" class="form-control" id="searchInput" placeholder="Search expenses by title or category...">
                 </div>
                 <div class="d-flex gap-2">
-                    <button class="btn-clear">
-                        <i class="bi bi-funnel"></i> Filter
-                    </button>
+                    <div class="medicine-filter-container">
+                        <button class="btn-clear" type="button" id="filterToggleBtn" aria-expanded="false" aria-controls="filterPanel">
+                            <i class="bi bi-funnel"></i> Filter<span id="filterCount"></span>
+                        </button>
+                        <div id="filterPanel" class="medicine-filter-panel d-none" role="region" aria-label="Filter expenses">
+                            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                                <span class="fw-bold" style="color:#013A0F;font-size:0.95rem;"><i class="bi bi-sliders me-1"></i> Filter Expenses</span>
+                                <button type="button" class="btn-close btn-sm" id="closeFilterPanel" aria-label="Close"></button>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted mb-1" for="filterStatus">Status</label>
+                                <select class="form-select form-select-sm" id="filterStatus">
+                                    <option value="">All</option><option value="approved">Approved</option>
+                                    <option value="pending">Pending</option><option value="rejected">Rejected</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold text-muted mb-1" for="filterCategory">Category</label>
+                                <select class="form-select form-select-sm" id="filterCategory"><option value="">All</option></select>
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6"><label class="form-label small fw-semibold text-muted mb-1" for="filterFrom">From</label>
+                                    <input type="date" class="form-control form-control-sm" id="filterFrom"></div>
+                                <div class="col-6"><label class="form-label small fw-semibold text-muted mb-1" for="filterTo">To</label>
+                                    <input type="date" class="form-control form-control-sm" id="filterTo"></div>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn-clear" id="filterResetBtn">Clear</button>
+                                <button type="button" class="btn-page btn-page-primary" id="filterApplyBtn">Apply</button>
+                            </div>
+                        </div>
+                    </div>
                     <a href="{% url 'expenses:category_list' %}" class="btn-clear text-decoration-none">
                         <i class="bi bi-tags"></i> Categories
                     </a>
@@ -48,7 +97,7 @@
                 </thead>
                 <tbody id="tableBody">
                     {% for expense in expenses %}
-                    <tr class="expense-row" data-search="{{ expense.title|lower }} {{ expense.category.name|lower }}">
+                    <tr class="expense-row" data-search="{{ expense.title|lower }} {{ expense.category.name|lower }}" data-status="{{ expense.status }}" data-category="{{ expense.category.name }}" data-date="{{ expense.expense_date|date:'Y-m-d' }}">
                         <td class="dc-mono" data-label="Date">{{ expense.expense_date|date:"d M Y" }}</td>
                         <td data-label="Expense Title">
                             <span class="dc-name">{{ expense.title }}</span>
@@ -94,6 +143,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <p id="noMatchMsg" class="text-center text-muted py-4 mb-0 d-none">No expenses match your search or filters.</p>
         </div>
         {% if not expenses %}
         <div class="dc-empty dashboard-list-empty-state">
@@ -108,22 +158,58 @@
 </main>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const rows = Array.from(document.querySelectorAll('.expense-row'));
     const searchInput = document.getElementById('searchInput');
-    const tableRows = document.querySelectorAll('.expense-row');
+    const toggleBtn = document.getElementById('filterToggleBtn');
+    const panel = document.getElementById('filterPanel');
+    const statusSel = document.getElementById('filterStatus');
+    const catSel = document.getElementById('filterCategory');
+    const fromInp = document.getElementById('filterFrom');
+    const toInp = document.getElementById('filterTo');
+    const countEl = document.getElementById('filterCount');
+    const noMatch = document.getElementById('noMatchMsg');
 
-    if(searchInput) {
-        searchInput.addEventListener('input', function () {
-            const searchValue = this.value.toLowerCase().trim();
-            tableRows.forEach(row => {
-                const searchData = row.getAttribute('data-search') || '';
-                if (searchData.includes(searchValue)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+    [...new Set(rows.map(r => r.dataset.category).filter(Boolean))].sort().forEach(c => {
+        const o = document.createElement('option'); o.value = c; o.textContent = c; catSel.appendChild(o);
+    });
+
+    function applyAll() {
+        const q = (searchInput?.value || '').toLowerCase().trim();
+        const st = statusSel.value, cat = catSel.value, from = fromInp.value, to = toInp.value;
+        let shown = 0;
+        rows.forEach(r => {
+            const ok = (r.dataset.search || '').includes(q)
+                && (!st || r.dataset.status === st)
+                && (!cat || r.dataset.category === cat)
+                && (!from || r.dataset.date >= from)
+                && (!to || r.dataset.date <= to);
+            r.style.display = ok ? '' : 'none';
+            if (ok) shown++;
         });
+        const n = [st, cat, from, to].filter(Boolean).length;
+        countEl.textContent = n ? ' (' + n + ')' : '';
+        if (noMatch) noMatch.classList.toggle('d-none', !rows.length || shown > 0);
     }
+
+    function closePanel() { panel.classList.add('d-none'); toggleBtn.setAttribute('aria-expanded', 'false'); }
+
+    searchInput?.addEventListener('input', applyAll);
+    toggleBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = toggleBtn.getAttribute('aria-expanded') === 'true';
+        panel.classList.toggle('d-none', open);
+        toggleBtn.setAttribute('aria-expanded', String(!open));
+    });
+    document.getElementById('closeFilterPanel').addEventListener('click', closePanel);
+    document.getElementById('filterApplyBtn').addEventListener('click', () => { applyAll(); closePanel(); });
+    document.getElementById('filterResetBtn').addEventListener('click', () => {
+        statusSel.value = ''; catSel.value = ''; fromInp.value = ''; toInp.value = ''; applyAll();
+    });
+    panel.addEventListener('click', e => e.stopPropagation());
+    document.addEventListener('click', e => { if (!panel.classList.contains('d-none') && !toggleBtn.contains(e.target)) closePanel(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+});
 </script>
 
 <script>

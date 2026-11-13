@@ -61,10 +61,10 @@
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="page-head mb-4">
         <div>
-            <h2 class="page-title mb-1">Manage Appointments</h2>
-            <p class="text-muted small mb-0">Search, filter, and manage all patient visits.</p>
+            <h2 class="page-title">Manage Appointments</h2>
+            <p class="page-subtitle">Search, filter, and manage all patient visits.</p>
         </div>
 
         <a href="{% url 'appointment:add_appointment' %}" class="btn-page btn-page-primary">
@@ -73,11 +73,11 @@
     </div>
 
     <!-- Filters Card -->
-    <div class="card mb-4">
-        <div class="card-header d-flex align-items-center gap-2" style="font-size: 0.98rem; font-weight: 700;">
-            <i class="bi bi-funnel-fill"></i> Filters
+    <div class="card mb-4 appointment-filters-card" data-filter-collapse>
+        <div class="card-header d-flex align-items-center justify-content-between gap-2 appointment-filters-toggle" role="button" tabindex="0" aria-expanded="false" style="font-size: 0.98rem; font-weight: 700;">
+            <span><i class="bi bi-funnel-fill"></i> Filters</span>
         </div>
-        <div class="card-body">
+        <div class="card-body appointment-filters-body">
             <div class="row g-3 align-items-end">
                 <div class="col-md-4">
                     <label class="form-label" style="font-size:0.85rem; font-weight:600;">Search Patient</label>
@@ -280,6 +280,32 @@
 
 </main>
 <script src="{% static 'assets/js/manage_appointment.js' %}?v={% now 'U' %}"></script>
+<script>
+    (() => {
+        const card = document.querySelector('.appointment-filters-card');
+        const toggle = card?.querySelector('.appointment-filters-toggle');
+        const params = new URLSearchParams(window.location.search);
+        const hasFilters = Boolean(params.get('search') || params.get('appointment_date') || (params.get('status') && params.get('status') !== 'all'));
+        if (!card || !toggle) return;
+        if (hasFilters) {
+            card.classList.add('is-open');
+            toggle.setAttribute('aria-expanded', 'true');
+        }
+        const toggleFilters = () => {
+            if (window.matchMedia('(max-width: 767.98px)').matches) {
+                const isOpen = card.classList.toggle('is-open');
+                toggle.setAttribute('aria-expanded', String(isOpen));
+            }
+        };
+        toggle.addEventListener('click', toggleFilters);
+        toggle.addEventListener('keydown', event => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                toggleFilters();
+            }
+        });
+    })();
+</script>
 
 
 {% endblock %}
