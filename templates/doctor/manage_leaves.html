@@ -153,20 +153,20 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive{% if not leaves %} d-none{% endif %}">
-                        <table class="table table-hover mb-0 align-middle">
+                        <table class="table table-hover mb-0 align-middle table-cards table-cards-leaves">
                             <thead>
                                 <tr>
                                     <th>Date</th>
                                     <th>Type</th>
                                     <th>Reason</th>
-                                    <th class="text-end">Action</th>
+                                    <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for leave in leaves %}
                                 <tr>
-                                    <td class="fw-semibold">{{ leave.date|date:"d M Y" }}</td>
-                                    <td>
+                                    <td class="fw-semibold" data-label="Date">{{ leave.date|date:"d M Y" }}</td>
+                                    <td data-label="Type">
                                         {% if leave.leave_type == 'full_day' %}
                                             <span class="badge leave-badge full">Full Day</span>
                                         {% elif leave.leave_type == 'first_half' %}
@@ -175,10 +175,10 @@
                                             <span class="badge leave-badge second">Second Half</span>
                                         {% endif %}
                                     </td>
-                                    <td class="text-muted text-truncate" style="max-width: 200px;" title="{{ leave.reason }}">
+                                    <td class="text-muted text-truncate" data-label="Reason" style="max-width: 200px;" title="{{ leave.reason }}">
                                         {{ leave.reason }}
                                     </td>
-                                    <td class="text-end">
+                                    <td class="text-end" data-label="Actions">
                                         <div class="action-btns">
                                         {% if leave.date >= today %}
                                         <form method="post" action="{% url 'doctor:delete_leave' leave.id %}" style="display:inline;" class="delete-leave-form">

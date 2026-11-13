@@ -30,10 +30,10 @@
             <h3 class="dc-card-title"><i class="bi bi-exclamation-triangle"></i> Restock alerts <span class="dc-count">{{ variants|length }} total</span></h3>
         </div>
         <div class="dc-table-wrap">
-            <table class="table table-hover dc-table">
+            <table class="table table-hover dc-table table-cards">
                 <thead>
                     <tr>
-                        <th class="col-num">#</th>
+                        <th class="col-index">#</th>
                         <th>Medicine</th>
                         <th>Pack Size</th>
                         <th class="text-end">Current Stock</th>
@@ -45,19 +45,19 @@
                 <tbody>
                     {% for v in variants %}
                     <tr>
-                        <td class="col-num">{{ forloop.counter }}</td>
-                        <td><span class="dc-name">{{ v.medicine.name }}</span></td>
-                        <td class="dc-muted">{{ v.power }}</td>
-                        <td class="text-end dc-mono">{{ v.stock }}</td>
-                        <td class="text-end dc-mono">{{ v.low_stock_alert }}</td>
-                        <td>
+                        <td class="col-index">{{ forloop.counter }}</td>
+                        <td data-label="Medicine"><span class="dc-name">{{ v.medicine.name }}</span></td>
+                        <td class="dc-muted" data-label="Pack Size">{{ v.power }}</td>
+                        <td class="text-end dc-mono" data-label="Current Stock">{{ v.stock }}</td>
+                        <td class="text-end dc-mono" data-label="Low Alert At">{{ v.low_stock_alert }}</td>
+                        <td data-label="Status">
                             {% if v.stock == 0 %}
                             <span class="dc-badge red">Out of Stock</span>
                             {% else %}
                             <span class="dc-badge peach">Low Stock</span>
                             {% endif %}
                         </td>
-                        <td class="col-actions text-end">
+                        <td class="col-actions text-end" data-label="Action">
                             <div class="action-btns">
                             {% if v.is_ordered %}
                             <a href="{% url 'medicine:purchase_detail' v.pending_purchase_id|hid %}" class="btn-act btn-act-view" title="View" aria-label="View">

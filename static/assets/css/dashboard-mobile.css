@@ -105,12 +105,12 @@
     }
 
     .stat-number {
-        font-size: 26px !important;
+        font-size: 22px !important;
     }
 
     .stat-label {
         overflow: hidden;
-        font-size: 13px !important;
+        font-size: 12px !important;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
@@ -138,6 +138,37 @@
     main#mainContent .row:has(.stat-card) > [class*="col-"]:last-child:nth-child(odd) {
         flex-basis: 100%;
         max-width: 100%;
+    }
+
+    /* dc-card.dc-card-body mini stat rows (e.g. low_stock, purchase_detail) */
+    main#mainContent .row.g-3:has(> [class*="col-"] > .dc-card.dc-card-body) {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+    }
+
+    main#mainContent .row.g-3:has(> [class*="col-"] > .dc-card.dc-card-body) > [class*="col-"] {
+        flex: none !important;
+        width: auto !important;
+        max-width: none !important;
+        padding: 0 !important;
+    }
+
+    main#mainContent .row.g-3:has(> [class*="col-"] > .dc-card.dc-card-body) > [class*="col-"]:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    main#mainContent .row.g-3:has(> [class*="col-"] > .dc-card.dc-card-body) .dc-card.dc-card-body {
+        padding: 14px !important;
+        width: 100%;
+    }
+
+    main#mainContent .row.g-3:has(> [class*="col-"] > .dc-card.dc-card-body) .dc-card.dc-card-body .fs-4 {
+        font-size: 22px !important;
+    }
+
+    main#mainContent .row.g-3:has(> [class*="col-"] > .dc-card.dc-card-body) .dc-card.dc-card-body .dc-muted {
+        font-size: 12px !important;
     }
 
     .dc-card-body > .row.g-3.align-items-end > [class*="col-"],
@@ -386,6 +417,166 @@
             flex: 0 0 100%;
             width: 100%;
         }
+
+        .table-cards-wrap,
+        .dc-table-wrap:has(> .table-cards),
+        .table-responsive:has(> .table-cards) {
+            overflow: visible !important;
+        }
+
+        .table-cards {
+            display: block !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        .table-cards thead {
+            display: none !important;
+        }
+
+        .table-cards tbody {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+
+        .table-cards tbody tr:not(.variant-row):not(:has(td[colspan])) {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            padding: 12px !important;
+            border: 1px solid var(--bs-border-color, #dee2e6) !important;
+            border-radius: 12px !important;
+            background: #fff !important;
+        }
+
+        .table-cards tbody td {
+            display: flex !important;
+            align-items: flex-start !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            text-align: right !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        .table-cards tbody td::before {
+            flex: 0 0 auto;
+            max-width: 45%;
+            color: #6c757d;
+            content: attr(data-label);
+            font-size: 12px;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .table-cards tbody td.col-num,
+        .table-cards tbody td.col-index {
+            display: none !important;
+        }
+
+        .table-cards tbody td.col-actions,
+        .table-cards tbody td:last-child {
+            align-items: center !important;
+        }
+
+        .table-cards tbody td[data-label="Action"]::before,
+        .table-cards tbody td[data-label="Actions"]::before {
+            display: none !important;
+        }
+
+        .table-cards tbody td[data-label="Action"],
+        .table-cards tbody td[data-label="Actions"] {
+            justify-content: flex-end !important;
+            padding-top: 10px !important;
+            border-top: 1px solid var(--bs-border-color, #dee2e6) !important;
+        }
+
+        .table-cards-leaves tbody tr:not(:has(td[colspan])) {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            grid-template-areas:
+                "date type"
+                "reason reason"
+                ". actions";
+            align-items: center !important;
+            gap: 10px 12px !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Date"] {
+            grid-area: date;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            white-space: nowrap !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Type"] {
+            grid-area: type;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            white-space: nowrap !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Reason"] {
+            grid-area: reason;
+            max-width: none !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Actions"] {
+            grid-area: actions;
+            justify-content: flex-end !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Actions"]::before {
+            content: none !important;
+        }
+
+        .table-cards .action-btns {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 6px !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .table-cards .action-btns form {
+            display: inline-flex !important;
+            margin: 0 !important;
+        }
+
+        .table-cards tbody tr:has(td[colspan]) {
+            display: block !important;
+        }
+
+        .table-cards tbody tr:has(td[colspan]) td {
+            display: block !important;
+            text-align: center !important;
+        }
+
+        .table-cards tbody tr:has(td[colspan]) td::before {
+            content: none !important;
+        }
+
+        .table-cards tbody tr.variant-row[style*="table-row"] {
+            display: block !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        .table-cards tbody tr.variant-row[style*="table-row"] td {
+            display: block !important;
+        }
+
+        .table-cards tbody tr.variant-row[style*="table-row"] td::before {
+            content: none !important;
+        }
     }
 
     .main-content#mainContent:has(> .container-fluid.px-4.py-5) {
@@ -498,12 +689,19 @@
         }
 
         main#mainContent .row:has(.stat-card) > [class*="col-"] {
-            flex: 0 0 100%;
-            max-width: 100%;
+            flex: 0 0 50%;
+            max-width: 50%;
         }
 
         .dashboard-stats {
-            grid-template-columns: minmax(0, 1fr) !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        .dashboard-stat-item:last-child:nth-child(odd),
+        main#mainContent .row:has(.stat-card) > [class*="col-"]:last-child:nth-child(odd) {
+            grid-column: auto;
+            flex-basis: 50%;
+            max-width: 50%;
         }
 
         .user-info {
@@ -513,5 +711,167 @@
         .user-name {
             display: none !important;
         }
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dc-table-wrap:has(> .table-cards),
+    .table-responsive:has(> .table-cards),
+    .leave-card .table-responsive:has(> .table-cards) {
+        overflow: visible !important;
+    }
+
+    .table-cards {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .table-cards thead {
+        display: none !important;
+    }
+
+    .table-cards tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .table-cards tbody tr:not(:has(td[colspan])) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        padding: 12px !important;
+        border: 1px solid var(--bs-border-color, #dee2e6) !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+    }
+
+    .table-cards tbody td {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: right !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .table-cards tbody td::before {
+        flex: 0 0 auto;
+        max-width: 45%;
+        color: #6c757d;
+        content: attr(data-label);
+        font-size: 12px;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .table-cards tbody td.col-index {
+        display: none !important;
+    }
+
+    .table-cards tbody td.col-actions,
+    .table-cards tbody td:last-child {
+        align-items: center !important;
+    }
+
+    .table-cards .action-btns {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .table-cards .action-btns form {
+        display: inline-flex !important;
+        margin: 0 !important;
+    }
+
+    .table-cards-leaves tbody tr:not(:has(td[colspan])) {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .table-cards-leaves tbody td[data-label="Actions"]::before {
+        content: none !important;
+    }
+
+    .table-cards tbody tr:has(td[colspan]) {
+        display: block !important;
+    }
+
+    .table-cards tbody tr:has(td[colspan]) td {
+        display: block !important;
+        text-align: center !important;
+    }
+
+    .table-cards tbody tr:has(td[colspan]) td::before {
+        content: none !important;
+    }
+}
+
+/* ── Final override: table-cards action cell + empty cell fixes ── */
+@media (max-width: 767.98px) {
+    /* Contain cards — nothing bleeds outside */
+    .table-cards tbody tr:not(:has(td[colspan])) {
+        overflow: hidden !important;
+    }
+
+    /* Actions cell: hide label, pin buttons right-aligned at bottom with border */
+    .table-cards tbody td[data-label="Action"]::before,
+    .table-cards tbody td[data-label="Actions"]::before,
+    .table-cards tbody td.col-actions::before {
+        display: none !important;
+    }
+
+    .table-cards tbody td[data-label="Action"],
+    .table-cards tbody td[data-label="Actions"],
+    .table-cards tbody td.col-actions {
+        position: static !important;
+        left: auto !important;
+        transform: none !important;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 10px 0 0 0 !important;
+        border: 0 !important;
+        border-top: 1px solid #E6EFE6 !important;
+    }
+
+    /* Reset position/margin/transform on all direct children of action cell */
+    .table-cards tbody td[data-label="Action"] > *,
+    .table-cards tbody td[data-label="Actions"] > *,
+    .table-cards tbody td.col-actions > * {
+        position: static !important;
+        left: auto !important;
+        transform: none !important;
+        margin: 0 !important;
+    }
+
+    /* Hide empty cells and their pseudo-label (the stray "-") */
+    .table-cards tbody td:empty {
+        display: none !important;
+    }
+
+    .table-cards tbody td:not([data-label])::before,
+    .table-cards tbody td[data-label=""]::before {
+        display: none !important;
+    }
+
+    /* td whose only content is whitespace / a dash renders as ::before label only — suppress label when cell value is blank */
+    .table-cards tbody td:not(:has(*)):not([data-label])::before {
+        display: none !important;
     }
 }

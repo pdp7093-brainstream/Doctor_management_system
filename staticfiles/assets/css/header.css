@@ -197,6 +197,70 @@
 }
 .header .nav-item > a[href*="appointment"]::after { display: none; }
 
+@media (max-width: 991px) {
+  .mobile-nav-active .navmenu > ul {
+    bottom: auto;
+    height: auto;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .header .nav-item {
+    display: block !important;
+  }
+
+  .header .nav-item > a[href*="appointment"] {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 12px 0 !important;
+    padding: 10px 20px !important;
+  }
+
+  .navmenu .profile-nav > .profile-nav-trigger {
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .navmenu .profile-nav-name {
+    display: inline;
+  }
+
+  .navmenu .profile-nav > .profile-nav-trigger .toggle-dropdown {
+    display: none;
+  }
+
+  .navmenu .profile-nav .profile-avatar {
+    box-sizing: border-box;
+    width: 36px !important;
+    height: 36px !important;
+    margin-left: 0;
+    flex: 0 0 36px;
+  }
+
+  .navmenu .profile-nav > ul {
+    position: static;
+    display: block;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+
+  .navmenu .profile-nav-divider hr {
+    margin: 5px 20px;
+    border: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    opacity: 1;
+  }
+
+  .navmenu .profile-nav #logoutBtn {
+    color: #AD0002 !important;
+  }
+}
+
 
 @media (min-width: 1200px) {
   .navmenu > ul > li > a::before { display: none !important; content: none !important; }

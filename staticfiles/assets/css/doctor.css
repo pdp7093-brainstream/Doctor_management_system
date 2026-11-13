@@ -1697,7 +1697,27 @@ a.action-btn:hover { color: #fff; }
 
 /* Empty state */
 .dc-empty { padding: 48px 16px !important; text-align: center; color: #6c757d; }
+.dc-empty.archive-empty-state,
+.dc-empty.dashboard-list-empty-state { padding: 32px !important; }
 .dc-empty > i { display: block; font-size: 2.2rem; color: var(--accent-color); opacity: 0.4; margin-bottom: 8px; }
+.pending-approvals-page .dc-empty.dashboard-list-empty-state > i {
+    display: inline-flex;
+    width: 48px;
+    height: 48px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #EAF4EA;
+    font-size: 24px;
+    opacity: 1;
+    margin-bottom: 12px;
+}
+.pending-approvals-page .dc-empty-title { margin: 0 0 4px; color: #212529; font-size: 16px; font-weight: 600; }
+.pending-approvals-page .dc-empty-text { margin: 0; font-size: 14px; }
+
+@media (max-width: 575px) {
+    .pending-approvals-page .page-head { row-gap: 14px; }
+}
 
 @media (max-width: 768px) {
     .dc-search { max-width: none; margin-left: 0; }

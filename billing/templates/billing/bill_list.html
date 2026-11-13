@@ -130,10 +130,10 @@
                 </div>
             </div>
             <div class="dc-table-wrap">
-                    <table class="table table-hover dc-table" style="min-width:780px;">
+                    <table class="table table-hover dc-table table-cards" style="min-width:780px;">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width:40px;"><input type="checkbox" class="form-check-input" id="selectAllBills"></th>
+                                <th class="text-center" style="width:40px;"><input type="checkbox" class="form-check-input" id="selectAllBills" aria-label="Select"></th>
                                 <th class="col-num">#</th>
                                 <th>Bill No.</th>
                                 <th>Patient</th>
@@ -147,10 +147,10 @@
                         <tbody>
                             {% for bill in month_info.bills %}
                             <tr>
-                                <td class="text-center"><input type="checkbox" class="form-check-input bill-checkbox" value="{{ bill.id|hid }}"></td>
+                                <td class="text-center" data-label="Select"><input type="checkbox" class="form-check-input bill-checkbox" value="{{ bill.id|hid }}" aria-label="Select bill"></td>
                                 <td class="col-num">{{ forloop.counter }}</td>
-                                <td class="dc-mono">{{ bill.bill_number }}</td>
-                                <td>
+                                <td class="dc-mono" data-label="Bill No.">{{ bill.bill_number }}</td>
+                                <td data-label="Patient">
                                     {% with display_name=bill.visit.appointment.family_member.name|default:bill.visit.patient.user.get_full_name|default:bill.visit.patient.user.username %}
                                     <div class="dc-person">
                                         <div class="dc-avatar">{{ display_name|first|upper }}</div>
@@ -158,9 +158,9 @@
                                     </div>
                                     {% endwith %}
                                 </td>
-                                <td class="dc-mono">{{ bill.bill_date|date:"d M Y" }}</td>
-                                <td class="text-end dc-mono">₹{{ bill.total|floatformat:2 }}</td>
-                                <td>
+                                <td class="dc-mono" data-label="Date">{{ bill.bill_date|date:"d M Y" }}</td>
+                                <td class="text-end dc-mono" data-label="Total">₹{{ bill.total|floatformat:2 }}</td>
+                                <td data-label="Method">
                                     <span class="dc-muted">
                                         {% if bill.payment_method == 'cash' %}
                                             <i class="bi bi-cash"></i>
@@ -174,7 +174,7 @@
                                         {{ bill.get_payment_method_display }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     {% if bill.payment_status == 'paid' %}
                                         <span class="dc-badge green">Paid</span>
                                     {% elif bill.payment_status == 'partial' %}
@@ -183,7 +183,7 @@
                                         <span class="dc-badge red">Unpaid</span>
                                     {% endif %}
                                 </td>
-                                <td class="col-actions text-end">
+                                <td class="col-actions text-end" data-label="Actions">
                                     <div class="action-btns">
                                         <a href="{% url 'billing:bill_detail' bill.visit.id|hid %}?bill_id={{ bill.id|hid }}" class="btn-act btn-act-view" title="View" aria-label="View">
                                             <i class="bi bi-eye"></i>

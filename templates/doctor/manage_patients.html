@@ -121,11 +121,11 @@
         </div>
         {% endif %}
 
-        <div class="dc-table-wrap{% if not patients %} d-none{% endif %}">
-            <table class="table table-hover dc-table" style="min-width:680px;">
+        <div class="dc-table-wrap patients-table-wrap{% if not patients %} d-none{% endif %}">
+            <table class="table table-hover dc-table patients-table table-cards" style="min-width:680px;">
                 <thead>
                     <tr>
-                        <th class="col-num">#</th>
+                        <th class="col-index">#</th>
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Phone</th>
@@ -135,35 +135,46 @@
 
                 <tbody id="tableBody">
                     {% for p in patients %}
-                    <tr>
-                        <td class="col-num">{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                        <td>
+                    <tr class="patient-row{% if not p.phone and not p.gender %} no-meta{% endif %}">
+                        <td class="col-index">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                        <td class="col-patient-name" data-label="Name">
                             <div class="dc-person">
                                 <div class="dc-avatar {% if p.type == 'family' %}is-family{% endif %}">
                                     {{ p.name|slice:":1"|upper }}
                                 </div>
-                                <div>
-                                    <div class="dc-name">{{ p.name }}</div>
+                                <div class="dc-person-info">
+                                    <div class="dc-name-line">
+                                        <span class="dc-name">{{ p.name }}</span>
+                                        {% if p.type == 'main' %}
+                                            <span class="login-badge-mobile d-md-none">
+                                                {% if p.login_status == 'active' %}<span class="badge bg-success">Active</span>
+                                                {% elif p.login_status == 'invited' %}<span class="badge bg-warning text-dark" title="Invited {{ p.invite_sent_at|date:'d M Y' }}">Invited · {{ p.invite_sent_at|date:'d M Y' }}</span>
+                                                {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
+                                            </span>
+                                        {% endif %}
+                                    </div>
                                     <div class="dc-sub">
                                         {% if p.type == 'family' %}Family member{% else %}Patient{% endif %}
                                         {% if p.type == 'main' %}
-                                            {% if p.login_status == 'active' %}<span class="badge bg-success">Active</span>
-                                            {% elif p.login_status == 'invited' %}<span class="badge bg-warning text-dark" title="Invited {{ p.invite_sent_at|date:'d M Y' }}">Invited · {{ p.invite_sent_at|date:'d M Y' }}</span>
-                                            {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
+                                            <span class="login-badge-desktop d-none d-md-inline">
+                                                {% if p.login_status == 'active' %}<span class="badge bg-success">Active</span>
+                                                {% elif p.login_status == 'invited' %}<span class="badge bg-warning text-dark" title="Invited {{ p.invite_sent_at|date:'d M Y' }}">Invited · {{ p.invite_sent_at|date:'d M Y' }}</span>
+                                                {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
+                                            </span>
                                         {% endif %}
                                     </div>
                                 </div>
                             </div>
                         </td>
 
-                        <td>
+                        <td class="col-patient-gender{% if not p.gender %} is-empty{% endif %}{% if not p.phone %} phone-empty{% endif %}{% if p.phone and p.gender %} has-phone{% endif %}" data-label="Gender">
                             {% if p.gender %}{{ p.gender|capfirst }}{% else %}<span class="dc-muted">—</span>{% endif %}
                         </td>
-                        <td class="dc-mono">
+                        <td class="dc-mono col-patient-phone{% if not p.phone %} is-empty{% endif %}" data-label="Phone">
                             {% if p.phone %}{{ p.phone }}{% else %}<span class="dc-muted">—</span>{% endif %}
                         </td>
 
-                        <td class="col-actions text-end">
+                        <td class="col-actions text-end col-patient-actions" data-label="Actions">
                             <div class="action-btns">
                                 <a href="{% url 'doctor:view_patient' p.type p.id|hid %}" class="btn-act btn-act-view" title="View" aria-label="View">
                                     <i class="bi bi-eye"></i>

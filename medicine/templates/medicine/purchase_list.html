@@ -73,7 +73,7 @@
             <h3 class="dc-card-title"><i class="bi bi-receipt"></i> Purchase records</h3>
         </div>
         <div id="tableContainer" class="dc-table-wrap{% if not purchases %} d-none{% endif %}">
-            <table class="table table-hover dc-table" style="min-width: 950px;">
+            <table class="table table-hover dc-table table-cards" style="min-width: 950px;">
                 <thead>
                     <tr>
                         <th class="col-num">#</th>
@@ -90,7 +90,7 @@
                     <tr class="purchase-row">
                         <td class="col-num">{{ page_obj.start_index|add:forloop.counter0 }}</td>
 
-                        <td>
+                        <td data-label="Vendor Name">
                             <div class="dc-person">
                                 <div class="dc-avatar">
                                     {{ purchase.vendor.name|first|upper }}
@@ -99,12 +99,12 @@
                             </div>
                         </td>
 
-                        <td class="dc-mono">
+                        <td class="dc-mono" data-label="Date">
                             <i class="bi bi-calendar-event me-2 dc-muted"></i>
                             <span>{{ purchase.date|date:"d M, Y" }}</span>
                         </td>
 
-                        <td>
+                        <td data-label="Items">
                             <span class="dc-badge grey">
                                 {{ purchase.items.count }} item{{ purchase.items.count|pluralize }}
                             </span>
@@ -121,13 +121,13 @@
                             </div>
                         </td>
 
-                        <td class="text-end dc-mono">
+                        <td class="text-end dc-mono" data-label="Total Amount">
                             <div class="fw-semibold">
                                 ₹{{ purchase.total_amount|floatformat:2 }}
                             </div>
                         </td>
 
-                        <td>
+                        <td data-label="Status">
                             {% if purchase.status == "received" %}
                             <span class="dc-badge green">Received</span>
                             {% elif purchase.status == "ordered" %}
@@ -137,7 +137,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="col-actions text-end">
+                        <td class="col-actions text-end" data-label="Actions">
                             <div class="action-btns">
                                 <a href="{% url 'medicine:purchase_detail' purchase.id|hid %}"
                                     class="btn-act btn-act-view" title="View" aria-label="View">

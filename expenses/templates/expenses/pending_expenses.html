@@ -4,7 +4,7 @@
 {% block title %}Pending Expenses{% endblock %}
 {% block content %}
 
-<main class="main-content" id="mainContent">
+<main class="main-content pending-approvals-page" id="mainContent">
     <!-- Page Header -->
     <div class="page-head">
         <div>
@@ -88,10 +88,8 @@
         {% if not expenses %}
         <div class="dc-empty dashboard-list-empty-state">
             <i class="bi bi-check2-all"></i>
-            <p class="dc-empty-text">All caught up! No pending approvals.</p>
-            <a href="{% url 'expenses:expense_list' %}" class="btn-page btn-page-outline">
-                <i class="bi bi-wallet2"></i> View All Expenses
-            </a>
+            <p class="dc-empty-title">All caught up!</p>
+            <p class="dc-empty-text">No pending approvals right now.</p>
         </div>
         {% endif %}
     </div>

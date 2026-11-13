@@ -1,0 +1,774 @@
+@media (max-width: 991px) {
+    body,
+    main,
+    .main-content {
+        overflow-x: hidden;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: min(280px, 85vw);
+        height: 100vh;
+        z-index: 1050;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .sidebar.show,
+    .sidebar.active {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .sidebar-overlay.show,
+    .sidebar-overlay.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .main-content,
+    .staff-card {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    .navbar-custom {
+        left: 0;
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    .navbar-left {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .navbar-brand-text {
+        min-width: 0;
+        flex: 1 1 auto;
+        overflow: hidden;
+        font-size: 18px !important;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .page-title {
+        font-size: 22px !important;
+    }
+
+    .page-head {
+        align-items: flex-start;
+    }
+
+    .page-head > .page-btn-group {
+        flex-basis: 100%;
+    }
+
+    .dashboard-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        align-items: stretch;
+    }
+
+    .dashboard-stat-item {
+        display: flex;
+        height: 100%;
+    }
+
+    .dashboard-stat-item:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+    .stat-card {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        width: 100%;
+        height: 100%;
+        padding: 14px !important;
+    }
+
+    .stat-content {
+        min-width: 0;
+    }
+
+    .stat-number {
+        font-size: 22px !important;
+    }
+
+    .stat-label {
+        overflow: hidden;
+        font-size: 13px !important;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .stat-icon {
+        flex: 0 0 40px;
+        width: 40px !important;
+        height: 40px !important;
+        margin: 0 0 0 12px !important;
+    }
+
+    main#mainContent .row:has(.stat-card) > [class*="col-"] {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+
+    main#mainContent .row:has(.stat-card) {
+        align-items: stretch !important;
+    }
+
+    main#mainContent .row:has(.stat-card) > [class*="col-"] {
+        display: flex;
+    }
+
+    main#mainContent .row:has(.stat-card) > [class*="col-"]:last-child:nth-child(odd) {
+        flex-basis: 100%;
+        max-width: 100%;
+    }
+
+    .dc-card-body > .row.g-3.align-items-end > [class*="col-"],
+    .filter-row > *,
+    .therapy-sessions .therapy-filter > :not(.therapy-filter-panel) {
+        flex: 0 0 100%;
+        width: 100% !important;
+        max-width: 100%;
+    }
+
+    .therapy-sessions .therapy-filter {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dc-search {
+        width: 100%;
+        max-width: none;
+        margin-left: 0;
+    }
+
+    .dc-search input,
+    .dc-card-body > .row.g-3.align-items-end input,
+    .dc-card-body > .row.g-3.align-items-end select,
+    .filter-row input,
+    .filter-row select,
+    .filter-panel input,
+    .filter-panel select,
+    .medicine-filter-panel input,
+    .medicine-filter-panel select,
+    .therapy-filter-panel input,
+    .therapy-filter-panel select {
+        box-sizing: border-box;
+        width: 100% !important;
+        min-width: 0;
+        height: 44px !important;
+        font-size: 16px !important;
+    }
+
+    .user-name {
+        display: inline !important;
+    }
+
+    @media (max-width: 767px) {
+        .feedback-list {
+            max-height: none !important;
+            overflow: visible !important;
+            padding-right: 0 !important;
+        }
+
+        .feedback-card {
+            position: relative;
+            display: block !important;
+        }
+
+        .feedback-list-checkbox {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 2;
+            margin: 0 !important;
+        }
+
+        .feedback-card-content {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 16px 46px 16px 16px !important;
+        }
+
+        .feedback-card-row {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: start !important;
+            gap: 8px 12px !important;
+            margin: 0 !important;
+        }
+
+        .feedback-info-column,
+        .feedback-actions-column,
+        .feedback-identity-row {
+            display: contents !important;
+        }
+
+        .feedback-name {
+            grid-column: 1;
+            grid-row: 1;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .feedback-rating {
+            grid-column: 2;
+            grid-row: 1;
+            margin-right: 24px;
+            white-space: nowrap;
+        }
+
+        .feedback-contact-row {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .feedback-message {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            min-width: 0;
+            white-space: normal;
+        }
+
+        .feedback-message-text {
+            display: -webkit-box;
+            overflow: hidden;
+            white-space: normal !important;
+            text-overflow: ellipsis;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+        }
+
+        .feedback-message-text.is-expanded {
+            display: block;
+            overflow: visible;
+            white-space: pre-wrap !important;
+            -webkit-line-clamp: unset;
+        }
+
+        .feedback-read-more:not(.d-none) {
+            display: inline-block;
+            font-size: 12px;
+            line-height: 1.4;
+            text-decoration: none;
+        }
+
+        .feedback-time {
+            grid-column: 1;
+            grid-row: 4;
+            align-self: center;
+        }
+
+        .feedback-delete {
+            grid-column: 2;
+            grid-row: 4;
+            justify-self: end;
+        }
+
+        .main-content#mainContent:has(#excel_file) .dc-card form > .d-flex.align-items-center.justify-content-between.pt-3.border-top.mt-4,
+        .dc-form-footer:has(> :nth-child(2)) {
+            display: flex !important;
+            flex-direction: column-reverse !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+        }
+
+        .main-content#mainContent:has(#excel_file) .dc-card form > .d-flex.align-items-center.justify-content-between.pt-3.border-top.mt-4 > *,
+        .dc-form-footer:has(> :nth-child(2)) > * {
+            box-sizing: border-box;
+            flex: 0 0 46px;
+            width: 100% !important;
+            height: 46px !important;
+            white-space: nowrap;
+        }
+
+        .dc-form-footer:has(> :nth-child(2)) > * > a,
+        .dc-form-footer:has(> :nth-child(2)) > * > button,
+        .dc-form-footer:has(> :nth-child(2)) > a,
+        .dc-form-footer:has(> :nth-child(2)) > button {
+            box-sizing: border-box;
+            display: inline-flex !important;
+            align-items: center;
+            width: 100% !important;
+            height: 46px !important;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) .table-responsive > table.table-sm {
+            display: block;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm thead {
+            display: none;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody {
+            display: block;
+            width: 100%;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody tr {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            width: 100%;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody tr:last-child {
+            border-bottom: 0;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody td {
+            display: block;
+            min-width: 0;
+            padding: 4px 8px;
+            border: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody td:first-child {
+            flex: 1 1 0;
+            font-family: monospace;
+            font-weight: 700;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody td:nth-child(2) {
+            flex: 0 0 auto;
+            padding-right: 8px;
+            padding-left: 0;
+            font-size: 0;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody td:nth-child(2)::before {
+            display: inline-block;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: #eaf4ea;
+            color: #015315;
+            content: "Optional";
+            font-size: 11px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody tr[data-required="true"] td:nth-child(2)::before {
+            background: #fff1df;
+            color: #a85400;
+            content: "Required";
+        }
+
+        .main-content#mainContent .dc-card:has(.dc-card-title i.bi-card-checklist) table.table-sm tbody td:nth-child(3) {
+            flex: 0 0 100%;
+            width: 100%;
+        }
+
+        .table-cards-wrap,
+        .dc-table-wrap:has(> .table-cards),
+        .table-responsive:has(> .table-cards) {
+            overflow: visible !important;
+        }
+
+        .table-cards {
+            display: block !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+        .table-cards thead {
+            display: none !important;
+        }
+
+        .table-cards tbody {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+
+        .table-cards tbody tr:not(.variant-row):not(:has(td[colspan])) {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 10px !important;
+            box-sizing: border-box !important;
+            width: 100% !important;
+            padding: 12px !important;
+            border: 1px solid var(--bs-border-color, #dee2e6) !important;
+            border-radius: 12px !important;
+            background: #fff !important;
+        }
+
+        .table-cards tbody td {
+            display: flex !important;
+            align-items: flex-start !important;
+            justify-content: space-between !important;
+            gap: 12px !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            text-align: right !important;
+            white-space: normal !important;
+            overflow-wrap: anywhere !important;
+        }
+
+        .table-cards tbody td::before {
+            flex: 0 0 auto;
+            max-width: 45%;
+            color: #6c757d;
+            content: attr(data-label);
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .table-cards tbody td.col-num,
+        .table-cards tbody td.col-index {
+            display: none !important;
+        }
+
+        .table-cards tbody td.col-actions,
+        .table-cards tbody td:last-child {
+            align-items: center !important;
+        }
+
+        .table-cards-leaves tbody tr:not(:has(td[colspan])) {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            grid-template-areas:
+                "date type"
+                "reason reason"
+                ". actions";
+            align-items: center !important;
+            gap: 10px 12px !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Date"] {
+            grid-area: date;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            white-space: nowrap !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Type"] {
+            grid-area: type;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            white-space: nowrap !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Reason"] {
+            grid-area: reason;
+            max-width: none !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Actions"] {
+            grid-area: actions;
+            justify-content: flex-end !important;
+        }
+
+        .table-cards-leaves tbody td[data-label="Actions"]::before {
+            content: none !important;
+        }
+
+        .table-cards .action-btns {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 6px !important;
+            flex-wrap: nowrap !important;
+        }
+
+        .table-cards .action-btns form {
+            display: inline-flex !important;
+            margin: 0 !important;
+        }
+
+        .table-cards tbody tr:has(td[colspan]) {
+            display: block !important;
+        }
+
+        .table-cards tbody tr:has(td[colspan]) td {
+            display: block !important;
+            text-align: center !important;
+        }
+
+        .table-cards tbody tr:has(td[colspan]) td::before {
+            content: none !important;
+        }
+
+        .table-cards tbody tr.variant-row[style*="table-row"] {
+            display: block !important;
+            padding: 0 !important;
+            border: 0 !important;
+        }
+
+        .table-cards tbody tr.variant-row[style*="table-row"] td {
+            display: block !important;
+        }
+
+        .table-cards tbody tr.variant-row[style*="table-row"] td::before {
+            content: none !important;
+        }
+    }
+
+    .main-content#mainContent:has(> .container-fluid.px-4.py-5) {
+        padding-right: 0 !important;
+        padding-left: 0 !important;
+    }
+
+    .main-content#mainContent:has(> .container-fluid.px-4.py-5) > .container-fluid.px-4.py-5 {
+        padding-right: 12px !important;
+        padding-left: 12px !important;
+    }
+
+    .main-content#mainContent:has(> .container-fluid.px-4.py-5) .card-body.p-4 {
+        padding: 16px !important;
+    }
+
+    .prescription-list-card > .card-header,
+    .therapy-card > .card-header {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        min-width: 0;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    .prescription-list-card > .card-header > div:first-child,
+    .therapy-card > .card-header > div:first-child {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .prescription-list-card > .card-header .card-title,
+    .therapy-card > .card-header .card-title {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .prescription-list-card > .card-header .badge,
+    .therapy-card > .card-header .badge {
+        flex: 0 0 auto;
+    }
+
+    .prescription-list-card > .card-header > div:last-child {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        min-width: 0;
+    }
+
+    .prescription-list-card > .card-header > div:last-child > .btn-page-primary,
+    .therapy-card > .card-header > .btn-page-primary {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #completeBtn {
+        box-sizing: border-box;
+        width: 100%;
+        height: 46px;
+        min-height: 46px;
+        padding: 0 16px;
+        border: 1px solid #015315 !important;
+        border-radius: 8px !important;
+        background: #015315 !important;
+        color: #fff !important;
+        font-size: 15px !important;
+        font-weight: 600;
+    }
+
+    @media (max-width: 575px) {
+        .navbar-brand-text {
+            display: none !important;
+        }
+
+        .navbar-right {
+            justify-content: flex-end;
+            gap: 10px !important;
+            margin-left: auto;
+        }
+
+        .navbar-right > .dropdown.me-3,
+        .navbar-right > .position-relative.me-3 {
+            margin-right: 0 !important;
+        }
+
+        .page-head > .page-btn-group,
+        .page-head > .btn-page {
+            width: 100%;
+        }
+
+        .page-head > .page-btn-group {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-head > .page-btn-group > *,
+        .page-head > .btn-page {
+            width: 100%;
+        }
+
+        main#mainContent .row:has(.stat-card) > [class*="col-"] {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+
+        .dashboard-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+
+        .dashboard-stat-item:last-child:nth-child(odd),
+        main#mainContent .row:has(.stat-card) > [class*="col-"]:last-child:nth-child(odd) {
+            grid-column: auto;
+            flex-basis: 50%;
+            max-width: 50%;
+        }
+
+        .user-info {
+            display: flex !important;
+        }
+
+        .user-name {
+            display: none !important;
+        }
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dc-table-wrap:has(> .table-cards),
+    .table-responsive:has(> .table-cards),
+    .leave-card .table-responsive:has(> .table-cards) {
+        overflow: visible !important;
+    }
+
+    .table-cards {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .table-cards thead {
+        display: none !important;
+    }
+
+    .table-cards tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    .table-cards tbody tr:not(:has(td[colspan])) {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
+        padding: 12px !important;
+        border: 1px solid var(--bs-border-color, #dee2e6) !important;
+        border-radius: 12px !important;
+        background: #fff !important;
+    }
+
+    .table-cards tbody td {
+        display: flex !important;
+        align-items: flex-start !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: right !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .table-cards tbody td::before {
+        flex: 0 0 auto;
+        max-width: 45%;
+        color: #6c757d;
+        content: attr(data-label);
+        font-size: 12px;
+        text-align: left;
+    }
+
+    .table-cards tbody td.col-index {
+        display: none !important;
+    }
+
+    .table-cards tbody td.col-actions,
+    .table-cards tbody td:last-child {
+        align-items: center !important;
+    }
+
+    .table-cards .action-btns {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    .table-cards .action-btns form {
+        display: inline-flex !important;
+        margin: 0 !important;
+    }
+
+    .table-cards-leaves tbody tr:not(:has(td[colspan])) {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .table-cards-leaves tbody td[data-label="Actions"]::before {
+        content: none !important;
+    }
+
+    .table-cards tbody tr:has(td[colspan]) {
+        display: block !important;
+    }
+
+    .table-cards tbody tr:has(td[colspan]) td {
+        display: block !important;
+        text-align: center !important;
+    }
+
+    .table-cards tbody tr:has(td[colspan]) td::before {
+        content: none !important;
+    }
+}

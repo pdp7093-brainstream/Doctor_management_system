@@ -542,5 +542,30 @@
 
     <!-- ===== SCRIPTS ===== -->
     <script src="{% static 'assets/js/prescription.js' %}?v=8"></script>
+    {% if submitted_form_data %}
+    {{ submitted_form_data|json_script:"prescriptionSubmittedFormData" }}
+    <script>
+        (() => {
+            const dataNode = document.getElementById('prescriptionSubmittedFormData');
+            const form = document.getElementById('visitForm');
+            if (!dataNode || !form) return;
+
+            const submitted = JSON.parse(dataNode.textContent);
+            form.querySelectorAll('input[type="checkbox"][name="should_deduct[]"]').forEach(field => {
+                field.checked = (submitted['should_deduct[]'] || []).includes(field.value);
+            });
+            Object.entries(submitted).forEach(([name, values]) => {
+                const fields = Array.from(form.elements).filter(field => field.name === name);
+                fields.forEach((field, index) => {
+                    if (field.type === 'checkbox' || field.type === 'radio') {
+                        field.checked = values.includes(field.value);
+                    } else if (field.type !== 'file' && values[index] !== undefined) {
+                        field.value = values[index];
+                    }
+                });
+            });
+        })();
+    </script>
+    {% endif %}
 </main>
 {% endblock %}

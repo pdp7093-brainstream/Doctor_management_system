@@ -2,18 +2,24 @@ import importlib
 from datetime import time
 from types import SimpleNamespace
 
+from django.contrib.messages import get_messages
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth.models import User
+from django.urls import reverse
 from django.test import SimpleTestCase, TestCase
 from django.template.loader import render_to_string
 from django.utils import timezone
+from unittest.mock import patch
 
 from .file_validation import clean_original_filename, validate_uploaded_document
 from .models import Appointment, Patient, Prescription, PrescriptionItem, Visit
 from .views import PrescriptionView
 from .views import normalize_advice_lines
 from clinic.models import ClinicSettings
+from doctor.hashid import encode_id
+from doctor.models import InnerMember
+from medicine.models import Medicine, MedicineVariant
 
 
 class UploadedDocumentValidationTests(SimpleTestCase):
@@ -129,6 +135,142 @@ class PrescriptionAdviceTests(TestCase):
         self.assertIn('Pathya – Take', with_advice)
         self.assertIn('Apathya – Avoid', with_advice)
         self.assertIn('Walk daily', with_advice)
+
+
+class PrescriptionPostFailureTests(TestCase):
+    def setUp(self):
+        patient_user = User.objects.create_user(username='post-patient')
+        patient, _ = Patient.objects.get_or_create(user=patient_user)
+        self.doctor_user = User.objects.create_user(username='post-doctor', password='test-password')
+        doctor = InnerMember.objects.create(
+            user=self.doctor_user,
+            role='doctor',
+            is_owner=True,
+        )
+        appointment = Appointment.objects.create(
+            patient=patient,
+            doctor=doctor,
+            appointment_date=timezone.localdate(),
+            time_slot=time(11, 0),
+        )
+        self.visit = Visit.objects.create(patient=patient, doctor=doctor, appointment=appointment)
+        self.prescription = Prescription.objects.create(visit=self.visit)
+        medicine = Medicine.objects.create(name='Test medicine', short_name='TEST-POST')
+        self.variant = MedicineVariant.objects.create(
+            medicine=medicine,
+            power='100 mg',
+            cost_price=10,
+            selling_price=15,
+            stock=20,
+        )
+        self.url = reverse('appointment:prescription', args=[encode_id(self.visit.id)])
+        self.client.force_login(self.doctor_user)
+
+    def _post_data(self, **extra):
+        data = {
+            'symptoms': 'Updated symptoms',
+            'diagnosis': 'Updated diagnosis',
+            'notes': 'Updated notes',
+            'pathya': 'Warm water',
+            'apathya': '',
+            'vihar': '',
+        }
+        data.update(extra)
+        return data
+
+    def test_bill_failure_rolls_back_completion_and_returns_error(self):
+        with patch(
+            'appointment.views.generate_bill_from_visit',
+            side_effect=RuntimeError('test bill failure'),
+        ):
+            response = self.client.post(
+                self.url,
+                self._post_data(complete_visit='1'),
+            )
+
+        self.visit.refresh_from_db()
+        self.visit.appointment.refresh_from_db()
+        self.prescription.refresh_from_db()
+
+        self.assertEqual(self.visit.visted_status, 'in_progress')
+        self.assertNotEqual(self.visit.appointment.status, 'completed')
+        self.assertIsNone(self.visit.symptoms)
+        self.assertEqual(self.prescription.pathya, '')
+        self.assertTrue(any(
+            'Bill could not be generated: test bill failure' in str(message)
+            for message in get_messages(response.wsgi_request)
+        ))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.url)
+        self.assertEqual(
+            response.wsgi_request.session[f'prescription_form_data_{self.visit.pk}']['symptoms'],
+            ['Updated symptoms'],
+        )
+
+    def test_invalid_item_edit_shows_error_and_rolls_back_form_changes(self):
+        item = PrescriptionItem.objects.create(
+            prescription=self.prescription,
+            medicine_variant=self.variant,
+            dosage='1-0-0-0 (after_food)',
+            days=3,
+            notes='Saved notes',
+        )
+
+        response = self.client.post(
+            self.url,
+            self._post_data(
+                **{
+                    'variant_id[]': [str(self.variant.id)],
+                    'item_id[]': [str(item.id + 100000)],
+                    'morning': ['2'],
+                    'afternoon': ['0'],
+                    'evening': ['0'],
+                    'night': ['0'],
+                    'meal': ['after_food'],
+                    'anupana': ['Warm water'],
+                    'days': ['5'],
+                    'medicine_notes': ['Unsaved notes'],
+                }
+            ),
+        )
+
+        self.visit.refresh_from_db()
+        item.refresh_from_db()
+
+        self.assertIsNone(self.visit.symptoms)
+        self.assertEqual(item.dosage, '1-0-0-0 (after_food)')
+        self.assertEqual(item.notes, 'Saved notes')
+        self.assertTrue(any(
+            'Test medicine' in str(message) and 'not found or invalid' in str(message)
+            for message in get_messages(response.wsgi_request)
+        ))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.url)
+        self.assertEqual(
+            response.wsgi_request.session[f'prescription_form_data_{self.visit.pk}']['morning'],
+            ['2'],
+        )
+
+    def test_addon_bill_failure_is_logged_and_warned(self):
+        self.visit.visted_status = 'completed'
+        self.visit.save(update_fields=['visted_status'])
+        appointment = self.visit.appointment
+        appointment.status = 'completed'
+        appointment.save(update_fields=['status'])
+
+        with self.assertLogs('appointment.views', level='ERROR') as logs:
+            with patch(
+                'appointment.views.generate_bill_from_visit',
+                side_effect=RuntimeError('test addon failure'),
+            ):
+                response = self.client.post(self.url, self._post_data())
+
+        self.assertIn('Addon bill generation failed for visit', logs.output[0])
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(any(
+            'Addon bill could not be generated: test addon failure' in str(message)
+            for message in get_messages(response.wsgi_request)
+        ))
 
 
 class SevanKaalDataMigrationTests(SimpleTestCase):

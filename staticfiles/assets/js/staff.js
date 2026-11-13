@@ -190,8 +190,8 @@ document.getElementById('saveResetPwd').addEventListener('click', function () {
                     rgba(15,23,42,0.45)
                 `,
                     customClass: {
+                        ...window.swalSharedCustomClass,
                         popup: 'rounded-4 shadow-lg',
-                        confirmButton: 'px-4 py-2'
                     }
                 });
 

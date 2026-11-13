@@ -14,7 +14,7 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
@@ -36,6 +36,14 @@ from clinic.models import ClinicSettings
 from .file_validation import validate_uploaded_document
 
 logger = logging.getLogger(__name__)
+
+
+class _PrescriptionItemEditError(Exception):
+    pass
+
+
+class _BillGenerationFailure(Exception):
+    pass
 
 
 def parse_prescription_therapies(post_data, prescription=None):
@@ -880,6 +888,9 @@ class PrescriptionView(View):
             'lab_documents': lab_documents,
             'visit_completed': visit.visted_status == 'completed' or visit.appointment.status == 'completed',
             'is_today': is_today,
+            'submitted_form_data': request.session.pop(
+                f'prescription_form_data_{visit.pk}', {}
+            ),
         })
 
     def reduce_stock(self, prescription):
@@ -919,10 +930,6 @@ class PrescriptionView(View):
     def post(self, request, hid):
         visit_id = resolve_hid(hid)
         visit = get_object_or_404(Visit, id=visit_id)
-        was_already_completed = (
-            visit.visted_status == "completed"
-            or visit.appointment.status == "completed"
-        )
         uploaded_documents = request.FILES.getlist("lab_documents")
         valid_uploaded_documents = []
         for document in uploaded_documents:
@@ -946,147 +953,192 @@ class PrescriptionView(View):
             value = (request.POST.get(field) or "").strip()
             return "" if value.casefold() == "none" else value
 
-        visit.symptoms = clean_visit_text("symptoms")
-        visit.diagnosis = clean_visit_text("diagnosis")
-        visit.notes = clean_visit_text("notes")
-
         is_completing = "complete_visit" in request.POST
-        if is_completing:
-            visit.visted_status = "completed"
-        elif visit.visted_status != "completed":
-            visit.visted_status = "in_progress"
-        visit.save()
 
-        prescription, _ = Prescription.objects.get_or_create(visit=visit)
-        prescription.pathya = normalize_advice_lines(request.POST.get('pathya'))
-        prescription.apathya = normalize_advice_lines(request.POST.get('apathya'))
-        vihar = (request.POST.get('vihar') or '').strip()
-        prescription.vihar = '' if vihar.casefold() == 'none' else vihar
-        prescription.save(update_fields=['pathya', 'apathya', 'vihar', 'updated_at'])
-        save_prescription_therapies(prescription, therapy_rows)
+        def preserve_form_data():
+            request.session[f'prescription_form_data_{visit.pk}'] = {
+                field: request.POST.getlist(field)
+                for field in request.POST.keys()
+                if field not in {'csrfmiddlewaretoken', 'item_id[]'}
+            }
 
-        variant_ids = request.POST.getlist("variant_id[]")
-        item_ids = request.POST.getlist("item_id[]")
-        morning_list = request.POST.getlist("morning")
-        afternoon_list = request.POST.getlist("afternoon")
-        evening_list = request.POST.getlist("evening")
-        night_list = request.POST.getlist("night")
-        meal_list = request.POST.getlist("meal")
-        anupana_list = request.POST.getlist("anupana")
-        days_list = request.POST.getlist("days")
-        notes_list = request.POST.getlist("medicine_notes")
-        deduct_list = request.POST.getlist("should_deduct[]")
+        deferred_messages = []
+        new_bill_generated = False
 
-        existing_item_ids = list(prescription.items.values_list('id', flat=True))
-        submitted_item_ids = []
-
-        for i, (item_id_str, v_id, m, a, e, n, meal, days, medicine_notes) in enumerate(zip(item_ids, variant_ids, morning_list, afternoon_list, evening_list, night_list, meal_list, days_list, notes_list)):
-            if not v_id:
-                continue
-            variant = MedicineVariant.objects.get(id=v_id)
-            dosage = f"{m}-{a}-{e}-{n} ({meal})"
-            anupana = anupana_list[i].strip() if i < len(anupana_list) else ''
-            sevan_kaal = meal if meal in dict(PrescriptionItem.SEVAN_KAAL_CHOICES) else ''
-            should_deduct = str(i) in deduct_list
-            if item_id_str:
-                try:
-                    item_id_int = int(item_id_str)
-                    submitted_item_ids.append(item_id_int)
-                    item = PrescriptionItem.objects.get(id=item_id_int, prescription=prescription)
-                    item.medicine_variant = variant
-                    item.dosage = dosage
-                    item.sevan_kaal = sevan_kaal
-                    item.anupana = anupana[:100]
-                    item.days = int(days)
-                    item.notes = medicine_notes
-                    item.should_deduct = should_deduct
-                    item.save()
-                except:
-                    pass
-            else:
-                new_item = PrescriptionItem.objects.create(
-                    prescription=prescription,
-                    medicine_variant=variant,
-                    dosage=dosage,
-                    sevan_kaal=sevan_kaal,
-                    anupana=anupana[:100],
-                    days=int(days),
-                    notes=medicine_notes,
-                    should_deduct=should_deduct,
+        try:
+            with transaction.atomic():
+                was_already_completed = (
+                    visit.visted_status == "completed"
+                    or visit.appointment.status == "completed"
                 )
-                submitted_item_ids.append(new_item.id)
+                visit.symptoms = clean_visit_text("symptoms")
+                visit.diagnosis = clean_visit_text("diagnosis")
+                visit.notes = clean_visit_text("notes")
+                if is_completing:
+                    visit.visted_status = "completed"
+                elif visit.visted_status != "completed":
+                    visit.visted_status = "in_progress"
+                visit.save()
 
-        items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
-        if items_to_delete:
-            PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
+                prescription, _ = Prescription.objects.get_or_create(visit=visit)
+                prescription.pathya = normalize_advice_lines(request.POST.get('pathya'))
+                prescription.apathya = normalize_advice_lines(request.POST.get('apathya'))
+                vihar = (request.POST.get('vihar') or '').strip()
+                prescription.vihar = '' if vihar.casefold() == 'none' else vihar
+                prescription.save(update_fields=['pathya', 'apathya', 'vihar', 'updated_at'])
+                save_prescription_therapies(prescription, therapy_rows)
 
-        for document, original_name in valid_uploaded_documents:
-            LabDocument.objects.create(
-                visit=visit,
-                file=document,
-                original_name=original_name,
-                uploaded_by=request.user,
-            )
+                variant_ids = request.POST.getlist("variant_id[]")
+                item_ids = request.POST.getlist("item_id[]")
+                morning_list = request.POST.getlist("morning")
+                afternoon_list = request.POST.getlist("afternoon")
+                evening_list = request.POST.getlist("evening")
+                night_list = request.POST.getlist("night")
+                meal_list = request.POST.getlist("meal")
+                anupana_list = request.POST.getlist("anupana")
+                days_list = request.POST.getlist("days")
+                notes_list = request.POST.getlist("medicine_notes")
+                deduct_list = request.POST.getlist("should_deduct[]")
 
-        if valid_uploaded_documents:
-            messages.success(request, f"{len(valid_uploaded_documents)} lab document(s) uploaded successfully.")
+                existing_item_ids = list(prescription.items.values_list('id', flat=True))
+                submitted_item_ids = []
 
-        if is_completing:
-            stock_errors = self.reduce_stock(prescription)
-            if stock_errors:
-                for err in stock_errors:
-                    messages.warning(request, f"Low stock: {err}")
-            try:
-                generate_bill_from_visit(visit)
-                messages.success(request, "Bill generated successfully!")
-            except Exception as e:
-                print("BILL GENERATION ERROR:", str(e))
-                messages.warning(request, f"Bill generation error: {str(e)}")
-        else:
-            new_bill_generated = False
-            try:
-                if was_already_completed:
+                for i, (item_id_str, v_id, m, a, e, n, meal, days, medicine_notes) in enumerate(zip(item_ids, variant_ids, morning_list, afternoon_list, evening_list, night_list, meal_list, days_list, notes_list)):
+                    if not v_id:
+                        continue
+                    variant = MedicineVariant.objects.get(id=v_id)
+                    dosage = f"{m}-{a}-{e}-{n} ({meal})"
+                    anupana = anupana_list[i].strip() if i < len(anupana_list) else ''
+                    sevan_kaal = meal if meal in dict(PrescriptionItem.SEVAN_KAAL_CHOICES) else ''
+                    should_deduct = str(i) in deduct_list
+                    try:
+                        days_value = int(days)
+                    except ValueError as exc:
+                        raise _PrescriptionItemEditError(
+                            f"Could not save {variant.medicine.name}: invalid prescription details."
+                        ) from exc
+
+                    if item_id_str:
+                        try:
+                            item_id_int = int(item_id_str)
+                            item = PrescriptionItem.objects.get(
+                                id=item_id_int,
+                                prescription=prescription,
+                            )
+                        except (PrescriptionItem.DoesNotExist, ValueError) as exc:
+                            raise _PrescriptionItemEditError(
+                                f"Could not update {variant.medicine.name}: prescription item not found or invalid."
+                            ) from exc
+                        item.medicine_variant = variant
+                        item.dosage = dosage
+                        item.sevan_kaal = sevan_kaal
+                        item.anupana = anupana[:100]
+                        item.days = days_value
+                        item.notes = medicine_notes
+                        item.should_deduct = should_deduct
+                        item.save()
+                        submitted_item_ids.append(item_id_int)
+                    else:
+                        new_item = PrescriptionItem.objects.create(
+                            prescription=prescription,
+                            medicine_variant=variant,
+                            dosage=dosage,
+                            sevan_kaal=sevan_kaal,
+                            anupana=anupana[:100],
+                            days=days_value,
+                            notes=medicine_notes,
+                            should_deduct=should_deduct,
+                        )
+                        submitted_item_ids.append(new_item.id)
+
+                items_to_delete = set(existing_item_ids) - set(submitted_item_ids)
+                if items_to_delete:
+                    PrescriptionItem.objects.filter(id__in=items_to_delete).delete()
+
+                for document, original_name in valid_uploaded_documents:
+                    LabDocument.objects.create(
+                        visit=visit,
+                        file=document,
+                        original_name=original_name,
+                        uploaded_by=request.user,
+                    )
+
+                if valid_uploaded_documents:
+                    deferred_messages.append((
+                        messages.SUCCESS,
+                        f"{len(valid_uploaded_documents)} lab document(s) uploaded successfully.",
+                    ))
+
+                if is_completing:
                     stock_errors = self.reduce_stock(prescription)
-                    if stock_errors:
-                        for err in stock_errors:
-                            messages.warning(request, f"Low stock: {err}")
+                    deferred_messages.extend(
+                        (messages.WARNING, f"Low stock: {err}") for err in stock_errors
+                    )
+                    try:
+                        generate_bill_from_visit(visit)
+                    except Exception as exc:
+                        logger.exception("Bill generation failed for visit %s", visit.pk)
+                        raise _BillGenerationFailure(str(exc)) from exc
+                    deferred_messages.append((messages.SUCCESS, "Bill generated successfully!"))
+                else:
+                    if was_already_completed:
+                        stock_errors = self.reduce_stock(prescription)
+                        deferred_messages.extend(
+                            (messages.WARNING, f"Low stock: {err}") for err in stock_errors
+                        )
 
-                new_bill = generate_bill_from_visit(visit)
-                if new_bill and new_bill.is_addon:
-                    new_bill_generated = True
-                    messages.info(request, f"Addon bill created for new medicines!")
-            except Exception as e:
-                print("ADDON BILL ERROR:", str(e))
-                pass  # Silently fail for updates
+                    try:
+                        with transaction.atomic():
+                            new_bill = generate_bill_from_visit(visit)
+                    except Exception as exc:
+                        logger.exception("Addon bill generation failed for visit %s", visit.pk)
+                        deferred_messages.append((
+                            messages.WARNING,
+                            f"Addon bill could not be generated: {exc}",
+                        ))
+                    else:
+                        if new_bill and new_bill.is_addon:
+                            new_bill_generated = True
+                            deferred_messages.append((messages.INFO, "Addon bill created for new medicines!"))
 
-        appointment = visit.appointment
-        if is_completing:
-            appointment.status = "completed"
-        elif appointment.status != "completed":
-            appointment.status = "confirmed"
-        appointment.save()
+                appointment = visit.appointment
+                if is_completing:
+                    appointment.status = "completed"
+                elif appointment.status != "completed":
+                    appointment.status = "confirmed"
+                appointment.save()
+
+            for level, text in deferred_messages:
+                messages.add_message(request, level, text)
+        except _PrescriptionItemEditError as exc:
+            preserve_form_data()
+            messages.error(request, str(exc))
+            return redirect('appointment:prescription', hid=hid)
+        except _BillGenerationFailure as exc:
+            preserve_form_data()
+            messages.error(request, f"Bill could not be generated: {exc}")
+            return redirect('appointment:prescription', hid=hid)
 
         if is_completing or new_bill_generated:
             from doctor import hashid as _hashid
             return redirect('billing:bill_detail', hid=_hashid.encode_id(visit.id))
-        
+
         if appointment.appointment_date == timezone.now().date():
             return redirect("doctor:dashboard")
-        else:
-            return redirect("appointment:manage_appointments")
+        return redirect("appointment:manage_appointments")
 
-
-# ─────────────────────────────────────────
-# Appointment Detail (Patient)
-# ─────────────────────────────────────────
 
 @login_required(login_url='login')
 def appointment_detail(request, hid):
     appointment_id = resolve_hid(hid)
-    appointment = get_object_or_404(Appointment, id=appointment_id, patient=request.user.patient, is_archived=False)
-
-    visit             = Visit.objects.filter(appointment=appointment).first()
-    prescription      = None
+    appointment = get_object_or_404(
+        Appointment,
+        id=appointment_id,
+        patient=request.user.patient,
+        is_archived=False,
+    )
+    visit = Visit.objects.filter(appointment=appointment).first()
+    prescription = None
     prescription_items = []
     prescription_therapies = []
 

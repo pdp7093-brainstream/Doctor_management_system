@@ -30,7 +30,7 @@
         </div>
 
         <div class="dc-table-wrap{% if not types %} d-none{% endif %}">
-            <table class="table table-hover dc-table" style="min-width:600px;">
+            <table class="table table-hover dc-table table-cards" style="min-width:600px;">
                 <thead>
                     <tr>
                         <th class="col-num">#</th>
@@ -44,20 +44,20 @@
                 <tbody id="tableBody">
                     {% for type in types %}
                     <tr class="type-row" data-name="{{ type.name|lower }}">
-                        <td class="col-num">{{ forloop.counter }}</td>
-                        <td><span class="dc-name">{{ type.name }}</span></td>
-                        <td>
+                        <td class="col-num col-index">{{ forloop.counter }}</td>
+                        <td data-label="Name"><span class="dc-name">{{ type.name }}</span></td>
+                        <td data-label="Medicines">
                             <span class="dc-badge grey">{{ type.medicine_count }} medicine{{ type.medicine_count|pluralize }}</span>
                         </td>
-                        <td>
+                        <td data-label="Status">
                             {% if type.is_active %}
                             <span class="dc-badge green">Active</span>
                             {% else %}
                             <span class="dc-badge red">Inactive</span>
                             {% endif %}
                         </td>
-                        <td class="dc-muted">{{ type.sort_order }}</td>
-                        <td class="col-actions text-end">
+                        <td class="dc-muted" data-label="Order">{{ type.sort_order }}</td>
+                        <td class="col-actions text-end" data-label="Actions">
                             <div class="action-btns">
                                 <a href="{% url 'medicine:edit_medicine_type' type.pk %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
                                     <i class="bi bi-pencil"></i>

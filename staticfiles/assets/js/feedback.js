@@ -4,6 +4,50 @@ function getCsrfToken() {
     return input ? input.value : '';
 }
 
+function updateFeedbackMessageToggles() {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches;
+
+    document.querySelectorAll('.feedback-message-text').forEach((message) => {
+        const toggle = message.nextElementSibling;
+        if (!toggle) return;
+
+        if (!isMobile) {
+            message.classList.remove('is-expanded');
+            toggle.classList.add('d-none');
+            toggle.setAttribute('aria-expanded', 'false');
+            toggle.textContent = 'Read more';
+            return;
+        }
+
+        if (message.classList.contains('is-expanded')) {
+            toggle.classList.remove('d-none');
+            return;
+        }
+
+        toggle.classList.toggle('d-none', message.scrollHeight <= message.clientHeight + 1);
+    });
+}
+
+document.addEventListener('click', (event) => {
+    const toggle = event.target.closest('.feedback-read-more');
+    if (!toggle) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    const message = toggle.previousElementSibling;
+    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+    message.classList.toggle('is-expanded', !isExpanded);
+    toggle.setAttribute('aria-expanded', String(!isExpanded));
+    toggle.textContent = isExpanded ? 'Read more' : 'Read less';
+});
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateFeedbackMessageToggles);
+} else {
+    updateFeedbackMessageToggles();
+}
+window.addEventListener('resize', updateFeedbackMessageToggles);
+
 document.addEventListener('click', async (event) => {
     const button = event.target.closest('.js-delete-feedback');
     if (!button) return;

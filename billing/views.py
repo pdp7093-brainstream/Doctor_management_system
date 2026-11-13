@@ -522,8 +522,13 @@ class AddBillView(LoginRequiredMixin, BillingAccessMixin, View):
                 patient = user.patient
                 patient.phone = phone
                 patient.save()
-            except Exception:
-                patient = Patient.objects.create(user=user, phone=phone)
+            except Patient.DoesNotExist:
+                try:
+                    patient = Patient.objects.create(user=user, phone=phone)
+                except Exception:
+                    logger.exception('Failed to create patient for new billing user')
+                    messages.error(request, 'Could not save the patient. Please try again.')
+                    return redirect('billing:bill_list')
 
         # parse appointment date/time
         appt_date_val = timezone.localdate()

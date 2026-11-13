@@ -133,12 +133,12 @@
         </div>
 
         <div class="card-body p-0">
-            <div class="{% if not appointments %}d-none{% endif %}" style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
-                <table class="table table-hover mb-0" style="min-width:820px; width:100%;">
+            <div class="table-cards-wrap {% if not appointments %}d-none{% endif %}" style="overflow-x:auto; -webkit-overflow-scrolling:touch; display:block; width:100%;">
+                <table class="table table-hover mb-0 table-cards" style="min-width:820px; width:100%;">
                     <thead>
                         <tr>
                             <th style="width: 40px; text-align: center;">
-                                <input type="checkbox" class="form-check-input" id="selectAllAppointments">
+                                <input type="checkbox" class="form-check-input" id="selectAllAppointments" aria-label="Select">
                             </th>
                             <th>Patient</th>
                             <th>Relation</th>
@@ -152,11 +152,11 @@
                     <tbody id="tableBody">
                         {% for appointment in appointments %}
                         <tr>
-                            <td class="text-center">
+                            <td class="text-center" data-label="Select">
                                 <input type="checkbox" class="form-check-input appointment-checkbox" value="{{ appointment.id|hid }}">
                             </td>
                             <!-- Patient Name -->
-                            <td>
+                            <td data-label="Patient">
                                 <span style="font-weight:600; color:var(--dark-text);">
                                     {% if appointment.family_member %}
                                         {{ appointment.family_member.name }}
@@ -170,7 +170,7 @@
                             </td>
 
                             <!-- Relation -->
-                            <td>
+                            <td data-label="Relation">
                                 {% if appointment.family_member %}
                                 <span class="badge bg-primary bg-opacity-10 text-primary"
                                     style="font-weight:600; font-size:0.78rem;">
@@ -185,18 +185,18 @@
                             </td>
 
                             <!-- Booked By -->
-                            <td style="color:#6c757d; font-size:13px;">
+                            <td data-label="Booked By" style="color:#6c757d; font-size:13px;">
                                 {{ appointment.patient.user.first_name }}
                                     {% if appointment.patient.user.last_name %}
                                         {{ appointment.patient.user.last_name }}
                                     {% endif %}
                             </td>
 
-                            <td style="font-size:0.9rem;">{{ appointment.appointment_date }}</td>
-                            <td style="font-size:0.9rem;">{{ appointment.time_slot|time:"h:i A" }}</td>
+                            <td data-label="Date" style="font-size:0.9rem;">{{ appointment.appointment_date }}</td>
+                            <td data-label="Time" style="font-size:0.9rem;">{{ appointment.time_slot|time:"h:i A" }}</td>
 
                             <!-- Status Badge -->
-                            <td>
+                            <td data-label="Status">
                                 {% if appointment.status == 'pending' %}
                                 <span class="badge bg-warning bg-opacity-25 text-warning"
                                     style="font-weight:600;">Pending</span>
@@ -213,7 +213,7 @@
                             </td>
 
                             <!-- Action -->
-                            <td class="text-end">
+                            <td class="text-end" data-label="Action">
                                 <div class="action-btns">
                                     <a href="{% url 'appointment:start_visit' appointment.id|hid %}"
                                         class="btn-act btn-act-view" title="View" aria-label="View">

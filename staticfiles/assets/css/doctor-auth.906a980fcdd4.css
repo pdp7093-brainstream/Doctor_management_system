@@ -1,0 +1,63 @@
+.doctor-auth-page .doctor-auth-title,
+.doctor-auth-page .form-label {
+    font-family: "Montserrat", "Poppins", sans-serif;
+}
+
+.doctor-auth-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.doctor-auth-logo img {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+}
+
+.doctor-auth-page .doctor-auth-card {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+.doctor-auth-page .doctor-auth-card-body {
+    height: auto !important;
+    max-height: none !important;
+    flex: 0 0 auto !important;
+    overflow: visible !important;
+    padding-bottom: 20px !important;
+}
+
+@media (max-width: 767px) {
+    .doctor-auth-shell {
+        aspect-ratio: auto !important;
+    }
+
+    .doctor-auth-footer {
+        position: static !important;
+        flex-shrink: 0;
+    }
+}
+
+@media (max-width: 575px) {
+    .doctor-auth-shell {
+        width: calc(100% - 32px) !important;
+        padding: 0 !important;
+    }
+
+    .doctor-forgot-page > .doctor-auth-card {
+        width: calc(100% - 32px) !important;
+    }
+
+    .doctor-auth-page .form-control {
+        box-sizing: border-box;
+        height: 46px !important;
+        font-size: 16px !important;
+    }
+}

@@ -25,19 +25,19 @@
             <div class="dc-search"><i class="bi bi-search"></i><input type="text" id="therapySearch" class="form-control" placeholder="Search therapies..." autocomplete="off"></div>
         </div>
         <div class="dc-table-wrap table-responsive{% if not therapies %} d-none{% endif %}">
-            <table class="table table-hover dc-table" style="min-width:760px;">
+            <table class="table table-hover dc-table table-cards" style="min-width:760px;">
                 <thead><tr><th class="col-num">#</th><th>Name</th><th>Duration</th><th>Billing</th><th>Pricing</th><th>Prescribed</th><th>Status</th><th class="col-actions text-end">Actions</th></tr></thead>
                 <tbody id="therapyTableBody">
                     {% for therapy in therapies %}
                     <tr class="therapy-row" data-name="{{ therapy.name|lower }}">
                         <td class="col-num">{{ forloop.counter }}</td>
-                        <td><span class="dc-name">{{ therapy.name }}</span></td>
-                        <td>{{ therapy.duration_minutes }} min</td>
-                        <td>{% if therapy.default_billing_type == 'package' %}<span class="dc-badge" style="background:#FFF3E6;color:#FD6801;white-space:nowrap;">Package</span>{% else %}<span class="dc-badge" style="background:#EAF4EA;color:#015315;white-space:nowrap;">Per session</span>{% endif %}</td>
-                        <td style="white-space:nowrap;">{% if therapy.default_billing_type == 'package' %}{% if therapy.package_price %}<strong>{{ therapy.package_price|money }}</strong> <span class="text-muted small">package</span>{% else %}<span class="dc-badge" style="background:#FDECEA;color:#AD0002;white-space:nowrap;">Price not set</span>{% endif %}{% else %}{% if therapy.session_price %}<strong>{{ therapy.session_price|money }}</strong> <span class="text-muted small">/ session</span>{% else %}<span class="dc-badge" style="background:#FDECEA;color:#AD0002;white-space:nowrap;">Price not set</span>{% endif %}{% endif %}</td>
-                        <td><span class="dc-badge grey">{{ therapy.prescribed_count }} prescription{{ therapy.prescribed_count|pluralize }}</span></td>
-                        <td>{% if therapy.is_active %}<span class="dc-badge green">Active</span>{% else %}<span class="dc-badge red">Inactive</span>{% endif %}</td>
-                        <td class="col-actions text-end">
+                        <td data-label="Name"><span class="dc-name">{{ therapy.name }}</span></td>
+                        <td data-label="Duration">{{ therapy.duration_minutes }} min</td>
+                        <td data-label="Billing">{% if therapy.default_billing_type == 'package' %}<span class="dc-badge" style="background:#FFF3E6;color:#FD6801;white-space:nowrap;">Package</span>{% else %}<span class="dc-badge" style="background:#EAF4EA;color:#015315;white-space:nowrap;">Per session</span>{% endif %}</td>
+                        <td data-label="Pricing" style="white-space:nowrap;">{% if therapy.default_billing_type == 'package' %}{% if therapy.package_price %}<strong>{{ therapy.package_price|money }}</strong> <span class="text-muted small">package</span>{% else %}<span class="dc-badge" style="background:#FDECEA;color:#AD0002;white-space:nowrap;">Price not set</span>{% endif %}{% else %}{% if therapy.session_price %}<strong>{{ therapy.session_price|money }}</strong> <span class="text-muted small">/ session</span>{% else %}<span class="dc-badge" style="background:#FDECEA;color:#AD0002;white-space:nowrap;">Price not set</span>{% endif %}{% endif %}</td>
+                        <td data-label="Prescribed"><span class="dc-badge grey">{{ therapy.prescribed_count }} prescription{{ therapy.prescribed_count|pluralize }}</span></td>
+                        <td data-label="Status">{% if therapy.is_active %}<span class="dc-badge green">Active</span>{% else %}<span class="dc-badge red">Inactive</span>{% endif %}</td>
+                        <td class="col-actions text-end" data-label="Actions">
                             <div class="action-btns">
                                 <a href="{% url 'doctor:therapy:therapy_edit' therapy.pk %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></a>
                                 <form method="post" action="{% url 'doctor:therapy:therapy_delete' therapy.pk %}" class="d-inline therapy-delete-form" data-name="{{ therapy.name }}" data-count="{{ therapy.prescribed_count }}">

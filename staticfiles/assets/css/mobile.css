@@ -48,6 +48,24 @@
     padding-left: 16px !important;
   }
 
+  .appointment-page .patient-selector-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .appointment-page .patient-selector-wrapper select,
+  .appointment-page .patient-selector-wrapper .btn-add-member {
+    width: 100% !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  .appointment-page .patient-selector-wrapper .btn-add-member {
+    justify-content: center !important;
+  }
+
   .card,
   [class*="-card"] {
     padding: 18px !important;
@@ -122,12 +140,6 @@
     padding-top: calc(var(--header-h, 76px) + 24px) !important;
   }
 
-  /* About page CTA section spacing */
-  .about-page .cta-section {
-    padding-top: 32px !important;
-    margin-top: 0 !important;
-  }
-
   /* Wisdom/shloka cards header alignment */
   .wisdom-card .card-header,
   .shloka-card .card-header {
@@ -180,8 +192,30 @@
   }
 
   /* Footer mobile styles */
+  .footer-16 .footer-nav-wrapper .nav-column .footer-nav {
+    gap: 16px !important;
+  }
+
+  .footer-16 .footer-nav-wrapper .nav-column .footer-nav a {
+    white-space: normal !important;
+    word-break: normal !important;
+    font-size: 14px !important;
+  }
+
   .footer-16 .footer-main {
     padding-top: 36px !important;
+  }
+
+  .footer-16 .footer-nav-wrapper {
+    margin-top: 28px !important;
+  }
+
+  .footer-16 .footer-nav-wrapper .nav-column {
+    margin-bottom: 24px !important;
+  }
+
+  .footer-16 .footer-nav-wrapper .nav-column h6 {
+    margin-bottom: 10px !important;
   }
 
   .footer-16 .brand-section .logo .sitename {

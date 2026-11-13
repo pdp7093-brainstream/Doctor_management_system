@@ -27,7 +27,7 @@
             </div>
         </div>
         <div id="tableContainer" class="dc-table-wrap{% if not vendors %} d-none{% endif %}">
-            <table class="table table-hover dc-table">
+            <table class="table table-hover dc-table table-cards">
                 <thead>
                     <tr>
                         <th class="col-num">#</th>
@@ -45,7 +45,7 @@
                         data-vendor-email="{{ vendor.email|default:''|lower }}">
                         <td class="col-num">{{ forloop.counter }}</td>
 
-                        <td>
+                        <td data-label="Vendor Name">
                             <div class="dc-person">
                                 <div class="dc-avatar">
                                     {{ vendor.name|first|upper }}
@@ -54,7 +54,7 @@
                             </div>
                         </td>
 
-                        <td>
+                        <td data-label="Phone">
                             {% if vendor.phone %}
                             <a href="tel:{{ vendor.phone }}" class="text-decoration-none text-dark dc-mono">
                                 <i class="bi bi-telephone me-1 dc-muted"></i>{{ vendor.phone }}
@@ -64,7 +64,7 @@
                             {% endif %}
                         </td>
 
-                        <td>
+                        <td data-label="Email">
                             {% if vendor.email %}
                             <a href="mailto:{{ vendor.email }}" class="text-decoration-none text-dark">
                                 <i class="bi bi-envelope me-1 dc-muted"></i>{{ vendor.email }}
@@ -74,7 +74,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="dc-muted">
+                        <td class="dc-muted" data-label="Address">
                             {% if vendor.address %}
                             <div class="text-truncate" title="{{ vendor.address }}">
                                 <i class="bi bi-geo-alt me-1"></i>{{ vendor.address|truncatewords:6 }}
@@ -84,7 +84,7 @@
                             {% endif %}
                         </td>
 
-                        <td class="col-actions text-end">
+                        <td class="col-actions text-end" data-label="Actions">
                             <div class="action-btns">
                                 <a href="{% url 'medicine:edit_vendor' vendor.id|hid %}" class="btn-act btn-act-edit" title="Edit" aria-label="Edit">
                                     <i class="bi bi-pencil"></i>

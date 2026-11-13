@@ -321,23 +321,9 @@
   text-align: left;
 }
 @media (max-width:767.98px) {
-  .therapy-sessions .dc-table { table-layout:auto; min-width:0; }
-  .therapy-sessions .dc-table th, .therapy-sessions .dc-table td { width:auto!important; }
-  .therapy-sessions .dc-table tbody td { padding:9px 2px; }
   .therapy-sessions .dc-card-header { flex-direction:column; align-items:stretch; gap:1rem; }
   .therapy-sessions .therapy-filter { display:grid!important; grid-template-columns:1fr; }
   .therapy-sessions .therapy-filter > * { width:100%!important; }
-  .therapy-sessions .dc-table-wrap { overflow:visible!important; }
-  .therapy-sessions table, .therapy-sessions tbody { display:block; width:100%; }
-  .therapy-sessions thead { display:none; }
-  .therapy-sessions tbody tr { display:block; margin:0 0 14px; padding:10px 12px; border:1px solid #e1e9e1; border-radius:12px; background:#fff; box-shadow:0 2px 10px #183b1b0a; }
-  .therapy-sessions tbody td { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:9px 2px; border:0; text-align:right!important; }
-  .therapy-sessions tbody td:before { content:attr(data-label); flex:0 0 86px; color:#647168; font-size:.78rem; font-weight:650; text-align:left; }
-  .therapy-sessions tbody td:first-child, .therapy-sessions tbody td:nth-child(2) { display:block; text-align:left!important; }
-  .therapy-sessions tbody td:first-child:before { content:'Patient'; display:block; margin-bottom:3px; }
-  .therapy-sessions tbody td:nth-child(2):before { content:'Therapy'; display:block; margin-bottom:3px; }
-  .therapy-sessions tbody td:last-child { justify-content:flex-end; }
-  .therapy-sessions tbody td:last-child:before { margin-right:auto; }
   .therapy-sessions .therapy-progress { min-width:0; flex:1; }
   .record-session-modal .modal-dialog { margin:0; max-width:100%; min-height:100%; }
   .record-session-modal .modal-content { min-height:100vh; border-radius:0; }
@@ -410,7 +396,7 @@
       </div>
     </div>
     <div class="dc-table-wrap{% if not therapies %} d-none{% endif %}">
-      <table class="table table-hover dc-table align-middle mb-0">
+      <table class="table table-hover dc-table table-cards align-middle mb-0">
         <colgroup>
           <col style="width: 20%;">
           <col style="width: 18%;">

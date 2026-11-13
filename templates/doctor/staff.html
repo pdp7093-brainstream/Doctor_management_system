@@ -23,7 +23,7 @@
             <span class="dc-count">{{ pending_doctors|length }} pending</span>
         </div>
         <div class="dc-table-wrap">
-                <table class="table table-hover dc-table" style="min-width:900px;">
+                <table class="table table-hover dc-table table-cards" style="min-width:900px;">
                     <thead>
                         <tr>
                             <th>Doctor</th>
@@ -37,7 +37,7 @@
                     <tbody>
                         {% for member in pending_doctors %}
                         <tr id="row-{{ member.id }}">
-                            <td>
+                            <td data-label="Doctor">
                                 <div class="dc-person">
                                     <div class="dc-avatar">
                                         {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
@@ -48,13 +48,13 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="dc-mono">{{ member.user.username }}</td>
-                            <td>{{ member.user.email|default:"—" }}</td>
-                            <td class="dc-mono">{{ member.phone|default:"—" }}</td>
-                            <td>
+                            <td class="dc-mono" data-label="Username">{{ member.user.username }}</td>
+                            <td data-label="Email">{{ member.user.email|default:"—" }}</td>
+                            <td class="dc-mono" data-label="Phone">{{ member.phone|default:"—" }}</td>
+                            <td data-label="Status">
                                 <span class="dc-badge peach">Pending</span>
                             </td>
-                            <td class="text-end">
+                            <td class="text-end" data-label="Actions">
                                 <div class="action-btns">
                                     <button class="btn-act btn-act-view btn-approve-doc" data-id="{{ member.id }}" title="Approve" aria-label="Approve">
                                         <i class="bi bi-check2-circle"></i>
@@ -79,17 +79,17 @@
             <span class="dc-count">{{ doctors|length }} active</span>
         </div>
         <div class="dc-table-wrap{% if not doctors %} d-none{% endif %}">
-            <table class="table table-hover dc-table" style="min-width:800px;">
+            <table class="table table-hover dc-table table-cards" style="min-width:800px;">
                 <thead><tr><th>Doctor</th><th>Username</th><th>Email</th><th>Phone</th><th>Default</th><th class="text-end">Actions</th></tr></thead>
                 <tbody>
                     {% for member in doctors %}
                     <tr>
-                        <td><div class="dc-person"><div class="dc-avatar">{{ member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper }}</div><div class="dc-name">{{ member.user.get_full_name|default:member.user.username }}</div></div></td>
-                        <td class="dc-mono">{{ member.user.username }}</td>
-                        <td>{{ member.user.email|default:"—" }}</td>
-                        <td class="dc-mono">{{ member.phone|default:"—" }}</td>
-                        <td>{% if member.is_default_doctor %}<span class="dc-badge green">Default</span>{% else %}—{% endif %}</td>
-                        <td class="text-end"><button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}" data-role="doctor" data-default="{{ member.is_default_doctor|lower }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" data-email="{{ member.user.email }}" data-phone="{{ member.phone }}" data-active="{{ member.user.is_active|lower }}" title="Edit doctor" aria-label="Edit doctor"><i class="bi bi-pencil"></i></button></td>
+                        <td data-label="Doctor"><div class="dc-person"><div class="dc-avatar">{{ member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper }}</div><div class="dc-name">{{ member.user.get_full_name|default:member.user.username }}</div></div></td>
+                        <td class="dc-mono" data-label="Username">{{ member.user.username }}</td>
+                        <td data-label="Email">{{ member.user.email|default:"—" }}</td>
+                        <td class="dc-mono" data-label="Phone">{{ member.phone|default:"—" }}</td>
+                        <td data-label="Default">{% if member.is_default_doctor %}<span class="dc-badge green">Default</span>{% else %}—{% endif %}</td>
+                        <td class="text-end" data-label="Actions"><button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}" data-role="doctor" data-default="{{ member.is_default_doctor|lower }}" data-name="{{ member.user.get_full_name|default:member.user.username }}" data-email="{{ member.user.email }}" data-phone="{{ member.phone }}" data-active="{{ member.user.is_active|lower }}" title="Edit doctor" aria-label="Edit doctor"><i class="bi bi-pencil"></i></button></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -112,7 +112,7 @@
 
         <div class="dc-table-wrap">
                 {% if billers %}
-                <table class="table table-hover dc-table" style="min-width:900px;">
+                <table class="table table-hover dc-table table-cards" style="min-width:900px;">
                     <thead>
                         <tr>
                             <th>Staff</th>
@@ -126,7 +126,7 @@
                     <tbody id="staffTableBody">
                         {% for member in billers %}
                         <tr id="row-{{ member.id }}">
-                            <td>
+                            <td data-label="Staff">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="dc-avatar">
                                         {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
@@ -138,17 +138,17 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="dc-mono">{{ member.user.username }}</td>
-                            <td>{{ member.user.email|default:"—" }}</td>
-                            <td class="dc-mono">{{ member.phone|default:"—" }}</td>
-                            <td>
+                            <td class="dc-mono" data-label="Username">{{ member.user.username }}</td>
+                            <td data-label="Email">{{ member.user.email|default:"—" }}</td>
+                            <td class="dc-mono" data-label="Phone">{{ member.phone|default:"—" }}</td>
+                            <td data-label="Status">
                                 {% if member.user.is_active %}
                                 <span class="dc-badge green">Active</span>
                                 {% else %}
                                 <span class="dc-badge grey">Inactive</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end">
+                            <td class="text-end" data-label="Actions">
                                 <div class="action-btns">
                                     <button class="btn-act btn-act-edit btn-edit-staff" data-id="{{ member.id }}"
                                         data-role="biller"
