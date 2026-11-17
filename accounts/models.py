@@ -24,7 +24,7 @@ class Patient(models.Model):
 
     @property
     def login_status(self):
-        if self.user.has_usable_password():
+        if self.user.has_usable_password() and self.user.email:
             return 'active'
         if self.user.email and self.invite_sent_at:
             return 'invited'

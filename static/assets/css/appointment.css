@@ -184,6 +184,32 @@ textarea.form-control {
 
 .btn-add-member:hover { background: var(--accent-color);color: #fff;}
 
+#appointmentForm select.form-control {
+   appearance: none;
+   -webkit-appearance: none;
+   padding-right: 40px;
+   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23015315' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+   background-repeat: no-repeat;
+   background-position: right 14px center;
+   background-size: 14px 12px;
+}
+
+@media (max-width: 767.98px) {
+   #appointmentForm #appointmentEmail {
+       font-size: 14px;
+       text-overflow: ellipsis;
+   }
+}
+
+@media (max-width: 767.98px) {
+   #appointmentForm #forWhomSelect {
+       font-size: 15px;
+       white-space: nowrap;
+       overflow: hidden;
+       text-overflow: ellipsis;
+   }
+}
+
 /* ── Add Member Modal ── */
 .modal-overlay { display: none;position: fixed;
   inset: 0;

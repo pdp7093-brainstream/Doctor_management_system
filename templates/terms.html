@@ -339,6 +339,13 @@
           tab.addEventListener('click', () => activatePolicy(tab.dataset.policyTab));
         });
 
+        document.addEventListener('DOMContentLoaded', () => {
+          if (window.location.hash === '#privacy') {
+            document.querySelector('a[data-policy-tab="privacy"]')?.click();
+            document.querySelector('#privacy')?.scrollIntoView();
+          }
+        });
+
         const observer = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {

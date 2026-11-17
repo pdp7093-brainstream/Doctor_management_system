@@ -26,6 +26,22 @@ from accounts.services.patient_import import (
 )
 
 
+class ChangePasswordViewTests(TestCase):
+    def test_successful_password_change_redirects_to_profile_and_authenticates_new_password(self):
+        user = User.objects.create_user(username='password-change-user', password='OldPassword123!')
+        Patient.objects.get_or_create(user=user)
+        self.client.force_login(user)
+
+        response = self.client.post(reverse('resetpass'), {
+            'old_password': 'OldPassword123!',
+            'new_password': 'NewPassword456!',
+            'confirm_password': 'NewPassword456!',
+        })
+
+        self.assertRedirects(response, reverse('profile'), fetch_redirect_response=False)
+        self.assertTrue(self.client.login(username='password-change-user', password='NewPassword456!'))
+
+
 class RoleRedirectMiddlewareTests(TestCase):
     def setUp(self):
         self.patient_user = User.objects.create_user(username='role-patient', password='pass')
@@ -395,6 +411,12 @@ class PatientInviteTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.patient_user.refresh_from_db()
         self.assertEqual(self.patient_user.email, 'changed@example.com')
+
+    def test_usable_password_without_email_has_no_login_status(self):
+        self.patient_user.email = ''
+        self.patient_user.set_password('KnownPass123!')
+        self.patient_user.save()
+        self.assertEqual(self.patient.login_status, 'none')
 
     def test_activation_page_sets_password_and_consumes_token(self):
         token = patient_invite_token_generator.make_token(self.patient_user)

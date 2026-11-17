@@ -52,7 +52,7 @@
                     <span class="dc-count">{{ categories|length }} total</span>
                 </div>
                 <div class="dc-table-wrap">
-                    <table class="table table-hover dc-table">
+                    <table class="table table-hover dc-table table-cards">
                         <thead>
                             <tr>
                                 <th>Category Name</th>
@@ -64,16 +64,16 @@
                         <tbody>
                             {% for category in categories %}
                             <tr>
-                                <td><span class="dc-name">{{category.name}}</span></td>
-                                <td class="dc-mono">{{category.created_at|date:"d M Y"}}</td>
-                                <td>
+                                <td data-label="Category Name"><span class="dc-name">{{category.name}}</span></td>
+                                <td class="dc-mono" data-label="Date Created">{{category.created_at|date:"d M Y"}}</td>
+                                <td data-label="Status">
                                     {% if category.is_active %}
                                     <span class="dc-badge green">Active</span>
                                     {% else %}
                                     <span class="dc-badge grey">Inactive</span>
                                     {% endif %}
                                 </td>
-                                <td class="col-actions text-end">
+                                <td class="col-actions text-end" data-label="Actions">
                                     <div class="action-btns">
                                     <button type="button" class="btn-act btn-act-edit" title="Edit" aria-label="Edit" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ category.id }}">
                                         <i class="bi bi-pencil"></i>

@@ -151,7 +151,7 @@
                         {% endfor %}
                       </select>
                       <button type="button" class="btn-add-member" id="openAddMember">
-                        <i class="bi bi-person-plus"></i> + Family Member
+                        <i class="bi bi-person-plus"></i> Add Family Member
                       </button>
                     </div>
                     <!-- Hidden fields filled by JS -->
@@ -163,7 +163,7 @@
                   <!-- Email --> 
                   <div class="col-md-12">
                     <label for="appointmentEmail" class="patient-selector-label">Email Address</label>
-                    <input type="email" name="email" id="appointmentEmail" class="form-control"
+                    <input type="email" name="email" id="appointmentEmail" class="form-control" autocomplete="email"
                       placeholder="Email Address"
                       value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}">
                   </div>
@@ -176,8 +176,8 @@
 
                   <!-- Time Slots -->
                   <div class="col-12 mt-3" id="time-slot-wrapper" style="display:none;">
-                    <label for="selected_time" class="patient-selector-label">Select Preferred Time</label>
-                    <div class="row g-2 row-cols-3 row-cols-md-4" id="time_buttons_container"></div>
+                    <span class="patient-selector-label d-block" id="timeSlotLabel">Select Preferred Time</span>
+                    <div class="row g-2 row-cols-3 row-cols-md-4" id="time_buttons_container" role="group" aria-labelledby="timeSlotLabel"></div>
                   </div>
                   <input type="hidden" name="time_slot" id="selected_time">
 
@@ -216,11 +216,11 @@
       <div class="modal-body">
         <div class="modal-form-grid">
           <div class="modal-field modal-field-full">
-            <label>Full Name *</label>
+            <label for="memberName">Full Name *</label>
             <input type="text" id="memberName" placeholder="e.g. Priya Shah">
           </div>
           <div class="modal-field">
-            <label>Relation *</label>
+            <label for="memberRelation">Relation *</label>
             <select id="memberRelation">
               <option value="">Select Relation</option>
               <option value="Wife">Wife</option>
@@ -235,11 +235,11 @@
             </select>
           </div>
           <div class="modal-field">
-            <label>Phone Number</label>
+            <label for="memberPhone">Phone Number</label>
             <input type="tel" id="memberPhone" placeholder="e.g. 9876543210" maxlength="15">
           </div>
           <div class="modal-field">
-            <label>Gender</label>
+            <label for="memberGender">Gender</label>
             <select id="memberGender">
               <option value="">Select Gender</option>
               <option value="male">Male</option>
@@ -248,11 +248,11 @@
             </select>
           </div>
           <div class="modal-field">
-            <label>Date of Birth</label>
+            <label for="memberDob">Date of Birth</label>
             <input type="date" id="memberDob" max="{{ member_dob_max }}">
           </div>
           <div class="modal-field">
-            <label>Blood Group</label>
+            <label for="memberBloodGroup">Blood Group</label>
             <select id="memberBloodGroup">
               <option value="">Select Blood Group</option>
               <option value="A+">A+</option>

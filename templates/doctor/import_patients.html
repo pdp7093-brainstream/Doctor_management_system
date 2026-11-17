@@ -243,7 +243,7 @@
             <form method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="confirm">
-                <button type="submit" class="action-btn" {% if summary.new == 0 %}disabled{% endif %}>
+                <button type="submit" class="btn-page btn-page-primary" {% if summary.new == 0 %}disabled{% endif %}>
                     <i class="bi bi-check-lg"></i> Confirm &amp; Import {{ summary.new }} Patients
                 </button>
             </form>

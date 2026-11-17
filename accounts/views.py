@@ -841,11 +841,15 @@ class ChangePasswordView(LoginRequiredMixin, View):
 
             # Check if old password is correct
             if user.check_password(old_password):
+                if old_password == new_password:
+                    messages.error(request, 'New password must be different from your current password.')
+                    return render(request, 'authentication/change_password.html', {'form': form})
                 user.set_password(new_password)
                 user.save()
                 # Maintain session after password change
                 update_session_auth_hash(request, user)
-                return redirect('login')
+                messages.success(request, 'Your password has been changed successfully.')
+                return redirect('profile')
             else:
                 messages.error(request, 'The old password you entered is incorrect.')
 

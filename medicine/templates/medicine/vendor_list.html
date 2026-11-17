@@ -45,7 +45,7 @@
                         data-vendor-email="{{ vendor.email|default:''|lower }}">
                         <td class="col-num">{{ forloop.counter }}</td>
 
-                        <td data-label="Vendor Name">
+                        <td class="col-card-head" data-label="Vendor Name">
                             <div class="dc-person">
                                 <div class="dc-avatar">
                                     {{ vendor.name|first|upper }}

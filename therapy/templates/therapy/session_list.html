@@ -418,7 +418,7 @@
         <tbody>
           {% for item in therapies %}
           <tr id="therapy-row-{{ item.pk }}" data-therapy-id="{{ item.pk }}">
-            <td data-label="Patient">
+            <td class="col-card-head" data-label="Patient">
               <div class="dc-person">
                 <div class="dc-avatar {% if item.prescription.visit.appointment.family_member %}is-family{% endif %}">
                   {% if item.prescription.visit.appointment.family_member %}

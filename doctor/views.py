@@ -568,6 +568,13 @@ def edit_patient(request, hid):
         bld_grop  = request.POST.get('bld_grop')
         address   = request.POST.get('address')
 
+        if not active_login and email:
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, 'Enter a valid email address.')
+                return render(request, 'doctor/edit_patient.html', {'patient': patient})
+
         # EMAIL DUPLICATE CHECK
         if not active_login and email and User.objects.filter(
             Q(email__iexact=email) | Q(username__iexact=email)
@@ -579,7 +586,7 @@ def edit_patient(request, hid):
 
         #  PHONE DUPLICATE CHECK
         if phone and Patient.objects.filter(phone=phone).exclude(pk=patient.pk).exists():
-
+            messages.error(request, 'This phone number is already used by another patient.')
             return render(request, 'doctor/edit_patient.html', {
                 'patient': patient
             })
@@ -611,6 +618,8 @@ def edit_patient(request, hid):
                     messages.success(request, f'Patient updated and login invite sent to {invite_email}')
                 elif invite_status == 'recent':
                     messages.warning(request, 'Patient updated. Invite was sent recently, try again in a minute.')
+                elif invite_status == 'active':
+                    messages.error(request, 'Patient updated, but this patient already has an active login.')
                 elif invite_status == 'no_email':
                     messages.warning(request, 'Add an email to send a login invite')
                 elif invite_status == 'invalid_email':

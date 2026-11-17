@@ -37,7 +37,7 @@
                     <tbody>
                         {% for member in pending_doctors %}
                         <tr id="row-{{ member.id }}">
-                            <td data-label="Doctor">
+                            <td class="col-card-head" data-label="Doctor">
                                 <div class="dc-person">
                                     <div class="dc-avatar">
                                         {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
@@ -84,7 +84,7 @@
                 <tbody>
                     {% for member in doctors %}
                     <tr>
-                        <td data-label="Doctor"><div class="dc-person"><div class="dc-avatar">{{ member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper }}</div><div class="dc-name">{{ member.user.get_full_name|default:member.user.username }}</div></div></td>
+                        <td class="col-card-head" data-label="Doctor"><div class="dc-person"><div class="dc-avatar">{{ member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper }}</div><div class="dc-name">{{ member.user.get_full_name|default:member.user.username }}</div></div></td>
                         <td class="dc-mono" data-label="Username">{{ member.user.username }}</td>
                         <td data-label="Email">{{ member.user.email|default:"—" }}</td>
                         <td class="dc-mono" data-label="Phone">{{ member.phone|default:"—" }}</td>
@@ -126,7 +126,7 @@
                     <tbody id="staffTableBody">
                         {% for member in billers %}
                         <tr id="row-{{ member.id }}">
-                            <td data-label="Staff">
+                            <td class="col-card-head" data-label="Staff">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="dc-avatar">
                                         {{member.user.first_name|slice:":1"|upper|default:member.user.username|slice:":1"|upper}}
@@ -223,7 +223,7 @@
 
             <div class="modal-err" id="addErr"></div>
             <div class="d-flex gap-2 mt-3">
-                <button class="btn btn-light flex-grow-1" id="closeAddStaff">Cancel</button>
+                <button class="btn-clear flex-grow-1" id="closeAddStaff">Cancel</button>
                 <button class="btn btn-primary flex-grow-1" id="saveAddStaff">Add Staff</button>
             </div>
         </div>
@@ -264,7 +264,7 @@
 
             <div class="modal-err" id="editErr"></div>
             <div class="d-flex gap-2 mt-3">
-                <button class="btn btn-light flex-grow-1" id="closeEditStaff">Cancel</button>
+                <button class="btn-clear flex-grow-1" id="closeEditStaff">Cancel</button>
                 <button class="btn btn-primary flex-grow-1" id="saveEditStaff">Save Changes</button>
             </div>
         </div>
@@ -297,7 +297,7 @@
 
             <div class="modal-err" id="pwdErr"></div>
             <div class="d-flex gap-2 mt-3">
-                <button class="btn btn-light flex-grow-1" id="closeResetPwd">Cancel</button>
+                <button class="btn-clear flex-grow-1" id="closeResetPwd">Cancel</button>
                 <button class="btn btn-primary flex-grow-1" id="saveResetPwd">Reset Password</button>
             </div>
         </div>
