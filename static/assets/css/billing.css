@@ -322,3 +322,33 @@ body .prescribed-medicines-scroll,
         padding: 0;
     }
 }
+
+@media (max-width: 767.98px) {
+   .dc-card .dc-table-wrap.bill-table-scroll.table-cards-wrap,
+   .bill-table-scroll.table-cards-wrap {
+       overflow-x: visible !important;
+   }
+   .dc-card table.dc-table.bill-medicines-table.table-cards,
+   .bill-medicines-table.table-cards {
+       width: 100% !important;
+       min-width: 0 !important;
+       max-width: 100% !important;
+       table-layout: auto !important;
+   }
+   .bill-medicines-table.table-cards th,
+   .bill-medicines-table.table-cards td {
+       width: auto !important;
+       min-width: 0 !important;
+       max-width: none !important;
+   }
+   .bill-medicines-table.table-cards tbody tr:has(td.dc-empty) {
+       display: block !important;
+       width: 100%;
+   }
+   .bill-medicines-table.table-cards td.dc-empty {
+       display: block !important;
+       width: 100% !important;
+       white-space: normal !important;
+       word-break: normal !important;
+   }
+}

@@ -352,3 +352,26 @@ body.change-password-page {
     padding: 36px 24px !important;
   }
 }
+
+@media (max-width: 767.98px) {
+   .auth-brand-panel {
+       padding: 20px 20px 22px !important;
+       min-height: 0 !important;
+   }
+   .auth-brand-logo {
+       font-size: 0.95rem !important;
+       gap: 10px !important;
+       margin-bottom: 0 !important;
+   }
+   .auth-brand-logo > *:first-child {
+       width: 44px !important;
+       height: 44px !important;
+       flex: 0 0 44px;
+   }
+   .auth-brand-heading {
+       font-size: 1.35rem !important;
+       margin: 12px 0 0 !important;
+   }
+   .auth-brand-sub,
+   .auth-brand-features { display: none !important; }
+}

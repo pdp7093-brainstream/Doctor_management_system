@@ -314,3 +314,23 @@ body { border-top: 0 !important; }
        display: none;
    }
 }
+
+@media (max-width: 1199px) {
+   .navmenu ul li.nav-item > a[href*="appointment"],
+   .navmenu ul li > a.btn-login {
+       display: flex !important;
+       align-items: center;
+       justify-content: center;
+       width: calc(100% - 24px) !important;
+       height: 44px !important;
+       margin: 6px 12px !important;
+       padding: 0 16px !important;
+       border-radius: 50px !important;
+       box-sizing: border-box;
+   }
+   .navmenu ul li.nav-item:has(> a[href*="appointment"]),
+   .navmenu ul li:has(> a.btn-login) {
+       display: block !important;
+       width: 100%;
+   }
+}

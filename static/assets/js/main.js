@@ -101,7 +101,10 @@
         duration: 600,
         easing: 'ease-in-out',
         once: true,
-        mirror: false
+        mirror: false,
+        offset: 40,
+        delay: 0,
+        disable: function () { return window.innerWidth < 576; }
       });
     }
   }

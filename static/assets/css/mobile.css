@@ -254,3 +254,43 @@
   .footer-16 {
     margin-top: 0 !important;
   }
+
+@media (max-width: 575.98px) {
+   .aw-card { padding: 20px 18px !important; }
+   .aw-card-head {
+       display: flex !important;
+       align-items: center !important;
+       gap: 12px !important;
+   }
+   .aw-card-head .aw-icon {
+       flex: 0 0 44px;
+       width: 44px !important;
+       height: 44px !important;
+       margin: 0 !important;
+   }
+   .aw-card-title {
+       font-size: 20px !important;
+       line-height: 1.25;
+       margin: 0 !important;
+   }
+}
+
+@media (max-width: 575.98px) {
+   .about-page .dr-card { padding: 20px 18px !important; }
+   .about-page .dr-card-head {
+       display: flex !important;
+       align-items: center !important;
+       gap: 12px !important;
+   }
+   .about-page .dr-card-head .dr-icon {
+       flex: 0 0 44px;
+       width: 44px !important;
+       height: 44px !important;
+       margin: 0 !important;
+   }
+   .about-page .dr-card-head h3 {
+       font-size: 18px !important;
+       line-height: 1.3;
+       margin: 0 !important;
+   }
+}

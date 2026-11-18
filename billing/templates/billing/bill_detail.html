@@ -66,8 +66,8 @@
                     <div class="dc-card-header">
                         <h3 class="dc-card-title"><i class="bi bi-capsule"></i> Prescribed Medicines</h3>
                     </div>
-                    <div class="dc-table-wrap bill-table-scroll">
-                        <table class="table table-hover dc-table bill-medicines-table">
+                    <div class="dc-table-wrap bill-table-scroll table-cards-wrap">
+                        <table class="table table-hover dc-table bill-medicines-table table-cards">
                             <thead>
                                 <tr>
                                     <th class="col-num">#</th>
@@ -81,8 +81,8 @@
                             <tbody>
                                 {% for item in bill.items.all %}
                                 <tr>
-                                    <td class="col-num">{{ forloop.counter }}</td>
-                                    <td class="dc-name">
+                                    <td class="col-num" data-label="#">{{ forloop.counter }}</td>
+                                    <td class="dc-name" data-label="Medicine">
                                         <div>{{ item.medicine_name }}</div>
                                         {% if item.medicine_variant and item.medicine_variant.medicine.medicine_type %}
                                             <small class="text-muted d-block">{{ item.medicine_variant.medicine.medicine_type.name }}</small>
@@ -90,10 +90,10 @@
                                             <small class="text-muted d-block">{{ item.medicine_variant.get_unit_display }}</small>
                                         {% endif %}
                                     </td>
-                                    <td><span class="dc-badge grey">{{ item.power }}</span></td>
-                                    <td class="text-end dc-mono">{{ item.quantity }}</td>
-                                    <td class="text-end dc-mono">₹{{ item.unit_price|floatformat:2 }}</td>
-                                    <td class="text-end dc-mono">₹{{ item.total_price|floatformat:2 }}</td>
+                                    <td data-label="Pack Size"><span class="dc-badge grey">{{ item.power }}</span></td>
+                                    <td class="text-end dc-mono" data-label="Qty">{{ item.quantity }}</td>
+                                    <td class="text-end dc-mono" data-label="Rate">₹{{ item.unit_price|floatformat:2 }}</td>
+                                    <td class="text-end dc-mono" data-label="Amount">₹{{ item.total_price|floatformat:2 }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
@@ -117,9 +117,33 @@
                 {% if therapy_bill_items %}
                 <div class="dc-card mb-3">
                     <div class="dc-card-header"><h3 class="dc-card-title"><i class="bi bi-droplet-half"></i> Therapy</h3></div>
-                    <div class="dc-table-wrap bill-table-scroll"><table class="table table-hover dc-table mb-0"><thead><tr><th class="col-num">#</th><th>Therapy</th><th>Billing</th><th class="text-end">Sessions</th><th class="text-end">Amount (₹)</th></tr></thead><tbody>
-                        {% for item in therapy_bill_items %}<tr><td class="col-num">{{ forloop.counter }}</td><td class="dc-name">{{ item.therapy_name }}</td><td>{{ item.get_billing_type_display }}</td><td class="text-end dc-mono">{{ item.sessions }}</td><td class="text-end dc-mono">₹{{ item.amount|floatformat:2 }}</td></tr>{% endfor %}
-                    </tbody><tfoot><tr><td colspan="4" class="text-end fw-semibold">Therapy total</td><td class="text-end fw-bold dc-mono">₹{{ therapy_subtotal|floatformat:2 }}</td></tr></tfoot></table></div>
+                    <div class="dc-table-wrap bill-table-scroll table-cards-wrap">
+                        <table class="table table-hover dc-table mb-0 table-cards">
+                            <thead>
+                                <tr>
+                                    <th class="col-num">#</th>
+                                    <th>Therapy</th>
+                                    <th>Billing</th>
+                                    <th class="text-end">Sessions</th>
+                                    <th class="text-end">Amount (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in therapy_bill_items %}
+                                <tr>
+                                    <td class="col-num" data-label="#">{{ forloop.counter }}</td>
+                                    <td class="dc-name" data-label="Therapy">{{ item.therapy_name }}</td>
+                                    <td data-label="Billing">{{ item.get_billing_type_display }}</td>
+                                    <td class="text-end dc-mono" data-label="Sessions">{{ item.sessions }}</td>
+                                    <td class="text-end dc-mono" data-label="Amount">₹{{ item.amount|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr><td colspan="4" class="text-end fw-semibold">Therapy total</td><td class="text-end fw-bold dc-mono">₹{{ therapy_subtotal|floatformat:2 }}</td></tr>
+                            </tfoot>
+                        </table>
+                    </div>
                 </div>
                 {% endif %}
 

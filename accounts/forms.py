@@ -21,30 +21,37 @@ class PasswordResetEmailForm(PasswordResetForm):
 
 class RegistrationForm(forms.Form):
     name = forms.CharField(
+        label='Full Name',
         max_length=100, 
         widget=forms.TextInput(attrs={
             'class': 'form-control', 
             'placeholder': 'Full Name',
-            'required': 'required'
+            'required': 'required',
+            'autocomplete': 'name'
         })
     )
     email = forms.EmailField(
+        label='Email',
         widget=forms.EmailInput(attrs={
             'class': 'form-control', 
             'placeholder': 'Email Address',
-            'required': 'required'
+            'required': 'required',
+            'autocomplete': 'email'
         })
     )
     phone = forms.CharField(
+        label='Phone',
         max_length=15, 
         widget=forms.TextInput(attrs={
             'class': 'form-control', 
-            'placeholder': '9876543210',
+            'placeholder': 'e.g. 9876543210',
             'required': 'required',
-            'type': 'tel'
+            'type': 'tel',
+            'autocomplete': 'tel'
         })
     )
     password = forms.CharField(
+        label='Password',
         widget=forms.PasswordInput(attrs={
             'class': 'form-control', 
             'placeholder': 'Password',
