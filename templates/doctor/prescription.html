@@ -6,12 +6,12 @@
 <main class="main-content" id="mainContent">
     <div class="container-fluid px-4 py-5">
 
-        <div class="d-flex justify-content-between align-items-center mb-5">
+        <div class="page-head mb-4">
             <div>
-                <h1 class="h3 text-dark fw-bold mb-1">Patient Visit</h1>
-                <p class="text-muted small mb-0">Document visit details and create prescription</p>
+                <h2 class="page-title">Patient Visit</h2>
+                <p class="page-subtitle">Document visit details and create prescription</p>
             </div>
-            <div class="page-btn-group">
+            <div class="d-flex gap-2 flex-wrap">
                 {% if visit_completed %}
                 <a href="{% url 'appointment:print_prescription' visit.id|hid %}" target="_blank"
                     class="btn-page btn-page-outline">

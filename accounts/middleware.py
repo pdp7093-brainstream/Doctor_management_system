@@ -88,7 +88,9 @@ class RoleRedirectMiddleware:
         patient_only_page = (
             namespace == '' and name in self.PATIENT_ONLY_URLS
         ) or (
-            namespace == 'appointment' and name in self.PATIENT_APPOINTMENT_URLS
+            namespace == 'appointment'
+            and name in self.PATIENT_APPOINTMENT_URLS
+            and name != 'print_prescription'
         )
         if (member or request.user.is_staff) and patient_only_page:
             return redirect(

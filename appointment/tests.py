@@ -81,9 +81,9 @@ class PrescriptionAdviceTests(TestCase):
     def setUp(self):
         patient_user = User.objects.create_user(username='advice-patient', first_name='Test')
         patient, _ = Patient.objects.get_or_create(user=patient_user)
-        doctor_user = User.objects.create_user(username='advice-doctor')
+        self.doctor_user = User.objects.create_user(username='advice-doctor')
         from doctor.models import InnerMember
-        doctor = InnerMember.objects.create(user=doctor_user, role='doctor')
+        doctor = InnerMember.objects.create(user=self.doctor_user, role='doctor')
         appointment = Appointment.objects.create(
             patient=patient,
             doctor=doctor,
@@ -92,6 +92,16 @@ class PrescriptionAdviceTests(TestCase):
         )
         self.visit = Visit.objects.create(patient=patient, doctor=doctor, appointment=appointment)
         self.prescription = Prescription.objects.create(visit=self.visit)
+
+    def test_doctor_can_open_print_prescription(self):
+        self.client.force_login(self.doctor_user)
+
+        response = self.client.get(
+            reverse('appointment:print_prescription', args=[encode_id(self.visit.id)])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'appointment/prescription_print.html')
 
     def test_advice_lines_are_normalized_and_saved(self):
         self.prescription.pathya = normalize_advice_lines(' Warm water \n\nMOONG DAL\nwarm water ')
