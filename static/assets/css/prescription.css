@@ -610,6 +610,31 @@ textarea.form-control {
 .therapy-notes input { margin-top: 5px; }
 .therapy-progress { height: 5px; min-width: 45px; }
 
+.therapy-notes-toggle.has-note {
+    position: relative;
+}
+.therapy-notes-toggle.has-note::after {
+    background: #117A15;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    content: "";
+    height: 8px;
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    width: 8px;
+}
+.therapy-notes-editor-row > td {
+    padding: 8px 12px !important;
+}
+.therapy-notes-editor-row textarea {
+    display: block;
+    width: 100%;
+}
+.therapy-notes-editor-row.d-none {
+    display: none !important;
+}
+
 @media (max-width: 768px) {
     .therapy-table-wrap { overflow: visible; }
     .therapy-prescription-table,
@@ -654,7 +679,17 @@ textarea.form-control {
     .therapy-prescription-table tbody tr.therapy-prescription-row > td:first-child::before { display: none; }
     .therapy-prescription-table .therapy-billing-select { min-width: 0; }
     .therapy-prescription-table .therapy-start-input { font-size: .7rem; }
-    .therapy-prescription-table .therapy-notes[open] { min-width: 0; }
-    .therapy-prescription-table .therapy-notes input { width: 100%; }
+    .therapy-prescription-table tbody tr.therapy-notes-editor-row {
+        display: block;
+        margin: -10px 12px 10px;
+        width: calc(100% - 24px);
+    }
+    .therapy-prescription-table tbody tr.therapy-notes-editor-row > td {
+        display: block;
+        width: 100%;
+    }
+    .therapy-prescription-table tbody tr.therapy-notes-editor-row textarea {
+        width: 100%;
+    }
     .therapy-prescription-table tbody tr.therapy-prescription-row > td:last-child { justify-content: end; }
 }

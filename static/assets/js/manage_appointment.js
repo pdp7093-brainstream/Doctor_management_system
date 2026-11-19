@@ -3,15 +3,21 @@ const searchInput = document.getElementById('search');
 const dateInput = document.getElementById('appointmentDate');
 const statusInput = document.getElementById('appointmentStatus');
 const clearBtn = document.getElementById('clearBtn');
+const currentParams = new URLSearchParams(window.location.search);
+const patientScope = {
+    patient: currentParams.get('patient') || '',
+    family_member: currentParams.get('family_member') || '',
+};
 let debounceTimer;
 
 function fetchAppointments(page = 1) {
-    const params = new URLSearchParams({
-        search: searchInput.value,
-        appointment_date: dateInput.value,
-        status: statusInput.value,
-        page: page,
-    });
+    const params = new URLSearchParams();
+    params.set('search', searchInput.value);
+    params.set('appointment_date', dateInput.value);
+    params.set('status', statusInput.value);
+    params.set('page', page);
+    if (patientScope.patient) params.set('patient', patientScope.patient);
+    if (patientScope.family_member) params.set('family_member', patientScope.family_member);
 
     fetch(`/appointment/manage_appointments/?${params.toString()}`, {
         headers: { 'x-requested-with': 'XMLHttpRequest' }

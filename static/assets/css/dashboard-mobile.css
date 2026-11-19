@@ -1245,6 +1245,32 @@
 }
 
 @media (max-width: 575.98px) {
+   .therapy-card .therapy-prescription-table tbody tr.therapy-prescription-row > td[data-label="Notes"] .therapy-notes-toggle {
+       height: 30px !important;
+       width: 32px !important;
+   }
+   .therapy-card .therapy-prescription-table tbody tr.therapy-notes-editor-row {
+       display: block !important;
+       width: calc(100% - 24px) !important;
+       margin: -10px 12px 10px !important;
+   }
+   .therapy-card .therapy-prescription-table tbody tr.therapy-notes-editor-row > td {
+       display: block !important;
+       width: 100% !important;
+       padding: 0 !important;
+   }
+   .therapy-card .therapy-prescription-table tbody tr.therapy-notes-editor-row textarea {
+       display: block !important;
+       width: 100% !important;
+       min-width: 0 !important;
+       height: auto !important;
+   }
+   .therapy-card .therapy-prescription-table tbody tr.therapy-notes-editor-row.d-none {
+       display: none !important;
+   }
+}
+
+@media (max-width: 575.98px) {
    .feedback-list .feedback-card {
        position: relative;
    }
@@ -1331,4 +1357,176 @@
        padding-top: 8px;
        border-top: 1px solid #e2e8f0;
    }
+}
+
+@media (max-width: 575.98px) {
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.duration-cell {
+       display: grid !important;
+       grid-template-columns: minmax(0, 1fr) auto auto;
+       align-items: center !important;
+       justify-content: initial !important;
+       column-gap: 8px;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.duration-cell::before {
+       grid-column: 1;
+       margin-right: 0 !important;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.duration-cell > div {
+       grid-row: 1;
+       display: block !important;
+       margin: 0 !important;
+       white-space: nowrap;
+       text-align: right;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.duration-cell > div:first-of-type {
+       grid-column: 2;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.duration-cell > div.duration-total {
+       grid-column: 3;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.stock-cell {
+       display: grid !important;
+       grid-template-columns: minmax(0, 1fr) auto auto;
+       align-items: center !important;
+       justify-content: initial !important;
+       column-gap: 8px;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.stock-cell::before {
+       grid-column: 1;
+       margin-right: 0 !important;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.stock-cell > .toggle-switch {
+       grid-column: 2;
+       margin: 0 !important;
+       justify-self: end;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.stock-cell > .stock-status {
+       grid-column: 3;
+       margin: 0 !important;
+       justify-self: end;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell {
+       display: flex !important;
+       grid-column: 1 / -1 !important;
+       justify-content: flex-end !important;
+       width: 100% !important;
+       padding-top: 10px !important;
+       border-top: 1px solid #edf1f5 !important;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell::before {
+       display: none !important;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell > .action-btns {
+       display: flex !important;
+       justify-content: flex-end !important;
+       width: 100% !important;
+   }
+}
+
+@media (max-width: 575.98px) {
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell {
+       display: flex !important;
+       justify-content: flex-end !important;
+       width: 100% !important;
+       grid-column: 1 / -1 !important;
+       border-top: 1px solid #e3ebe2 !important;
+       padding-top: 10px !important;
+       margin-top: 4px !important;
+   }
+   .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell::before {
+       display: none !important;
+       border: 0 !important;
+   }
+}
+
+@media (max-width: 575.98px) {
+    .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell,
+    .prescription-list-card .prescription-table tbody tr.prescription-row > td:last-child,
+    .prescription-list-card .prescription-table tbody td.action-cell,
+    .prescription-list-card .prescription-table td.action-cell,
+    .prescription-table tbody tr.prescription-row > td.action-cell,
+    .prescription-table tbody tr.prescription-row > td:last-child,
+    .prescription-table tr.prescription-row > td.action-cell,
+    .prescription-table tr.prescription-row > td:last-child,
+    .prescription-table tbody td.action-cell,
+    .prescription-table tbody td:last-child,
+    .prescription-table td.action-cell,
+    .prescription-table td:last-child,
+    tr.prescription-row > td.action-cell,
+    tr.prescription-row > td:last-child,
+    tr.prescription-row > td[data-label="Action"],
+    #medicineList tr.prescription-row > td.action-cell,
+    #medicineList tr.prescription-row > td:last-child,
+    #medicineList td.action-cell,
+    #medicineList td:last-child {
+        display: flex !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+        grid-column: 1 / -1 !important;
+        border-top: 1px solid #e3ebe2 !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        padding-top: 10px !important;
+        margin-top: 4px !important;
+    }
+
+    .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell::before,
+    .prescription-list-card .prescription-table tbody tr.prescription-row > td:last-child::before,
+    .prescription-list-card .prescription-table tbody td.action-cell::before,
+    .prescription-list-card .prescription-table td.action-cell::before,
+    .prescription-table tbody tr.prescription-row > td.action-cell::before,
+    .prescription-table tbody tr.prescription-row > td:last-child::before,
+    .prescription-table tr.prescription-row > td.action-cell::before,
+    .prescription-table tr.prescription-row > td:last-child::before,
+    .prescription-table tbody td.action-cell::before,
+    .prescription-table tbody td:last-child::before,
+    .prescription-table td.action-cell::before,
+    .prescription-table td:last-child::before,
+    tr.prescription-row > td.action-cell::before,
+    tr.prescription-row > td:last-child::before,
+    tr.prescription-row > td[data-label="Action"]::before,
+    #medicineList tr.prescription-row > td.action-cell::before,
+    #medicineList tr.prescription-row > td:last-child::before,
+    #medicineList td.action-cell::before,
+    #medicineList td:last-child::before {
+        display: none !important;
+        content: none !important;
+        border: none !important;
+        border-top: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        border-bottom: none !important;
+    }
+
+    .prescription-list-card .prescription-table tbody tr.prescription-row > td.action-cell > .action-btns,
+    .prescription-table tbody tr.prescription-row > td.action-cell > .action-btns,
+    .prescription-table tbody td.action-cell > .action-btns,
+    tr.prescription-row > td.action-cell > .action-btns,
+    #medicineList td.action-cell > .action-btns {
+        display: flex !important;
+        justify-content: flex-end !important;
+        margin-left: auto !important;
+    }
+}
+
+@media (max-width: 575.98px) {
+    #medicineList tr.prescription-row td.action-cell {
+        display: flex !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        width: 100% !important;
+        max-width: none !important;
+        grid-column: 1 / -1 !important;
+        border-top: 1px solid #e3ebe2 !important;
+        padding: 10px 0 0 !important;
+        margin-top: 4px !important;
+    }
+    #medicineList tr.prescription-row td.action-cell::before {
+        display: none !important;
+    }
+    #medicineList tr.prescription-row td.action-cell .action-btns {
+        margin-left: auto !important;
+        justify-content: flex-end !important;
+    }
 }

@@ -327,12 +327,15 @@ document.querySelectorAll('.btn-delete-fm').forEach(btn => {
 });
 // dashboardd.html js code
 
-const ROWS_PER_PAGE = 10;
+(function () {
+    const ROWS_PER_PAGE = 10;
     const tbody = document.getElementById('tableBody');
-    const allRows = Array.from(tbody.querySelectorAll('tr:not(#emptyRow)'));
     const pagination = document.getElementById('pagination');
     const pageInfo = document.getElementById('pageInfo');
     const paginationWrapper = document.getElementById('paginationWrapper');
+    if (!tbody || !pagination || !pageInfo || !paginationWrapper) return;
+
+    const allRows = Array.from(tbody.querySelectorAll('tr:not(#emptyRow)'));
     let currentPage = 1;
 
     function totalPages() { return Math.ceil(allRows.length / ROWS_PER_PAGE); }
@@ -379,5 +382,6 @@ const ROWS_PER_PAGE = 10;
         paginationWrapper.style.display = 'flex';
         showPage(1);
     }
+})();
 
 

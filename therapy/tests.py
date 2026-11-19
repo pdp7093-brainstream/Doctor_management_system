@@ -653,6 +653,48 @@ class TherapyTests(TestCase):
         self.assertTrue(rows[unbilled.pk].can_delete_therapy)
         self.assertFalse(rows[billed.pk].can_delete_therapy)
 
+    def test_package_prefill_not_required(self):
+        # Master therapy only holds session price; package_price is None
+        therapy = Therapy.objects.create(
+            name='Master Per Session Rate Only',
+            duration_minutes=60,
+            session_price=Decimal('50.00'),
+            package_price=None,
+        )
+        self.assertIsNone(therapy.package_price)
+
+        # Prescription prescribes this therapy as a package, specifying package price per prescription
+        data = QueryDict('', mutable=True)
+        data.setlist('therapy_id[]', [str(therapy.pk)])
+        data.setlist('therapy_item_id[]', [''])
+        data.setlist('therapy_sessions[]', ['5'])
+        data.setlist('therapy_frequency[]', ['daily'])
+        data.setlist('therapy_start[]', [''])
+        data.setlist('therapy_notes[]', ['Package decided per prescription'])
+        data.setlist('therapy_billing_type[]', ['package'])
+        data.setlist('therapy_session_price[]', ['50.00'])
+        data.setlist('therapy_package_price[]', ['220.00'])
+
+        parsed_rows, error = parse_prescription_therapies(data, self.prescription)
+        self.assertIsNone(error)
+        self.assertEqual(len(parsed_rows), 1)
+        self.assertEqual(parsed_rows[0]['billing_type'], 'package')
+        self.assertEqual(parsed_rows[0]['package_price'], Decimal('220.00'))
+
+        save_prescription_therapies(self.prescription, parsed_rows)
+        prescribed = self.prescription.therapies.get(therapy=therapy)
+        self.assertEqual(prescribed.billing_type, 'package')
+        self.assertEqual(prescribed.package_price, Decimal('220.00'))
+        self.assertEqual(prescribed.total_sessions, 5)
+
+        # Billing packages bills the saved package amount once
+        bill = generate_bill_from_visit(self.visit)
+        self.assertEqual(bill.subtotal, Decimal('220.00'))
+        item = TherapyBillItem.objects.get(prescription_therapy=prescribed)
+        self.assertEqual(item.billing_type, 'package')
+        self.assertEqual(item.amount, Decimal('220.00'))
+
+
 
 
 

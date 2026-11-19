@@ -6813,3 +6813,9 @@ section,
   color: #ffffff;
   transform: translateY(-2px);
 }
+
+@media (max-width: 767.98px) {
+  .footer .bottom-content {
+    padding-bottom: 56px;
+  }
+}

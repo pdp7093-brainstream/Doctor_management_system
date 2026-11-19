@@ -83,26 +83,28 @@ def therapy_form_values(request):
         session_price = Decimal(request.POST.get('session_price', request.POST.get('price_per_session', '0')).strip() or '0')
     except (InvalidOperation, AttributeError):
         session_price = None
-    package_price_raw = request.POST.get('package_price', '').strip()
-    try:
-        package_price = Decimal(package_price_raw) if package_price_raw else None
-    except (InvalidOperation, AttributeError):
-        package_price = False
-    default_billing_type = request.POST.get('default_billing_type', 'per_session')
-    if default_billing_type not in dict(BILLING_TYPE_CHOICES):
-        default_billing_type = 'per_session'
-    return {
+
+    data = {
         'name': name,
         'description': request.POST.get('description', '').strip(),
         'duration_minutes': parse_non_negative_int(request.POST.get('duration_minutes'), 45),
         'price_per_session': session_price or Decimal('0'),
         'session_price': session_price,
-        'package_price': package_price,
-        'default_billing_type': default_billing_type,
-        'default_sessions': max(parse_non_negative_int(request.POST.get('default_sessions'), 1), 1),
         'is_active': request.POST.get('is_active') == 'on',
         'sort_order': parse_non_negative_int(request.POST.get('sort_order')),
     }
+    if 'default_billing_type' in request.POST:
+        dbt = request.POST.get('default_billing_type', 'per_session')
+        data['default_billing_type'] = dbt if dbt in dict(BILLING_TYPE_CHOICES) else 'per_session'
+    if 'default_sessions' in request.POST:
+        data['default_sessions'] = max(parse_non_negative_int(request.POST.get('default_sessions'), 1), 1)
+    if 'package_price' in request.POST:
+        package_price_raw = request.POST.get('package_price', '').strip()
+        try:
+            data['package_price'] = Decimal(package_price_raw) if package_price_raw else None
+        except (InvalidOperation, AttributeError):
+            data['package_price'] = False
+    return data
 
 
 def therapy_sessions_redirect(request, query=''):
@@ -131,7 +133,7 @@ class TherapyListView(LoginRequiredMixin, StaffRequiredMixin, View):
             messages.error(request, 'Therapy name is required.')
         elif Therapy.objects.filter(name__iexact=values['name']).exists():
             messages.error(request, f"Therapy '{values['name']}' already exists.")
-        elif values['session_price'] is None or values['package_price'] is False:
+        elif values['session_price'] is None or values.get('package_price') is False:
             messages.error(request, 'Enter valid therapy prices.')
         else:
             Therapy.objects.create(**values)
@@ -153,7 +155,7 @@ class TherapyEditView(LoginRequiredMixin, StaffRequiredMixin, View):
             messages.error(request, 'Therapy name is required.')
         elif Therapy.objects.filter(name__iexact=values['name']).exclude(pk=pk).exists():
             messages.error(request, f"Therapy '{values['name']}' already exists.")
-        elif values['session_price'] is None or values['package_price'] is False:
+        elif values['session_price'] is None or values.get('package_price') is False:
             messages.error(request, 'Enter valid therapy prices.')
         else:
             for field, value in values.items():

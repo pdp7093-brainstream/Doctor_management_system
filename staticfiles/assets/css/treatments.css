@@ -309,3 +309,23 @@
     padding-left: 18px;
     text-align: left;
 }
+
+@media (max-width: 767px) {
+    .treatment-cards-grid {
+        gap: 16px;
+    }
+
+    .treatments-page .treatment-card-wrapper {
+        flex: 0 0 85%;
+        width: 85%;
+        padding: 0 !important;
+        scroll-snap-align: start;
+    }
+}
+
+@media (max-width: 767px) {
+    .treatment-card-wrapper:only-child {
+        width: 100% !important;
+        flex-basis: 100% !important;
+    }
+}

@@ -663,11 +663,12 @@ function addTherapyRow() {
             <td><input class="form-control form-control-sm" type="number" name="therapy_package_price[]" value="${escapeAttr(packagePrice)}" min="0" step="0.01"></td>
             <td><select class="form-select form-select-sm" name="therapy_frequency[]"><option value="daily" ${frequency === 'daily' ? 'selected' : ''}>Daily</option><option value="alternate" ${frequency === 'alternate' ? 'selected' : ''}>Alternate days</option><option value="twice_week" ${frequency === 'twice_week' ? 'selected' : ''}>Twice a week</option><option value="weekly" ${frequency === 'weekly' ? 'selected' : ''}>Weekly</option></select></td>
             <td><input class="form-control form-control-sm" type="date" name="therapy_start[]" value="${escapeAttr(startDate)}"></td>
-            <td><input class="form-control form-control-sm" name="therapy_notes[]" value="${escapeAttr(notes)}"></td>
+            <td><button type="button" class="btn btn-sm btn-outline-secondary therapy-notes-toggle${notes ? ' has-note' : ''}" title="${escapeAttr(notes || 'Edit notes')}" aria-label="Edit notes" aria-expanded="false"><i class="bi bi-pencil-square"></i></button></td>
             <td><span class="small text-muted">0/${sessions}</span><div class="progress" style="height:5px;min-width:48px"><div class="progress-bar" style="width:0%;background:#117A15"></div></div></td>
             <td class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
         </tr>`;
     document.getElementById('therapyList').insertAdjacentHTML('beforeend', row);
+    document.getElementById('therapyList').insertAdjacentHTML('beforeend', `<tr class="therapy-notes-editor-row d-none"><td colspan="10"><textarea class="form-control form-control-sm therapy-notes-input" name="therapy_notes[]" aria-label="Therapy notes">${escapeHtml(notes)}</textarea></td></tr>`);
     updateTherapyCount();
     resetTherapyModal();
     bootstrap.Modal.getInstance(document.getElementById('therapyModal'))?.hide();
@@ -681,6 +682,18 @@ let therapyHighlighted = -1;
 const therapySearchInput = document.getElementById('therapySearchInput');
 const therapyDropdown = document.getElementById('therapyDropdown');
 const therapySelect = document.getElementById('therapySelect');
+let packagePriceManuallyEdited = false;
+
+function recalculatePackagePrice() {
+    if (packagePriceManuallyEdited) return;
+    const sessions = Number(document.getElementById('therapySessionsInput')?.value) || 0;
+    const sp = Number(document.getElementById('therapySessionPriceInput')?.value) || 0;
+    const pkgInput = document.getElementById('therapyPackagePriceInput');
+    if (pkgInput) {
+        const total = sessions * sp;
+        pkgInput.value = total > 0 ? (Number.isInteger(total) ? String(total) : total.toFixed(2)) : (total === 0 ? '0' : '');
+    }
+}
 
 function renderTherapyDropdown(query) {
     const q = (query || '').toLowerCase();
@@ -688,8 +701,7 @@ function renderTherapyDropdown(query) {
     const filtered = opts.filter(o => !q || (o.dataset.name || o.textContent).toLowerCase().includes(q));
     therapyDropdown.innerHTML = filtered.map((o, i) => {
         const price = Number(o.dataset.sessionPrice || 0);
-        const pkg = Number(o.dataset.packagePrice || 0);
-        const hint = price > 0 ? `₹${price}/session` : (pkg > 0 ? `₹${pkg} package` : '<span style="color:#dc3545;">Price not set</span>');
+        const hint = price > 0 ? `₹${price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}/session` : '<span style="color:#dc3545;">Rate not set</span>';
         return `<button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-id="${o.value}" data-idx="${i}"><span>${o.dataset.name}</span><small class="text-muted">${o.dataset.duration} min · ${hint}</small></button>`;
     }).join('');
     therapyDropdown.style.display = filtered.length ? 'block' : 'none';
@@ -733,15 +745,19 @@ function selectTherapy(id) {
     if (!option) return;
     therapySelect.value = id;
     therapySearchInput.value = option.dataset.name;
-    document.getElementById('therapyBillingTypeInput').value = option.dataset.billingType || 'per_session';
-    document.getElementById('therapySessionsInput').value = option.dataset.defaultSessions || '1';
-    document.getElementById('therapySessionPriceInput').value = option.dataset.sessionPrice || '0.00';
-    document.getElementById('therapyPackagePriceInput').value = option.dataset.packagePrice || '';
+    packagePriceManuallyEdited = false;
+    document.getElementById('therapyBillingTypeInput').value = 'per_session';
+    document.getElementById('therapySessionsInput').value = '1';
+    const sp = option.dataset.sessionPrice || '0.00';
+    document.getElementById('therapySessionPriceInput').value = sp;
+    recalculatePackagePrice();
     // sync segmented toggle
-    setBillingType(option.dataset.billingType || 'per_session');
+    setBillingType('per_session');
     const chip = document.getElementById('therapySummaryChip');
     chip.style.display = 'block';
-    chip.querySelector('span').textContent = `${option.dataset.duration} min · ${option.dataset.billingType === 'package' ? 'Package' : 'Per session'} · ${option.dataset.defaultSessions || 1} sessions`;
+    const spNum = Number(sp);
+    const rateText = spNum > 0 ? `₹${spNum.toLocaleString('en-IN', { maximumFractionDigits: 2 })} / session` : 'Rate not set';
+    chip.querySelector('span').textContent = `${option.dataset.duration} min · ${rateText}`;
     document.getElementById('addTherapyBtn').disabled = false;
     updateTherapyTotal();
 }
@@ -756,6 +772,9 @@ function setBillingType(type) {
     });
     document.getElementById('sessionPriceWrap').style.display = type === 'per_session' ? '' : 'none';
     document.getElementById('packagePriceWrap').style.display = type === 'package' ? '' : 'none';
+    if (type === 'package' && !packagePriceManuallyEdited) {
+        recalculatePackagePrice();
+    }
     updateTherapyTotal();
 }
 document.querySelectorAll('.billing-toggle-seg').forEach(b => b.addEventListener('click', () => setBillingType(b.dataset.billing)));
@@ -769,9 +788,24 @@ function updateTherapyTotal() {
     if (type === 'per_session') el.textContent = `${sessions} sessions × ₹${sp} = ₹${sessions * sp}`;
     else el.textContent = `Package: ₹${pp} for ${sessions} sessions`;
 }
-['therapySessionsInput','therapySessionPriceInput','therapyPackagePriceInput'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener('input', updateTherapyTotal);
+
+document.getElementById('therapySessionsInput')?.addEventListener('input', () => {
+    if (!packagePriceManuallyEdited) {
+        recalculatePackagePrice();
+    }
+    updateTherapyTotal();
+});
+
+document.getElementById('therapySessionPriceInput')?.addEventListener('input', () => {
+    if (!packagePriceManuallyEdited) {
+        recalculatePackagePrice();
+    }
+    updateTherapyTotal();
+});
+
+document.getElementById('therapyPackagePriceInput')?.addEventListener('input', () => {
+    packagePriceManuallyEdited = true;
+    updateTherapyTotal();
 });
 
 // patch addTherapyRow to use hidden input + option source
@@ -804,6 +838,25 @@ function updateTherapyPrescriptionRow(row) {
 }
 
 const therapyList = document.getElementById('therapyList');
+therapyList?.addEventListener('click', event => {
+    const button = event.target.closest('.therapy-notes-toggle');
+    if (!button) return;
+    const row = button.closest('.therapy-prescription-row');
+    const editorRow = row?.nextElementSibling;
+    if (!editorRow?.matches('.therapy-notes-editor-row')) return;
+    const opening = editorRow.classList.contains('d-none');
+    editorRow.classList.toggle('d-none', !opening);
+    button.setAttribute('aria-expanded', String(opening));
+    if (opening) editorRow.querySelector('.therapy-notes-input')?.focus();
+});
+therapyList?.addEventListener('input', event => {
+    if (!event.target.matches('.therapy-notes-input')) return;
+    const row = event.target.closest('.therapy-notes-editor-row')?.previousElementSibling;
+    const button = row?.querySelector('.therapy-notes-toggle');
+    const note = event.target.value.trim();
+    button?.classList.toggle('has-note', Boolean(note));
+    if (button) button.title = note || 'Edit notes';
+});
 therapyList?.addEventListener('input', event => {
     if (event.target.matches('.therapy-sessions-input, .therapy-price-input')) {
         updateTherapyPrescriptionRow(event.target.closest('.therapy-prescription-row'));
@@ -843,12 +896,13 @@ function addTherapyRow() {
             <td data-label="Amount" class="therapy-amount-cell"><strong class="therapy-amount"></strong></td>
             <td data-label="Frequency"><select class="form-select form-select-sm" name="therapy_frequency[]"><option value="daily" ${frequency === 'daily' ? 'selected' : ''}>Daily</option><option value="alternate" ${frequency === 'alternate' ? 'selected' : ''}>Alternate days</option><option value="twice_week" ${frequency === 'twice_week' ? 'selected' : ''}>Twice a week</option><option value="weekly" ${frequency === 'weekly' ? 'selected' : ''}>Weekly</option></select></td>
             <td data-label="Start date"><input class="form-control form-control-sm therapy-start-input" type="date" name="therapy_start[]" value="${escapeAttr(startDate)}"></td>
-            <td data-label="Notes"><details class="therapy-notes"><summary class="btn btn-sm btn-outline-secondary" title="Edit notes" aria-label="Edit notes"><i class="bi bi-pencil-square"></i></summary><input class="form-control form-control-sm" name="therapy_notes[]" value="${escapeAttr(notes)}" aria-label="Therapy notes"></details></td>
+            <td data-label="Notes"><button type="button" class="btn btn-sm btn-outline-secondary therapy-notes-toggle${notes ? ' has-note' : ''}" title="${escapeAttr(notes || 'Edit notes')}" aria-label="Edit notes" aria-expanded="false"><i class="bi bi-pencil-square"></i></button></td>
             <td data-label="Progress"><span class="small text-muted">0/${sessions}</span><div class="progress therapy-progress"><div class="progress-bar" style="width:0%;background:#117A15"></div></div></td>
             <td data-label="Action" class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
         </tr>`;
     document.getElementById('therapyList').insertAdjacentHTML('beforeend', row);
-    updateTherapyPrescriptionRow(document.getElementById('therapyList').lastElementChild);
+    document.getElementById('therapyList').insertAdjacentHTML('beforeend', `<tr class="therapy-notes-editor-row d-none"><td colspan="10"><textarea class="form-control form-control-sm therapy-notes-input" name="therapy_notes[]" aria-label="Therapy notes">${escapeHtml(notes)}</textarea></td></tr>`);
+    updateTherapyPrescriptionRow(document.querySelector('#therapyList .therapy-prescription-row:last-of-type'));
     updateTherapyCount();
     resetTherapyModal();
     bootstrap.Modal.getInstance(document.getElementById('therapyModal'))?.hide();
@@ -858,6 +912,7 @@ function resetTherapyModal() {
     const modal = document.getElementById('therapyModal');
     if (therapySearchInput) therapySearchInput.value = '';
     therapySelect.value = '';
+    packagePriceManuallyEdited = false;
     document.getElementById('therapyBillingTypeInput').value = 'per_session';
     document.getElementById('therapySessionsInput').value = '1';
     document.getElementById('therapySessionPriceInput').value = '0.00';

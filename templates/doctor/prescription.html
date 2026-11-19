@@ -23,7 +23,7 @@
                     <i class="bi me-2"></i>Back to Appointments
                 </a>
                 {% else %}
-                <a href="{% url 'appointment:manage_appointments' %}" class="btn-page btn-page-outline">
+                <a href="{% url 'appointment:manage_appointments' %}?patient={{ visit.appointment.patient_id|hid }}{% if visit.appointment.family_member_id %}&family_member={{ visit.appointment.family_member_id|hid }}{% endif %}" class="btn-page btn-page-outline">
                     <i class="bi bi me-2"></i>View History
                 </a>
                 {% endif %}
@@ -323,10 +323,11 @@
                                     <td data-label="Amount" class="therapy-amount-cell"><strong class="therapy-amount"></strong></td>
                                     <td data-label="Frequency"><select class="form-select form-select-sm" name="therapy_frequency[]"><option value="daily" {% if item.frequency == 'daily' %}selected{% endif %}>Daily</option><option value="alternate" {% if item.frequency == 'alternate' %}selected{% endif %}>Alternate days</option><option value="twice_week" {% if item.frequency == 'twice_week' %}selected{% endif %}>Twice a week</option><option value="weekly" {% if item.frequency == 'weekly' %}selected{% endif %}>Weekly</option></select></td>
                                     <td data-label="Start date"><input class="form-control form-control-sm therapy-start-input" type="date" name="therapy_start[]" value="{{ item.start_date|date:'Y-m-d' }}"></td>
-                                    <td data-label="Notes"><details class="therapy-notes"><summary class="btn btn-sm btn-outline-secondary" title="Edit notes" aria-label="Edit notes"><i class="bi bi-pencil-square"></i></summary><input class="form-control form-control-sm" name="therapy_notes[]" value="{{ item.notes }}" aria-label="Therapy notes"></details></td>
+                                    <td data-label="Notes"><button type="button" class="btn btn-sm btn-outline-secondary therapy-notes-toggle{% if item.notes %} has-note{% endif %}" title="{% if item.notes %}{{ item.notes|escape }}{% else %}Edit notes{% endif %}" aria-label="Edit notes" aria-expanded="false"><i class="bi bi-pencil-square"></i></button></td>
                                     <td data-label="Progress"><span class="small text-muted">{{ item.progress_text }}</span><div class="progress therapy-progress" style="height:5px"><div class="progress-bar" role="progressbar" style="width:{{ item.progress_percent }}%;background:#117A15"></div></div></td>
                                     <td data-label="Action" class="text-end"><button type="button" class="btn-act btn-act-delete" title="Delete" aria-label="Delete therapy" onclick="removeTherapyRow(this)"><i class="bi bi-trash"></i></button></td>
                                 </tr>
+                                <tr class="therapy-notes-editor-row d-none"><td colspan="10"><textarea class="form-control form-control-sm therapy-notes-input" name="therapy_notes[]" aria-label="Therapy notes">{{ item.notes }}</textarea></td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>

@@ -5,6 +5,20 @@
 {% load static %}
 
 <style>
+    .patient-filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .3rem .6rem;
+        border: 1px solid #dce9dc;
+        border-radius: 999px;
+        background: #f5f8f5;
+        color: #344638;
+        font-size: .8rem;
+        text-decoration: none;
+    }
+    .patient-filter-chip:hover { background: #eaf4ea; color: #015315; }
+
     /* View button — matches staff.html btn-edit-staff style */
     .btn-view-appt {
         background-color: #F3F8F2;
@@ -115,6 +129,14 @@
             </div>
         </div>
     </div>
+
+    {% if filter_patient %}
+    <div class="mb-3">
+        <a class="medicine-filter-chip patient-filter-chip" href="{% url 'appointment:manage_appointments' %}" aria-label="Clear patient filter">
+            {{ filter_patient_name }} <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </a>
+    </div>
+    {% endif %}
 
     <!-- Appointments Table Card -->
     <div class="card">
@@ -285,7 +307,7 @@
         const card = document.querySelector('.appointment-filters-card');
         const toggle = card?.querySelector('.appointment-filters-toggle');
         const params = new URLSearchParams(window.location.search);
-        const hasFilters = Boolean(params.get('search') || params.get('appointment_date') || (params.get('status') && params.get('status') !== 'all'));
+        const hasFilters = Boolean(params.get('search') || params.get('appointment_date') || (params.get('status') && params.get('status') !== 'all') || params.get('patient'));
         if (!card || !toggle) return;
         if (hasFilters) {
             card.classList.add('is-open');

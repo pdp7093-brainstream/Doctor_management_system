@@ -485,11 +485,35 @@ class Manage_appointments(View):
         search           = request.GET.get('search', '')
         appointment_date = request.GET.get('appointment_date', '')
         status           = request.GET.get('status', 'all')
+        patient_hid = request.GET.get('patient', '').strip()
+        family_member_hid = request.GET.get('family_member', '').strip()
+        filter_patient = None
+        filter_family_member = None
 
         appointments = Appointment.objects.filter(
             is_archived=False,
             doctor=doctor,
         ) if doctor else Appointment.objects.none()
+
+        if patient_hid:
+            from doctor import hashid as _hashid
+            try:
+                filter_patient = get_object_or_404(Patient, id=_hashid.decode_hash(patient_hid))
+            except Exception:
+                raise Http404('Patient not found')
+            appointments = appointments.filter(patient=filter_patient)
+            if family_member_hid:
+                try:
+                    filter_family_member = get_object_or_404(
+                        FamilyMember,
+                        id=_hashid.decode_hash(family_member_hid),
+                        patient=filter_patient,
+                    )
+                except Exception:
+                    raise Http404('Family member not found')
+                appointments = appointments.filter(family_member=filter_family_member)
+            else:
+                appointments = appointments.filter(family_member__isnull=True)
 
         if search:
             appointments = appointments.filter(
@@ -517,6 +541,14 @@ class Manage_appointments(View):
             'search'          : search,
             'appointment_date': appointment_date,
             'status'          : status,
+            'filter_patient'  : filter_family_member or filter_patient,
+            'filter_patient_name': (
+                filter_family_member.name if filter_family_member
+                else (filter_patient.user.get_full_name() or filter_patient.user.username) if filter_patient
+                else ''
+            ),
+            'patient_hid'     : patient_hid,
+            'family_member_hid': family_member_hid,
         }
 
         return render(request, 'doctor/manage_appointments.html', context)
