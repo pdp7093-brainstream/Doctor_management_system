@@ -83,7 +83,7 @@ class PrescriptionAdviceTests(TestCase):
         patient, _ = Patient.objects.get_or_create(user=patient_user)
         self.doctor_user = User.objects.create_user(username='advice-doctor')
         from doctor.models import InnerMember
-        doctor = InnerMember.objects.create(user=self.doctor_user, role='doctor')
+        doctor = InnerMember.objects.create(user=self.doctor_user, role='doctor', is_owner=True)
         appointment = Appointment.objects.create(
             patient=patient,
             doctor=doctor,

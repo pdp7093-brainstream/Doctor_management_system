@@ -8,10 +8,10 @@
 <main class="main-content" id="mainContent">
 
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="page-head mb-4">
         <div>
-            <h2 class="page-title mb-1">Patient Profile</h2>
-            <p class="text-muted small mb-0">Full details and family members of this patient.</p>
+            <h2 class="page-title">Patient Profile</h2>
+            <p class="page-subtitle">Full details and family members of this patient.</p>
         </div>
         <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-outline">
             <i class="bi bi-arrow-left me-1"></i> Back to Patients
@@ -101,6 +101,12 @@
                         {{ member.bld_grop|default:"—" }}
                     </div>
                 </div>
+                {% if member.case_no %}
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Case No.</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">{{ member.case_no }}</div>
+                </div>
+                {% endif %}
                 {% else %}
                 <div class="col-md-4">
                     <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Blood Group</div>
@@ -131,6 +137,12 @@
                         {{ patient.address|default:"—" }}
                     </div>
                 </div>
+                {% if patient.case_no %}
+                <div class="col-md-4">
+                    <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Case No.</div>
+                    <div style="font-size:0.92rem; font-weight:600; color:var(--dark-text);">{{ patient.case_no }}</div>
+                </div>
+                {% endif %}
                 {% endif %}
             </div>
         </div>

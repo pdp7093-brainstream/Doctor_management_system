@@ -237,36 +237,42 @@ def search_patients(request):
             Q(user__first_name__icontains=query) |
             Q(user__last_name__icontains=query) |
             Q(user__email__icontains=query) |
-            Q(phone__icontains=query)
+            Q(phone__icontains=query) |
+            Q(case_no__icontains=query)
         ).select_related('user').values(
-            'id', 'user__first_name', 'user__last_name', 'phone', 'user__email'
+            'id', 'user__first_name', 'user__last_name', 'phone', 'user__email', 'case_no'
         )[:10]
 
         for p in patients:
             full_name = f"{p['user__first_name']} {p['user__last_name']}".strip() or p['user__email']
+            case_no = p.get('case_no') or ''
+            case_suffix = f' · Case #{case_no}' if case_no else ''
             results.append({
                 'id': f"patient_{p['id']}",
-                'name': full_name,
+                'name': full_name + case_suffix,
                 'type': 'Main Patient',
                 'phone': p['phone'] or 'N/A',
-                'display': f"{full_name} (Main Patient) - {p['phone'] or 'No Phone'}"
+                'display': f"{full_name}{case_suffix} (Main Patient) - {p['phone'] or 'No Phone'}"
             })
 
         # Search family members
         family_members = FamilyMember.objects.filter(
             Q(name__icontains=query) |
-            Q(phone__icontains=query)
+            Q(phone__icontains=query) |
+            Q(case_no__icontains=query)
         ).select_related('patient__user').values(
-            'id', 'name', 'relation', 'phone'
+            'id', 'name', 'relation', 'phone', 'case_no'
         )[:10]
 
         for fm in family_members:
+            case_no = fm.get('case_no') or ''
+            case_suffix = f' · Case #{case_no}' if case_no else ''
             results.append({
                 'id': f"family_{fm['id']}",
-                'name': fm['name'],
+                'name': fm['name'] + case_suffix,
                 'type': f"Family Member ({fm['relation']})",
                 'phone': fm['phone'] or 'N/A',
-                'display': f"{fm['name']} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
+                'display': f"{fm['name']}{case_suffix} ({fm['relation']}) - {fm['phone'] or 'No Phone'}"
             })
 
         logger.debug("search_patients: query=%r returned %d results", query, len(results))
@@ -1250,6 +1256,7 @@ def print_prescription(request, hid):
     )
     patient_gender = display_value(family_member.gender if family_member else visit.patient.gender)
     patient_contact = display_value(visit.patient.phone)
+    patient_case_no = display_value(family_member.case_no if family_member else visit.patient.case_no)
     doctor = visit.doctor or (visit.appointment.doctor if visit.appointment else None) or default_doctor
     doctor_name = display_value((doctor.user.get_full_name() or doctor.user.username) if doctor else '')
     
@@ -1264,6 +1271,7 @@ def print_prescription(request, hid):
         'patient_name': patient_name,
         'patient_gender': patient_gender,
         'patient_contact': patient_contact,
+        'patient_case_no': patient_case_no,
         'doctor_name': doctor_name,
         'doctor_specialization': display_value(settings.specialization),
         'doctor_registration_no': display_value(settings.registration_no),

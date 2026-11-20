@@ -27,6 +27,10 @@ from accounts.services.patient_import import (
 
 
 class ChangePasswordViewTests(TestCase):
+    def setUp(self):
+        owner = User.objects.create_user(username='setup-owner', password='pass')
+        InnerMember.objects.create(user=owner, role='doctor', is_owner=True)
+
     def test_successful_password_change_redirects_to_profile_and_authenticates_new_password(self):
         user = User.objects.create_user(username='password-change-user', password='OldPassword123!')
         Patient.objects.get_or_create(user=user)
@@ -491,3 +495,248 @@ class PublicFeedbackProtectionTests(TestCase):
             [message.message for message in get_messages(response.wsgi_request)],
         )
         self.assertEqual(PatientFeedback.objects.count(), 3)
+
+
+class CaseNoTests(TestCase):
+    def setUp(self):
+        self.doctor_user = User.objects.create_user(username='caseno-doctor', password='pass')
+        InnerMember.objects.create(user=self.doctor_user, role='doctor', is_owner=True)
+        self.client.force_login(self.doctor_user)
+
+        # A patient with a case_no
+        self.user1 = User.objects.create_user(
+            username='caseno-patient1@example.com',
+            email='caseno-patient1@example.com',
+            first_name='Ravi', last_name='Kumar',
+        )
+        self.patient1 = self.user1.patient
+        self.patient1.case_no = '1194'
+        self.patient1.save()
+
+        # A patient without case_no
+        self.user2 = User.objects.create_user(
+            username='caseno-patient2@example.com',
+            email='caseno-patient2@example.com',
+            first_name='Meena', last_name='Sharma',
+        )
+        self.patient2 = self.user2.patient
+
+    def test_case_no_saved_on_patient(self):
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, '1194')
+
+    def test_case_no_search_finds_patient_in_manage_patients(self):
+        response = self.client.get(reverse('doctor:manage_patients'), {'search': '1194'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Ravi')
+
+    def test_case_no_search_finds_family_member_in_manage_patients(self):
+        from accounts.models import FamilyMember
+        member = FamilyMember.objects.create(
+            patient=self.patient1,
+            name='Sita Kumar',
+            relation='Wife',
+            case_no='9999',
+        )
+        response = self.client.get(reverse('doctor:manage_patients'), {'search': '9999'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Sita Kumar')
+
+    def test_duplicate_case_no_shows_warning_but_saves(self):
+        # Edit patient2 to use case_no '1194' (already on patient1)
+        response = self.client.post(
+            reverse('doctor:edit_patient', args=[encode_id(self.patient2.pk)]),
+            {
+                'name': 'Meena Sharma',
+                'email': 'caseno-patient2@example.com',
+                'phone': '',
+                'case_no': '1194',
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        # Warning was issued
+        messages_list = [m.message for m in get_messages(response.wsgi_request)]
+        self.assertTrue(any('Case No. 1194 is already used by' in m for m in messages_list))
+        # But the save still happened
+        self.patient2.refresh_from_db()
+        self.assertEqual(self.patient2.case_no, '1194')
+
+
+class ImportCaseNumbersTests(TestCase):
+    def setUp(self):
+        import openpyxl  # noqa
+        from accounts.models import FamilyMember
+        self.report_path = "test_case_numbers_report.csv"
+        self.temp_files = []
+        self.user1 = User.objects.create_user(
+            username="single-match@example.com",
+            first_name="Ravi",
+            last_name="Verma",
+        )
+        self.patient1 = self.user1.patient
+        self.patient1.case_no = ""
+        self.patient1.save()
+
+    def tearDown(self):
+        import os
+        if os.path.exists(self.report_path):
+            os.remove(self.report_path)
+        if os.path.exists("report.csv"):
+            os.remove("report.csv")
+        for f in self.temp_files:
+            if os.path.exists(f):
+                os.remove(f)
+
+    def _create_xlsx(self, rows, headers=("name", "old_register_no", "check_note", "page")):
+        import tempfile
+        import openpyxl
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.append(list(headers))
+        for r in rows:
+            ws.append(list(r))
+        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as f:
+            temp_path = f.name
+            wb.save(temp_path)
+        self.temp_files.append(temp_path)
+        return temp_path
+
+    def test_single_match_sets_case_no(self):
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "1194", "", "1"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "1194")
+
+    def test_duplicate_names_skipped(self):
+        from django.core.management import call_command
+        # Create second patient with the exact same name
+        user2 = User.objects.create_user(
+            username="another-ravi@example.com",
+            first_name="Ravi",
+            last_name="Verma",
+        )
+        patient2 = user2.patient
+        patient2.case_no = ""
+        patient2.save()
+
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "2222", "", "1"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        patient2.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "")
+        self.assertEqual(patient2.case_no, "")
+
+    def test_existing_case_no_not_overwritten(self):
+        from django.core.management import call_command
+        self.patient1.case_no = "100"
+        self.patient1.save()
+
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "200", "", "1"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "100")
+
+    def test_row_with_check_note_skipped(self):
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "3333", "Verify name spelling", "2"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "")
+
+    def test_dry_run_changes_nothing(self):
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "4444", "", "3"],
+        ])
+        call_command("import_case_numbers", xlsx, f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "")
+
+    def test_multi_number_value_saved_as_is(self):
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "1691 / 1745", "", "4"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "1691 / 1745")
+
+    def test_family_member_single_match_sets_case_no(self):
+        from django.core.management import call_command
+        from accounts.models import FamilyMember
+        member = FamilyMember.objects.create(
+            patient=self.patient1,
+            name="Aarti Verma",
+            relation="Wife",
+            case_no="",
+        )
+        xlsx = self._create_xlsx([
+            ["Aarti Verma", "5555", "", "5"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        member.refresh_from_db()
+        self.assertEqual(member.case_no, "5555")
+
+    def test_accepts_case_no_header_alternative(self):
+        from django.core.management import call_command
+        xlsx = self._create_xlsx(
+            [["Ravi Verma", "7777", "", "6"]],
+            headers=("name", "case_no", "check_note", "page"),
+        )
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "7777")
+
+    def test_check_note_same_name_appears_ignored(self):
+        import csv
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "8888", "same name appears 2 times", "7"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "8888")
+
+        # Verify original check note is kept in report.csv
+        with open(self.report_path, "r", encoding="utf-8") as f:
+            reader = list(csv.DictReader(f))
+            self.assertEqual(len(reader), 1)
+            self.assertEqual(reader[0]["status"], "will set")
+            self.assertEqual(reader[0]["check_note"], "same name appears 2 times")
+
+    def test_check_note_mixed_retains_needs_check(self):
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "8889", "same name appears 2 times; verify spelling", "8"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "")
+
+    def test_duplicate_in_register_not_set(self):
+        import csv
+        from django.core.management import call_command
+        xlsx = self._create_xlsx([
+            ["Ravi Verma", "9001", "", "9"],
+            ["  ravi   verma  ", "9002", "", "10"],
+        ])
+        call_command("import_case_numbers", xlsx, "--apply", f"--report={self.report_path}")
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.patient1.case_no, "")
+
+        with open(self.report_path, "r", encoding="utf-8") as f:
+            reader = list(csv.DictReader(f))
+            self.assertEqual(len(reader), 2)
+            self.assertEqual(reader[0]["status"], "duplicate in register")
+            self.assertEqual(reader[1]["status"], "duplicate in register")
+
+

@@ -21,6 +21,7 @@ class Patient(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
     invite_sent_at = models.DateTimeField(null=True, blank=True)
+    case_no = models.CharField("Case No.", max_length=50, blank=True, default="", db_index=True)
 
     @property
     def login_status(self):
@@ -56,6 +57,7 @@ class FamilyMember(models.Model):
     dob = models.DateField(null=True, blank=True)
     bld_grop = models.CharField(max_length=10, choices=BLOOD_GROUP_CHOICES, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    case_no = models.CharField("Case No.", max_length=50, blank=True, default="", db_index=True)
 
     class Meta:
         unique_together = ('patient', 'name', 'relation')

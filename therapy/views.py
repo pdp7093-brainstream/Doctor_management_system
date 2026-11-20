@@ -305,19 +305,19 @@ class MarkTherapySessionDoneView(LoginRequiredMixin, BillingAccessMixin, View):
         if not session_date or session_date > timezone.localdate():
             error_msg = 'Choose a valid session date that is not in the future.'
             if is_ajax:
-                return JsonResponse({'error': error_msg}, status=400)
+                return JsonResponse({'ok': False, 'error': error_msg}, status=400)
             messages.error(request, error_msg)
             return redirect(return_to)
         if status not in {TherapySession.STATUS_DONE, TherapySession.STATUS_MISSED}:
             error_msg = 'Choose Done or Missed for the session status.'
             if is_ajax:
-                return JsonResponse({'error': error_msg}, status=400)
+                return JsonResponse({'ok': False, 'error': error_msg}, status=400)
             messages.error(request, error_msg)
             return redirect(return_to)
         if create_bill and status != TherapySession.STATUS_DONE:
             error_msg = 'Only completed (Done) sessions can be billed.'
             if is_ajax:
-                return JsonResponse({'error': error_msg}, status=400)
+                return JsonResponse({'ok': False, 'error': error_msg}, status=400)
             messages.error(request, error_msg)
             return redirect(return_to)
 
@@ -332,7 +332,7 @@ class MarkTherapySessionDoneView(LoginRequiredMixin, BillingAccessMixin, View):
             if prescribed.status != 'active' or done_count >= prescribed.total_sessions:
                 error_msg = 'All prescribed therapy sessions are already completed.'
                 if is_ajax:
-                    return JsonResponse({'error': error_msg}, status=400)
+                    return JsonResponse({'ok': False, 'error': error_msg}, status=400)
                 messages.error(request, error_msg)
                 return redirect(return_to)
 
@@ -379,10 +379,10 @@ class MarkTherapySessionDoneView(LoginRequiredMixin, BillingAccessMixin, View):
             )
             if is_ajax:
                 return JsonResponse({
-                    'success': True,
+                    'ok': True,
                     'message': f'{prescribed.therapy.name} session {session.session_no} saved and billed ({bill.bill_number}).',
-                    'redirect_url': print_url,
-                    'bill_number': bill.bill_number,
+                    'bill_id': bill.id,
+                    'bill_url': print_url,
                 })
             messages.success(
                 request,
@@ -435,7 +435,7 @@ class BillTherapySessionsView(LoginRequiredMixin, BillingAccessMixin, View):
             if not unbilled_sessions:
                 error_msg = 'No unbilled sessions found.'
                 if is_ajax:
-                    return JsonResponse({'error': error_msg}, status=400)
+                    return JsonResponse({'ok': False, 'error': error_msg}, status=400)
                 messages.error(request, error_msg)
                 return redirect('doctor:therapy:therapy_sessions')
 
@@ -467,10 +467,9 @@ class BillTherapySessionsView(LoginRequiredMixin, BillingAccessMixin, View):
         )
         if is_ajax:
             return JsonResponse({
-                'success': True,
-                'message': f'Bill {bill.bill_number} created successfully.',
-                'redirect_url': print_url,
-                'bill_number': bill.bill_number,
+                'ok': True,
+                'bill_id': bill.id,
+                'bill_url': print_url,
             })
         messages.success(request, f'Bill {bill.bill_number} created successfully.')
         return redirect(print_url)

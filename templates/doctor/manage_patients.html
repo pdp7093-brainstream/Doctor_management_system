@@ -153,6 +153,7 @@
                                             </span>
                                         {% endif %}
                                     </div>
+                                    {% if p.case_no %}<div class="dc-sub" style="font-size:0.75rem; color:#6c757d;">Case #{{ p.case_no }}</div>{% endif %}
                                     <div class="dc-sub">
                                         {% if p.type == 'family' %}Family member{% else %}Patient{% endif %}
                                         {% if p.type == 'main' %}

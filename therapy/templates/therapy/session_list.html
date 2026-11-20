@@ -995,7 +995,11 @@
         });
       }
 
-      const data = await response.json().catch(() => ({}));
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('The server returned an unexpected response. Please try again.');
+      }
+      const data = await response.json();
       if (!response.ok) {
         const errorMessage = data.error || 'Failed to create bill. Please try again.';
         if (confirmErrorBox) {
@@ -1006,15 +1010,28 @@
         return;
       }
 
-      // Success: redirect to bill print page
-      if (data.redirect_url) {
-        window.location.href = data.redirect_url;
-      } else {
-        window.location.reload();
+      const isCreatingBill = pendingBillingConfig.type === 'direct_url' || pendingBillingConfig.type === 'record_and_bill';
+      if (isCreatingBill && (!data.ok || !data.bill_url)) {
+        throw new Error(data.error || 'The server could not confirm the bill. Please try again.');
       }
+
+      if (isCreatingBill) {
+        bootstrap.Modal.getInstance(confirmModal)?.hide();
+        if (window.Swal) {
+          await Swal.fire({
+            icon: 'success',
+            title: 'Bill created',
+            html: `Therapy bill created successfully. <a href="${data.bill_url}">View bill</a>`,
+            confirmButtonText: 'Done',
+          });
+        } else if (typeof window.showToast === 'function') {
+          window.showToast('Therapy bill created successfully.', 'success', data.bill_url);
+        }
+      }
+      window.location.reload();
     } catch (err) {
       if (confirmErrorBox) {
-        confirmErrorBox.textContent = 'An unexpected error occurred. Please try again.';
+        confirmErrorBox.textContent = err.message || 'An unexpected error occurred. Please try again.';
         confirmErrorBox.classList.remove('d-none');
       }
       resetConfirmSubmitState();

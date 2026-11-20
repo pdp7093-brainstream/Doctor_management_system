@@ -356,6 +356,8 @@ class TherapyTests(TestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest',
         )
         self.assertEqual(resp2.status_code, 200)
+        self.assertEqual(resp2.json()['ok'], True)
+        self.assertIn('bill_url', resp2.json())
         s1.refresh_from_db()
         s2.refresh_from_db()
         s3.refresh_from_db()
@@ -379,6 +381,10 @@ class TherapyTests(TestCase):
             HTTP_X_REQUESTED_WITH='XMLHttpRequest',
         )
         self.assertEqual(resp3.status_code, 400)
+        self.assertEqual(resp3.json(), {'ok': False, 'error': 'No unbilled sessions found.'})
+        self.assertEqual(
+            TherapyBillItem.objects.filter(bill__in=[bill1, bill2]).count(), 3
+        )
 
         # 5. Session 4 is recorded; billing now only covers session 4
         s4 = TherapySession.objects.create(

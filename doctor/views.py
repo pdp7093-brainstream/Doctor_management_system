@@ -318,6 +318,7 @@ def manage_patients(request):
             'email': p.user.email,
             'login_status': p.login_status,
             'invite_sent_at': p.invite_sent_at,
+            'case_no': p.case_no,
         })
 
     # Family Members (as patients)
@@ -329,6 +330,7 @@ def manage_patients(request):
             'gender': f.gender,
             'type': 'family',
             'login_status': 'none',
+            'case_no': f.case_no,
         })
 
     # Filters
@@ -355,6 +357,7 @@ def manage_patients(request):
             patient for patient in combined
             if search_lower in patient['name'].lower()
             or search_lower in (patient.get('phone') or '').lower()
+            or search_lower in (patient.get('case_no') or '').lower()
         ]
 
     paginator = Paginator(combined, 10)
@@ -567,6 +570,7 @@ def edit_patient(request, hid):
         phone     = request.POST.get('phone', '').strip()
         bld_grop  = request.POST.get('bld_grop')
         address   = request.POST.get('address')
+        case_no   = request.POST.get('case_no', '').strip()
 
         if not active_login and email:
             try:
@@ -591,6 +595,17 @@ def edit_patient(request, hid):
                 'patient': patient
             })
 
+        # CASE NO DUPLICATE WARNING (non-blocking)
+        if case_no:
+            existing_patient = Patient.objects.filter(case_no=case_no).exclude(pk=patient.pk).first()
+            if existing_patient:
+                dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
+                messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
+            else:
+                existing_member = FamilyMember.objects.filter(case_no=case_no).first()
+                if existing_member:
+                    messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
+
         #  UPDATE USER
         if name:
             name_parts = name.split(' ', 1)
@@ -607,6 +622,7 @@ def edit_patient(request, hid):
         patient.dob       = dob if dob else None
         patient.gender    = gender
         patient.bld_grop  = bld_grop
+        patient.case_no   = case_no
         patient.save()
 
         if request.POST.get('send_login_invite') == 'on' and not active_login:
@@ -666,6 +682,7 @@ def add_patient(request):
         address   = request.POST.get('address')
         parent_id = request.POST.get('parent_patient')
         relation  = request.POST.get('relation', '').strip()
+        case_no   = request.POST.get('case_no', '').strip()
 
         if not name:
 
@@ -684,6 +701,17 @@ def add_patient(request):
                 ).exists():
                     return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
+                # CASE NO DUPLICATE WARNING (non-blocking)
+                if case_no:
+                    existing_patient = Patient.objects.filter(case_no=case_no).first()
+                    if existing_patient:
+                        dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
+                        messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
+                    else:
+                        existing_member = FamilyMember.objects.filter(case_no=case_no).first()
+                        if existing_member:
+                            messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
+
                 FamilyMember.objects.create(
                     patient  = parent_patient,
                     name     = name,
@@ -692,6 +720,7 @@ def add_patient(request):
                     gender   = gender or None,
                     dob      = dob or None,
                     bld_grop = bld_grop or None,
+                    case_no  = case_no,
                 )
 
                 return redirect('doctor:manage_patients')
@@ -715,6 +744,17 @@ def add_patient(request):
             messages.error(request, 'Email already in use.')
             return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
+        # CASE NO DUPLICATE WARNING (non-blocking)
+        if case_no:
+            existing_patient = Patient.objects.filter(case_no=case_no).first()
+            if existing_patient:
+                dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
+                messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
+            else:
+                existing_member = FamilyMember.objects.filter(case_no=case_no).first()
+                if existing_member:
+                    messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
+
         name_parts = name.split(' ', 1)
         first_name = name_parts[0]
         last_name  = name_parts[1] if len(name_parts) > 1 else ''
@@ -737,6 +777,7 @@ def add_patient(request):
                 patient.dob      = dob or None
                 patient.gender   = gender or None
                 patient.bld_grop = bld_grop or None
+                patient.case_no  = case_no
                 patient.save()
 
             send_welcome_email(request, user, phone=phone, added_by_clinic=True)
@@ -975,6 +1016,7 @@ def edit_family(request, hid):
         gender   = request.POST.get('gender', '')
         dob      = request.POST.get('dob')
         bld_grop = request.POST.get('bld_grop')
+        case_no  = request.POST.get('case_no', '').strip()
 
         # Validate required fields
         if not name:
@@ -986,6 +1028,17 @@ def edit_family(request, hid):
             messages.error(request, 'This phone number is already registered.')
             return render(request, 'doctor/edit_family.html', {'member': member})
 
+        # CASE NO DUPLICATE WARNING (non-blocking)
+        if case_no:
+            existing_patient = Patient.objects.filter(case_no=case_no).first()
+            if existing_patient:
+                dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
+                messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
+            else:
+                existing_member = FamilyMember.objects.filter(case_no=case_no).exclude(pk=member.pk).first()
+                if existing_member:
+                    messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
+
         # Update member
         member.name     = name
         member.phone    = phone if phone else None
@@ -993,6 +1046,7 @@ def edit_family(request, hid):
         member.gender   = gender if gender else None
         member.dob      = dob if dob else None
         member.bld_grop = bld_grop if bld_grop else None
+        member.case_no  = case_no
         member.save()
 
         return redirect('doctor:manage_patients')
