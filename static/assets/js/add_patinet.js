@@ -69,7 +69,7 @@ parentSearch && parentSearch.addEventListener('input', function(){
     phoneInput.required = false;
     emailField.style.display = 'block';
     addressField.style.display = 'block';
-    modeText.innerHTML = ` No parent selected — this person will be added as a <strong>main patient</strong> with their own login.`;
+    modeText.innerHTML = ` No parent selected — this person will be added as a <strong>main patient</strong>. Add an email only if they need an online login.`;
     submitText.textContent = 'Save Patient';
 
     const q = this.value.trim();

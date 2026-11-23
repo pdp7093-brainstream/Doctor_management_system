@@ -63,7 +63,7 @@
                         </div>
                         <div id="modeHint" class="dc-hint">
                             <i class="bi bi-info-circle"></i>
-                            <span id="modeText">{% if selected_parent %}Parent selected — this person will be added as a <strong>family member</strong> of <strong>{{ selected_parent.user.get_full_name|default:selected_parent.user.email }}</strong>. No separate login will be created.{% else %}No parent selected — this person will be added as a <strong>main patient</strong> with their own login.{% endif %}</span>
+                            <span id="modeText">{% if selected_parent %}Parent selected — this person will be added as a <strong>family member</strong> of <strong>{{ selected_parent.user.get_full_name|default:selected_parent.user.email }}</strong>. No separate login will be created.{% else %}No parent selected — this person will be added as a <strong>main patient</strong>. Add an email only if they need an online login.{% endif %}</span>
                         </div>
                     </div>
                 </div>
