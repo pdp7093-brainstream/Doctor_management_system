@@ -102,6 +102,158 @@
         });
     }
 
+    const patientsTable = document.querySelector('.patients-table');
+
+    function openCaseNoEditor(button) {
+        const cell = button.closest('.case-no-cell');
+        if (!cell || cell.querySelector('.case-no-editor')) return;
+
+        const currentValue = button.querySelector('.case-no-value')?.textContent.trim() || '';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-control form-control-sm';
+        input.value = currentValue === '—' ? '' : currentValue;
+        input.setAttribute('aria-label', 'Case No.');
+
+        const editor = document.createElement('div');
+        editor.className = 'case-no-editor';
+        editor.dataset.url = button.dataset.url;
+        editor.appendChild(input);
+
+        const controls = document.createElement('div');
+        controls.className = 'case-no-editor-controls';
+        const saveButton = document.createElement('button');
+        saveButton.type = 'button';
+        saveButton.className = 'btn btn-sm btn-success case-no-save';
+        saveButton.setAttribute('aria-label', 'Save Case No.');
+        saveButton.textContent = '✓';
+        const cancelButton = document.createElement('button');
+        cancelButton.type = 'button';
+        cancelButton.className = 'btn btn-sm btn-outline-secondary case-no-cancel';
+        cancelButton.setAttribute('aria-label', 'Cancel edit');
+        cancelButton.textContent = '×';
+        controls.append(saveButton, cancelButton);
+        editor.appendChild(controls);
+
+        const error = document.createElement('div');
+        error.className = 'case-no-error text-danger small mt-1';
+        error.setAttribute('role', 'alert');
+        editor.appendChild(error);
+
+        button.hidden = true;
+        cell.appendChild(editor);
+        input.focus();
+        input.select();
+    }
+
+    function cancelCaseNoEdit(editor) {
+        const cell = editor.closest('.case-no-cell');
+        if (!cell) return;
+        editor.remove();
+        const display = cell.querySelector('.case-no-edit');
+        if (display) display.hidden = false;
+    }
+
+    async function saveCaseNo(editor) {
+        if (!editor || editor.dataset.saving === 'true') return;
+        const input = editor.querySelector('input');
+        const buttons = editor.querySelectorAll('button');
+        const error = editor.querySelector('.case-no-error');
+        const caseNo = input.value.trim();
+        error.textContent = '';
+        if (!caseNo) {
+            error.textContent = 'Case No. is required.';
+            input.focus();
+            return;
+        }
+
+        editor.dataset.saving = 'true';
+        input.disabled = true;
+        buttons.forEach(button => { button.disabled = true; });
+        const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]')?.value || '';
+        try {
+            const response = await fetch(editor.dataset.url, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: new URLSearchParams({ case_no: caseNo }),
+            });
+            const result = await response.json();
+            if (!response.ok || !result.ok) {
+                error.textContent = result.error || 'Could not save Case No.';
+                editor.dataset.saving = 'false';
+                input.disabled = false;
+                buttons.forEach(button => { button.disabled = false; });
+                input.focus();
+                return;
+            }
+
+            const cell = editor.closest('.case-no-cell');
+            const display = cell?.querySelector('.case-no-edit');
+            const value = display?.querySelector('.case-no-value');
+            if (value) value.textContent = result.case_no;
+            editor.remove();
+            if (display) {
+                display.hidden = false;
+                const saved = document.createElement('i');
+                saved.className = 'bi bi-check-circle-fill text-success case-no-saved';
+                saved.setAttribute('aria-label', 'Saved');
+                display.appendChild(saved);
+                window.setTimeout(() => saved.remove(), 1400);
+            }
+        } catch (fetchError) {
+            error.textContent = 'Could not save Case No. Please try again.';
+            editor.dataset.saving = 'false';
+            input.disabled = false;
+            buttons.forEach(button => { button.disabled = false; });
+            input.focus();
+        }
+    }
+
+    if (patientsTable) {
+        patientsTable.addEventListener('click', event => {
+            const editButton = event.target.closest('.case-no-edit');
+            if (editButton) {
+                openCaseNoEditor(editButton);
+                return;
+            }
+
+            const saveButton = event.target.closest('.case-no-save');
+            if (saveButton) {
+                saveCaseNo(saveButton.closest('.case-no-editor'));
+                return;
+            }
+
+            const cancelButton = event.target.closest('.case-no-cancel');
+            if (cancelButton) {
+                cancelCaseNoEdit(cancelButton.closest('.case-no-editor'));
+                return;
+            }
+
+            const cell = event.target.closest('.case-no-cell');
+            if (cell && !event.target.closest('.case-no-editor')) {
+                const display = cell.querySelector('.case-no-edit');
+                if (display) openCaseNoEditor(display);
+            }
+        });
+
+        patientsTable.addEventListener('keydown', event => {
+            const input = event.target.closest('.case-no-editor input');
+            if (!input) return;
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                saveCaseNo(input.closest('.case-no-editor'));
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                cancelCaseNoEdit(input.closest('.case-no-editor'));
+            }
+        });
+    }
+
     function debounce(fn, delay = 350) {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(fn, delay);
@@ -145,6 +297,8 @@
     if (filterResetBtn && filterForm) {
         filterResetBtn.addEventListener('click', () => {
             filterForm.querySelectorAll('select').forEach(select => { select.value = ''; });
+            const allLettersRadio = document.getElementById('letter-all');
+            if (allLettersRadio) allLettersRadio.checked = true;
             filterForm.requestSubmit();
         });
     }

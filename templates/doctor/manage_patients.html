@@ -14,9 +14,8 @@
         right: 0;
         z-index: 1050;
         width: min(320px, calc(100vw - 2rem));
-        max-height: 70vh;
-        overflow-y: auto;
-        overscroll-behavior: contain;
+        max-height: none;
+        overflow: visible;
         padding: 1.15rem 1.25rem;
         background: #fff;
         border: 1px solid #dce9dc;
@@ -27,6 +26,22 @@
     .medicine-filter-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .6rem; border: 1px solid #dce9dc; border-radius: 999px; background: #f5f8f5; color: #344638; font-size: .8rem; text-decoration: none; }
     .medicine-filter-chip:hover { background: #eaf4ea; color: #015315; }
     .medicine-clear-filters { color: #015315; font-size: .85rem; font-weight: 600; }
+    .case-no-edit { display: inline-flex; align-items: center; gap: .35rem; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    .case-no-edit[hidden] { display: none; }
+    .case-no-edit .bi-pencil { color: #6c757d; font-size: .75rem; }
+    .case-no-editor { min-width: 150px; }
+    .case-no-editor-controls { display: flex; align-items: center; gap: .3rem; margin-top: .25rem; }
+    .case-no-editor-controls button { padding: .1rem .4rem; line-height: 1.2; }
+    .case-no-error { max-width: 220px; white-space: normal; }
+    .letter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .letter-chip { min-width: 32px; height: 30px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid #CFE5CF; border-radius: 8px; font-size: 13px; font-weight: 600; color: #015315; background: #fff; cursor: pointer; }
+    .btn-check:checked + .letter-chip { background: #015315; color: #fff; border-color: #015315; }
+    @media (max-width: 767.98px) {
+        .medicine-filter-panel {
+            position: static;
+            width: 100%;
+        }
+    }
 </style>
 
 <main class="main-content" id="mainContent">
@@ -97,13 +112,15 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold text-muted mb-1" for="filterLetter">First letter</label>
-                            <select class="form-select form-select-sm" name="letter" id="filterLetter">
-                                <option value="">All</option>
+                            <div class="form-label small fw-semibold text-muted mb-1">First letter</div>
+                            <div class="letter-chips" role="radiogroup" aria-label="First letter">
+                                <input type="radio" class="btn-check" name="letter" id="letter-all" value="" {% if not selected_letter %}checked{% endif %}>
+                                <label class="letter-chip" for="letter-all">All</label>
                                 {% for letter in alphabet %}
-                                <option value="{{ letter }}" {% if selected_letter == letter %}selected{% endif %}>{{ letter }}</option>
+                                <input type="radio" class="btn-check" name="letter" id="letter-{{ letter }}" value="{{ letter }}" {% if selected_letter == letter %}checked{% endif %}>
+                                <label class="letter-chip" for="letter-{{ letter }}">{{ letter }}</label>
                                 {% endfor %}
-                            </select>
+                            </div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center pt-2 border-top">
                             <button type="button" class="btn btn-sm btn-outline-secondary px-3" id="filterResetBtn">Reset</button>
@@ -126,6 +143,7 @@
                 <thead>
                     <tr>
                         <th class="col-index">#</th>
+                        <th>CASE NO.</th>
                         <th>Name</th>
                         <th>Gender</th>
                         <th>Phone</th>
@@ -137,6 +155,12 @@
                     {% for p in patients %}
                     <tr class="patient-row{% if not p.phone and not p.gender %} no-meta{% endif %}">
                         <td class="col-index">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                        <td class="case-no-cell" data-label="Case No.">
+                            <button type="button" class="case-no-edit" data-url="{% url 'doctor:update_case_no' p.type p.id|hid %}" aria-label="Edit case number">
+                                <span class="case-no-value">{% if p.case_no %}{{ p.case_no }}{% else %}—{% endif %}</span>
+                                <i class="bi bi-pencil" aria-hidden="true"></i>
+                            </button>
+                        </td>
                         <td class="col-patient-name" data-label="Name">
                             <div class="dc-person">
                                 <div class="dc-avatar {% if p.type == 'family' %}is-family{% endif %}">
@@ -153,7 +177,6 @@
                                             </span>
                                         {% endif %}
                                     </div>
-                                    {% if p.case_no %}<div class="dc-sub" style="font-size:0.75rem; color:#6c757d;">Case #{{ p.case_no }}</div>{% endif %}
                                     <div class="dc-sub">
                                         {% if p.type == 'family' %}Family member{% else %}Patient{% endif %}
                                         {% if p.type == 'main' %}
@@ -210,6 +233,10 @@
                                 {% endif %}
                             </div>
                         </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No patients found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

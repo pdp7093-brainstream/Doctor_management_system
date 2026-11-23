@@ -9,11 +9,25 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import transaction
 from django.db.models import Q
+from django.db.models.functions import Trim
 from django.contrib.auth.models import User
 from accounts.models import Patient
 
 VALID_BLOOD_GROUPS = {"A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"}
 VALID_GENDERS = {"male": "Male", "female": "Female", "other": "Other"}
+
+
+def normalize_case_no(value: Any) -> str:
+    return str(value if value is not None else "").strip().casefold()
+
+
+def _add_canonical_case_no(row_dict: Dict[str, Any]) -> None:
+    for key in ("case_no", "old_register_no", "register_no"):
+        value = row_dict.get(key)
+        if value is not None and str(value).strip():
+            row_dict["case_no"] = str(value).strip()
+            return
+    row_dict["case_no"] = ""
 
 
 def clean_phone(raw_phone: Any) -> Tuple[str, str]:
@@ -120,7 +134,7 @@ def clean_blood_group(raw_bg: Any) -> str:
 def parse_import_file(uploaded_file) -> List[Dict[str, Any]]:
     """
     Reads CSV or XLSX uploaded file and returns a list of normalized row dictionaries.
-    Keys: name, phone, email, gender, dob, blood_group, address.
+    Keys include normalized case_no plus name, phone, email, gender, dob, blood_group, address.
     """
     filename = uploaded_file.name.lower()
     rows = []
@@ -150,6 +164,7 @@ def parse_import_file(uploaded_file) -> List[Dict[str, Any]]:
             for col_idx, col_name in enumerate(header):
                 val = r[col_idx] if col_idx < len(r) else ""
                 row_dict[col_name] = str(val).strip()
+            _add_canonical_case_no(row_dict)
             rows.append({"_row_num": row_idx, **row_dict})
 
     elif filename.endswith((".xlsx", ".xlsm")):
@@ -171,6 +186,7 @@ def parse_import_file(uploaded_file) -> List[Dict[str, Any]]:
                     continue
                 val = r[col_idx] if col_idx < len(r) else ""
                 row_dict[col_name] = val if val is not None else ""
+            _add_canonical_case_no(row_dict)
             rows.append({"_row_num": row_idx, **row_dict})
 
     else:
@@ -197,6 +213,12 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
             Q(phone__isnull=True) | Q(phone="")
         ).values_list("user__first_name", "user__last_name")
     }
+    existing_case_nos = {
+        normalize_case_no(case_no)
+        for case_no in Patient.objects.exclude(case_no__isnull=True)
+        .exclude(case_no__exact="")
+        .values_list("case_no", flat=True)
+    }
 
     existing_emails = set(
         User.objects.exclude(email__isnull=True)
@@ -207,6 +229,7 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
 
     seen_phones_in_file = set()
     seen_name_only_in_file = set()
+    seen_case_nos_in_file = set()
     seen_emails_in_file = set()
 
     validated_rows = []
@@ -219,6 +242,11 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
         raw_gender = r.get("gender", "")
         raw_dob = r.get("dob", "")
         raw_bg = r.get("blood_group", "")
+        raw_case_no = r.get("case_no")
+        if raw_case_no is None or not str(raw_case_no).strip():
+            raw_case_no = r.get("old_register_no") or r.get("register_no") or ""
+        case_no = str(raw_case_no if raw_case_no is not None else "").strip()
+        normalized_case_no = normalize_case_no(case_no)
         address = str(r.get("address", "")).strip()
 
         errors = []
@@ -253,8 +281,16 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
             is_dup = False
             dup_reasons = []
 
-            # Check phone
-            if phone:
+            # A supplied Case No. is the identity duplicate key.
+            if normalized_case_no:
+                if normalized_case_no in seen_case_nos_in_file:
+                    is_dup = True
+                    dup_reasons.append(f"Case No. {case_no} appears multiple times in file")
+                elif normalized_case_no in existing_case_nos:
+                    is_dup = True
+                    dup_reasons.append(f"Patient with Case No. {case_no} already exists")
+            # Without Case No., fall back to the existing phone/name rules.
+            elif phone:
                 if phone in seen_phones_in_file:
                     is_dup = True
                     dup_reasons.append(f"Phone {phone} appears multiple times in file")
@@ -280,9 +316,11 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
             else:
                 status = "New"
                 reason = "Ready (no phone)" if not phone else ""
+                if normalized_case_no:
+                    seen_case_nos_in_file.add(normalized_case_no)
                 if phone:
                     seen_phones_in_file.add(phone)
-                else:
+                elif not normalized_case_no:
                     seen_name_only_in_file.add(name)
                 if email:
                     seen_emails_in_file.add(email)
@@ -290,6 +328,7 @@ def validate_patient_rows(raw_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]
         validated_rows.append({
             "row_num": row_num,
             "name": name,
+            "case_no": case_no,
             "phone": phone,
             "email": email,
             "gender": gender,
@@ -322,6 +361,7 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
     error_count = 0
     skipped_rows = []
     created_patients = []
+    seen_case_nos_in_file = set()
 
     for r in rows:
         status = r.get("status")
@@ -338,6 +378,8 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
         phone = r.get("phone") or None
         email = r.get("email", "")
         name = r.get("name", "")
+        case_no = str(r.get("case_no", "") or "").strip()
+        normalized_case_no = normalize_case_no(case_no)
         gender = r.get("gender", "") or None
         dob = r.get("dob", "") or None
         bld_grop = r.get("blood_group", "") or None
@@ -347,14 +389,30 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
         name_parts = name.split(" ", 1)
         first_name = name_parts[0]
         last_name = name_parts[1] if len(name_parts) > 1 else ""
-        if phone and Patient.objects.filter(phone=phone).exists():
+        if normalized_case_no and normalized_case_no in seen_case_nos_in_file:
+            duplicate_count += 1
+            r_skipped = dict(r)
+            r_skipped["status"] = "Duplicate"
+            r_skipped["reason"] = f"Case No. {case_no} appears multiple times in file"
+            skipped_rows.append(r_skipped)
+            continue
+        if normalized_case_no and Patient.objects.annotate(
+            normalized_case_no=Trim("case_no")
+        ).filter(normalized_case_no__iexact=case_no).exists():
+            duplicate_count += 1
+            r_skipped = dict(r)
+            r_skipped["status"] = "Duplicate"
+            r_skipped["reason"] = f"Patient with Case No. {case_no} already exists"
+            skipped_rows.append(r_skipped)
+            continue
+        if not normalized_case_no and phone and Patient.objects.filter(phone=phone).exists():
             duplicate_count += 1
             r_skipped = dict(r)
             r_skipped["status"] = "Duplicate"
             r_skipped["reason"] = f"Patient with phone {phone} already exists"
             skipped_rows.append(r_skipped)
             continue
-        if not phone and Patient.objects.filter(
+        if not normalized_case_no and not phone and Patient.objects.filter(
             Q(phone__isnull=True) | Q(phone=""),
             user__first_name=first_name,
             user__last_name=last_name,
@@ -386,6 +444,8 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
         if dry_run:
             created_count += 1
             created_patients.append(r)
+            if normalized_case_no:
+                seen_case_nos_in_file.add(normalized_case_no)
             continue
 
         # Execute creation inside transaction.atomic()
@@ -406,10 +466,13 @@ def create_patients_from_rows(rows: List[Dict[str, Any]], dry_run: bool = False)
                 patient.dob = dob
                 patient.gender = gender
                 patient.bld_grop = bld_grop
+                patient.case_no = case_no
                 patient.save()
 
             created_count += 1
             created_patients.append(r)
+            if normalized_case_no:
+                seen_case_nos_in_file.add(normalized_case_no)
 
         except Exception as exc:
             error_count += 1

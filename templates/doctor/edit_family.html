@@ -27,6 +27,14 @@
                 <form method="POST" class="row g-3">
                     {% csrf_token %}
 
+                    <div class="col-12">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="family-case-no">
+                            Case No. <span class="text-danger">*</span>
+                        </label>
+                        <input id="family-case-no" type="text" name="case_no" class="form-control" value="{{ form_data.case_no|default_if_none:member.case_no|default_if_none:'' }}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50" required>
+                        {% if case_no_error %}<div class="text-danger small mt-1">{{ case_no_error }}</div>{% endif %}
+                    </div>
+
                     <!-- Personal Info Label -->
                     <div class="col-12">
                         <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
@@ -39,7 +47,7 @@
                             Full Name <span class="text-danger">*</span>
                         </label>
                         <input id="family-name" type="text" name="name" class="form-control"
-                               value="{{ member.name }}" placeholder="Enter full name" required>
+                               value="{{ form_data.name|default_if_none:member.name|default_if_none:'' }}" placeholder="Enter full name" required>
                     </div>
 
                     <div class="col-md-6">
@@ -48,17 +56,17 @@
                         </label>
                         <select id="family-relation" name="relation" class="form-select" required>
                             <option value="">Select Relation</option>
-                            <option value="Father"      {% if member.relation == 'Father' %}selected{% endif %}>Father</option>
-                            <option value="Mother"      {% if member.relation == 'Mother' %}selected{% endif %}>Mother</option>
-                            <option value="Sister"      {% if member.relation == 'Sister' %}selected{% endif %}>Sister</option>
-                            <option value="Brother"     {% if member.relation == 'Brother' %}selected{% endif %}>Brother</option>
-                            <option value="Wife"        {% if member.relation == 'Wife' %}selected{% endif %}>Wife</option>
-                            <option value="Husband"     {% if member.relation == 'Husband' %}selected{% endif %}>Husband</option>
-                            <option value="Son"         {% if member.relation == 'Son' %}selected{% endif %}>Son</option>
-                            <option value="Daughter"    {% if member.relation == 'Daughter' %}selected{% endif %}>Daughter</option>
-                            <option value="Grandchild"  {% if member.relation == 'Grandchild' %}selected{% endif %}>Grandchild</option>
-                            <option value="Grandparent" {% if member.relation == 'Grandparent' %}selected{% endif %}>Grandparent</option>
-                            <option value="Other"       {% if member.relation == 'Other' %}selected{% endif %}>Other</option>
+                            <option value="Father"      {% if form_data %}{% if form_data.relation == 'Father' %}selected{% endif %}{% elif member.relation == 'Father' %}selected{% endif %}>Father</option>
+                            <option value="Mother"      {% if form_data %}{% if form_data.relation == 'Mother' %}selected{% endif %}{% elif member.relation == 'Mother' %}selected{% endif %}>Mother</option>
+                            <option value="Sister"      {% if form_data %}{% if form_data.relation == 'Sister' %}selected{% endif %}{% elif member.relation == 'Sister' %}selected{% endif %}>Sister</option>
+                            <option value="Brother"     {% if form_data %}{% if form_data.relation == 'Brother' %}selected{% endif %}{% elif member.relation == 'Brother' %}selected{% endif %}>Brother</option>
+                            <option value="Wife"        {% if form_data %}{% if form_data.relation == 'Wife' %}selected{% endif %}{% elif member.relation == 'Wife' %}selected{% endif %}>Wife</option>
+                            <option value="Husband"     {% if form_data %}{% if form_data.relation == 'Husband' %}selected{% endif %}{% elif member.relation == 'Husband' %}selected{% endif %}>Husband</option>
+                            <option value="Son"         {% if form_data %}{% if form_data.relation == 'Son' %}selected{% endif %}{% elif member.relation == 'Son' %}selected{% endif %}>Son</option>
+                            <option value="Daughter"    {% if form_data %}{% if form_data.relation == 'Daughter' %}selected{% endif %}{% elif member.relation == 'Daughter' %}selected{% endif %}>Daughter</option>
+                            <option value="Grandchild"  {% if form_data %}{% if form_data.relation == 'Grandchild' %}selected{% endif %}{% elif member.relation == 'Grandchild' %}selected{% endif %}>Grandchild</option>
+                            <option value="Grandparent" {% if form_data %}{% if form_data.relation == 'Grandparent' %}selected{% endif %}{% elif member.relation == 'Grandparent' %}selected{% endif %}>Grandparent</option>
+                            <option value="Other"       {% if form_data %}{% if form_data.relation == 'Other' %}selected{% endif %}{% elif member.relation == 'Other' %}selected{% endif %}>Other</option>
                         </select>
                     </div>
 
@@ -68,9 +76,9 @@
                         </label>
                         <select id="family-gender" name="gender" class="form-select">
                             <option value="">Select Gender</option>
-                            <option value="male"   {% if member.gender == 'male' %}selected{% endif %}>Male</option>
-                            <option value="female" {% if member.gender == 'female' %}selected{% endif %}>Female</option>
-                            <option value="other"  {% if member.gender == 'other' %}selected{% endif %}>Other</option>
+                            <option value="male"   {% if form_data %}{% if form_data.gender == 'male' %}selected{% endif %}{% elif member.gender == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if form_data %}{% if form_data.gender == 'female' %}selected{% endif %}{% elif member.gender == 'female' %}selected{% endif %}>Female</option>
+                            <option value="other"  {% if form_data %}{% if form_data.gender == 'other' %}selected{% endif %}{% elif member.gender == 'other' %}selected{% endif %}>Other</option>
                         </select>
                     </div>
 
@@ -79,7 +87,7 @@
                             Phone
                         </label>
                         <input id="family-phone" type="tel" name="phone" class="form-control"
-                               value="{{ member.phone }}" placeholder="Enter phone number">
+                               value="{{ form_data.phone|default_if_none:member.phone|default_if_none:'' }}" placeholder="Enter phone number">
                     </div>
 
                     <!-- Medical Label -->
@@ -94,7 +102,7 @@
                             Date of Birth
                         </label>
                         <input id="family-dob" type="date" name="dob" class="form-control"
-                               value="{{ member.dob|date:'Y-m-d' }}">
+                               value="{% if form_data %}{{ form_data.dob }}{% else %}{{ member.dob|date:'Y-m-d' }}{% endif %}">
                     </div>
 
                     <div class="col-md-6">
@@ -103,23 +111,15 @@
                         </label>
                         <select id="family-blood-group" name="bld_grop" class="form-select">
                             <option value="">Select Blood Group</option>
-                            <option value="A+"  {% if member.bld_grop == 'A+' %}selected{% endif %}>A+</option>
-                            <option value="A-"  {% if member.bld_grop == 'A-' %}selected{% endif %}>A-</option>
-                            <option value="B+"  {% if member.bld_grop == 'B+' %}selected{% endif %}>B+</option>
-                            <option value="B-"  {% if member.bld_grop == 'B-' %}selected{% endif %}>B-</option>
-                            <option value="AB+" {% if member.bld_grop == 'AB+' %}selected{% endif %}>AB+</option>
-                            <option value="AB-" {% if member.bld_grop == 'AB-' %}selected{% endif %}>AB-</option>
-                            <option value="O+"  {% if member.bld_grop == 'O+' %}selected{% endif %}>O+</option>
-                            <option value="O-"  {% if member.bld_grop == 'O-' %}selected{% endif %}>O-</option>
+                            <option value="A+"  {% if form_data %}{% if form_data.bld_grop == 'A+' %}selected{% endif %}{% elif member.bld_grop == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-"  {% if form_data %}{% if form_data.bld_grop == 'A-' %}selected{% endif %}{% elif member.bld_grop == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+"  {% if form_data %}{% if form_data.bld_grop == 'B+' %}selected{% endif %}{% elif member.bld_grop == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-"  {% if form_data %}{% if form_data.bld_grop == 'B-' %}selected{% endif %}{% elif member.bld_grop == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if form_data %}{% if form_data.bld_grop == 'AB+' %}selected{% endif %}{% elif member.bld_grop == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if form_data %}{% if form_data.bld_grop == 'AB-' %}selected{% endif %}{% elif member.bld_grop == 'AB-' %}selected{% endif %}>AB-</option>
+                            <option value="O+"  {% if form_data %}{% if form_data.bld_grop == 'O+' %}selected{% endif %}{% elif member.bld_grop == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-"  {% if form_data %}{% if form_data.bld_grop == 'O-' %}selected{% endif %}{% elif member.bld_grop == 'O-' %}selected{% endif %}>O-</option>
                         </select>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="family-case-no">
-                            Case No. <small class="fw-normal text-muted">(optional)</small>
-                        </label>
-                        <input id="family-case-no" type="text" name="case_no" class="form-control"
-                               value="{{ member.case_no }}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50">
                     </div>
 
                     <!-- Actions -->

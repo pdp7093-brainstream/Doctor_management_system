@@ -84,9 +84,8 @@
         right: 0;
         z-index: 1050;
         width: min(320px, calc(100vw - 2rem));
-        max-height: 70vh;
-        overflow-y: auto;
-        overscroll-behavior: contain;
+        max-height: none;
+        overflow: visible;
         padding: 1.15rem 1.25rem;
         background: #fff;
         border: 1px solid #dce9dc;
@@ -97,6 +96,12 @@
     .medicine-filter-chip { display: inline-flex; align-items: center; gap: .35rem; padding: .3rem .6rem; border: 1px solid #dce9dc; border-radius: 999px; background: #f5f8f5; color: #344638; font-size: .8rem; text-decoration: none; }
     .medicine-filter-chip:hover { background: #eaf4ea; color: #015315; }
     .medicine-clear-filters { color: #015315; font-size: .85rem; font-weight: 600; }
+    @media (max-width: 767.98px) {
+        .medicine-filter-panel {
+            position: static;
+            width: 100%;
+        }
+    }
 
 </style>
 

@@ -22,6 +22,16 @@
             {% csrf_token %}
             <div class="dc-card-body">
 
+                <div class="dc-section">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="dc-label" for="caseNoInput">Case No. <span class="text-danger">*</span></label>
+                            <input type="text" id="caseNoInput" name="case_no" class="form-control" value="{{ form_data.case_no|default_if_none:'' }}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50" required>
+                            {% if case_no_error %}<div class="text-danger small mt-1">{{ case_no_error }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Section 1: Booking type -->
                 <div class="dc-section">
                     <h3 class="dc-section-title"><i class="bi bi-diagram-3"></i> Booking Type</h3>
@@ -31,29 +41,29 @@
                                 <label class="dc-label" for="parentSearch">
                                     Parent Patient <small>(optional, to add a family member)</small>
                                 </label>
-                                <input type="text" id="parentSearch" class="form-control" placeholder="Search existing patient by name or phone" autocomplete="off">
-                                <input type="hidden" name="parent_patient" id="parent_patient_input" value="">
+                                <input type="text" id="parentSearch" class="form-control" value="{% if selected_parent %}{{ selected_parent.user.get_full_name|default:selected_parent.user.email }}{% endif %}" placeholder="Search existing patient by name or phone" autocomplete="off">
+                                <input type="hidden" name="parent_patient" id="parent_patient_input" value="{{ form_data.parent_patient|default_if_none:'' }}">
                                 <div id="parentSuggestions" class="list-group dc-suggest" style="display:none;"></div>
                             </div>
-                            <div class="col-md-6" id="relationField" style="display:none;">
+                            <div class="col-md-6" id="relationField" style="{% if selected_parent %}display:block;{% else %}display:none;{% endif %}">
                                 <label class="dc-label" for="relationSelect">Relation *</label>
-                                <select name="relation" id="relationSelect" class="form-select">
+                                <select name="relation" id="relationSelect" class="form-select" {% if selected_parent %}required{% endif %}>
                                     <option value="">Select Relation</option>
-                                    <option value="Wife">Wife</option>
-                                    <option value="Husband">Husband</option>
-                                    <option value="Son">Son</option>
-                                    <option value="Daughter">Daughter</option>
-                                    <option value="Father">Father</option>
-                                    <option value="Mother">Mother</option>
-                                    <option value="Brother">Brother</option>
-                                    <option value="Sister">Sister</option>
-                                    <option value="Other">Other</option>
+                                    <option value="Wife" {% if form_data.relation == 'Wife' %}selected{% endif %}>Wife</option>
+                                    <option value="Husband" {% if form_data.relation == 'Husband' %}selected{% endif %}>Husband</option>
+                                    <option value="Son" {% if form_data.relation == 'Son' %}selected{% endif %}>Son</option>
+                                    <option value="Daughter" {% if form_data.relation == 'Daughter' %}selected{% endif %}>Daughter</option>
+                                    <option value="Father" {% if form_data.relation == 'Father' %}selected{% endif %}>Father</option>
+                                    <option value="Mother" {% if form_data.relation == 'Mother' %}selected{% endif %}>Mother</option>
+                                    <option value="Brother" {% if form_data.relation == 'Brother' %}selected{% endif %}>Brother</option>
+                                    <option value="Sister" {% if form_data.relation == 'Sister' %}selected{% endif %}>Sister</option>
+                                    <option value="Other" {% if form_data.relation == 'Other' %}selected{% endif %}>Other</option>
                                 </select>
                             </div>
                         </div>
                         <div id="modeHint" class="dc-hint">
                             <i class="bi bi-info-circle"></i>
-                            <span id="modeText">No parent selected — this person will be added as a <strong>main patient</strong> with their own login.</span>
+                            <span id="modeText">{% if selected_parent %}Parent selected — this person will be added as a <strong>family member</strong> of <strong>{{ selected_parent.user.get_full_name|default:selected_parent.user.email }}</strong>. No separate login will be created.{% else %}No parent selected — this person will be added as a <strong>main patient</strong> with their own login.{% endif %}</span>
                         </div>
                     </div>
                 </div>
@@ -64,14 +74,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="dc-label">Full Name *</label>
-                            <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                            <input type="text" name="name" class="form-control" value="{{ form_data.name|default_if_none:'' }}" placeholder="Enter full name" required>
                         </div>
 
                         <div class="col-md-6" id="phoneField">
                             <label class="dc-label" id="phoneLabel">
                                 Phone <small id="phoneHint">(optional)</small>
                             </label>
-                            <input type="tel" name="phone" id="phoneInput" class="form-control"
+                            <input type="tel" name="phone" id="phoneInput" class="form-control" value="{{ form_data.phone|default_if_none:'' }}"
                                    placeholder="e.g. 9876543210" maxlength="15"
                                    inputmode="numeric" pattern="[0-9]{7,15}"
                                    title="Phone number must contain only digits (7–15 digits)">
@@ -79,16 +89,16 @@
 
                         <div class="col-md-4">
                             <label class="dc-label">Date of Birth</label>
-                            <input type="date" name="dob" class="form-control">
+                            <input type="date" name="dob" class="form-control" value="{{ form_data.dob|default_if_none:'' }}">
                         </div>
 
                         <div class="col-md-4">
                             <label class="dc-label">Gender</label>
                             <select name="gender" class="form-select">
                                 <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
+                                <option value="male" {% if form_data.gender == 'male' %}selected{% endif %}>Male</option>
+                                <option value="female" {% if form_data.gender == 'female' %}selected{% endif %}>Female</option>
+                                <option value="other" {% if form_data.gender == 'other' %}selected{% endif %}>Other</option>
                             </select>
                         </div>
 
@@ -96,32 +106,29 @@
                             <label class="dc-label">Blood Group</label>
                             <select name="bld_grop" class="form-select">
                                 <option value="">Select Blood Group</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
+                                <option value="A+" {% if form_data.bld_grop == 'A+' %}selected{% endif %}>A+</option>
+                                <option value="A-" {% if form_data.bld_grop == 'A-' %}selected{% endif %}>A-</option>
+                                <option value="B+" {% if form_data.bld_grop == 'B+' %}selected{% endif %}>B+</option>
+                                <option value="B-" {% if form_data.bld_grop == 'B-' %}selected{% endif %}>B-</option>
+                                <option value="AB+" {% if form_data.bld_grop == 'AB+' %}selected{% endif %}>AB+</option>
+                                <option value="AB-" {% if form_data.bld_grop == 'AB-' %}selected{% endif %}>AB-</option>
+                                <option value="O+" {% if form_data.bld_grop == 'O+' %}selected{% endif %}>O+</option>
+                                <option value="O-" {% if form_data.bld_grop == 'O-' %}selected{% endif %}>O-</option>
                             </select>
                         </div>
 
-                        <div class="col-md-6" id="emailField">
-                            <label class="dc-label">Email *</label>
-                            <input type="email" id="emailInput" name="email" class="form-control" placeholder="name@example.com" required>
+                        <div class="col-md-6" id="emailField" {% if selected_parent %}style="display:none;"{% endif %}>
+                            <label class="dc-label" for="emailInput">Email (optional)</label>
+                            <input type="email" id="emailInput" name="email" class="form-control" value="{{ form_data.email|default_if_none:'' }}" placeholder="name@example.com">
+                            <div class="form-text">Needed only if the patient should get an online login.</div>
                         </div>
 
-                        <div class="col-12" id="addressField">
+                        <div class="col-12" id="addressField" {% if selected_parent %}style="display:none;"{% endif %}>
                             <label class="dc-label">Address</label>
                             <textarea name="address" class="form-control" rows="3"
-                                      placeholder="House no., street, area, city"></textarea>
+                                      placeholder="House no., street, area, city">{{ form_data.address|default_if_none:'' }}</textarea>
                         </div>
 
-                        <div class="col-md-6">
-                            <label class="dc-label">Case No. <small>(optional)</small></label>
-                            <input type="text" name="case_no" class="form-control" placeholder="e.g. 1194 or 430 / 1271" maxlength="50">
-                        </div>
                     </div>
                 </div>
 
@@ -132,7 +139,7 @@
                 <a href="{% url 'doctor:manage_patients' %}" class="btn-page btn-page-outline"><i class="bi bi-x-lg"></i> Cancel</a>
                 <button type="submit" class="btn-page btn-page-primary" id="submitBtn">
                     <i class="bi bi-check2-circle"></i>
-                    <span id="submitText">Save Patient</span>
+                    <span id="submitText">{% if selected_parent %}Save Family Member{% else %}Save Patient{% endif %}</span>
                 </button>
             </div>
         </form>

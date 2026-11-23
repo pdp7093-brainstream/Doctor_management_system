@@ -3,6 +3,7 @@ import logging
 import random
 import re
 import string
+from uuid import uuid4
 from datetime import date, timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -23,6 +24,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from accounts.models import Patient
 from django.contrib import messages
@@ -35,6 +37,76 @@ from accounts.emails import send_welcome_email
 from appointment.file_validation import validate_uploaded_document
 
 logger = logging.getLogger(__name__)
+
+
+def _find_case_no_duplicate(case_no, exclude_patient_id=None, exclude_family_member_id=None):
+    normalized_case_no = (case_no or '').strip().casefold()
+    if not normalized_case_no:
+        return None
+
+    for patient in Patient.objects.select_related('user').exclude(case_no='').iterator():
+        if patient.pk != exclude_patient_id and (patient.case_no or '').strip().casefold() == normalized_case_no:
+            return {
+                'name': patient.user.get_full_name() or patient.user.email or patient.user.username,
+                'phone': patient.phone or '—',
+            }
+
+    for member in FamilyMember.objects.exclude(case_no='').iterator():
+        if member.pk != exclude_family_member_id and (member.case_no or '').strip().casefold() == normalized_case_no:
+            return {'name': member.name, 'phone': member.phone or '—'}
+
+    return None
+
+
+def _case_no_duplicate_error(case_no, duplicate):
+    return f"Case No. {case_no} is already used by {duplicate['name']} ({duplicate['phone']})"
+
+
+@login_required
+@require_POST
+@csrf_protect
+def update_case_no(request, person_type, hid):
+    if not InnerMember.objects.filter(user=request.user, role='doctor').exists():
+        return JsonResponse({'ok': False, 'error': 'Forbidden.'}, status=403)
+
+    from . import hashid as _hashid
+    try:
+        person_id = _hashid.decode_hash(hid)
+    except Exception:
+        return JsonResponse({'ok': False, 'error': 'Invalid person.'}, status=404)
+
+    if person_type == 'main':
+        person = Patient.objects.select_related('user').filter(pk=person_id).first()
+        exclude_patient_id = person_id
+        exclude_family_member_id = None
+    elif person_type == 'family':
+        person = FamilyMember.objects.filter(pk=person_id).first()
+        exclude_patient_id = None
+        exclude_family_member_id = person_id
+    else:
+        return JsonResponse({'ok': False, 'error': 'Invalid person type.'}, status=404)
+
+    if person is None:
+        return JsonResponse({'ok': False, 'error': 'Person not found.'}, status=404)
+
+    case_no = request.POST.get('case_no', '').strip()
+    if not case_no:
+        return JsonResponse({'ok': False, 'error': 'Case No. is required.'}, status=400)
+
+    duplicate = _find_case_no_duplicate(
+        case_no,
+        exclude_patient_id=exclude_patient_id,
+        exclude_family_member_id=exclude_family_member_id,
+    )
+    if duplicate:
+        return JsonResponse({
+            'ok': False,
+            'error': _case_no_duplicate_error(case_no, duplicate),
+        }, status=400)
+
+    person.case_no = case_no
+    person.save(update_fields=['case_no'])
+    return JsonResponse({'ok': True, 'case_no': case_no})
 
 def login_view(request):
     request.session.pop("_doctor_logout_redirect", None)
@@ -567,10 +639,27 @@ def edit_patient(request, hid):
             email = patient.user.email
         dob       = request.POST.get('dob')
         gender    = request.POST.get('gender')
-        phone     = request.POST.get('phone', '').strip()
+        phone     = (request.POST.get('phone') or '').strip()
+        if phone.lower() == 'none':
+            phone = ''
         bld_grop  = request.POST.get('bld_grop')
         address   = request.POST.get('address')
         case_no   = request.POST.get('case_no', '').strip()
+
+        if not case_no:
+            return render(request, 'doctor/edit_patient.html', {
+                'patient': patient,
+                'case_no_error': 'Case No. is required.',
+                'form_data': request.POST,
+            })
+
+        duplicate = _find_case_no_duplicate(case_no, exclude_patient_id=patient.pk)
+        if duplicate:
+            return render(request, 'doctor/edit_patient.html', {
+                'patient': patient,
+                'case_no_error': _case_no_duplicate_error(case_no, duplicate),
+                'form_data': request.POST,
+            })
 
         if not active_login and email:
             try:
@@ -595,17 +684,6 @@ def edit_patient(request, hid):
                 'patient': patient
             })
 
-        # CASE NO DUPLICATE WARNING (non-blocking)
-        if case_no:
-            existing_patient = Patient.objects.filter(case_no=case_no).exclude(pk=patient.pk).first()
-            if existing_patient:
-                dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
-                messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
-            else:
-                existing_member = FamilyMember.objects.filter(case_no=case_no).first()
-                if existing_member:
-                    messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
-
         #  UPDATE USER
         if name:
             name_parts = name.split(' ', 1)
@@ -617,7 +695,7 @@ def edit_patient(request, hid):
         patient.user.save()
 
         # UPDATE PATIENT
-        patient.phone     = phone
+        patient.phone     = phone or None
         patient.address   = address
         patient.dob       = dob if dob else None
         patient.gender    = gender
@@ -625,23 +703,18 @@ def edit_patient(request, hid):
         patient.case_no   = case_no
         patient.save()
 
-        if request.POST.get('send_login_invite') == 'on' and not active_login:
-            if not patient.user.email:
-                messages.warning(request, 'Add an email to send a login invite')
-            else:
-                invite_status, invite_email = send_patient_invite_email(patient, request, request.user)
-                if invite_status == 'sent':
-                    messages.success(request, f'Patient updated and login invite sent to {invite_email}')
-                elif invite_status == 'recent':
-                    messages.warning(request, 'Patient updated. Invite was sent recently, try again in a minute.')
-                elif invite_status == 'active':
-                    messages.error(request, 'Patient updated, but this patient already has an active login.')
-                elif invite_status == 'no_email':
-                    messages.warning(request, 'Add an email to send a login invite')
-                elif invite_status == 'invalid_email':
-                    messages.error(request, 'Patient updated, but the email address is invalid and the invite was not sent.')
-                elif invite_status == 'error':
-                    messages.error(request, 'Patient updated, but the login invite could not be sent. Please try again.')
+        if request.POST.get('send_login_invite') == 'on' and not active_login and email:
+            invite_status, invite_email = send_patient_invite_email(patient, request, request.user)
+            if invite_status == 'sent':
+                messages.success(request, f'Patient updated and login invite sent to {invite_email}')
+            elif invite_status == 'recent':
+                messages.warning(request, 'Patient updated. Invite was sent recently, try again in a minute.')
+            elif invite_status == 'active':
+                messages.error(request, 'Patient updated, but this patient already has an active login.')
+            elif invite_status == 'invalid_email':
+                messages.error(request, 'Patient updated, but the email address is invalid and the invite was not sent.')
+            elif invite_status == 'error':
+                messages.error(request, 'Patient updated, but the login invite could not be sent. Please try again.')
 
         return redirect('doctor:manage_patients')
 
@@ -677,12 +750,39 @@ def add_patient(request):
         email     = request.POST.get('email', '').strip().lower()
         dob       = request.POST.get('dob')
         gender    = request.POST.get('gender')
-        phone     = request.POST.get('phone', '').strip()
+        phone     = (request.POST.get('phone') or '').strip()
+        if phone.lower() == 'none':
+            phone = ''
         bld_grop  = request.POST.get('bld_grop')
         address   = request.POST.get('address')
         parent_id = request.POST.get('parent_patient')
         relation  = request.POST.get('relation', '').strip()
         case_no   = request.POST.get('case_no', '').strip()
+
+        if not case_no:
+            selected_parent = None
+            if parent_id:
+                selected_parent = Patient.objects.select_related('user').filter(pk=parent_id).first()
+            return render(request, 'doctor/add_patient.html', {
+                'patients': all_patients,
+                'case_no_error': 'Case No. is required.',
+                'form_data': request.POST,
+                'selected_parent': selected_parent,
+            })
+
+        duplicate = _find_case_no_duplicate(case_no)
+        if duplicate:
+            selected_parent = None
+            if request.POST.get('parent_patient'):
+                selected_parent = Patient.objects.select_related('user').filter(
+                    pk=request.POST.get('parent_patient')
+                ).first()
+            return render(request, 'doctor/add_patient.html', {
+                'patients': all_patients,
+                'case_no_error': _case_no_duplicate_error(case_no, duplicate),
+                'form_data': request.POST,
+                'selected_parent': selected_parent,
+            })
 
         if not name:
 
@@ -699,24 +799,21 @@ def add_patient(request):
                     name__iexact=name,
                     relation__iexact=relation
                 ).exists():
-                    return render(request, 'doctor/add_patient.html', {'patients': all_patients})
-
-                # CASE NO DUPLICATE WARNING (non-blocking)
-                if case_no:
-                    existing_patient = Patient.objects.filter(case_no=case_no).first()
-                    if existing_patient:
-                        dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
-                        messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
-                    else:
-                        existing_member = FamilyMember.objects.filter(case_no=case_no).first()
-                        if existing_member:
-                            messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
+                    messages.error(
+                        request,
+                        'A family member with this name and relation already exists for this patient.',
+                    )
+                    return render(request, 'doctor/add_patient.html', {
+                        'patients': all_patients,
+                        'form_data': request.POST,
+                        'selected_parent': parent_patient,
+                    })
 
                 FamilyMember.objects.create(
                     patient  = parent_patient,
                     name     = name,
                     relation = relation,
-                    phone    = phone,          # optional — parent ka nahi, jo dala woh
+                    phone    = phone or None,  # optional — parent ka nahi, jo dala woh
                     gender   = gender or None,
                     dob      = dob or None,
                     bld_grop = bld_grop or None,
@@ -730,39 +827,32 @@ def add_patient(request):
                 return render(request, 'doctor/add_patient.html', {'patients': all_patients})
 
         # ── Case 2: No parent → Create Main Patient (User + Patient) ────
-        if not email:
-            messages.error(request, 'Email is required.')
-            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
+        if email:
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, 'Enter a valid email address.')
+                return render(request, 'doctor/add_patient.html', {
+                    'patients': all_patients,
+                    'form_data': request.POST,
+                })
 
-        try:
-            validate_email(email)
-        except ValidationError:
-            messages.error(request, 'Enter a valid email address.')
-            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
-
-        if User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).exists():
-            messages.error(request, 'Email already in use.')
-            return render(request, 'doctor/add_patient.html', {'patients': all_patients})
-
-        # CASE NO DUPLICATE WARNING (non-blocking)
-        if case_no:
-            existing_patient = Patient.objects.filter(case_no=case_no).first()
-            if existing_patient:
-                dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
-                messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
-            else:
-                existing_member = FamilyMember.objects.filter(case_no=case_no).first()
-                if existing_member:
-                    messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
+            if User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).exists():
+                messages.error(request, 'Email already in use.')
+                return render(request, 'doctor/add_patient.html', {
+                    'patients': all_patients,
+                    'form_data': request.POST,
+                })
 
         name_parts = name.split(' ', 1)
         first_name = name_parts[0]
         last_name  = name_parts[1] if len(name_parts) > 1 else ''
+        username = email or (f'pt-{phone}' if phone else f'pt-{uuid4().hex}')
 
         try:
             with transaction.atomic():
                 user = User.objects.create_user(
-                    username   = email,
+                    username   = username,
                     email      = email,
                     first_name = first_name,
                     last_name  = last_name,
@@ -780,7 +870,10 @@ def add_patient(request):
                 patient.case_no  = case_no
                 patient.save()
 
-            send_welcome_email(request, user, phone=phone, added_by_clinic=True)
+            if email:
+                send_welcome_email(request, user, phone=phone, added_by_clinic=True)
+            else:
+                messages.success(request, 'Patient added successfully.')
             return redirect('doctor:manage_patients')
 
         except Exception as exc:
@@ -1011,12 +1104,29 @@ def edit_family(request, hid):
 
     if request.method == 'POST':
         name     = request.POST.get('name', '').strip()
-        phone    = request.POST.get('phone', '').strip()
+        phone    = (request.POST.get('phone') or '').strip()
+        if phone.lower() == 'none':
+            phone = ''
         relation = request.POST.get('relation', '').strip()
         gender   = request.POST.get('gender', '')
         dob      = request.POST.get('dob')
         bld_grop = request.POST.get('bld_grop')
         case_no  = request.POST.get('case_no', '').strip()
+
+        if not case_no:
+            return render(request, 'doctor/edit_family.html', {
+                'member': member,
+                'case_no_error': 'Case No. is required.',
+                'form_data': request.POST,
+            })
+
+        duplicate = _find_case_no_duplicate(case_no, exclude_family_member_id=member.pk)
+        if duplicate:
+            return render(request, 'doctor/edit_family.html', {
+                'member': member,
+                'case_no_error': _case_no_duplicate_error(case_no, duplicate),
+                'form_data': request.POST,
+            })
 
         # Validate required fields
         if not name:
@@ -1027,17 +1137,6 @@ def edit_family(request, hid):
         if phone and FamilyMember.objects.filter(phone=phone).exclude(pk=member.pk).exists():
             messages.error(request, 'This phone number is already registered.')
             return render(request, 'doctor/edit_family.html', {'member': member})
-
-        # CASE NO DUPLICATE WARNING (non-blocking)
-        if case_no:
-            existing_patient = Patient.objects.filter(case_no=case_no).first()
-            if existing_patient:
-                dup_name = existing_patient.user.get_full_name() or existing_patient.user.email
-                messages.warning(request, f'Case No. {case_no} is already used by {dup_name}')
-            else:
-                existing_member = FamilyMember.objects.filter(case_no=case_no).exclude(pk=member.pk).first()
-                if existing_member:
-                    messages.warning(request, f'Case No. {case_no} is already used by {existing_member.name}')
 
         # Update member
         member.name     = name

@@ -21,6 +21,7 @@ from accounts.tokens import patient_invite_token_generator
 from accounts.services.patient_import import (
     clean_phone,
     clean_date,
+    parse_import_file,
     validate_patient_rows,
     create_patients_from_rows,
 )
@@ -217,6 +218,51 @@ class PatientImportTests(TestCase):
         self.assertEqual(second_import["created_count"], 0)
         self.assertEqual(second_import["duplicate_count"], 1)
         self.assertEqual(Patient.objects.filter(user__first_name="Name", user__last_name="Only Patient").count(), 1)
+
+    def test_same_name_with_different_case_numbers_imports_both(self):
+        rows = [
+            {"_row_num": 2, "name": "Same Name Patient", "phone": "", "case_no": "REG-100"},
+            {"_row_num": 3, "name": "Same Name Patient", "phone": "", "case_no": "REG-101"},
+        ]
+
+        validated = validate_patient_rows(rows)
+        self.assertEqual([row["status"] for row in validated], ["New", "New"])
+        result = create_patients_from_rows(validated)
+
+        self.assertEqual(result["created_count"], 2)
+        self.assertEqual(
+            set(Patient.objects.filter(user__first_name="Same", user__last_name="Name Patient").values_list("case_no", flat=True)),
+            {"REG-100", "REG-101"},
+        )
+
+    def test_same_case_number_is_skipped_in_file_and_against_database(self):
+        existing_user = User.objects.create_user(username="case-existing", first_name="Existing")
+        existing_user.patient.case_no = "DB-200"
+        existing_user.patient.save(update_fields=["case_no"])
+        rows = [
+            {"_row_num": 2, "name": "File One", "case_no": "FILE-100"},
+            {"_row_num": 3, "name": "File Two", "case_no": " file-100 "},
+            {"_row_num": 4, "name": "Database Existing", "case_no": " db-200 "},
+        ]
+
+        validated = validate_patient_rows(rows)
+        self.assertEqual([row["status"] for row in validated], ["New", "Duplicate", "Duplicate"])
+        result = create_patients_from_rows(validated)
+        self.assertEqual(result["created_count"], 1)
+        self.assertEqual(result["duplicate_count"], 2)
+        self.assertEqual(Patient.objects.get(user__first_name="File").case_no, "FILE-100")
+
+    def test_case_number_column_aliases_are_normalized(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+
+        for header in ("case_no", "old_register_no", "register_no"):
+            with self.subTest(header=header):
+                uploaded = SimpleUploadedFile(
+                    "patients.csv",
+                    f"name,{header}\nAlias Patient,ALIAS-300\n".encode(),
+                )
+                parsed = parse_import_file(uploaded)
+                self.assertEqual(parsed[0]["case_no"], "ALIAS-300")
 
     def test_three_date_formats(self):
         # dd/mm/yyyy
@@ -542,24 +588,171 @@ class CaseNoTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Sita Kumar')
 
-    def test_duplicate_case_no_shows_warning_but_saves(self):
-        # Edit patient2 to use case_no '1194' (already on patient1)
+    def test_duplicate_case_no_is_rejected(self):
+        # Edit patient2 to use a whitespace-padded, case-insensitive duplicate.
+        self.patient1.case_no = 'AbC-1194'
+        self.patient1.save(update_fields=['case_no'])
         response = self.client.post(
             reverse('doctor:edit_patient', args=[encode_id(self.patient2.pk)]),
             {
                 'name': 'Meena Sharma',
                 'email': 'caseno-patient2@example.com',
                 'phone': '',
-                'case_no': '1194',
+                'case_no': ' abc-1194 ',
             },
         )
-        self.assertEqual(response.status_code, 302)
-        # Warning was issued
-        messages_list = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertTrue(any('Case No. 1194 is already used by' in m for m in messages_list))
-        # But the save still happened
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Case No. abc-1194 is already used by Ravi Kumar')
+        self.assertEqual(response.context['case_no_error'], 'Case No. abc-1194 is already used by Ravi Kumar (—)')
         self.patient2.refresh_from_db()
-        self.assertEqual(self.patient2.case_no, '1194')
+        self.assertEqual(self.patient2.case_no, '')
+
+    def test_family_duplicate_name_and_relation_shows_error(self):
+        from accounts.models import FamilyMember
+
+        FamilyMember.objects.create(
+            patient=self.patient1,
+            name='Sita Kumar',
+            relation='Wife',
+            case_no='FAM-100',
+        )
+        response = self.client.post(reverse('doctor:add_patient'), {
+            'name': 'Sita Kumar',
+            'parent_patient': str(self.patient1.pk),
+            'relation': 'Wife',
+            'case_no': 'FAM-101',
+        })
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'A family member with this name and relation already exists for this patient.',
+        )
+        self.assertEqual(FamilyMember.objects.filter(patient=self.patient1).count(), 1)
+
+    def test_add_patient_without_email_creates_no_login_and_sends_no_email(self):
+        with patch('doctor.views.send_welcome_email') as send_welcome:
+            response = self.client.post(reverse('doctor:add_patient'), {
+                'name': 'No Email Patient',
+                'email': '',
+                'phone': '',
+                'case_no': 'NO-EMAIL-100',
+            })
+
+        self.assertEqual(response.status_code, 302)
+        patient = Patient.objects.get(case_no='NO-EMAIL-100')
+        self.assertEqual(patient.user.email, '')
+        self.assertTrue(patient.user.username.startswith('pt-'))
+        self.assertFalse(patient.user.has_usable_password())
+        self.assertEqual(patient.login_status, 'none')
+        send_welcome.assert_not_called()
+        self.assertIn('Patient added successfully.', [m.message for m in get_messages(response.wsgi_request)])
+
+    def test_add_patient_with_email_keeps_email_flow(self):
+        with patch('doctor.views.send_welcome_email') as send_welcome:
+            response = self.client.post(reverse('doctor:add_patient'), {
+                'name': 'Email Patient',
+                'email': 'email-patient@example.com',
+                'phone': '',
+                'case_no': 'EMAIL-100',
+            })
+
+        self.assertEqual(response.status_code, 302)
+        patient = Patient.objects.get(case_no='EMAIL-100')
+        self.assertEqual(patient.user.email, 'email-patient@example.com')
+        self.assertEqual(patient.user.username, 'email-patient@example.com')
+        send_welcome.assert_called_once()
+
+    def test_case_no_is_required_for_doctor_patient_and_family_forms(self):
+        from accounts.models import FamilyMember
+
+        add_patient_response = self.client.post(reverse('doctor:add_patient'), {
+            'name': 'New Patient',
+            'email': 'new-case-required@example.com',
+            'case_no': '   ',
+        })
+        self.assertEqual(add_patient_response.status_code, 200)
+        self.assertContains(add_patient_response, 'Case No. is required.')
+        self.assertFalse(User.objects.filter(username='new-case-required@example.com').exists())
+
+        edit_patient_response = self.client.post(
+            reverse('doctor:edit_patient', args=[encode_id(self.patient2.pk)]),
+            {'name': 'Meena Sharma', 'email': 'caseno-patient2@example.com', 'case_no': ''},
+        )
+        self.assertEqual(edit_patient_response.status_code, 200)
+        self.assertContains(edit_patient_response, 'Case No. is required.')
+        self.patient2.refresh_from_db()
+        self.assertEqual(self.patient2.case_no, '')
+
+        family_count = FamilyMember.objects.count()
+        add_family_response = self.client.post(reverse('doctor:add_patient'), {
+            'name': 'New Family Member',
+            'parent_patient': str(self.patient1.pk),
+            'relation': 'Other',
+            'case_no': ' ',
+        })
+        self.assertEqual(add_family_response.status_code, 200)
+        self.assertContains(add_family_response, 'Case No. is required.')
+        self.assertEqual(FamilyMember.objects.count(), family_count)
+
+        member = FamilyMember.objects.create(
+            patient=self.patient1,
+            name='Existing Family Member',
+            relation='Other',
+            case_no='FM-100',
+        )
+        edit_family_response = self.client.post(
+            reverse('doctor:edit_family', args=[encode_id(member.pk)]),
+            {'name': member.name, 'relation': member.relation, 'case_no': ''},
+        )
+        self.assertEqual(edit_family_response.status_code, 200)
+        self.assertContains(edit_family_response, 'Case No. is required.')
+        member.refresh_from_db()
+        self.assertEqual(member.case_no, 'FM-100')
+
+    def test_inline_case_no_update_succeeds(self):
+        response = self.client.post(
+            reverse('doctor:update_case_no', args=['main', encode_id(self.patient2.pk)]),
+            {'case_no': ' 264 '},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {'ok': True, 'case_no': '264'})
+        self.patient2.refresh_from_db()
+        self.assertEqual(self.patient2.case_no, '264')
+
+    def test_inline_case_no_update_rejects_empty_value(self):
+        response = self.client.post(
+            reverse('doctor:update_case_no', args=['main', encode_id(self.patient2.pk)]),
+            {'case_no': '  '},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {'ok': False, 'error': 'Case No. is required.'})
+        self.patient2.refresh_from_db()
+        self.assertEqual(self.patient2.case_no, '')
+
+    def test_inline_case_no_update_rejects_duplicate(self):
+        response = self.client.post(
+            reverse('doctor:update_case_no', args=['main', encode_id(self.patient2.pk)]),
+            {'case_no': '1194'},
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), {
+            'ok': False,
+            'error': 'Case No. 1194 is already used by Ravi Kumar (—)',
+        })
+        self.patient2.refresh_from_db()
+        self.assertEqual(self.patient2.case_no, '')
+
+    def test_inline_case_no_update_for_non_staff_returns_403(self):
+        non_staff = User.objects.create_user(username='case-no-non-staff', password='pass')
+        self.client.force_login(non_staff)
+        response = self.client.post(
+            reverse('doctor:update_case_no', args=['main', encode_id(self.patient2.pk)]),
+            {'case_no': '264'},
+        )
+        self.assertEqual(response.status_code, 403)
+        self.patient2.refresh_from_db()
+        self.assertEqual(self.patient2.case_no, '')
 
 
 class ImportCaseNumbersTests(TestCase):

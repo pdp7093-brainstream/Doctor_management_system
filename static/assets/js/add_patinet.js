@@ -67,7 +67,6 @@ parentSearch && parentSearch.addEventListener('input', function(){
     relationField.style.display = 'none';
     relationSelect.required = false;
     phoneInput.required = false;
-    emailInput.required = true;
     emailField.style.display = 'block';
     addressField.style.display = 'block';
     modeText.innerHTML = ` No parent selected — this person will be added as a <strong>main patient</strong> with their own login.`;

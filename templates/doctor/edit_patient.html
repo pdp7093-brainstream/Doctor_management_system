@@ -33,6 +33,14 @@
                 <form method="POST" enctype="multipart/form-data" class="row g-3">
                     {% csrf_token %}
 
+                    <div class="col-12">
+                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="patient-case-no">
+                            Case No. <span class="text-danger">*</span>
+                        </label>
+                        <input id="patient-case-no" type="text" name="case_no" class="form-control" value="{{ form_data.case_no|default_if_none:patient.case_no|default_if_none:'' }}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50" required>
+                        {% if case_no_error %}<div class="text-danger small mt-1">{{ case_no_error }}</div>{% endif %}
+                    </div>
+
                     <!-- Personal Info Label -->
                     <div class="col-12">
                         <div style="font-size:0.78rem; font-weight:700; color:var(--primary-color);">
@@ -45,24 +53,24 @@
                             Full Name <span class="text-danger">*</span>
                         </label>
                         <input id="patient-name" type="text" name="name" class="form-control"
-                               value="{{ patient.user.first_name }} {{ patient.user.last_name }}" required>
+                               value="{% if form_data %}{{ form_data.name }}{% else %}{{ patient.user.first_name }} {{ patient.user.last_name }}{% endif %}" required>
                     </div>
 
                     <div class="col-md-6">
                         <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <label class="form-label mb-0" style="font-size:0.85rem; font-weight:600;" for="patient-email">Email</label>
+                            <label class="form-label mb-0" style="font-size:0.85rem; font-weight:600;" for="patient-email">Email (optional)</label>
                             {% if patient.login_status == 'active' %}<span class="badge bg-success">Active</span>
                             {% elif patient.login_status == 'invited' %}
                                 <span class="badge bg-warning text-dark">Invited · {{ patient.invite_sent_at|date:'d M Y' }}</span>
                                 <button type="submit" form="resendPatientInviteForm" class="btn btn-link btn-sm p-0">Resend invite</button>
                             {% else %}<span class="badge bg-secondary">No login</span>{% endif %}
                         </div>
-                        <input id="patient-email" type="email" name="email" class="form-control" value="{{ patient.user.email }}" {% if patient.login_status == 'active' %}readonly aria-describedby="patient-email-note"{% endif %}>
+                        <input id="patient-email" type="email" name="email" class="form-control" value="{{ form_data.email|default_if_none:patient.user.email|default_if_none:'' }}" {% if patient.login_status == 'active' %}readonly aria-describedby="patient-email-note"{% endif %}>
                         {% if patient.login_status == 'active' %}
                             <div id="patient-email-note" class="form-text">The patient manages this email from their own account</div>
                         {% else %}
                             <div class="form-check mt-2">
-                                <input class="form-check-input" type="checkbox" name="send_login_invite" id="send-login-invite" {% if patient.login_status == 'none' or not patient.user.email %}checked{% endif %}>
+                                <input class="form-check-input" type="checkbox" name="send_login_invite" id="send-login-invite" {% if form_data %}{% if form_data.send_login_invite == 'on' %}checked{% endif %}{% elif patient.user.email and patient.login_status == 'none' %}checked{% endif %} {% if not patient.user.email %}disabled{% endif %}>
                                 <label class="form-check-label small" for="send-login-invite">Send login invite to this email after saving</label>
                             </div>
                         {% endif %}
@@ -72,7 +80,7 @@
                         <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="patient-dob">
                             Date of Birth
                         </label>
-                        <input id="patient-dob" type="date" name="dob" class="form-control" value="{{ patient.dob|date:'Y-m-d' }}">
+                        <input id="patient-dob" type="date" name="dob" class="form-control" value="{% if form_data %}{{ form_data.dob }}{% else %}{{ patient.dob|date:'Y-m-d' }}{% endif %}">
                     </div>
 
                     <div class="col-md-6">
@@ -81,9 +89,9 @@
                         </label>
                         <select id="patient-gender" name="gender" class="form-select">
                             <option value="">Select Gender</option>
-                            <option value="male"   {% if patient.gender == 'male' %}selected{% endif %}>Male</option>
-                            <option value="female" {% if patient.gender == 'female' %}selected{% endif %}>Female</option>
-                            <option value="other"  {% if patient.gender == 'other' %}selected{% endif %}>Other</option>
+                            <option value="male"   {% if form_data %}{% if form_data.gender == 'male' %}selected{% endif %}{% elif patient.gender == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if form_data %}{% if form_data.gender == 'female' %}selected{% endif %}{% elif patient.gender == 'female' %}selected{% endif %}>Female</option>
+                            <option value="other"  {% if form_data %}{% if form_data.gender == 'other' %}selected{% endif %}{% elif patient.gender == 'other' %}selected{% endif %}>Other</option>
                         </select>
                     </div>
 
@@ -99,7 +107,7 @@
                             Phone
                         </label>
                         <input id="patient-phone" type="tel" name="phone" class="form-control"
-                               value="{{ patient.phone }}" placeholder="Enter phone number"
+                               value="{{ form_data.phone|default_if_none:patient.phone|default_if_none:'' }}" placeholder="Enter phone number"
                                inputmode="numeric" pattern="[0-9]{7,15}" maxlength="15"
                                title="Phone number must contain only digits (7–15 digits)">
                     </div>
@@ -110,14 +118,14 @@
                         </label>
                         <select id="patient-blood-group" name="bld_grop" class="form-select">
                             <option value="">Select Blood Group</option>
-                            <option value="A+"  {% if patient.bld_grop == 'A+' %}selected{% endif %}>A+</option>
-                            <option value="A-"  {% if patient.bld_grop == 'A-' %}selected{% endif %}>A-</option>
-                            <option value="B+"  {% if patient.bld_grop == 'B+' %}selected{% endif %}>B+</option>
-                            <option value="B-"  {% if patient.bld_grop == 'B-' %}selected{% endif %}>B-</option>
-                            <option value="AB+" {% if patient.bld_grop == 'AB+' %}selected{% endif %}>AB+</option>
-                            <option value="AB-" {% if patient.bld_grop == 'AB-' %}selected{% endif %}>AB-</option>
-                            <option value="O+"  {% if patient.bld_grop == 'O+' %}selected{% endif %}>O+</option>
-                            <option value="O-"  {% if patient.bld_grop == 'O-' %}selected{% endif %}>O-</option>
+                            <option value="A+"  {% if form_data %}{% if form_data.bld_grop == 'A+' %}selected{% endif %}{% elif patient.bld_grop == 'A+' %}selected{% endif %}>A+</option>
+                            <option value="A-"  {% if form_data %}{% if form_data.bld_grop == 'A-' %}selected{% endif %}{% elif patient.bld_grop == 'A-' %}selected{% endif %}>A-</option>
+                            <option value="B+"  {% if form_data %}{% if form_data.bld_grop == 'B+' %}selected{% endif %}{% elif patient.bld_grop == 'B+' %}selected{% endif %}>B+</option>
+                            <option value="B-"  {% if form_data %}{% if form_data.bld_grop == 'B-' %}selected{% endif %}{% elif patient.bld_grop == 'B-' %}selected{% endif %}>B-</option>
+                            <option value="AB+" {% if form_data %}{% if form_data.bld_grop == 'AB+' %}selected{% endif %}{% elif patient.bld_grop == 'AB+' %}selected{% endif %}>AB+</option>
+                            <option value="AB-" {% if form_data %}{% if form_data.bld_grop == 'AB-' %}selected{% endif %}{% elif patient.bld_grop == 'AB-' %}selected{% endif %}>AB-</option>
+                            <option value="O+"  {% if form_data %}{% if form_data.bld_grop == 'O+' %}selected{% endif %}{% elif patient.bld_grop == 'O+' %}selected{% endif %}>O+</option>
+                            <option value="O-"  {% if form_data %}{% if form_data.bld_grop == 'O-' %}selected{% endif %}{% elif patient.bld_grop == 'O-' %}selected{% endif %}>O-</option>
                         </select>
                     </div>
 
@@ -126,15 +134,7 @@
                             Address
                         </label>
                         <textarea id="patient-address" name="address" class="form-control" rows="3"
-                                  placeholder="Enter complete address">{{ patient.address }}</textarea>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="patient-case-no">
-                            Case No. <small class="fw-normal text-muted">(optional)</small>
-                        </label>
-                        <input id="patient-case-no" type="text" name="case_no" class="form-control"
-                               value="{{ patient.case_no }}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50">
+                                  placeholder="Enter complete address">{{ form_data.address|default_if_none:patient.address|default_if_none:'' }}</textarea>
                     </div>
 
                     <!-- Actions -->
@@ -154,6 +154,16 @@
 <script>
 (function(){
     var ph = document.getElementById('patient-phone');
+    var email = document.getElementById('patient-email');
+    var invite = document.getElementById('send-login-invite');
+    if (email && invite) {
+        var syncInviteAvailability = function(){
+            invite.disabled = !email.value.trim();
+            if (invite.disabled) invite.checked = false;
+        };
+        email.addEventListener('input', syncInviteAvailability);
+        syncInviteAvailability();
+    }
     if (!ph) return;
     ph.addEventListener('keydown', function(e){
         var allowed = ['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Home','End'];
