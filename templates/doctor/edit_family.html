@@ -31,7 +31,7 @@
                         <label class="form-label" style="font-size:0.85rem; font-weight:600;" for="family-case-no">
                             Case No. <span class="text-danger">*</span>
                         </label>
-                        <input id="family-case-no" type="text" name="case_no" class="form-control" value="{{ form_data.case_no|default_if_none:member.case_no|default_if_none:'' }}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50" required>
+                        <input id="family-case-no" type="text" name="case_no" class="form-control" value="{% if form_data %}{{ form_data.case_no }}{% else %}{{ member.case_no|default_if_none:'' }}{% endif %}" placeholder="e.g. 1194 or 430 / 1271" maxlength="50" required>
                         {% if case_no_error %}<div class="text-danger small mt-1">{{ case_no_error }}</div>{% endif %}
                     </div>
 

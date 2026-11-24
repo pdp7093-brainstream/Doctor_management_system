@@ -634,6 +634,7 @@ def edit_patient(request, hid):
 
         name      = request.POST.get('name', '').strip()
         email     = request.POST.get('email', '').strip().lower()
+        email_was_empty = not (patient.user.email or '').strip()
         active_login = patient.login_status == 'active'
         if active_login:
             email = patient.user.email
@@ -666,7 +667,10 @@ def edit_patient(request, hid):
                 validate_email(email)
             except ValidationError:
                 messages.error(request, 'Enter a valid email address.')
-                return render(request, 'doctor/edit_patient.html', {'patient': patient})
+                return render(request, 'doctor/edit_patient.html', {
+                    'patient': patient,
+                    'form_data': request.POST,
+                })
 
         # EMAIL DUPLICATE CHECK
         if not active_login and email and User.objects.filter(
@@ -674,14 +678,16 @@ def edit_patient(request, hid):
         ).exclude(pk=patient.user.pk).exists():
             messages.error(request, 'Email already in use.')
             return render(request, 'doctor/edit_patient.html', {
-                'patient': patient
+                'patient': patient,
+                'form_data': request.POST,
             })
 
         #  PHONE DUPLICATE CHECK
         if phone and Patient.objects.filter(phone=phone).exclude(pk=patient.pk).exists():
             messages.error(request, 'This phone number is already used by another patient.')
             return render(request, 'doctor/edit_patient.html', {
-                'patient': patient
+                'patient': patient,
+                'form_data': request.POST,
             })
 
         #  UPDATE USER
@@ -690,8 +696,20 @@ def edit_patient(request, hid):
             patient.user.first_name = name_parts[0]
             patient.user.last_name = name_parts[1] if len(name_parts) > 1 else ''
         if not active_login:
-            patient.user.email      = email or patient.user.email
-            patient.user.username   = email or patient.user.username
+            if email:
+                if email_was_empty:
+                    patient.user.set_unusable_password()
+                patient.user.email = email
+                patient.user.username = email
+            else:
+                patient.user.email = ''
+                if not patient.user.username.startswith('pt-'):
+                    generated_username = f"pt-{phone}" if phone else f"pt-{uuid4().hex}"
+                    if User.objects.filter(username__iexact=generated_username).exclude(pk=patient.user.pk).exists():
+                        generated_username = f"pt-{uuid4().hex}"
+                        while User.objects.filter(username__iexact=generated_username).exclude(pk=patient.user.pk).exists():
+                            generated_username = f"pt-{uuid4().hex}"
+                    patient.user.username = generated_username
         patient.user.save()
 
         # UPDATE PATIENT
@@ -847,7 +865,15 @@ def add_patient(request):
         name_parts = name.split(' ', 1)
         first_name = name_parts[0]
         last_name  = name_parts[1] if len(name_parts) > 1 else ''
-        username = email or (f'pt-{phone}' if phone else f'pt-{uuid4().hex}')
+
+        if email:
+            username = email
+        else:
+            username = f'pt-{phone}' if phone else f'pt-{uuid4().hex}'
+            if User.objects.filter(username__iexact=username).exists():
+                username = f'pt-{uuid4().hex}'
+                while User.objects.filter(username__iexact=username).exists():
+                    username = f'pt-{uuid4().hex}'
 
         try:
             with transaction.atomic():
@@ -873,7 +899,7 @@ def add_patient(request):
             if email:
                 send_welcome_email(request, user, phone=phone, added_by_clinic=True)
             else:
-                messages.success(request, 'Patient added successfully.')
+                messages.success(request, 'Patient added.')
             return redirect('doctor:manage_patients')
 
         except Exception as exc:
@@ -1131,12 +1157,18 @@ def edit_family(request, hid):
         # Validate required fields
         if not name:
             messages.error(request, 'Name is required.')
-            return render(request, 'doctor/edit_family.html', {'member': member})
+            return render(request, 'doctor/edit_family.html', {
+                'member': member,
+                'form_data': request.POST,
+            })
 
         # Check for duplicate phone (exclude self)
         if phone and FamilyMember.objects.filter(phone=phone).exclude(pk=member.pk).exists():
             messages.error(request, 'This phone number is already registered.')
-            return render(request, 'doctor/edit_family.html', {'member': member})
+            return render(request, 'doctor/edit_family.html', {
+                'member': member,
+                'form_data': request.POST,
+            })
 
         # Update member
         member.name     = name

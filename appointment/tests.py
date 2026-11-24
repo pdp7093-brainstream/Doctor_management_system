@@ -103,6 +103,50 @@ class PrescriptionAdviceTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'appointment/prescription_print.html')
 
+    def test_prescription_pages_show_selected_patient_case_number_or_dash(self):
+        from accounts.models import FamilyMember
+
+        self.client.force_login(self.doctor_user)
+        patient = self.visit.appointment.patient
+        patient.case_no = 'PAT-123'
+        patient.save(update_fields=['case_no'])
+        prescription_url = reverse('appointment:prescription', args=[encode_id(self.visit.id)])
+        print_url = reverse('appointment:print_prescription', args=[encode_id(self.visit.id)])
+
+        for url in (prescription_url, print_url):
+            with self.subTest(person='patient', url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, 'Case No.')
+                self.assertContains(response, 'PAT-123')
+
+        family_member = FamilyMember.objects.create(
+            patient=patient,
+            name='Test Family Member',
+            relation='Child',
+            case_no='FAM-456',
+        )
+        appointment = self.visit.appointment
+        appointment.family_member = family_member
+        appointment.save(update_fields=['family_member'])
+
+        for url in (prescription_url, print_url):
+            with self.subTest(person='family member', url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, 'Case No.')
+                self.assertContains(response, 'FAM-456')
+
+        family_member.case_no = ''
+        family_member.save(update_fields=['case_no'])
+        for url in (prescription_url, print_url):
+            with self.subTest(person='family member without case number', url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertContains(response, 'Case No.')
+                self.assertContains(response, '—')
+                self.assertNotContains(response, 'PAT-123')
+
     def test_advice_lines_are_normalized_and_saved(self):
         self.prescription.pathya = normalize_advice_lines(' Warm water \n\nMOONG DAL\nwarm water ')
         self.prescription.apathya = normalize_advice_lines('Fried food\nfried FOOD\nLate eating')

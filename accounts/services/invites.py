@@ -39,6 +39,9 @@ def send_patient_invite_email(patient, request, acting_user):
         'activate_patient', kwargs={'uidb64': uidb64, 'token': token}
     ))
     context = {'patient': patient, 'invite_url': invite_url}
+    previous_invite_sent_at = patient.invite_sent_at
+    patient.invite_sent_at = now
+    patient.save(update_fields=['invite_sent_at'])
     try:
         message = EmailMultiAlternatives(
             subject='Set your Hitshree patient account password',
@@ -49,11 +52,11 @@ def send_patient_invite_email(patient, request, acting_user):
         message.attach_alternative(render_to_string('emails/patient_invite.html', context), 'text/html')
         message.send(fail_silently=False)
     except Exception:
+        patient.invite_sent_at = previous_invite_sent_at
+        patient.save(update_fields=['invite_sent_at'])
         logger.exception('Unable to send patient invite for patient_id=%s', patient.pk)
         return 'error', email
 
-    patient.invite_sent_at = now
-    patient.save(update_fields=['invite_sent_at'])
     security_logger.info(
         'patient_invite_sent patient_id=%s user_id=%s actor_user_id=%s',
         patient.pk, patient.user_id, acting_user.pk,

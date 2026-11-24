@@ -906,6 +906,7 @@ class PrescriptionView(View):
         prescription_therapies = prescription.therapies.select_related('therapy').prefetch_related('session_records')
         therapy_options = Therapy.objects.filter(is_active=True)
         lab_documents = visit.lab_documents.all()
+        patient_record = appt.family_member or appt.patient
 
         for item in items:
             morning, afternoon, evening, night, meal = self.parse_dosage(item.dosage)
@@ -919,6 +920,7 @@ class PrescriptionView(View):
 
         return render(request, 'doctor/prescription.html', {
             'visit': visit,
+            'patient_record': patient_record,
             'variants': variants,
             'items': items,
             'prescription_therapies': prescription_therapies,
@@ -1256,7 +1258,7 @@ def print_prescription(request, hid):
     )
     patient_gender = display_value(family_member.gender if family_member else visit.patient.gender)
     patient_contact = display_value(visit.patient.phone)
-    patient_case_no = display_value(family_member.case_no if family_member else visit.patient.case_no)
+    patient_record = family_member or visit.patient
     doctor = visit.doctor or (visit.appointment.doctor if visit.appointment else None) or default_doctor
     doctor_name = display_value((doctor.user.get_full_name() or doctor.user.username) if doctor else '')
     
@@ -1268,10 +1270,10 @@ def print_prescription(request, hid):
         'prescription_therapies': prescription_therapies,
         'clinic': settings,
         'default_doctor': default_doctor,
+        'patient_record': patient_record,
         'patient_name': patient_name,
         'patient_gender': patient_gender,
         'patient_contact': patient_contact,
-        'patient_case_no': patient_case_no,
         'doctor_name': doctor_name,
         'doctor_specialization': display_value(settings.specialization),
         'doctor_registration_no': display_value(settings.registration_no),

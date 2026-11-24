@@ -24,7 +24,7 @@
                 </a>
                 {% else %}
                 <a href="{% url 'appointment:manage_appointments' %}?patient={{ visit.appointment.patient_id|hid }}{% if visit.appointment.family_member_id %}&family_member={{ visit.appointment.family_member_id|hid }}{% endif %}" class="btn-page btn-page-outline">
-                    <i class="bi bi me-2"></i>View History
+                    <i class="bi bi-clock-history me-2"></i>View History
                 </a>
                 {% endif %}
             </div>
@@ -57,15 +57,11 @@
                                         value="{% if visit %}{{ visit.appointment.appointment_date }}{% endif %}"
                                         readonly>
                                 </div>
-                                {% with case_no=visit.appointment.family_member.case_no|default:visit.appointment.patient.case_no %}
-                                {% if case_no %}
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold text-dark mb-2">Case No.</label>
                                     <input type="text" class="form-control bg-secondary-subtle"
-                                        value="{{ case_no }}" readonly>
+                                        value="{{ patient_record.case_no|default:'—' }}" readonly>
                                 </div>
-                                {% endif %}
-                                {% endwith %}
                             </div>
                         </div>
                     </div>

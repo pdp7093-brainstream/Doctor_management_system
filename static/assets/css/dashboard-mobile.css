@@ -1530,3 +1530,14 @@
         justify-content: flex-end !important;
     }
 }
+
+@media (max-width: 575.98px) {
+    .page-head > .d-flex {
+        width: 100%;
+    }
+    .page-head > .d-flex > .btn-page {
+        flex: 1 1 0;
+        justify-content: center;
+        gap: 6px;
+    }
+}

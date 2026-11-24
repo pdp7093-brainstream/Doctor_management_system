@@ -448,7 +448,7 @@ class PatientInviteTests(TestCase):
         self.patient_user.set_password('KnownPass123!')
         self.patient_user.save()
         response = self.client.post(reverse('doctor:edit_patient', args=[encode_id(self.patient.pk)]), {
-            'name': 'Patient Name', 'email': 'changed@example.com', 'phone': '',
+            'name': 'Patient Name', 'email': 'changed@example.com', 'phone': '', 'case_no': 'INV-001',
         })
         self.assertEqual(response.status_code, 302)
         self.patient_user.refresh_from_db()
@@ -456,11 +456,50 @@ class PatientInviteTests(TestCase):
 
     def test_staff_can_change_non_active_patient_email(self):
         response = self.client.post(reverse('doctor:edit_patient', args=[encode_id(self.patient.pk)]), {
-            'name': 'Patient Name', 'email': 'changed@example.com', 'phone': '',
+            'name': 'Patient Name', 'email': 'changed@example.com', 'phone': '', 'case_no': 'INV-001',
         })
         self.assertEqual(response.status_code, 302)
         self.patient_user.refresh_from_db()
         self.assertEqual(self.patient_user.email, 'changed@example.com')
+
+    def test_adding_email_to_legacy_patient_invalidates_existing_password(self):
+        self.patient_user.email = ''
+        self.patient_user.set_password('LegacyKnownPassword123!')
+        self.patient_user.save()
+
+        response = self.client.post(reverse('doctor:edit_patient', args=[encode_id(self.patient.pk)]), {
+            'name': 'Patient Name',
+            'email': 'legacy@example.com',
+            'phone': '',
+            'case_no': 'LEGACY-001',
+        })
+
+        self.assertEqual(response.status_code, 302)
+        self.patient_user.refresh_from_db()
+        self.patient.refresh_from_db()
+        self.assertFalse(self.patient_user.has_usable_password())
+        self.assertEqual(self.patient.login_status, 'none')
+
+    def test_adding_email_and_inviting_legacy_patient_invalidates_password(self):
+        self.patient_user.email = ''
+        self.patient_user.set_password('LegacyKnownPassword123!')
+        self.patient_user.save()
+
+        with patch('accounts.services.invites.EmailMultiAlternatives') as email_message:
+            email_message.return_value.send.return_value = 1
+            response = self.client.post(reverse('doctor:edit_patient', args=[encode_id(self.patient.pk)]), {
+                'name': 'Patient Name',
+                'email': 'legacy-invite@example.com',
+                'phone': '',
+                'case_no': 'LEGACY-002',
+                'send_login_invite': 'on',
+            })
+
+        self.assertEqual(response.status_code, 302)
+        self.patient_user.refresh_from_db()
+        self.patient.refresh_from_db()
+        self.assertFalse(self.patient_user.has_usable_password())
+        self.assertEqual(self.patient.login_status, 'invited')
 
     def test_usable_password_without_email_has_no_login_status(self):
         self.patient_user.email = ''
@@ -571,6 +610,56 @@ class CaseNoTests(TestCase):
         self.patient1.refresh_from_db()
         self.assertEqual(self.patient1.case_no, '1194')
 
+    def test_edit_patient_invite_status_is_saved_before_send_and_shown_after_redirect(self):
+        def assert_invite_status_saved_before_send(*args, **kwargs):
+            self.patient1.refresh_from_db()
+            self.assertEqual(self.patient1.login_status, 'invited')
+            return 1
+
+        with patch('accounts.services.invites.EmailMultiAlternatives') as email_message:
+            email_message.return_value.send.side_effect = assert_invite_status_saved_before_send
+            response = self.client.post(
+                reverse('doctor:edit_patient', args=[encode_id(self.patient1.pk)]),
+                {
+                    'name': 'Ravi Kumar',
+                    'email': 'caseno-patient1@example.com',
+                    'phone': '',
+                    'case_no': '1194',
+                    'send_login_invite': 'on',
+                },
+            )
+
+        self.assertRedirects(response, reverse('doctor:manage_patients'), fetch_redirect_response=False)
+        list_response = self.client.get(reverse('doctor:manage_patients'))
+        self.assertEqual(list_response.status_code, 200)
+        self.assertIn('no-store', list_response.headers['Cache-Control'])
+        patient_row = next(
+            row for row in list_response.context['patients'].object_list
+            if row['id'] == self.patient1.pk
+        )
+        self.assertEqual(patient_row['login_status'], 'invited')
+        self.assertContains(list_response, 'Invited ·')
+
+    def test_edit_forms_prefill_existing_case_numbers(self):
+        patient_response = self.client.get(
+            reverse('doctor:edit_patient', args=[encode_id(self.patient1.pk)]),
+        )
+        self.assertEqual(patient_response.status_code, 200)
+        self.assertContains(patient_response, 'id="patient-case-no" type="text" name="case_no" class="form-control" value="1194"')
+
+        from accounts.models import FamilyMember
+        member = FamilyMember.objects.create(
+            patient=self.patient1,
+            name='Sita Kumar',
+            relation='Wife',
+            case_no='9999',
+        )
+        family_response = self.client.get(
+            reverse('doctor:edit_family', args=[encode_id(member.pk)]),
+        )
+        self.assertEqual(family_response.status_code, 200)
+        self.assertContains(family_response, 'id="family-case-no" type="text" name="case_no" class="form-control" value="9999"')
+
     def test_case_no_search_finds_patient_in_manage_patients(self):
         response = self.client.get(reverse('doctor:manage_patients'), {'search': '1194'})
         self.assertEqual(response.status_code, 200)
@@ -603,6 +692,7 @@ class CaseNoTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Case No. abc-1194 is already used by Ravi Kumar')
+        self.assertContains(response, 'value=" abc-1194 "')
         self.assertEqual(response.context['case_no_error'], 'Case No. abc-1194 is already used by Ravi Kumar (—)')
         self.patient2.refresh_from_db()
         self.assertEqual(self.patient2.case_no, '')
@@ -646,7 +736,7 @@ class CaseNoTests(TestCase):
         self.assertFalse(patient.user.has_usable_password())
         self.assertEqual(patient.login_status, 'none')
         send_welcome.assert_not_called()
-        self.assertIn('Patient added successfully.', [m.message for m in get_messages(response.wsgi_request)])
+        self.assertIn('Patient added.', [m.message for m in get_messages(response.wsgi_request)])
 
     def test_add_patient_with_email_keeps_email_flow(self):
         with patch('doctor.views.send_welcome_email') as send_welcome:
@@ -931,5 +1021,24 @@ class ImportCaseNumbersTests(TestCase):
             self.assertEqual(len(reader), 2)
             self.assertEqual(reader[0]["status"], "duplicate in register")
             self.assertEqual(reader[1]["status"], "duplicate in register")
+
+    def test_edit_patient_can_remove_email_and_sends_no_invite(self):
+        with patch('accounts.services.invites.send_patient_invite_email') as send_invite:
+            response = self.client.post(
+                reverse('doctor:edit_patient', args=[encode_id(self.patient1.pk)]),
+                {
+                    'name': 'Ravi Kumar',
+                    'email': '',
+                    'phone': '',
+                    'case_no': '1194',
+                    'send_login_invite': 'on',
+                },
+            )
+
+        self.assertEqual(response.status_code, 302)
+        self.user1.refresh_from_db()
+        self.patient1.refresh_from_db()
+        self.assertEqual(self.user1.email, '')
+        send_invite.assert_not_called()
 
 
