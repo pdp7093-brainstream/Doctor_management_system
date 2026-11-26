@@ -4,16 +4,17 @@
 {% block title %}Feedback - {% if clinic %}{{ clinic.clinic_name }}{% else %}Clinic{% endif %}{% endblock %}
 {% block meta_description %}Share your experience and help us improve our healthcare services.{% endblock %}
 {% block meta_keywords %}feedback, patient feedback, clinic review{% endblock %}
-{% block body_class %}contact-page{% endblock %}
+{% block body_class %}contact-page feedback-page{% endblock %}
 {% block extra_css %}
   <link href="{% static 'assets/css/about.css' %}" rel="stylesheet">
   <link href="{% static 'assets/css/feedback.css' %}" rel="stylesheet">
 {% endblock %}
 {% block content %}
 
-    <section class="about-banner">
+    <section class="about-banner page-banner">
       <div class="container">
         <div class="banner-content">
+          <span class="banner-shloka">सर्वे भवन्तु सुखिनः</span>
           <h1>Feedback</h1>
           <p>We value your opinion! Share your experience with us and help us improve our healthcare services. Your feedback matters.</p>
         </div>
@@ -27,7 +28,7 @@
 
           <!-- Left Info Panel -->
           <div class="col-lg-5 align-self-start" data-aos="fade-right" data-aos-delay="200">
-            <div class="dr-vision mt-0 align-self-start text-start">
+            <div class="dr-vision feedback-info-box mt-0 align-self-start text-start">
               <span class="dr-vision-label"><i class="bi bi-chat-heart"></i> We'd Love to Hear From You</span>
               <p>Your feedback helps us deliver better care. Whether it's a compliment, a suggestion, or a concern — we listen to every word.</p>
 
@@ -47,43 +48,22 @@
                 </div>
               </div>
 
-              <div class="info-item d-flex align-items-start gap-3 mb-3">
+              <div class="info-item d-flex align-items-start gap-3">
                 <i class="bi bi-heart-pulse"></i>
                 <div>
                   <h4>Continuous Improvement</h4>
                   <span>Your input directly shapes our services</span>
                 </div>
               </div>
-
-              {% if clinic.address %}
-              <hr class="my-3" style="opacity:0.2;">
-              <div class="info-item d-flex align-items-start gap-3 mb-3">
-                <i class="bi bi-geo-alt"></i>
-                <div>
-                  <h4>Visit Us</h4>
-                  <span>{{ clinic.address }}</span>
-                </div>
-              </div>
-              {% endif %}
-
-              {% if clinic.email %}
-              <div class="info-item d-flex align-items-start gap-3">
-                <i class="bi bi-envelope"></i>
-                <div>
-                  <h4>Email</h4>
-                  <span>{{ clinic.email }}</span>
-                </div>
-              </div>
-              {% endif %}
             </div>
           </div>
 
           <!-- Right Feedback Form -->
           <div class="col-lg-7" data-aos="fade-left" data-aos-delay="300">
-            <div class="dr-card">
+            <div class="dr-card feedback-form-card">
               <div class="dr-card-head">
                 <div class="dr-icon"><i class="bi bi-pencil-square"></i></div>
-                <h3>Share Your Experience</h3>
+                <h3 class="form-title">Share Your Experience</h3>
               </div>
               <p class="text-muted small mb-4">All fields marked with * are required.</p>
 
@@ -127,7 +107,7 @@
                   <div class="col-12">
                     <label class="form-label" id="ratingPrompt">How would you rate your experience? *</label>
                     <div class="d-flex align-items-center flex-wrap gap-3">
-                      <div class="star-rating d-flex flex-row-reverse justify-content-end gap-1" role="radiogroup" aria-labelledby="ratingPrompt">
+                      <div class="star-rating rating-stars d-flex flex-row-reverse justify-content-end gap-1" role="radiogroup" aria-labelledby="ratingPrompt">
                         <input class="visually-hidden" type="radio" name="rating" id="star5" value="5" required>
                         <label class="fs-4 mb-0" for="star5" data-rating="5" title="Excellent"><i class="bi bi-star-fill"></i></label>
                         <input class="visually-hidden" type="radio" name="rating" id="star4" value="4">

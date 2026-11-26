@@ -1,0 +1,36 @@
+    <!-- Call To Action Section -->
+    <section id="call-to-action" class="call-to-action section">
+
+      <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+        <!-- Full-width centered banner -->
+        <div class="cta-banner" style="padding-top: 32px; margin-top: -30px;">
+          <div class="banner-bg" aria-hidden="true"></div>
+          <div class="cta-banner-inner">
+            <!-- Label -->
+            <span class="cta-label">Start Today</span>
+
+            <!-- Heading -->
+            <h2 class="cta-heading reveal-up" style="transition-delay: 0s;">Begin Your Journey to<br class="d-none d-sm-block"> Natural Healing</h2>
+
+            <!-- Subtext -->
+            <p class="cta-subtext reveal-up" style="transition-delay: 0.15s;">Consult our Ayurvedic experts and get a treatment plan made just for you.</p>
+
+            <!-- Buttons -->
+            <div class="cta-buttons">
+              <a href="{% url 'appointment:appointment' %}" class="cta-btn-book reveal-up" style="transition-delay: 0.3s; display: inline-flex; align-items: center; gap: 8px;">
+                Book Appointment <i class="bi bi-arrow-right"></i>
+              </a>
+              {% if clinic.phone %}
+              <a href="tel:{{ clinic.phone }}" class="cta-btn-call reveal-up" style="transition-delay: 0.3s;">
+                <i class="bi bi-telephone-fill"></i>
+                {{ clinic.phone }}
+              </a>
+              {% endif %}
+            </div>
+          </div>
+        </div><!-- /cta-banner -->
+
+      </div>
+
+    </section><!-- /Call To Action Section -->

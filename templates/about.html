@@ -12,9 +12,10 @@
 {% block content %}
 
     <!-- ── 1. BANNER ──────────────────────────────────────── -->
-    <section class="about-banner">
+    <section class="about-banner page-banner">
         <div class="container">
             <div class="banner-content">
+                <span class="banner-shloka">आयुर्वेदो अमृतानां श्रेष्ठः</span>
                 <h1>About Us</h1>
                 <p>Rooted in the timeless wisdom of Ayurveda, dedicated to your complete well-being.</p>
             </div>
@@ -44,21 +45,27 @@
 
     <div class="row g-4 mt-4">
       <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="100">
-        <div class="dr-card">
-          <div class="dr-card-head"><div class="dr-icon"><i class="bi bi-people"></i></div><h3>Rooted in Traditional Ayurvedic Wisdom</h3></div>
+        <div class="dr-card" data-num="01">
+          <div class="dr-icon"><i class="bi bi-people"></i></div>
+          <h3>Rooted in Traditional Ayurvedic Wisdom</h3>
           <p>Dr. Mohit Agrawal has received training in Nadi Vaidya under the traditional Guru–Shishya Parampara, preserving the time-honoured knowledge and practices of Ayurveda. His approach combines traditional Ayurvedic principles with personalised guidance to support overall health and well-being.</p>
+          <button type="button" class="dr-more">Read more</button>
         </div>
       </div>
       <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="200">
-        <div class="dr-card">
-          <div class="dr-card-head"><div class="dr-icon"><i class="bi bi-heart-pulse"></i></div><h3>Experience in Chronic Health Conditions</h3></div>
+        <div class="dr-card" data-num="02">
+          <div class="dr-icon"><i class="bi bi-heart-pulse"></i></div>
+          <h3>Experience in Chronic Health Conditions</h3>
           <p>With years of clinical experience, Dr. Agrawal focuses on supporting individuals dealing with chronic health conditions through an individualised Ayurvedic approach. Each consultation aims to understand the person's unique health concerns and provide guidance in accordance with traditional Ayurvedic principles.</p>
+          <button type="button" class="dr-more">Read more</button>
         </div>
       </div>
       <div class="col-lg-4 col-md-6 d-flex" data-aos="fade-up" data-aos-delay="300">
-        <div class="dr-card">
-          <div class="dr-card-head"><div class="dr-icon"><i class="bi bi-sunrise"></i></div><h3>Bringing Ayurveda into Everyday Life</h3></div>
+        <div class="dr-card" data-num="03">
+          <div class="dr-icon"><i class="bi bi-sunrise"></i></div>
+          <h3>Bringing Ayurveda into Everyday Life</h3>
           <p>We believe Ayurveda is more than a system of healthcare—it is a way of life. At HSDB Ayurveda, we help individuals incorporate Ayurvedic principles into their daily routines, including guidance on dinacharya (daily regimen), lifestyle practices, and healthy habits to encourage balance and long-term well-being.</p>
+          <button type="button" class="dr-more">Read more</button>
         </div>
       </div>
     </div>
@@ -74,7 +81,7 @@
     <!-- Ayurveda Wisdom Section -->
     <section id="ayurveda-wisdom" class="aw-section section">
   <div class="container">
-    {% include 'partials/ayurveda_wisdom_cards.html' %}
+    {% include 'partials/ayurveda_wisdom_cards.html' with wisdom_img='assets/img/ayurveda/care-herbs.webp' %}
 
     <div class="aw-therapies">
       <div class="row align-items-center g-5">
@@ -88,7 +95,7 @@
         <div class="col-lg-5 order-1 order-lg-2" data-aos="fade-left" data-aos-delay="200">
           <span class="aw-eyebrow">Healing Methods</span>
           <h3 class="aw-therapies-title">Common Therapies in Ayurveda</h3>
-          <p class="aw-therapies-sub">Ayurveda uses six classical approaches to restore balance in the body and mind. At our hospital, every therapy is chosen for your unique body type, never one-size-fits-all.</p>
+          <p class="aw-therapies-sub">Ayurveda uses time-tested approaches to restore balance in the body and mind. At our hospital, every therapy is chosen for your unique body type, never one-size-fits-all.</p>
           <ul class="aw-therapies-points">
             <li><i class="bi bi-check-circle-fill"></i><span><strong>Diet and herbs</strong> correct imbalance from within</span></li>
             <li><i class="bi bi-check-circle-fill"></i><span><strong>Panchakarma and massage</strong> detox and rejuvenate the body</span></li>
@@ -166,7 +173,7 @@
                     <div class="value-card">
                         <div class="value-icon"><i class="bi bi-book"></i></div>
                         <h3 class="value-title">Authentic Ayurveda</h3>
-                        <p class="value-desc">Treatments based on classical Ayurvedic texts.</p>
+                        <p class="value-desc">Treatments based on classical Ayurvedic texts like Charaka and Sushruta Samhita, followed with care.</p>
                     </div>
                 </div>
 
@@ -199,51 +206,18 @@
     </section>
 
     <!-- ── 5. CTA ──────────────────────────────────────────── -->
-    <section id="call-to-action" class="call-to-action section">
-        <div class="container" data-aos="fade-up" data-aos-delay="100">
-            <div class="cta-banner">
-                <svg class="cta-pattern" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                    <defs>
-                        <pattern id="ctaLeafPatternAbout" x="0" y="0" width="120" height="120" patternUnits="userSpaceOnUse">
-                            <circle cx="60" cy="60" r="52" stroke="white" stroke-width="0.8" fill="none"/>
-                            <circle cx="60" cy="60" r="38" stroke="white" stroke-width="0.8" fill="none"/>
-                            <circle cx="60" cy="60" r="24" stroke="white" stroke-width="0.8" fill="none"/>
-                            <circle cx="60" cy="60" r="10" stroke="white" stroke-width="0.8" fill="none"/>
-                            <line x1="60" y1="8"  x2="60" y2="112" stroke="white" stroke-width="0.6"/>
-                            <line x1="8"  y1="60" x2="112" y2="60" stroke="white" stroke-width="0.6"/>
-                            <line x1="18" y1="18" x2="102" y2="102" stroke="white" stroke-width="0.6"/>
-                            <line x1="102" y1="18" x2="18" y2="102" stroke="white" stroke-width="0.6"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(0,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(45,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(90,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(135,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(180,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(225,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(270,60,60)"/>
-                            <ellipse cx="60" cy="30" rx="5" ry="14" fill="white" opacity="0.25" transform="rotate(315,60,60)"/>
-                        </pattern>
-                    </defs>
-                    <rect width="100%" height="100%" fill="url(#ctaLeafPatternAbout)"/>
-                </svg>
+    {% include 'partials/cta_banner.html' %}
 
-                <div class="cta-banner-inner" data-aos="fade-up" data-aos-delay="150">
-                    <span class="cta-label">Start Today</span>
-                    <h2 class="cta-heading">Begin Your Journey to<br class="d-none d-sm-block"> Natural Healing</h2>
-                    <p class="cta-subtext">Consult our Ayurvedic experts and get a treatment plan made just for you.</p>
-                    <div class="cta-buttons">
-                        <a href="{% url 'appointment:appointment' %}" class="cta-btn-book">
-                            Book Appointment &rarr;
-                        </a>
-                        {% if clinic.phone %}
-                        <a href="tel:{{ clinic.phone }}" class="cta-btn-call">
-                            <i class="bi bi-telephone-fill"></i>
-                            {{ clinic.phone }}
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+{% endblock %}
 
+{% block extra_js %}
+<script>
+document.querySelectorAll('.dr-more').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var card = btn.closest('.dr-card');
+    var open = card.classList.toggle('open');
+    btn.textContent = open ? 'Show less' : 'Read more';
+  });
+});
+</script>
 {% endblock %}

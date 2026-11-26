@@ -829,3 +829,36 @@ input.form-control[type="file"]:hover::file-selector-button {
     }
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   Patient Profile Page Polish
+   ══════════════════════════════════════════════════════════════ */
+
+/* Sanskrit shloka above the welcome heading */
+.banner-shloka-dark {
+  display: block;
+  font-family: "Tiro Devanagari Sanskrit", serif;
+  color: var(--brand-accent);
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+/* bigger, easier-to-tap buttons inside profile cards */
+.profile-page-shell .card .btn, .profile-page-shell .profile-card .btn {
+  font-size: .85rem !important; padding: 7px 16px !important; border-radius: 8px !important;
+}
+
+/* name in heading font */
+.profile-page-shell .pc-name {
+  font-family: var(--heading-font, "Cormorant Garamond", Georgia, serif) !important;
+  font-size: 1.6rem !important;
+  font-weight: 700;
+}
+
+/* soft hover on cards */
+.profile-page-shell .card, .profile-page-shell .profile-card {
+  border-radius: 16px !important; transition: transform .3s ease, box-shadow .3s ease;
+}
+.profile-page-shell .card:hover, .profile-page-shell .profile-card:hover {
+  transform: translateY(-3px); box-shadow: 0 16px 36px rgba(20,40,26,.09) !important;
+}

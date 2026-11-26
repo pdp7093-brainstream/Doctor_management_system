@@ -406,3 +406,30 @@ textarea.form-control {
     display: none !important;
   }
 }
+
+
+@media (min-width: 992px) {
+  .appointment-page .clinic-info-panel,
+  .appointment-page .clinic-info-box {
+    position: sticky;
+    position: sticky !important;
+    top: 120px;
+    margin-top: 0 !important;
+  }
+}
+.appointment-page .appointment-form-card {
+  position: relative; overflow: hidden; background: #fff !important;
+  border: 1px solid #ECEFE6 !important; border-radius: 18px !important;
+  box-shadow: 0 14px 36px rgba(20,40,26,.07);
+}
+.appointment-page .appointment-form-card::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--brand-accent);
+}
+.appointment-page .appointment-form-card input[readonly] {
+  background: #F4F6F1 !important; color: #5b6b5f; cursor: not-allowed;
+}
+.appointment-page .appointment-form-card .form-control:focus,
+.appointment-page .appointment-form-card .form-select:focus {
+  border-color: var(--brand-primary) !important; box-shadow: 0 0 0 3px rgba(1,83,21,.12) !important;
+}
+.appointment-page .appointment-form-card input[type="date"] { min-height: 46px; cursor: pointer; }

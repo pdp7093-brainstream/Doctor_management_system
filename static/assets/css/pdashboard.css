@@ -117,3 +117,41 @@ body {
     }
     #appointmentsTable td.appt-actions .btn i { margin: 0 !important; }
 }
+
+.patient-page-shell section.card.page-card[aria-labelledby="myTherapiesTitle"] {
+    min-height: 0;
+    padding: 0;
+}
+
+.patient-page-shell section.card.page-card[aria-labelledby="myTherapiesTitle"] > .card-body {
+    padding: 20px;
+}
+
+@media (min-width: 992px) {
+    .patient-page-shell #appointmentResults .table-responsive {
+        overflow-x: visible !important;
+    }
+
+    .patient-page-shell #appointmentsTable {
+        width: 100%;
+        table-layout: auto;
+    }
+}
+
+.patient-page-shell #appointmentsTable td:last-child,
+.patient-page-shell #appointmentsTable th:last-child {
+    white-space: nowrap;
+    min-width: 190px;
+}
+
+.patient-page-shell #appointmentsTable td:last-child {
+    display: table-cell;
+}
+
+.patient-page-shell #appointmentsTable td:last-child a,
+.patient-page-shell #appointmentsTable td:last-child .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 6px;
+}

@@ -15,7 +15,7 @@
 /* Fonts */
 :root {
   --default-font: "Roboto",  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --heading-font: "Montserrat",  sans-serif;
+  --heading-font: "Cormorant Garamond", Georgia, "Times New Roman", serif;
   --nav-font: "Lato",  sans-serif;
 }
 
@@ -2921,17 +2921,34 @@ section,
 .call-to-action .cta-banner {
   position: relative;
   overflow: hidden;
-  background-color: var(--brand-primary, #015315);
+  isolation: isolate;
   border-radius: 24px;
   padding: 80px 48px;
   margin-bottom: 0;
   text-align: center;
 }
 
+.call-to-action .cta-banner > *:not(.banner-bg) {
+  position: relative;
+  z-index: 1;
+}
+
+.call-to-action .cta-banner .banner-bg {
+  background: radial-gradient(ellipse at center, rgba(1, 83, 21, 0.90) 0%, rgba(1, 83, 21, 0.75) 50%, rgba(1, 83, 21, 0.35) 100%),
+              url('../img/bg/cta-bg.webp') center/cover no-repeat;
+}
+
 @media (max-width: 768px) {
   .call-to-action .cta-banner {
     padding: 48px 24px;
     border-radius: 18px;
+  }
+}
+
+@media (max-width: 767px) {
+  .call-to-action .cta-banner .banner-bg {
+    background: radial-gradient(ellipse at center, rgba(1, 83, 21, 0.90) 0%, rgba(1, 83, 21, 0.75) 50%, rgba(1, 83, 21, 0.35) 100%),
+                url('../img/bg/cta-bg-sm.webp') center/cover no-repeat;
   }
 }
 
@@ -2972,6 +2989,7 @@ section,
   line-height: 1.25;
   color: #ffffff;
   margin-bottom: 20px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 @media (max-width: 768px) {
@@ -6689,8 +6707,8 @@ section,
   align-items: center;
   gap: 8px;
   background: #fff;
-  color: #013A0F;
-  border: 1.5px solid #013A0F;
+  color: var(--brand-primary);
+  border: 1.5px solid var(--brand-primary);
   font-weight: 700;
   padding: 12px 28px;
   border-radius: 50px;
@@ -6698,7 +6716,8 @@ section,
   transition: background .25s ease, color .25s ease, transform .25s ease;
 }
 .aw-therapies-btn:hover {
-  background: #013A0F;
+  background: var(--brand-primary);
+  border-color: var(--brand-primary);
   color: #fff;
   transform: translateY(-2px);
 }
@@ -6821,14 +6840,22 @@ section,
 }
 
 .aw-feature {
-  position: relative; overflow: hidden; margin: 0 0 8px;
-  background: linear-gradient(135deg, #015315 0%, #117A15 100%);
+  position: relative; overflow: hidden; isolation: isolate; margin: 0 0 8px;
   border-radius: 20px; padding: 44px 48px; color: #fff;
   box-shadow: 0 18px 40px rgba(1, 83, 21, .25);
+}
+.aw-feature > *:not(.banner-bg) {
+  position: relative;
+  z-index: 1;
+}
+.aw-feature .banner-bg {
+  background: linear-gradient(90deg, rgba(1, 83, 21, 0.94) 0%, rgba(1, 83, 21, 0.82) 50%, rgba(1, 83, 21, 0.45) 100%),
+              url('../img/bg/consult-bg.webp') right center/cover no-repeat;
 }
 .aw-feature::after {
   content: ""; position: absolute; right: -80px; top: -80px;
   width: 260px; height: 260px; border-radius: 50%; background: rgba(255,255,255,.06);
+  z-index: 1;
 }
 .aw-feature-badge {
   display: inline-flex; align-items: center; gap: 8px;
@@ -6836,7 +6863,10 @@ section,
   font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   padding: 6px 14px; border-radius: 50px; margin-bottom: 18px;
 }
-.aw-feature-title { font-size: 1.9rem; font-weight: 700; color: #fff; margin: 0 0 20px; }
+.aw-feature-title {
+  font-size: 1.9rem; font-weight: 700; color: #fff; margin: 0 0 20px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
 .aw-feature-shloka {
   font-family: "Noto Sans Devanagari", sans-serif;
   font-size: 1.35rem; font-weight: 600; line-height: 1.9;
@@ -6844,7 +6874,10 @@ section,
   border-radius: 12px; padding: 18px 22px; margin: 0;
 }
 .aw-feature-ref { font-size: .85rem; font-style: italic; color: rgba(255,255,255,.75); margin: 10px 0 0; }
-.aw-feature-text { font-size: 1.05rem; line-height: 1.8; color: rgba(255,255,255,.92); margin: 0 0 24px; }
+.aw-feature-text {
+  font-size: 1.05rem; line-height: 1.8; color: rgba(255,255,255,.92); margin: 0 0 24px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
 .aw-feature-text .aw-highlight {
   color: #fff; font-weight: 700; padding: 0 2px;
   background: linear-gradient(transparent 60%, rgba(253,104,1,.55) 60%);
@@ -6857,9 +6890,638 @@ section,
 }
 .aw-feature-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.2); color: var(--brand-primary); }
 @media (max-width: 767px) {
-  .aw-feature { padding: 28px 20px; border-radius: 16px; }
+  .aw-feature {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+  .aw-feature .banner-bg {
+    background: linear-gradient(90deg, rgba(1, 83, 21, 0.94) 0%, rgba(1, 83, 21, 0.82) 50%, rgba(1, 83, 21, 0.45) 100%),
+                url('../img/bg/consult-bg-sm.webp') right center/cover no-repeat;
+  }
   .aw-feature-title { font-size: 1.4rem; }
   .aw-feature-shloka { font-size: 1.05rem; padding: 14px 16px; }
   .aw-feature-text { font-size: .98rem; }
   .aw-feature-btn { width: 100%; justify-content: center; }
 }
+  .aw-feature-title { font-size: 1.4rem; }
+  .aw-feature-shloka { font-size: 1.05rem; padding: 14px 16px; }
+  .aw-feature-text { font-size: .98rem; }
+  .aw-feature-btn { width: 100%; justify-content: center; }
+}
+
+h1, h2, h3, .section-title h2, .hero h1, .aw-card-title, .aw-feature-title {
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    line-height: 1.2;
+}
+.section-title h2 { font-size: clamp(2rem, 4vw, 2.75rem); }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4rem); }
+.section-title p,
+.aw-eyebrow {
+    font-family: var(--default-font);
+}
+
+h4, h5, h6,
+.aw-card-title,
+.service-card h3, .service-card h4,
+.feature-item h4, .step-card h4,
+.journey-card h5, .journey-title,
+.floating-card h4,
+.footer h4, .footer .footer-links h4,
+.footer-16 .nav-column h6 {
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+.aw-card-title,
+.service-card h3, .service-card h4,
+.feature-item h4, .step-card h4,
+.journey-card h5, .journey-title,
+.floating-card h4 {
+    font-size: 1.35rem;
+}
+.footer h4, .footer .footer-links h4,
+.footer-16 .nav-column h6 {
+    font-size: 1.15rem;
+}
+
+.banner-bg {
+  position: absolute; inset: -4%;
+  z-index: 0;
+  animation: bannerZoom 22s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes bannerZoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+
+.cta-banner, .aw-feature { transition: transform .4s ease, box-shadow .4s ease; }
+.cta-banner:hover, .aw-feature:hover { transform: translateY(-4px); box-shadow: 0 24px 50px rgba(1,83,21,.28); }
+
+.reveal-up { opacity: 0; transform: translateY(18px); transition: opacity .8s ease, transform .8s ease; }
+.reveal-up.is-visible { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .banner-bg { animation: none; }
+  .reveal-up { opacity: 1; transform: none; transition: none; }
+  .cta-banner:hover, .aw-feature:hover { transform: none; }
+}
+
+.hero-v2{position:relative;overflow:hidden;background:#fff;padding:0}
+.hero-v2-bg{position:absolute;inset:0;z-index:0;
+  background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.94) 28%,rgba(255,255,255,.45) 48%,rgba(255,255,255,0) 66%),
+             url("../img/ayurveda/hero.webp") right center/cover no-repeat;
+  animation:heroZoom 24s ease-in-out infinite alternate}
+@keyframes heroZoom{from{transform:scale(1)}to{transform:scale(1.06)}}
+.hero-v2 .container{position:relative;z-index:1}
+.hero-v2-swiper .swiper-slide{min-height:calc(100vh - 96px);display:flex;align-items:center;padding:70px 0 80px}
+.hero-v2-content{max-width:600px}
+.hero-v2-shloka{display:block;font-family:"Tiro Devanagari Sanskrit",serif;font-size:1.35rem;color:var(--brand-accent);margin-bottom:10px}
+.hero-v2-eyebrow{display:block;font-family:var(--default-font);font-size:.8rem;letter-spacing:.22em;text-transform:uppercase;color:#4b5a50;margin-bottom:14px}
+.hero-v2-title{font-family:var(--heading-font);font-weight:600;font-size:clamp(3.2rem,7vw,6.2rem);line-height:.95;color:var(--brand-primary);margin:0 0 22px}
+.hero-v2-title span{display:block;color:var(--brand-accent)}
+.hero-v2-title-sm{font-size:clamp(2.6rem,5vw,4.2rem);margin-bottom:26px}
+.hero-v2-sub{font-size:1.15rem;line-height:1.75;color:#3c4049;max-width:480px;margin:0 0 30px}
+.hero-v2-points{list-style:none;padding:0;margin:0 0 30px;display:grid;gap:12px}
+.hero-v2-points li{display:flex;align-items:center;gap:16px;background:rgba(255,255,255,.86);backdrop-filter:blur(6px);border:1px solid #dfeadc;border-radius:14px;padding:12px 18px;max-width:460px;text-align:left}
+.hero-v2-points .ic{flex:0 0 46px;height:46px;border-radius:50%;background:#e8f3e6;color:var(--brand-primary);display:flex;align-items:center;justify-content:center;font-size:20px}
+.hero-v2-points strong{display:block;font-family:var(--heading-font);font-size:1.35rem;font-weight:700;color:var(--heading-color);line-height:1.2}
+.hero-v2-points small{color:#5b6460;font-size:.92rem}
+.hero-v2-btn{display:inline-flex;align-items:center;gap:10px;background:var(--brand-accent);color:#fff;font-weight:600;padding:15px 34px;border-radius:50px;text-decoration:none;box-shadow:0 10px 24px rgba(253,104,1,.28);transition:transform .25s,box-shadow .25s}
+.hero-v2-btn:hover{color:#fff;transform:translateY(-2px);box-shadow:0 14px 30px rgba(253,104,1,.35)}
+.hero-v2 .hero-dots{position:absolute;left:0;right:0;bottom:22px;z-index:2;display:flex;gap:10px;justify-content:center}
+.hero-v2 .hero-dots .swiper-pagination-bullet{width:12px;height:12px;cursor:pointer;margin:0!important;border-radius:6px;background:rgba(1,83,21,.3);opacity:1;transition:width .3s,background .3s}
+.hero-v2 .hero-dots .swiper-pagination-bullet-active{width:34px;background:var(--brand-accent)}
+@media (max-width:991px){
+  .hero-v2-bg{position:relative;height:300px;inset:auto;animation:none;
+    background:linear-gradient(180deg,rgba(255,255,255,0) 55%,#fff 100%),url("../img/ayurveda/hero.webp") center/cover no-repeat}
+  .hero-v2-swiper .swiper-slide{min-height:auto;padding:0 0 60px}
+  .hero-v2-content{text-align:center;margin:-30px auto 0;max-width:100%}
+  .hero-v2-sub{margin-left:auto;margin-right:auto}
+  .hero-v2-points li{margin:0 auto}
+  .hero-v2 .hero-dots{bottom:22px}
+}
+@media (prefers-reduced-motion:reduce){.hero-v2-bg{animation:none}}
+
+.hero-v2 { --hero-offset: 96px; padding-top: var(--hero-offset); }
+.hero-v2-bg { top: var(--hero-offset); }
+.hero-v2-swiper .swiper-slide {
+  min-height: clamp(480px, 70vh, 620px);
+  padding: 40px 0 64px;
+}
+.hero-v2-title { font-size: clamp(3rem, 6vw, 5.2rem); }
+.hero-v2-title-sm { font-size: clamp(2.4rem, 4.4vw, 3.6rem); }
+
+@media (max-width: 991px) {
+  .hero-v2 { --hero-offset: 76px; }
+  .hero-v2-bg { top: auto; height: 240px; }
+  .hero-v2-swiper .swiper-slide { min-height: auto; padding: 0 0 56px; }
+}
+
+.hero-v2-swiper .swiper-slide {
+  min-height: clamp(420px, 60vh, 540px);
+  padding: 28px 0 52px;
+}
+.hero-v2-title { font-size: clamp(2.8rem, 5.2vw, 4.6rem); margin-bottom: 16px; }
+.hero-v2-title-sm { font-size: clamp(2.2rem, 3.8vw, 3.2rem); margin-bottom: 18px; }
+.hero-v2-shloka { margin-bottom: 6px; }
+.hero-v2-eyebrow { margin-bottom: 10px; }
+.hero-v2-sub { margin-bottom: 22px; }
+.hero-v2-points { gap: 10px; margin-bottom: 22px; }
+.hero-v2-points li { padding: 10px 16px; }
+
+.hero-v2-bg {
+  background:
+    linear-gradient(90deg, #fff 0%, rgba(255,255,255,.75) 25%, rgba(255,255,255,.2) 45%, rgba(255,255,255,0) 55%),
+    url("../img/ayurveda/hero-wide.webp") center / cover no-repeat;
+}
+@media (min-width: 992px) and (max-width: 1280px) {
+  .hero-v2-bg {
+    background:
+      linear-gradient(90deg, #fff 0%, rgba(255,255,255,.8) 30%, rgba(255,255,255,.25) 50%, rgba(255,255,255,0) 60%),
+      url("../img/ayurveda/hero-wide-sm.webp") 70% center / cover no-repeat;
+  }
+}
+@media (max-width: 991px) {
+  .hero-v2-bg {
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0) 60%, #fff 100%),
+      url("../img/ayurveda/hero-mobile.webp") center / cover no-repeat;
+  }
+}
+
+/* White fade on the left extended by 2% */
+.hero-v2-bg {
+  background:
+    linear-gradient(90deg, #fff 0%, rgba(255,255,255,.78) 27%, rgba(255,255,255,.22) 47%, rgba(255,255,255,0) 57%),
+    url("../img/ayurveda/hero-wide.webp") center / cover no-repeat;
+}
+@media (min-width: 992px) and (max-width: 1280px) {
+  .hero-v2-bg {
+    background:
+      linear-gradient(90deg, #fff 0%, rgba(255,255,255,.82) 32%, rgba(255,255,255,.27) 52%, rgba(255,255,255,0) 62%),
+      url("../img/ayurveda/hero-wide-sm.webp") 70% center / cover no-repeat;
+  }
+}
+
+/* Slightly smaller text */
+.hero-v2-title    { font-size: clamp(2.7rem, 5vw, 4.3rem); }
+.hero-v2-title-sm { font-size: clamp(2.1rem, 3.6vw, 3rem); }
+.hero-v2-sub      { font-size: 1.05rem; max-width: 430px; }
+.hero-v2-eyebrow  { font-size: .75rem; }
+
+.header .branding { min-height: 88px; transition: min-height .3s ease; }
+.header .logo img { max-height: 64px; transition: max-height .3s ease; }
+.header .logo { gap: 12px; }
+.header .logo-text { display: flex; flex-direction: column; line-height: 1.05; }
+.header .logo-text strong { font-family: var(--heading-font); font-size: 1.6rem; font-weight: 700; color: var(--brand-primary); }
+.header .logo-text small { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: #5b6460; }
+.scrolled .header .branding { min-height: 70px; }
+.scrolled .header .logo img { max-height: 50px; }
+.navmenu a { font-size: 1rem; }
+@media (max-width: 575px) { .header .logo-text small { display: none; } .header .logo-text strong { font-size: 1.3rem; } }
+
+.hero-v2 { --hero-offset: 88px; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.header .logo-text { display: none !important; }
+.header .branding { min-height: 100px; }
+.header .logo img { max-height: 84px; }
+
+.scrolled .header .branding { min-height: 76px; }
+.scrolled .header .logo img { max-height: 62px; }
+@media (max-width: 991px) {
+  .header .branding { min-height: 76px; }
+  .header .logo img { max-height: 60px; }
+}
+
+.hero-v2 { --hero-offset: 100px; }
+@media (max-width: 991px) {
+  .hero-v2 { --hero-offset: 76px; }
+}
+
+@media (min-width: 768px) {
+  .aw-feature-btn { width: auto !important; display: inline-flex !important; }
+}
+
+@media (max-width: 991px) {
+  .hero-v2-bg {
+    position: relative; inset: auto; height: 260px; animation: none;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0) 62%, #fff 100%),
+      url("../img/ayurveda/hero-mobile.webp") center / cover no-repeat !important;
+  }
+  .hero-v2-content { margin-top: -20px; padding: 0 4px; }
+}
+@media (max-width: 575px) {
+  .hero-v2-bg { height: 220px; }
+  .hero-v2-title    { font-size: 2.6rem; }
+  .hero-v2-title-sm { font-size: 2.1rem; }
+  .hero-v2-sub      { font-size: 1rem; }
+  .hero-v2-points li { padding: 10px 12px; gap: 12px; }
+  .hero-v2-points .ic { flex: 0 0 38px; height: 38px; font-size: 17px; }
+  .hero-v2-points strong { font-size: 1.1rem; }
+  .hero-v2-points small  { font-size: .82rem; }
+}
+
+/* 1. Mobile action bar */
+.mobile-action-bar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 9990;
+  display: flex; gap: 10px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,.96); backdrop-filter: blur(8px);
+  box-shadow: 0 -6px 20px rgba(20,40,26,.10);
+}
+.mab-btn {
+  flex: 1; height: 46px; border-radius: 50px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; font-weight: 600; font-size: .95rem; text-decoration: none;
+}
+.mab-call { flex: 0 0 38%; background: #fff; color: var(--brand-primary); border: 1.5px solid var(--brand-primary); }
+.mab-book { background: var(--brand-accent); color: #fff; box-shadow: 0 6px 16px rgba(253,104,1,.3); }
+.mab-btn:hover { color: inherit; }
+.mab-book:hover { color: #fff; }
+@media (max-width: 767.98px) {
+  body:has(.mobile-action-bar) { padding-bottom: 72px; }
+  /* 2. Scroll-to-top above the bar, smaller */
+  .scroll-top { width: 38px !important; height: 38px !important; right: 12px !important; }
+  .scroll-top.active { bottom: 84px !important; }
+}
+
+/* 3. Journey cards compact on mobile */
+@media (max-width: 767.98px) {
+  .journey-steps-wrap .row > [class*="col-"] { width: 100%; }
+  .journey-card {
+    display: grid !important; grid-template-columns: 48px 1fr; column-gap: 14px; row-gap: 2px;
+    align-items: center; text-align: left !important; padding: 14px 16px !important; min-height: 0 !important;
+  }
+  .journey-card .journey-step-num { display: none; }
+  .journey-card .journey-icon-wrap { grid-row: 1 / span 2; width: 48px; height: 48px; margin: 0 !important; }
+  .journey-card .journey-title { margin: 0 !important; font-size: 1.15rem; }
+  .journey-card .journey-text  { margin: 0 !important; font-size: .88rem; line-height: 1.45; }
+  .journey-steps-wrap::before, .journey-steps-wrap .connector, .journey-card::after { display: none !important; }
+}
+
+/* 4. Same eyebrow + heading style everywhere */
+.section-eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: var(--default-font); font-size: .78rem; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--brand-accent);
+  margin-bottom: 10px;
+}
+@media (max-width: 767.98px) {
+  .section-title h2, .aw-section h2, .home-about h2 { font-size: 2rem !important; line-height: 1.15; }
+  .section-title p, .home-about p { font-size: .95rem; line-height: 1.7; }
+}
+
+@media (max-width: 767.98px) {
+  /* Wisdom cards: compact header, title on one line */
+  .aw-card { padding: 18px 16px !important; }
+  .aw-card-head { display: flex !important; align-items: center !important; gap: 12px !important; margin-bottom: 12px !important; }
+  .aw-card-head .aw-icon { flex: 0 0 42px; width: 42px !important; height: 42px !important; margin: 0 !important; }
+  .aw-card-title { font-size: 1.3rem !important; margin: 0 !important; white-space: nowrap; }
+
+  /* About: remove the big gap between the feature points and the image */
+  .home-about .row { row-gap: 24px !important; }
+  .home-about [class*="col-"] { margin-bottom: 0 !important; padding-bottom: 0 !important; }
+  .home-about .about-image, .home-about .main-image, .home-about .image-wrapper { margin-top: 0 !important; }
+  .home-about .about-visual { margin-top: 0 !important; }
+
+  /* Journey rows: tighter spacing */
+  .journey-steps-wrap .row { --bs-gutter-y: 12px; }
+}
+
+
+@media (min-width: 992px) {
+  .hero-v2-swiper .swiper-slide { padding-bottom: 72px; }
+  .hero-v2-title-sm { font-size: clamp(2rem, 3.2vw, 2.8rem) !important; margin-bottom: 14px !important; }
+  .hero-v2-points { gap: 8px !important; margin-bottom: 20px !important; }
+  .hero-v2-points li { padding: 8px 14px !important; }
+  .hero-v2-points .ic { flex: 0 0 38px !important; height: 38px !important; font-size: 17px !important; }
+  .hero-v2-points strong { font-size: 1.15rem !important; }
+  .hero-v2-points small { font-size: .85rem !important; }
+}
+
+@media (min-width: 1200px) { .main .container { max-width: min(1320px, calc(100% - 64px)); } }
+
+.aw-section, .featured-services.section { padding: 64px 0 !important; }
+.featured-services { background: #FBFAF4 !important; }
+
+.aw-head-split { display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; margin-bottom: 40px; }
+.aw-head-split .aw-head { text-align: left !important; margin: 0 !important; max-width: none; }
+.aw-head-img { height: 300px; border-radius: 18px; background-size: cover; background-position: center;
+  box-shadow: 0 18px 40px rgba(20,40,26,.12); }
+
+.journey-card { position: relative; padding: 0 !important; overflow: hidden; border-radius: 18px !important; text-align: left !important; }
+.journey-card .jc-photo { height: 170px; background-size: cover; background-position: center; transition: transform .6s ease; }
+.journey-card:hover .jc-photo { transform: scale(1.05); }
+.journey-card .journey-step-num { position: absolute; top: 12px; left: 14px; z-index: 2; background: #fff; border-radius: 20px; padding: 2px 10px; }
+.journey-card .journey-icon-wrap { position: relative; z-index: 2; margin: -28px 0 10px 20px !important; background: #fff !important; box-shadow: 0 6px 16px rgba(0,0,0,.08); }
+.journey-card .journey-title, .journey-card .journey-text { padding: 0 20px; }
+.journey-card .journey-text { padding-bottom: 22px; }
+.journey-steps-wrap::before, .journey-steps-wrap .connector { display: none !important; }
+
+@media (max-width: 991px) {
+  .aw-head-split { grid-template-columns: 1fr; gap: 20px; }
+  .aw-head-split .aw-head { text-align: center !important; }
+  .aw-head-img { height: 220px; }
+}
+@media (max-width: 767.98px) {
+  /* keep the compact mobile rows: small photo on the left instead of big icon */
+  .journey-card { grid-template-columns: 84px 1fr !important; padding: 0 !important; }
+  .journey-card .jc-photo { grid-row: 1 / span 2; height: 100%; min-height: 96px; }
+  .journey-card .journey-icon-wrap { display: none !important; }
+  .journey-card .journey-title { padding: 12px 14px 0 !important; }
+  .journey-card .journey-text { padding: 2px 14px 12px !important; }
+}
+
+/* Normalise section spacing on About page and after values-section */
+.about-page .values-section {
+  padding-bottom: 32px !important;
+  margin-bottom: 0 !important;
+}
+.about-page .call-to-action.section {
+  padding-top: 32px !important;
+  padding-bottom: 64px !important;
+}
+
+html { scroll-behavior: smooth; }
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* image hover zoom inside frames */
+.aw-head-img, .home-about .main-image, .about-page .dr-photo-wrap, .about-page .aw-therapies-frame, .about-page .img-frame, .about-page .therapies-frame { overflow: hidden; }
+.aw-head-img, .home-about .main-image img, .about-page .dr-photo-wrap img, .about-page .aw-therapies-frame img, .about-page .img-frame img, .about-page .therapies-frame img {
+  transition: transform 1.2s cubic-bezier(.2,.7,.2,1);
+}
+.aw-head-img:hover, .home-about .main-image:hover img, .about-page .dr-photo-wrap:hover img, .about-page .aw-therapies-frame:hover img,
+.about-page .img-frame:hover img, .about-page .therapies-frame:hover img { transform: scale(1.04); }
+
+/* button arrows nudge */
+a .bi-arrow-right, button .bi-arrow-right { display: inline-block; transition: transform .3s ease; }
+a:hover .bi-arrow-right, button:hover .bi-arrow-right { transform: translateX(4px); }
+
+/* header shadow on scroll */
+.header { transition: box-shadow .35s ease, background-color .35s ease; }
+.scrolled .header { box-shadow: 0 6px 24px rgba(20,40,26,.08); }
+
+/* page cross-fade between public pages */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .35s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1 !important; transform: none !important; transition: none !important; }
+  .aw-head-img, .home-about .main-image img, .about-page .dr-photo-wrap img, .about-page .aw-therapies-frame img, a .bi-arrow-right { transition: none !important; }
+  @view-transition { navigation: none; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Public Site Polish: Header Dropdown, Banner Zoom, Shloka, Page Fade
+   ══════════════════════════════════════════════════════════════ */
+
+/* 1. Header profile dropdown solid background */
+.header .dropdown-menu, .header .navmenu .dropdown ul {
+  background: #fff !important; opacity: 1 !important; backdrop-filter: none !important;
+  border: 1px solid #ECEFE6 !important; border-radius: 12px !important;
+  box-shadow: 0 16px 40px rgba(20,40,26,.14) !important; padding: 8px 0 !important;
+}
+.header .dropdown-menu a, .header .navmenu .dropdown ul a { color: var(--heading-color) !important; padding: 9px 18px !important; }
+.header .dropdown-menu a:hover, .header .navmenu .dropdown ul a:hover { background: #F4F8F1 !important; color: var(--brand-primary) !important; }
+
+/* 2. Slow zoom on page banner photos */
+.page-banner, .about-banner, .treatments-banner {
+  overflow: hidden;
+  position: relative;
+  background-image: none !important;
+}
+.page-banner .banner-bg-img,
+.page-banner::before,
+.about-banner::before,
+.treatments-banner::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+  pointer-events: none;
+  animation: bannerZoom 22s ease-out forwards;
+}
+.about-banner::before {
+  background-image: linear-gradient(rgba(1, 83, 21, 0.82), rgba(1, 83, 21, 0.30)),
+                    url('../img/ayurveda/about-banner.webp') !important;
+}
+.treatments-banner::before {
+  background-image: linear-gradient(rgba(1, 83, 21, 0.85), rgba(1, 83, 21, 0.35)),
+                    url('../img/ayurveda/about.webp') !important;
+}
+.page-banner .container,
+.about-banner .container,
+.treatments-banner .container,
+.banner-content {
+  position: relative;
+  z-index: 1;
+}
+@keyframes bannerZoom { from { transform: scale(1); } to { transform: scale(1.08); } }
+.page-banner h1, .page-banner p, .page-banner .banner-shloka,
+.about-banner h1, .about-banner p, .about-banner .banner-shloka,
+.treatments-banner h1, .treatments-banner p, .treatments-banner .banner-shloka {
+  animation: bannerText .9s ease-out both;
+}
+.page-banner p, .about-banner p, .treatments-banner p { animation-delay: .15s; }
+@keyframes bannerText { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .page-banner *, .page-banner::before,
+  .about-banner *, .about-banner::before,
+  .treatments-banner *, .treatments-banner::before {
+    animation: none !important;
+  }
+}
+
+/* 3. Sanskrit line above each page banner title */
+.banner-shloka {
+  display: block;
+  font-family: "Tiro Devanagari Sanskrit", serif;
+  color: #FFD9B8;
+  font-size: 1.05rem;
+  letter-spacing: .5px;
+  margin-bottom: 6px;
+}
+
+/* Header Login button */
+.header .navmenu ul li > a.btn-login {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+  height: 40px !important;
+  padding: 0 22px !important;
+  border: 1.5px solid var(--brand-primary) !important;
+  border-radius: 50px !important;
+  background: transparent !important;
+  color: var(--brand-primary) !important;
+  font-family: var(--nav-font, "Lato", sans-serif);
+  font-weight: 600;
+  font-size: 15px !important;
+  text-decoration: none !important;
+  transition: background .3s ease, color .3s ease, box-shadow .3s ease;
+}
+.header .navmenu ul li > a.btn-login i,
+.header .navmenu ul li > a.btn-login svg { font-size: 16px; }
+.header .navmenu ul li > a.btn-login:hover {
+  background: var(--brand-primary) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 20px rgba(1,83,21,.22);
+  text-decoration: none !important;
+}
+.header .navmenu ul li > a.btn-login::after,
+.header .navmenu ul li > a.btn-login::before { display: none !important; }
+@media (min-width: 1200px) {
+  .header .navmenu ul li > a.btn-login { margin-left: 10px !important; }
+}
+@media (max-width: 1199px) {
+  .header .navmenu ul li > a.btn-login {
+    width: calc(100% - 24px) !important;
+    height: 44px !important;
+    margin: 6px 12px !important;
+    padding: 0 16px !important;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
+
+/* Keep the Login navigation button pill-shaped in every state. */
+.header .btn-login-nav,
+.header .btn-login-nav:hover,
+.header .btn-login-nav:focus,
+.header .btn-login-nav:active,
+.header .btn-login-nav.active {
+  border-radius: 50px !important;
+  height: 40px !important;
+  padding: 0 22px !important;
+  border: 1.5px solid var(--brand-primary) !important;
+  outline: none !important;
+}
+.header .btn-login-nav:focus:not(:hover),
+.header .btn-login-nav.active:not(:hover) {
+  background: transparent !important;
+  color: var(--brand-primary) !important;
+}
+@media (max-width: 1199px) {
+  .header .btn-login-nav,
+  .header .btn-login-nav:hover,
+  .header .btn-login-nav:focus,
+  .header .btn-login-nav:active,
+  .header .btn-login-nav.active {
+    height: 44px !important;
+    padding: 0 16px !important;
+  }
+}
+
+/* Login pill: icon stays visible on hover, one smooth colour change */
+.header .btn-login-nav i,
+.header .btn-login-nav svg { color: inherit !important; stroke: currentColor; transition: none; }
+.header .btn-login-nav:hover i,
+.header .btn-login-nav:hover svg { color: #fff !important; stroke: #fff; }
+.header .btn-login-nav { transition: background-color .25s ease, color .25s ease, box-shadow .25s ease !important; }
+
+@media (max-width: 767px) {
+  /* Keep both hero slides on the shared mobile image and equal slide sizing. */
+  #hero.hero-v2 { padding-top: 76px !important; }
+  #hero .hero-v2-bg {
+    height: 180px !important;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,0) 60%, #fff 100%),
+      url("../img/ayurveda/hero-mobile.webp") center / cover no-repeat !important;
+  }
+  #hero .hero-v2-swiper .swiper-wrapper { align-items: stretch; }
+  #hero .hero-v2-swiper .swiper-slide {
+    height: auto;
+    min-height: 0 !important;
+    padding: 0 0 20px !important;
+  }
+
+  /* About feature item spacing */
+  .home-about .about-content .about-point { margin-bottom: 14px !important; padding: 0 !important; }
+
+  /* CTA label readable on green */
+  .call-to-action .cta-banner .cta-label { color: #FFD9B8 !important; }
+
+  /* Footer: less empty space and readable links */
+  .footer-16.footer { padding-top: 40px !important; }
+  .footer-16 .footer-main { padding-bottom: 16px !important; margin-bottom: 16px !important; }
+  .footer-16 .row > [class*="col-"] { margin-bottom: 18px !important; }
+  .footer-16 .footer-bottom { padding: 16px 0 90px !important; }
+  .footer-16 .footer-bottom .footer-legal-links a { color: rgba(255,255,255,.85) !important; }
+
+  /* The mobile action bar replaces the floating scroll control. */
+  .scroll-top { display: none !important; }
+}
+
+@media (max-width: 767px) {
+  .hero-v2 .swiper-slide {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    height: auto !important;
+  }
+  .hero-v2 .hero-v2-content {
+    position: relative !important;
+    z-index: 2;
+    margin-top: 0 !important;
+    padding-top: 18px !important;
+    padding-bottom: 28px !important;
+    transform: none !important;
+    top: auto !important;
+    justify-content: flex-start !important;
+  }
+  .hero-v2 .hero-v2-content > :first-child { margin-top: 0 !important; }
+}
+
+/* Smooth cross-fade between public pages (Chrome and Edge). */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: vtFadeOut .25s ease both; }
+::view-transition-new(root) { animation: vtFadeIn .35s ease both; }
+@keyframes vtFadeOut { to { opacity: 0; } }
+@keyframes vtFadeIn { from { opacity: 0; } }
+
+/* Keep the header steady during the fade. */
+#header { view-transition-name: site-header; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+
+/* Home Wisdom section spacing */
+#ayurveda-wisdom.aw-section { padding-top: 60px !important; }
+@media (max-width: 767px) {
+  #ayurveda-wisdom.aw-section { padding-top: 36px !important; }
+}
+
+/* CTA eyebrow readable on green (all screens) */
+.call-to-action .cta-banner .cta-label { color: #FFD9B8 !important; }
+
+/* Wisdom section: spacing between paragraph and the check-list */
+#ayurveda-wisdom.aw-section .aw-therapies-points,
+#ayurveda-wisdom.aw-section ul { margin-top: 16px !important; }
+#ayurveda-wisdom.aw-section .aw-therapies-points li,
+#ayurveda-wisdom.aw-section ul li { margin-bottom: 10px; }

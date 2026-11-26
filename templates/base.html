@@ -21,7 +21,7 @@
   <link href="https://fonts.googleapis.com" rel="preconnect">
   <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Cormorant+Garamond:wght@500;600;700&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Tiro+Devanagari+Sanskrit&display=swap"
     rel="stylesheet">
   {% endblock %}
 
@@ -55,10 +55,18 @@
   {% include 'footer.html' %}
 
   {% block after_footer %}
+  {% if request.resolver_match.url_name != 'appointment' %}
+  <div class="mobile-action-bar d-md-none" role="navigation" aria-label="Quick actions">
+    {% if clinic.phone %}
+    <a href="tel:{{ clinic.phone }}" class="mab-btn mab-call"><i class="bi bi-telephone-fill"></i> Call</a>
+    {% endif %}
+    <a href="{% url 'appointment:appointment' %}" class="mab-btn mab-book"><i class="bi bi-calendar-check"></i> Book Appointment</a>
+  </div>
+  {% endif %}
+
   <a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
       class="bi bi-arrow-up-short"></i></a>
 
-  <div id="preloader"></div>
   {% endblock %}
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

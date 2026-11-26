@@ -1451,3 +1451,21 @@ textarea.form-control { min-height: 90px; resize: vertical; }
 .prescribed-on { font-size: .8rem; color: #6b7280; margin-top: 8px; }
 .soft-box { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; background: #fafafa; }
 @media (max-width: 375px) { .appointment-page-shell .card { padding: 16px; } .summary-row { flex-direction: column; } .summary-right { text-align: left; } }
+
+.appointment-page-shell .dose-grid { display: inline-flex; gap: 6px; margin: 8px 0 6px; }
+.appointment-page-shell .dose-grid span { display: flex; flex-direction: column; align-items: center; min-width: 38px; padding: 6px 4px; border-radius: 10px; background: #EAF5EC; border: 1px solid #CFE6D3; }
+.appointment-page-shell .dose-grid b { font-size: 1.05rem; color: var(--brand-primary); line-height: 1.1; }
+.appointment-page-shell .dose-grid small { font-size: .68rem; color: #6b7d70; letter-spacing: .5px; }
+
+@media (min-width: 992px) {
+    .appointment-page-shell .rx-list { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .appointment-page-shell .rx-list > * { margin: 0 !important; }
+}
+
+.appointment-page-shell .section-title,
+.appointment-page-shell .card h5,
+.appointment-page-shell .card h6 {
+    font-family: var(--heading-font) !important;
+    font-size: 1.3rem !important;
+    font-weight: 600;
+}

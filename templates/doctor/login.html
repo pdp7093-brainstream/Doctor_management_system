@@ -71,6 +71,18 @@
         .doctor-login-button:hover {
             background: #013d10 !important;
         }
+
+        .auth-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .9rem;
+            color: #015315;
+            text-decoration: none;
+            margin-bottom: 24px;
+        }
+
+        .auth-back-link:hover { color: #FD6801; }
     </style>
 </head>
 
@@ -96,6 +108,7 @@
             <!-- Header with Gradient -->
             <div class="p-4 text-center text-white flex-shrink-0"
                 style="background: linear-gradient(135deg, #015315, #027a22);">
+                <a href="/" class="doctor-auth-brand" style="display:inline-flex;flex-direction:column;align-items:center;gap:8px;color:#fff;text-decoration:none;">
                 <div class="doctor-auth-logo">
                     {% if clinic and clinic.logo %}
                     <img src="{{ clinic.logo.url }}" alt="{{ clinic.clinic_name|default:'Clinic' }} logo">
@@ -103,12 +116,15 @@
                     <img src="{% static 'assets/img/ayurveda/hitshree-icon.png' %}" alt="Hitshree logo">
                     {% endif %}
                 </div>
+                <span>{{ clinic.clinic_name|default:'Hitshree' }}</span>
+                </a>
                 <h2 class="doctor-auth-title mb-1 fw-bold" style="font-size: 1.5rem;">Welcome Back</h2>
                 <p class="mb-0 small" style="opacity: 0.9;">Login to your clinic account</p>
             </div>
 
             <!-- Form Section - Scrollable -->
             <div class="p-4 flex-grow-1 overflow-y-auto doctor-auth-card-body">
+                <a href="/" class="auth-back-link">← Back to website</a>
                 <!-- Error Message -->
                 {% if error %}
                 <div class="alert alert-danger alert-dismissible fade show rounded-3 mb-3 small" role="alert">

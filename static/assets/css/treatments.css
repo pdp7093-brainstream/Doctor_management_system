@@ -329,3 +329,74 @@
         flex-basis: 100% !important;
     }
 }
+
+.treatments-page .treatment-card {
+  position: relative; overflow: hidden; border-radius: 18px !important;
+  border: 1px solid #ECEFE6 !important; box-shadow: 0 12px 30px rgba(20,40,26,.06);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.treatments-page .treatment-card::before {
+  content: ""; position: absolute; left: 50%; top: 0; height: 3px; width: 48px;
+  transform: translateX(-50%); background: var(--brand-accent); transition: width .45s ease;
+}
+.treatments-page .treatment-card:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(20,40,26,.11); }
+.treatments-page .treatment-card:hover::before { width: 100%; }
+
+.treatments-page .treatment-card .card-icon,
+.treatments-page .treatment-card .treatment-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-primary), #117A15) !important;
+  box-shadow: 0 10px 22px rgba(1,83,21,.22);
+  display: flex; align-items: center; justify-content: center;
+}
+.treatments-page .treatment-card .card-icon i,
+.treatments-page .treatment-card .card-icon svg,
+.treatments-page .treatment-card .treatment-icon i,
+.treatments-page .treatment-card .treatment-icon svg { color: #fff !important; stroke: #fff; font-size: 22px; }
+
+/* Book button: outline, fills on hover */
+.treatments-page .treatment-card .btn-book {
+  background: transparent !important; color: var(--brand-accent) !important;
+  border: 1.5px solid var(--brand-accent) !important; box-shadow: none !important;
+  transition: background .3s ease, color .3s ease;
+}
+.treatments-page .treatment-card .btn-book:hover { background: var(--brand-accent) !important; color: #fff !important; }
+
+/* carousel arrows visible */
+.treatments-page .nav-btn,
+.treatments-page .swiper-nav-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  border: 1.5px solid var(--brand-primary) !important; color: var(--brand-primary) !important;
+  opacity: 1 !important; background: #fff;
+}
+.treatments-page .nav-btn:hover,
+.treatments-page .swiper-nav-btn:hover { background: var(--brand-primary) !important; color: #fff !important; }
+.treatments-page .nav-btn:disabled,
+.treatments-page .nav-btn.swiper-button-disabled,
+.treatments-page .swiper-nav-btn.swiper-button-disabled { opacity: .35 !important; }
+.treatments-page .nav-btn:disabled:hover { background: #fff !important; color: var(--brand-primary) !important; }
+
+@media (max-width: 767px) {
+  /* Horizontal scroll rows start at the first card, including centered groups. */
+  .treatments-page .treatment-cards-grid.scroll-grid,
+  .treatments-page .treatment-cards-grid.justify-content-center {
+    justify-content: flex-start !important;
+    scroll-padding-left: 16px;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* One full card with a small peek at the next card. */
+  .treatments-page .treatment-cards-grid.scroll-grid > *,
+  .treatments-page .swiper .swiper-slide {
+    width: 85% !important;
+    min-width: 85% !important;
+  }
+
+  /* Remove the large white space after the disclaimer before the shared footer. */
+  .treatments-page .treatments-note { margin-bottom: 0 !important; }
+}
+
+@media (max-width: 767px) {
+  .treatments-page .group-header { margin-bottom: 16px !important; }
+}

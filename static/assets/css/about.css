@@ -389,14 +389,173 @@
         text-align: center !important;
         display: flex !important;
         justify-content: center !important;
-        background: #015315 !important;
-        border-color: #015315 !important;
+        background: var(--brand-primary) !important;
+        border-color: var(--brand-primary) !important;
         color: #fff !important;
     }
 
     .about-page .aw-therapies-btn:hover {
-        background: #013A0F !important;
-        border-color: #013A0F !important;
+        background: var(--brand-primary-hover) !important;
+        border-color: var(--brand-primary-hover) !important;
         color: #fff !important;
     }
+}
+
+.about-page .dr-card {
+  position: relative; overflow: hidden;
+  background: #fff !important; border: 1px solid #ECEFE6 !important; border-radius: 18px !important;
+  padding: 30px 26px 24px !important;
+  box-shadow: 0 12px 30px rgba(20,40,26,.06);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.about-page .dr-card::before {
+  content: ""; position: absolute; left: 0; top: 0; height: 3px; width: 64px;
+  background: var(--brand-accent); transition: width .45s ease;
+}
+.about-page .dr-card:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(20,40,26,.11); }
+.about-page .dr-card:hover::before { width: 100%; }
+.about-page .dr-card::after {
+  content: attr(data-num); position: absolute; right: 22px; top: 10px;
+  font-family: var(--heading-font); font-size: 4.2rem; font-weight: 700; line-height: 1;
+  color: #C9A24A; opacity: .18; pointer-events: none;
+}
+.about-page .dr-card .dr-icon {
+  width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--brand-primary), #117A15); color: #fff;
+  box-shadow: 0 10px 22px rgba(1,83,21,.22);
+}
+.about-page .dr-card h3 { font-size: 1.35rem !important; line-height: 1.25; margin: 0 0 12px !important; padding-right: 50px; }
+.about-page .dr-card p {
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: .95rem; line-height: 1.7; margin-bottom: 8px;
+}
+.about-page .dr-card.open p { -webkit-line-clamp: unset; overflow: visible; }
+.about-page .dr-more { background: none; border: 0; padding: 0; color: var(--brand-accent); font-weight: 600; font-size: .9rem; cursor: pointer; }
+.about-page .dr-more:hover { text-decoration: underline; }
+
+.about-page .dr-card {
+  position: relative; overflow: hidden;
+  background: #fff !important; border: 1px solid #ECEFE6 !important; border-radius: 18px !important;
+  padding: 30px 26px 24px !important;
+  box-shadow: 0 12px 30px rgba(20,40,26,.06);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.about-page .dr-card::before {
+  content: ""; position: absolute; left: 0; top: 0; height: 3px; width: 64px;
+  background: var(--brand-accent); transition: width .45s ease;
+}
+.about-page .dr-card:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(20,40,26,.11); }
+.about-page .dr-card:hover::before { width: 100%; }
+.about-page .dr-card::after {
+  content: attr(data-num); position: absolute; right: 22px; top: 10px;
+  font-family: var(--heading-font); font-size: 4.2rem; font-weight: 700; line-height: 1;
+  color: #C9A24A; opacity: .18; pointer-events: none;
+}
+.about-page .dr-card .dr-icon {
+  width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--brand-primary), #117A15); color: #fff;
+  box-shadow: 0 10px 22px rgba(1,83,21,.22);
+}
+.about-page .dr-card h3 { font-size: 1.35rem !important; line-height: 1.25; margin: 0 0 12px !important; padding-right: 50px; }
+.about-page .dr-card p {
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: .95rem; line-height: 1.7; margin-bottom: 8px;
+}
+.about-page .dr-card.open p { -webkit-line-clamp: unset; overflow: visible; }
+.about-page .dr-more { background: none; border: 0; padding: 0; color: var(--brand-accent); font-weight: 600; font-size: .9rem; cursor: pointer; }
+.about-page .dr-more:hover { text-decoration: underline; }
+
+.about-page .values-section .section-title { margin-bottom: 36px !important; }
+.about-page .values-section .row { --bs-gutter-y: 24px; }
+.about-page .values-section .row > [class*="col-"] { display: flex; }
+.about-page .value-card {
+  position: relative; overflow: hidden; width: 100%; height: 100%;
+  background: #fff !important; border: 1px solid #ECEFE6 !important; border-radius: 18px !important;
+  padding: 28px 24px !important; text-align: center;
+  box-shadow: 0 12px 30px rgba(20,40,26,.06);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+.about-page .value-card::before {
+  content: ""; position: absolute; left: 50%; top: 0; height: 3px; width: 48px; transform: translateX(-50%);
+  background: var(--brand-accent); transition: width .45s ease;
+}
+.about-page .value-card:hover { transform: translateY(-6px); box-shadow: 0 20px 44px rgba(20,40,26,.11); }
+.about-page .value-card:hover::before { width: 100%; }
+.about-page .value-card .value-icon {
+  width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+  background: linear-gradient(135deg, var(--brand-primary), #117A15); color: #fff;
+  box-shadow: 0 10px 22px rgba(1,83,21,.22);
+}
+.about-page .value-card h3, .about-page .value-card h4 { font-size: 1.3rem !important; margin-bottom: 10px !important; }
+.about-page .value-card p { font-size: .93rem; line-height: 1.65; margin: 0; }
+
+/* 1. icon visible: white glyph inside green circle */
+.about-page .value-card .value-icon i,
+.about-page .value-card .value-icon svg,
+.about-page .value-card .value-icon::before {
+    color: #fff !important; fill: #fff !important; opacity: 1 !important; font-size: 24px;
+}
+
+/* 2. reduce gap between "Our Values" heading and cards */
+.about-page .values-section .section-title {
+    padding-bottom: 0 !important; margin-bottom: 0 !important;
+}
+.about-page .values-section .section-heading-block {
+    margin-bottom: 32px !important;
+}
+.about-page .values-section .values-grid { margin-top: 0 !important; }
+
+.about-page .aw-therapies { border-top: none !important; }
+
+.about-page .therapies-section .therapies-img,
+.about-page .aw-therapies .aw-therapies-frame {
+  border: none !important; border-radius: 20px; overflow: hidden;
+  box-shadow: 0 16px 40px rgba(20,40,26,.08);
+}
+.about-page .therapies-section .therapies-img img,
+.about-page .aw-therapies .aw-therapies-frame img {
+  display: block; width: 100%; transition: transform .6s ease;
+}
+.about-page .therapies-section .therapies-img:hover img,
+.about-page .aw-therapies .aw-therapies-frame:hover img { transform: scale(1.03); }
+
+/* 1. same small gap under every section heading on About page */
+.about-page section .section-title,
+.about-page section .container.section-title {
+  padding-bottom: 0 !important; margin-bottom: 36px !important;
+}
+
+/* 2. "Your Healing Journey" step cards */
+.about-page .journey-section .step-card h3,
+.about-page .journey-section .step-card h4,
+.about-page .journey-section .step-card h5,
+.about-page .approach-section .step-item h3,
+.about-page .approach-section .step-item .step-title {
+  font-size: 1.25rem !important; margin: 10px 0 8px !important;
+}
+.about-page .journey-section .step-card .step-icon,
+.about-page .approach-section .step-item .step-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-primary), #117A15) !important;
+  box-shadow: 0 10px 22px rgba(1,83,21,.22);
+}
+.about-page .journey-section .step-card .step-icon i,
+.about-page .journey-section .step-card .step-icon svg,
+.about-page .approach-section .step-item .step-icon i,
+.about-page .approach-section .step-item .step-icon svg {
+  color: #fff !important; fill: none; stroke: #fff; font-size: 24px;
+}
+
+@media (max-width: 767px) {
+  /* Our Values cards full width like other cards */
+  .about-page .values-section .values-grid .value-card-wrapper {
+    width: 100% !important;
+  }
+  .about-page .value-card { width: 100% !important; }
+
+  /* Less empty space right after the page banner */
+  .about-page .page-banner + .about-section { padding-top: 32px !important; }
 }

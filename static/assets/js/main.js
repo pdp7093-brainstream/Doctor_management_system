@@ -61,16 +61,6 @@
   });
 
   /**
-   * Preloader
-   */
-  const preloader = document.querySelector('#preloader');
-  if (preloader) {
-    window.addEventListener('load', () => {
-      preloader.remove();
-    });
-  }
-
-  /**
    * Scroll top button
    */
   let scrollTop = document.querySelector('.scroll-top');
@@ -156,5 +146,88 @@
       faqItem.parentNode.classList.toggle('faq-active');
     });
   });
+
+  /**
+   * Reveal on scroll for banner content
+   */
+  const revealElements = document.querySelectorAll('.reveal-up');
+  if ('IntersectionObserver' in window) {
+    const revealObserver = new IntersectionObserver((entries, observer) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    revealElements.forEach(el => revealObserver.observe(el));
+  } else {
+    revealElements.forEach(el => el.classList.add('is-visible'));
+  }
+
+  /**
+   * Subtle calm scroll reveal across public pages
+   */
+  function initScrollReveal() {
+    try {
+      const selectors = [
+        '.section-title',
+        '.aw-head',
+        '.aw-head-img',
+        '.aw-feature',
+        '.aw-card',
+        '.journey-card',
+        '.home-about .row > div',
+        '.cta-banner',
+        /* about.html main cards & frames */
+        '.about-page .dr-card',
+        '.about-page .value-card',
+        '.about-page .step-item',
+        '.about-page .aw-therapies',
+        /* treatments.html main cards */
+        '.treatment-card'
+      ];
+
+      const targets = document.querySelectorAll(selectors.join(', '));
+      if (!targets.length) return;
+
+      targets.forEach(el => {
+        el.classList.add('reveal');
+        const parentRow = el.closest('.row, .values-grid, .steps-row, .treatment-cards-grid');
+        if (parentRow) {
+          const siblings = Array.from(parentRow.querySelectorAll('.reveal'));
+          const idx = siblings.indexOf(el);
+          if (idx >= 0) {
+            el.style.transitionDelay = ((idx % 4) * 90) + 'ms';
+          }
+        }
+      });
+
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries, obs) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('in');
+              obs.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+
+        targets.forEach(el => observer.observe(el));
+      } else {
+        targets.forEach(el => el.classList.add('in'));
+      }
+    } catch (err) {
+      // Safety: ensure elements are always visible if any error occurs
+      document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollReveal);
+  } else {
+    initScrollReveal();
+  }
 
 })();

@@ -57,14 +57,26 @@ TREATMENT_GROUPS = [
     },
     {
         "label": "VISHESH CHIKITSA",
-        "title": "Signature Relaxation Therapy",
-        "subtitle": "A deeply calming classical therapy for the mind, nervous system and scalp.",
+        "title": "Signature Therapies",
+        "subtitle": "Specialised classical therapies for deep healing of the mind, blood and chronic pain.",
         "treatments": [
             {
                 "name": "Shirodhara",
                 "icon": "bi-moon-stars",
                 "summary": "A steady stream of warm medicated oil poured gently over the forehead to calm the mind and nervous system.",
                 "helpful_for": ["Stress & low mood", "Sleeplessness", "Headache & migraine", "Hair fall & scalp health", "Nervous tension"],
+            },
+            {
+                "name": "Raktashodhana",
+                "icon": "bi-droplet-half",
+                "summary": "Classical Ayurvedic blood-purification therapy that clears vitiated blood (Rakta) to relieve chronic skin and inflammatory conditions.",
+                "helpful_for": ["Chronic skin conditions (eczema, psoriasis)", "Acne & recurring boils", "Gout & uric acid issues", "Varicose veins", "Localised swelling & inflammation"],
+            },
+            {
+                "name": "Agni Karma",
+                "icon": "bi-fire",
+                "summary": "Precise therapeutic heat applied with a heated metal rod (Shalaka) on specific points, for quick relief from chronic pain.",
+                "helpful_for": ["Heel pain (calcaneal spur)", "Frozen shoulder", "Knee & joint pain", "Sciatica & back pain", "Tennis elbow"],
             },
         ],
     },

@@ -147,11 +147,6 @@
   transition: background-color 0.3s;
 }
 
-.header .navmenu a.btn-login:hover {
-  background: #EAF4EA;
-  color: #015315;
-}
-
 .header .navmenu a.btn-login::before,
 .header .navmenu a.btn-login::after {
   display: none !important;
@@ -334,3 +329,5 @@ body { border-top: 0 !important; }
        width: 100%;
    }
 }
+
+  .navmenu .profile-nav-divider > hr { margin: 0 20px 5px; }

@@ -13,9 +13,10 @@
 <main id="main">
 
     <!-- Treatments Banner -->
-    <section class="treatments-banner">
+    <section class="treatments-banner page-banner">
         <div class="container">
             <div class="banner-content">
+                <span class="banner-shloka">स्वस्थस्य स्वास्थ्यरक्षणम्</span>
                 <h1>Our Treatments</h1>
                 <p>Authentic Ayurvedic therapies to cleanse, heal and restore balance.</p>
             </div>
@@ -50,9 +51,9 @@
                     {% endif %}
                 </div>
 
-                <div class="treatment-cards-grid scroll-grid">
+                <div class="treatment-cards-grid scroll-grid{% if group.treatments|length <= 3 %} justify-content-center{% endif %}">
                     {% for treatment in group.treatments %}
-                    <div class="treatment-card-wrapper d-flex">
+                    <div class="treatment-card-wrapper d-flex" id="{{ treatment.name|slugify }}">
                         <div class="treatment-card d-flex flex-column w-100">
                             <div class="card-icon">
                                 <i class="bi {{ treatment.icon }}"></i>
@@ -69,7 +70,7 @@
                                 </ul>
                             </div>
                             
-                            <a href="{% url 'appointment:appointment' %}" class="btn-book">Book this treatment</a>
+                            <a href="{% url 'appointment:appointment' %}?treatment={{ treatment.name|urlencode }}" class="btn-book">Book this treatment</a>
                         </div>
                     </div>
                     {% endfor %}

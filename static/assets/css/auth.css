@@ -375,3 +375,53 @@ body.change-password-page {
    .auth-brand-sub,
    .auth-brand-features { display: none !important; }
 }
+
+/* Auth page link back to the public website */
+.auth-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .9rem;
+  color: var(--brand-primary);
+  text-decoration: none;
+  margin-bottom: 24px;
+}
+.auth-back-link:hover { color: var(--brand-accent); }
+
+/* Shared split-layout auth page styling */
+.auth-brand-panel {
+  background: linear-gradient(135deg, rgba(1,83,21,.92), rgba(17,122,21,.85)),
+              url("../img/bg/consult-bg.webp") center/cover no-repeat !important;
+}
+.auth-brand-panel::before,
+.auth-brand-panel::after { display: none !important; }
+
+.auth-brand-heading,
+.auth-form-title,
+.auth-brand-logo {
+  font-family: var(--heading-font) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0 !important;
+}
+.auth-brand-heading span { color: #FD6801 !important; }
+
+.auth-brand-feature i {
+  background: rgba(255,255,255,.14) !important;
+  border: 1px solid rgba(255,255,255,.25) !important;
+  color: #fff !important;
+}
+.auth-brand-feature i,
+.auth-brand-feature svg { stroke: #fff; }
+
+.auth-shloka {
+  display: block;
+  font-family: "Tiro Devanagari Sanskrit", serif;
+  color: #FFD9B8;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.auth-brand-panel {
+  background: linear-gradient(135deg, rgba(1,83,21,.86), rgba(17,122,21,.70)),
+              url("../img/bg/consult-bg.webp") center/cover no-repeat !important;
+}
